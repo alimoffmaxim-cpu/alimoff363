@@ -45,6 +45,10 @@ async def run() -> None:
     dp.update.outer_middleware(OwnerOnlyMiddleware(config.owner_id))
     dp.include_router(build_router(config, storage, vault, janitor))
 
+    me = await bot.get_me()
+    print(f"✅ Бот @{me.username} подключён к Telegram и ждёт сообщений.\n"
+          f"   Отвечает только пользователю с id {config.owner_id}. Напишите боту /start.", flush=True)
+
     watcher = asyncio.create_task(autolock(vault, janitor))
     try:
         # Long polling: серверу не нужен открытый порт и публичный адрес.

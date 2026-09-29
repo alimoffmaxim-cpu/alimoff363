@@ -34,7 +34,11 @@ class OwnerOnlyMiddleware(BaseMiddleware):
             return await handler(event, data)
 
         if user is not None and user.id != self.owner_id:
-            log.warning("Отклонён доступ: user_id=%s", user.id)
+            log.warning(
+                "Сообщение от чужого пользователя id %s отклонено. "
+                "Если это вы — в .env указан неверный OWNER_ID (сейчас %s), замените его на %s.",
+                user.id, self.owner_id, user.id,
+            )
             await self._notify_owner(data["bot"], user.id, user.username)
         if chat is not None and chat.type != "private":
             try:

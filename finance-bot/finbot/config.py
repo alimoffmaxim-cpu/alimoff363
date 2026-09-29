@@ -34,8 +34,12 @@ def load_config() -> Config:
     if os.name != "nt" and env_file.exists() and env_file.stat().st_mode & 0o077:
         raise SystemExit("Файл .env доступен другим пользователям системы. Выполните: chmod 600 .env")
 
+    token = _required("BOT_TOKEN")
+    if _required("OWNER_ID") == token.split(":", 1)[0]:
+        raise SystemExit("В OWNER_ID указан ID самого бота. Нужен ваш Telegram ID (его пришлёт @userinfobot).")
+
     config = Config(
-        bot_token=_required("BOT_TOKEN"),
+        bot_token=token,
         owner_id=int(_required("OWNER_ID")),
         master_key=load_master_key(_required("MASTER_KEY")),
         db_path=Path(os.environ.get("DB_PATH", "data/finance.db")),

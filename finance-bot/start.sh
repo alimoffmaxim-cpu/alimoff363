@@ -57,8 +57,13 @@ if [ ! -f .env ]; then
     while true; do
         read -rp "Ваш Telegram ID (цифры, узнать у @userinfobot): " OWNER
         OWNER="${OWNER//[[:space:]]/}"
-        [[ "$OWNER" =~ ^[0-9]+$ ]] && break
-        echo "ID должен состоять только из цифр. Попробуйте ещё раз."
+        if [[ ! "$OWNER" =~ ^[0-9]+$ ]]; then
+            echo "ID должен состоять только из цифр. Попробуйте ещё раз."
+        elif [ "$OWNER" = "${TOKEN%%:*}" ]; then
+            echo "Это ID самого бота (цифры из токена). Нужен ВАШ ID — его пришлёт @userinfobot."
+        else
+            break
+        fi
     done
     KEY=$(.venv/bin/python -m finbot genkey)
     umask 077
@@ -69,6 +74,26 @@ if [ ! -f .env ]; then
     unset TOKEN KEY RAW
     echo "Настройки сохранены в .env (доступен только вам)."
 fi
+
+# Исправляем частую ошибку: в OWNER_ID записан ID бота вместо ID владельца.
+SAVED_TOKEN=$(grep -E '^BOT_TOKEN=' .env | cut -d= -f2-)
+SAVED_OWNER=$(grep -E '^OWNER_ID=' .env | cut -d= -f2-)
+if [ -n "$SAVED_TOKEN" ] && [ "$SAVED_OWNER" = "${SAVED_TOKEN%%:*}" ]; then
+    echo "В настройках вместо вашего Telegram ID указан ID самого бота."
+    flush_input
+    while true; do
+        read -rp "Введите ВАШ Telegram ID (пришлёт @userinfobot): " OWNER
+        OWNER="${OWNER//[[:space:]]/}"
+        if [[ "$OWNER" =~ ^[0-9]+$ ]] && [ "$OWNER" != "${SAVED_TOKEN%%:*}" ]; then
+            break
+        fi
+        echo "Нужны только цифры, и это должен быть ваш ID, а не ID бота."
+    done
+    umask 077
+    awk -v id="$OWNER" '/^OWNER_ID=/{print "OWNER_ID=" id; next} {print}' .env > .env.tmp && mv .env.tmp .env
+    echo "ID исправлен."
+fi
+unset SAVED_TOKEN
 
 echo "Запускаю бота... Первый запуск может занять 1–3 минуты (подготовка графиков). Остановить: Ctrl+C"
 exec .venv/bin/python -m finbot

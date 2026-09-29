@@ -107,3 +107,19 @@ def test_vault_encrypts_and_locks(tmp_path):
         assert not await vault.unlock("new-secret")  # даже верный PIN не принимается во время блокировки
 
     asyncio.run(scenario())
+
+
+def test_webapp_payload_roundtrip_and_limit():
+    import base64
+    import json
+    from datetime import datetime
+
+    txs = [Tx("out", 35000, "Еда", "", TODAY, id=1), Tx("fx", 3000000, "", "", TODAY, id=2, rub=9000000)]
+    raw = dashboard.webapp_payload(txs, datetime(2026, 9, 29, 20, 15))
+    data = json.loads(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
+    assert data["v"] == 1 and data["b"] == 30000 - 350 and data["r"] == 3.0
+    assert data["m"][-1] == [2026, 9, 0, 350, 90000, 30000]
+    assert data["c"][data["k"][-1][0]] == "Еда"
+    # много длинных категорий — ссылка всё равно не превышает лимит
+    many = [Tx("out", 100 * i, f"Категория-номер-{i}-с-длинным-названием", "", TODAY, id=i) for i in range(1, 200)]
+    assert len(dashboard.webapp_payload(many, datetime(2026, 9, 29))) <= dashboard.WEBAPP_PAYLOAD_LIMIT

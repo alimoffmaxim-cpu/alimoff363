@@ -17,6 +17,7 @@ class Config:
     session_minutes: int
     auto_delete_minutes: int
     tz: ZoneInfo
+    webapp_url: str
 
 
 def _required(name: str) -> str:
@@ -45,7 +46,10 @@ def load_config() -> Config:
         session_minutes=int(os.environ.get("SESSION_MINUTES", "15")),
         auto_delete_minutes=int(os.environ.get("AUTO_DELETE_MINUTES", "10")),
         tz=ZoneInfo(os.environ.get("TIMEZONE", "Asia/Bangkok")),
+        webapp_url=os.environ.get("WEBAPP_URL", "").strip(),
     )
+    if config.webapp_url and not config.webapp_url.startswith("https://"):
+        raise SystemExit("WEBAPP_URL должен начинаться с https:// (требование Telegram для мини-аппов)")
     # Секреты больше не нужны в окружении процесса — убираем, чтобы не утекли в дочерние процессы/дампы.
     for name in ("BOT_TOKEN", "MASTER_KEY"):
         os.environ.pop(name, None)

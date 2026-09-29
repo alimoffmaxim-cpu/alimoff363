@@ -95,6 +95,11 @@ if [ -n "$SAVED_TOKEN" ] && [ "$SAVED_OWNER" = "${SAVED_TOKEN%%:*}" ]; then
 fi
 unset SAVED_TOKEN
 
+# Мини-апп дашборда: добавляем адрес страницы, если его ещё нет в настройках.
+if ! grep -q '^WEBAPP_URL=' .env; then
+    grep '^WEBAPP_URL=' .env.example >> .env
+fi
+
 # Бот считает в батах: переводим «сегодня» со старого значения по умолчанию на время Таиланда.
 if grep -qx 'TIMEZONE=Europe/Moscow' .env; then
     umask 077

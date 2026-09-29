@@ -18,6 +18,7 @@ from aiogram.types import (
     Message,
     ReplyKeyboardMarkup,
     TelegramObject,
+    WebAppInfo,
 )
 
 from . import dashboard
@@ -354,6 +355,21 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
     @router.message(F.text == BTN_DASH)
     async def cmd_dash(message: Message, state: FSMContext) -> None:
         await state.clear()
+        txs = storage.list_tx(vault.cipher)
+        if config.webapp_url:
+            # Данные идут во фрагменте ссылки (после #): браузер не отправляет его на сервер.
+            url = f"{config.webapp_url}#d.{dashboard.webapp_payload(txs, datetime.now(config.tz))}"
+            markup = InlineKeyboardMarkup(inline_keyboard=[[
+                InlineKeyboardButton(text="📊 Открыть дашборд", web_app=WebAppInfo(url=url))]])
+            await reply(message, dashboard.caption(txs, today()), reply_markup=markup)
+            return
+        png = await asyncio.to_thread(dashboard.render, txs, today())
+        sent = await message.answer_photo(BufferedInputFile(png, filename="dashboard.png"),
+                                          caption=dashboard.caption(txs, today()))
+        janitor.later(message, sent)
+
+    @router.message(Command("dash_png"))
+    async def cmd_dash_png(message: Message) -> None:
         txs = storage.list_tx(vault.cipher)
         png = await asyncio.to_thread(dashboard.render, txs, today())
         sent = await message.answer_photo(BufferedInputFile(png, filename="dashboard.png"),

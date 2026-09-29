@@ -1,6 +1,8 @@
-"""Картинка-дашборд. Рисуется в память и никогда не пишется на диск."""
+"""Дашборд: данные для мини-аппа и запасной вариант картинкой (рисуется в память, не на диск)."""
+import base64
 import io
-from datetime import date
+import json
+from datetime import date, datetime
 
 import matplotlib
 
@@ -133,3 +135,55 @@ def caption(txs: list[Tx], today: date) -> str:
                      f"курс {fmt_rate(cur.rate)} ({change})")
     lines.append(f"💰 Баланс: <b>{money(balance(txs))}</b>")
     return "\n".join(lines)
+
+
+WEBAPP_PAYLOAD_LIMIT = 1700  # запас до лимита длины ссылки в кнопке Telegram
+
+
+def webapp_payload(txs: list[Tx], now: datetime) -> str:
+    """Снимок для мини-аппа. Если не влезает в ссылку — урезаем детали, но не итоги."""
+    for recent, per_month in ((12, 10), (8, 8), (5, 6), (3, 5), (0, 4), (0, 0)):
+        payload = _payload(txs, now, recent=recent, per_month_cats=per_month)
+        if len(payload) <= WEBAPP_PAYLOAD_LIMIT:
+            break
+    return payload
+
+
+def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, months: int = 6) -> str:
+    """Компактный снимок в base64url. Суммы — в целых батах/рублях."""
+    today = now.date()
+    totals = monthly_totals(txs, today, months)
+    names: list[str] = []
+
+    def index(name: str) -> int:
+        if name not in names:
+            names.append(name)
+        return names.index(name)
+
+    per_month = []
+    for m in totals:
+        pairs: list[int] = []
+        for name, amount in categories(txs, m.year, m.month)[:per_month_cats]:
+            pairs += [index(name), round(amount / 100)]
+        per_month.append(pairs)
+
+    kinds = {"in": "i", "out": "o", "fx": "x", "adj": "a"}
+    ops = []
+    for tx in sorted(txs, key=lambda t: (t.day, t.id or 0), reverse=True)[:recent]:
+        ops.append([f"{tx.day:%d.%m}", kinds.get(tx.kind, "o"), round(tx.amount / 100),
+                    index(tx.category) if tx.kind in ("in", "out") and tx.category else -1, round(tx.rub / 100)])
+
+    rate = last_rate(txs)
+    data = {
+        "v": 1,
+        "t": f"{now:%d.%m %H:%M}",
+        "m": [[m.year, m.month, round(m.income / 100), round(m.expense / 100),
+               round(m.fx_rub / 100), round(m.fx_thb / 100)] for m in totals],
+        "c": names,
+        "k": per_month,
+        "b": round(balance(txs) / 100),
+        "r": round(rate, 4) if rate else 0,
+        "o": ops,
+    }
+    raw = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
+    return base64.urlsafe_b64encode(raw).decode().rstrip("=")

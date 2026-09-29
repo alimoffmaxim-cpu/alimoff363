@@ -29,7 +29,8 @@ if [ ! -d .venv ]; then
     echo "Устанавливаю зависимости (1–2 минуты)..."
     "$PYTHON" -m venv .venv
 fi
-.venv/bin/pip install -q --disable-pip-version-check -r requirements.txt
+.venv/bin/pip install -q --disable-pip-version-check --upgrade pip
+.venv/bin/pip install -q --disable-pip-version-check --prefer-binary -r requirements.txt
 
 if [ ! -f .env ]; then
     read -rsp "Вставьте токен бота от @BotFather (ввод скрыт) и нажмите Enter: " TOKEN; echo

@@ -24,8 +24,19 @@ fi
 step "1/5 Устанавливаю системные пакеты..."
 if [ -z "${FINBOT_SKIP_APT:-}" ]; then
     export DEBIAN_FRONTEND=noninteractive
-    apt-get update -qq
-    apt-get install -y -qq python3 python3-venv curl ca-certificates tar >/dev/null
+    # На новом сервере Ubuntu первые минуты сама ставит обновления и занимает apt — ждём до 10 минут.
+    apt_retry() {
+        for attempt in $(seq 1 60); do
+            if apt-get -o DPkg::Lock::Timeout=10 "$@"; then
+                return 0
+            fi
+            [ "$attempt" -eq 1 ] && echo "Система устанавливает обновления, жду освобождения apt..."
+            sleep 10
+        done
+        return 1
+    }
+    apt_retry update -qq
+    apt_retry install -y -qq python3 python3-venv curl ca-certificates tar >/dev/null
 fi
 if ! python3 -c 'import sys; sys.exit(sys.version_info < (3, 11))'; then
     echo "Нужен Python 3.11 или новее. Создайте сервер на Ubuntu 24.04 LTS или Debian 12."

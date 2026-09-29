@@ -30,7 +30,8 @@ def _required(name: str) -> str:
 def load_config() -> Config:
     load_dotenv()
     env_file = Path(".env")
-    if env_file.exists() and env_file.stat().st_mode & 0o077:
+    # На Windows права POSIX не применяются — там проверку пропускаем.
+    if os.name != "nt" and env_file.exists() and env_file.stat().st_mode & 0o077:
         raise SystemExit("Файл .env доступен другим пользователям системы. Выполните: chmod 600 .env")
 
     config = Config(

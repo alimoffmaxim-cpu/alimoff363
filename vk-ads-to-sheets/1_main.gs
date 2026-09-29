@@ -16,8 +16,8 @@
  */
 
 const CONFIG = {
-  SHEET_NAME: 'VK Ads',
-  // Уровень детализации: 'ad_plans' — кампании, 'campaigns' — группы объявлений, 'banners' — объявления
+  SHEET_NAME: 'VK Итог',
+  // По каким объектам суммировать итог за день (все группы объявлений кабинета)
   LEVEL: 'campaigns',
   // Сколько последних дней перезаписывать при каждом запуске (VK досчитывает статистику задним числом)
   DAYS_BACK: 7,
@@ -26,7 +26,7 @@ const CONFIG = {
 };
 
 const API_BASE = 'https://ads.vk.com/api/v2';
-const HEADERS = ['Дата', 'ID', 'Название', 'Показы', 'Клики', 'CTR, %', 'Расход, ₽', 'CPC, ₽', 'CPM, ₽', 'Результаты', 'CPA, ₽'];
+const HEADERS = ['Дата', 'Расход, ₽', 'Лиды'];
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -57,7 +57,7 @@ function promptVkToken() {
   });
   try {
     const r = exportVkAdsStats();
-    ui.alert('Готово. Объектов в кабинете: ' + r.objects + ', строк статистики: ' + r.rows +
+    ui.alert('Готово. Групп объявлений: ' + r.objects + ', дней со статистикой: ' + r.rows +
       ' (лист «' + CONFIG.SHEET_NAME + '» внизу таблицы). Токен действует до ' +
       Utilities.formatDate(new Date(Date.now() + 24 * 3600 * 1000), Session.getScriptTimeZone(), 'dd.MM HH:mm'));
   } catch (e) {

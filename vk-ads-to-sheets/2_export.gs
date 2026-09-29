@@ -7,7 +7,7 @@ function exportForDays_(daysBack) {
 
   const names = fetchObjectNames_();
   const ids = Object.keys(names);
-  const rows = [];
+  const totals = {}; // дата → [расход, лиды]
 
   for (let i = 0; i < ids.length; i += 100) {
     const chunk = ids.slice(i, i + 100);
@@ -20,18 +20,16 @@ function exportForDays_(daysBack) {
     (res.items || []).forEach(function (item) {
       (item.rows || []).forEach(function (r) {
         const b = r.base || {};
-        const shows = num_(b.shows);
-        const spent = num_(b.spent);
-        if (!shows && !spent) return; // пропускаем пустые дни
-        rows.push([
-          r.date, String(item.id), names[item.id] || '',
-          shows, num_(b.clicks), num_(b.ctr), spent,
-          num_(b.cpc), num_(b.cpm), num_(b.goals), num_(b.cpa),
-        ]);
+        const t = totals[r.date] || (totals[r.date] = [0, 0]);
+        t[0] += num_(b.spent);
+        t[1] += num_(b.goals);
       });
     });
   }
 
+  const rows = Object.keys(totals)
+    .filter(function (d) { return totals[d][0] || totals[d][1]; }) // пропускаем пустые дни
+    .map(function (d) { return [d, Math.round(totals[d][0] * 100) / 100, totals[d][1]]; });
   writeRows_(rows, dateFrom, dateTo);
   return { objects: ids.length, rows: rows.length };
 }
@@ -72,7 +70,7 @@ function writeRows_(newRows, dateFrom, dateTo) {
   });
 
   sh.clearContents();
-  sh.getRange('A:B').setNumberFormat('@'); // дата и ID — как текст
+  sh.getRange('A:A').setNumberFormat('@'); // дата — как текст
   sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight('bold');
   sh.setFrozenRows(1);
   if (all.length) sh.getRange(2, 1, all.length, HEADERS.length).setValues(all);

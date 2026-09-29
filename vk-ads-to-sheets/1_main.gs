@@ -40,7 +40,7 @@ function onOpen() {
 
 /** Основная функция: её вызывает ежедневный триггер. Догружает всё с последней даты на листе. */
 function exportVkAdsStats() {
-  exportForDays_(Math.max(CONFIG.DAYS_BACK, daysSinceLastRow_()));
+  return exportForDays_(Math.max(CONFIG.DAYS_BACK, daysSinceLastRow_()));
 }
 
 /** Сохраняет разовый токен из агентского кабинета и сразу выгружает статистику. */
@@ -55,9 +55,14 @@ function promptVkToken() {
     VK_TOKEN_EXPIRES: String(Date.now() + 24 * 3600 * 1000),
     VK_MANUAL_TOKEN: '1',
   });
-  exportVkAdsStats();
-  ui.alert('Готово: статистика обновлена. Токен действует до ' +
-    Utilities.formatDate(new Date(Date.now() + 24 * 3600 * 1000), Session.getScriptTimeZone(), 'dd.MM HH:mm'));
+  try {
+    const r = exportVkAdsStats();
+    ui.alert('Готово. Объектов в кабинете: ' + r.objects + ', строк статистики: ' + r.rows +
+      ' (лист «' + CONFIG.SHEET_NAME + '» внизу таблицы). Токен действует до ' +
+      Utilities.formatDate(new Date(Date.now() + 24 * 3600 * 1000), Session.getScriptTimeZone(), 'dd.MM HH:mm'));
+  } catch (e) {
+    ui.alert('Ошибка: ' + e.message);
+  }
 }
 
 /** Сколько дней прошло с последней даты на листе (90, если лист пуст). */

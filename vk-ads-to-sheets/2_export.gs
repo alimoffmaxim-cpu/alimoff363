@@ -33,6 +33,7 @@ function exportForDays_(daysBack) {
   }
 
   writeRows_(rows, dateFrom, dateTo);
+  return { objects: ids.length, rows: rows.length };
 }
 
 /** Список объектов выбранного уровня: {id: name}. */

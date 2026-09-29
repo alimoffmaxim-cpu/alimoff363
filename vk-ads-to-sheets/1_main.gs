@@ -32,8 +32,8 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('VK Реклама')
     .addItem('Ввести токен VK (на 24 ч)', 'promptVkToken')
-    .addItem('Обновить статистику', 'exportVkAdsStats')
-    .addItem('Загрузить последние 90 дней', 'backfill90Days')
+    .addItem('Обновить статистику', 'menuUpdate')
+    .addItem('Загрузить последние 90 дней', 'menuBackfill')
     .addItem('Включить ежедневное обновление', 'setupDailyTrigger')
     .addToUi();
 }
@@ -79,5 +79,20 @@ function daysSinceLastRow_() {
 
 /** Разовая дозагрузка истории. */
 function backfill90Days() {
-  exportForDays_(90);
+  return exportForDays_(90);
+}
+
+// Пункты меню: запускают выгрузку и показывают результат или ошибку
+function menuUpdate() { runWithAlert_(exportVkAdsStats); }
+function menuBackfill() { runWithAlert_(backfill90Days); }
+
+function runWithAlert_(fn) {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const r = fn();
+    ui.alert('Готово (версия «итог за день»). Групп объявлений: ' + r.objects +
+      ', дней со статистикой: ' + r.rows + '. Смотрите лист «' + CONFIG.SHEET_NAME + '».');
+  } catch (e) {
+    ui.alert('Ошибка: ' + e.message);
+  }
 }

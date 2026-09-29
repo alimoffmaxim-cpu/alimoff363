@@ -1,0 +1,40 @@
+# /etc/systemd/system/finbot.service
+[Unit]
+Description=Personal finance Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=finbot
+Group=finbot
+WorkingDirectory=/opt/finbot
+ExecStart=/opt/finbot/.venv/bin/python -m finbot
+Restart=on-failure
+RestartSec=5
+UMask=0077
+
+# Изоляция: процесс видит только свою папку, не может повышать привилегии
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/finbot/data
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+# Запрет дампов памяти (в памяти лежит ключ, пока бот разблокирован)
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target

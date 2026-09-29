@@ -1,6 +1,7 @@
 # Секреты и локальные настройки — никогда не коммитить
 .env
 .env.*
+!.env.example
 *.secret
 *.key
 secrets.*
@@ -16,3 +17,14 @@ token*.json
 # Системный мусор
 .DS_Store
 Thumbs.db
+
+# Финансовый бот: база с данными и локальное окружение
+finance-bot/data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+__pycache__/
+.venv/
+venv/
+.pytest_cache/

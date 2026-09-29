@@ -1,0 +1,122 @@
+"""Картинка-дашборд. Рисуется в память и никогда не пишется на диск."""
+import io
+from datetime import date
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+
+from .finance import categories, fmt_pct, money, month_label, monthly_totals, pct_change  # noqa: E402
+from .storage import Tx  # noqa: E402
+
+SURFACE = "#fcfcfb"
+TEXT = "#0b0b0b"
+TEXT_2 = "#52514e"
+GRID = "#e4e3df"
+INCOME = "#2a78d6"  # категориальный слот 1
+EXPENSE = "#eb6834"  # категориальный слот 2 (проверенная CVD-безопасная пара)
+
+
+def _rub(kopecks: int) -> float:
+    return kopecks / 100
+
+
+def _short(value: float) -> str:
+    if value >= 1_000_000:
+        return f"{value / 1_000_000:.1f} млн".replace(".", ",")
+    if value >= 1_000:
+        return f"{value / 1_000:.0f}к"
+    return f"{value:.0f}"
+
+
+def render(txs: list[Tx], today: date, currency: str, accounts_total: int | None) -> bytes:
+    months = monthly_totals(txs, today, 6)
+    cur, prev = months[-1], months[-2]
+    cats = categories(txs, cur.year, cur.month)[:7]
+
+    plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 11, "text.color": TEXT})
+    fig = plt.figure(figsize=(10, 10.5), facecolor=SURFACE)
+    grid = fig.add_gridspec(3, 4, height_ratios=[0.9, 2.2, 2.0], hspace=0.55, wspace=0.3)
+
+    fig.text(0.06, 0.965, f"Финансы · {month_label(cur.year, cur.month)}", fontsize=18, weight="bold")
+    fig.text(0.06, 0.94, f"на {today:%d.%m.%Y} · сравнение с {month_label(prev.year, prev.month)}",
+             fontsize=10, color=TEXT_2)
+
+    tiles = [
+        ("Доходы", money(cur.income, currency), fmt_pct(pct_change(cur.income, prev.income))),
+        ("Расходы", money(cur.expense, currency), fmt_pct(pct_change(cur.expense, prev.expense))),
+        ("Итог месяца", money(cur.net, currency), f"пр. мес.: {money(prev.net, currency)}"),
+        ("На счетах", money(accounts_total, currency) if accounts_total is not None else "—", "сумма балансов"),
+    ]
+    for i, (title, value, sub) in enumerate(tiles):
+        ax = fig.add_subplot(grid[0, i])
+        ax.axis("off")
+        ax.text(0, 0.85, title, fontsize=10, color=TEXT_2, transform=ax.transAxes)
+        ax.text(0, 0.45, value, fontsize=14, weight="bold", transform=ax.transAxes)
+        ax.text(0, 0.1, sub.replace("нет данных за прошлый месяц", "нет данных"), fontsize=9,
+                color=TEXT_2, transform=ax.transAxes)
+
+    # Динамика: доходы и расходы по месяцам
+    ax = fig.add_subplot(grid[1, :])
+    x = range(len(months))
+    width = 0.36
+    inc = [_rub(m.income) for m in months]
+    exp = [_rub(m.expense) for m in months]
+    ax.bar([i - width / 2 - 0.01 for i in x], inc, width, color=INCOME, label="Доходы")
+    ax.bar([i + width / 2 + 0.01 for i in x], exp, width, color=EXPENSE, label="Расходы")
+    top = max(inc + exp + [1])
+    for i in x:
+        for dx, v in ((-width / 2, inc[i]), (width / 2, exp[i])):
+            if v:
+                ax.text(i + dx, v + top * 0.015, _short(v), ha="center", va="bottom", fontsize=8, color=TEXT_2)
+    ax.set_xticks(list(x), [month_label(m.year, m.month) for m in months])
+    ax.set_ylim(0, top * 1.15)
+    ax.yaxis.set_major_formatter(lambda v, _: _short(v))
+    ax.set_title("Доходы и расходы за 6 месяцев", loc="left", fontsize=12, weight="bold", pad=30)
+    ax.legend(loc="lower left", frameon=False, ncols=2, bbox_to_anchor=(-0.01, 1.0), borderaxespad=0.2)
+    _style(ax)
+    ax.grid(axis="y", color=GRID, linewidth=0.8)
+
+    # Структура расходов текущего месяца
+    ax = fig.add_subplot(grid[2, :])
+    ax.set_title("Куда ушли деньги в этом месяце", loc="left", fontsize=12, weight="bold", pad=12)
+    if cats:
+        names = [c for c, _ in cats][::-1]
+        values = [_rub(v) for _, v in cats][::-1]
+        ax.barh(names, values, color=EXPENSE, height=0.6)
+        total = sum(_rub(v) for _, v in categories(txs, cur.year, cur.month))
+        for i, v in enumerate(values):
+            ax.text(v, i, f"  {_short(v)} · {v / total * 100:.0f}%", va="center", fontsize=9, color=TEXT_2)
+        ax.set_xlim(0, max(values) * 1.3)
+        ax.xaxis.set_visible(False)
+        _style(ax)
+        ax.spines["bottom"].set_visible(False)
+    else:
+        ax.axis("off")
+        ax.text(0, 0.5, "Расходов в этом месяце пока нет", color=TEXT_2, transform=ax.transAxes)
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=110, facecolor=SURFACE, bbox_inches="tight", pad_inches=0.3)
+    plt.close(fig)
+    return buf.getvalue()
+
+
+def _style(ax) -> None:
+    ax.set_facecolor(SURFACE)
+    for side in ("top", "right", "left"):
+        ax.spines[side].set_visible(False)
+    ax.spines["bottom"].set_color(GRID)
+    ax.tick_params(colors=TEXT_2, length=0)
+    ax.set_axisbelow(True)
+
+
+def caption(txs: list[Tx], today: date, currency: str) -> str:
+    months = monthly_totals(txs, today, 2)
+    prev, cur = months
+    return (
+        f"<b>{month_label(cur.year, cur.month)}</b> vs {month_label(prev.year, prev.month)}\n"
+        f"Доходы: <b>{money(cur.income, currency)}</b> ({fmt_pct(pct_change(cur.income, prev.income))})\n"
+        f"Расходы: <b>{money(cur.expense, currency)}</b> ({fmt_pct(pct_change(cur.expense, prev.expense))})\n"
+        f"Итог: <b>{money(cur.net, currency)}</b>"
+    )

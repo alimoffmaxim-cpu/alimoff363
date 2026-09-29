@@ -1,0 +1,4 @@
+aiogram>=3.31,<4
+cryptography>=50
+matplotlib>=3.11
+python-dotenv>=1.0

@@ -21,6 +21,16 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+# На сервере с 1 ГБ памяти добавляем 1 ГБ подкачки, чтобы установка и обновления не «вешали» систему.
+if [ -z "${FINBOT_SKIP_APT:-}" ] && ! swapon --show | grep -q . && [ ! -f /swapfile ]; then
+    echo "Добавляю 1 ГБ подкачки для маленького сервера..."
+    if fallocate -l 1G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=1024 status=none; then
+        chmod 600 /swapfile
+        mkswap /swapfile >/dev/null && swapon /swapfile
+        grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+fi
+
 step "1/5 Устанавливаю системные пакеты..."
 if [ -z "${FINBOT_SKIP_APT:-}" ]; then
     export DEBIAN_FRONTEND=noninteractive

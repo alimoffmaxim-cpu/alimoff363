@@ -42,10 +42,15 @@ if [ ! -f .env ]; then
     echo
     flush_input
     while true; do
-        read -rsp "Вставьте токен бота от @BotFather (ввод скрыт) и нажмите Enter: " TOKEN; echo
-        TOKEN="${TOKEN//[[:space:]]/}"
-        [[ "$TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] && break
-        echo "Это не похоже на токен (формат 123456:ABC...). Попробуйте ещё раз."
+        read -rsp "Вставьте токен бота от @BotFather (ввод скрыт) и нажмите Enter: " RAW; echo
+        # Находим токен внутри вставленного текста — можно скопировать хоть всё сообщение BotFather.
+        if [[ "$RAW" =~ ([0-9]{5,}:[A-Za-z0-9_-]{30,}) ]]; then
+            TOKEN="${BASH_REMATCH[1]}"
+            unset RAW
+            echo "Токен принят."
+            break
+        fi
+        echo "Токен не найден (получено символов: ${#RAW}). Скопируйте токен из сообщения @BotFather и вставьте ещё раз."
     done
     while true; do
         read -rp "Ваш Telegram ID (цифры, узнать у @userinfobot): " OWNER
@@ -59,7 +64,7 @@ if [ ! -f .env ]; then
         printf 'BOT_TOKEN=%s\nOWNER_ID=%s\nMASTER_KEY=%s\n' "$TOKEN" "$OWNER" "$KEY"
         grep -vE '^(BOT_TOKEN|OWNER_ID|MASTER_KEY)=' .env.example
     } > .env
-    unset TOKEN KEY
+    unset TOKEN KEY RAW
     echo "Настройки сохранены в .env (доступен только вам)."
 fi
 

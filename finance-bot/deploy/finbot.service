@@ -3,6 +3,8 @@
 Description=Personal finance Telegram bot
 After=network-online.target
 Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=10
 
 [Service]
 Type=simple
@@ -11,8 +13,11 @@ Group=finbot
 WorkingDirectory=/opt/finbot
 ExecStart=/opt/finbot/.venv/bin/python -m finbot
 Restart=on-failure
-RestartSec=5
+RestartSec=10
 UMask=0077
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+Environment=MPLCONFIGDIR=/tmp/matplotlib
 
 # Изоляция: процесс видит только свою папку, не может повышать привилегии
 NoNewPrivileges=true

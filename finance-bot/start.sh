@@ -32,17 +32,27 @@ fi
 .venv/bin/pip install -q --disable-pip-version-check --upgrade pip
 .venv/bin/pip install -q --disable-pip-version-check --prefer-binary -r requirements.txt
 
+# Сбрасывает нажатия клавиш, сделанные во время установки, чтобы они не попали в ответы.
+flush_input() {
+    [ -t 0 ] || return 0
+    while read -rs -t 1 -n 10000 _discard 2>/dev/null; do :; done
+}
+
 if [ ! -f .env ]; then
-    read -rsp "Вставьте токен бота от @BotFather (ввод скрыт) и нажмите Enter: " TOKEN; echo
-    if [[ ! "$TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]]; then
-        echo "Это не похоже на токен (формат 123456:ABC...). Запустите скрипт снова."
-        exit 1
-    fi
-    read -rp "Ваш Telegram ID (цифры, узнать у @userinfobot): " OWNER
-    if [[ ! "$OWNER" =~ ^[0-9]+$ ]]; then
-        echo "ID должен состоять только из цифр. Запустите скрипт снова."
-        exit 1
-    fi
+    echo
+    flush_input
+    while true; do
+        read -rsp "Вставьте токен бота от @BotFather (ввод скрыт) и нажмите Enter: " TOKEN; echo
+        TOKEN="${TOKEN//[[:space:]]/}"
+        [[ "$TOKEN" =~ ^[0-9]+:[A-Za-z0-9_-]+$ ]] && break
+        echo "Это не похоже на токен (формат 123456:ABC...). Попробуйте ещё раз."
+    done
+    while true; do
+        read -rp "Ваш Telegram ID (цифры, узнать у @userinfobot): " OWNER
+        OWNER="${OWNER//[[:space:]]/}"
+        [[ "$OWNER" =~ ^[0-9]+$ ]] && break
+        echo "ID должен состоять только из цифр. Попробуйте ещё раз."
+    done
     KEY=$(.venv/bin/python -m finbot genkey)
     umask 077
     {

@@ -3,4 +3,4 @@
 cd "$(dirname "$0")"
 bash start.sh
 echo
-read -rp "Бот остановлен. Нажмите Enter, чтобы закрыть окно."
+read -rsp "Бот остановлен. Нажмите Enter, чтобы закрыть окно."

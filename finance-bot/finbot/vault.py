@@ -90,6 +90,11 @@ class Vault:
         failed = int(self._storage.get_meta("failed") or b"0")
         return MAX_ATTEMPTS - failed % MAX_ATTEMPTS
 
+    def reset(self) -> None:
+        """Удаляет все данные и PIN безвозвратно."""
+        self._storage.wipe()
+        self.lock()
+
     async def change_pin(self, new_pin: str) -> None:
         old = self.cipher
         salt = new_salt()

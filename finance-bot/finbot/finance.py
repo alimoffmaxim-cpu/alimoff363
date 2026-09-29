@@ -1,56 +1,178 @@
-"""Разбор ввода и расчёт статистики — чистые функции без Telegram."""
+"""Разбор ввода и расчёт статистики — чистые функции без Telegram.
+
+Все суммы хранятся в сотых долях (сатанги для бат, копейки для рублей).
+Основная валюта — тайский бат. Рубли участвуют только в обменах.
+"""
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import date, timedelta
 
 from .storage import Tx
 
-AMOUNT_RE = re.compile(r"^\s*([+-]?)\s*(\d{1,3}(?: \d{3})+|\d+)(?:[.,](\d{1,2}))?(?=\s|$)\s*(.*)$", re.S)
-DATE_RE = re.compile(r"(?:^|\s)(\d{1,2})\.(\d{1,2})(?:\.(\d{2}|\d{4}))?(?=\s|$)")
+THB = "฿"
+RUB = "₽"
+
 MONTHS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
+MONTHS_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+               "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
+
+MONTHS_WITH = ["январём", "февралём", "мартом", "апрелем", "маем", "июнем",
+               "июлем", "августом", "сентябрём", "октябрём", "ноябрём", "декабрём"]
+
+EXPENSE_CATEGORIES = [
+    ("🍜", "Еда"), ("🛒", "Продукты"), ("☕", "Кафе"), ("🛵", "Транспорт"),
+    ("🏠", "Жильё"), ("📱", "Связь"), ("💊", "Здоровье"), ("🎉", "Развлечения"),
+    ("🛍", "Покупки"), ("✈️", "Путешествия"), ("💆", "Уход"), ("📦", "Другое"),
+]
+INCOME_CATEGORIES = [("💼", "Зарплата"), ("💻", "Фриланс"), ("🎁", "Подарок"), ("💸", "Возврат"), ("📦", "Другое")]
+EMOJI = {name: emoji for emoji, name in EXPENSE_CATEGORIES + INCOME_CATEGORIES}
+
+ALIASES = {
+    "еда": "Еда", "обед": "Еда", "ужин": "Еда", "завтрак": "Еда",
+    "продукты": "Продукты", "магазин": "Продукты", "7-11": "Продукты", "макро": "Продукты",
+    "кафе": "Кафе", "ресторан": "Кафе", "кофе": "Кафе",
+    "такси": "Транспорт", "grab": "Транспорт", "bolt": "Транспорт", "байк": "Транспорт",
+    "бензин": "Транспорт", "транспорт": "Транспорт",
+    "аренда": "Жильё", "жилье": "Жильё", "жильё": "Жильё", "квартира": "Жильё", "свет": "Жильё",
+    "связь": "Связь", "интернет": "Связь", "симка": "Связь",
+    "здоровье": "Здоровье", "аптека": "Здоровье", "врач": "Здоровье",
+    "развлечения": "Развлечения", "кино": "Развлечения", "бар": "Развлечения",
+    "покупки": "Покупки", "одежда": "Покупки",
+    "путешествия": "Путешествия", "отель": "Путешествия", "билеты": "Путешествия",
+    "уход": "Уход", "массаж": "Уход", "маникюр": "Уход",
+    "зп": "Зарплата", "зарплата": "Зарплата", "фриланс": "Фриланс",
+    "подарок": "Подарок", "возврат": "Возврат", "кэшбек": "Возврат", "кешбэк": "Возврат",
+    "другое": "Другое", "прочее": "Другое",
+}
+
+OUT_WORDS = {"расход", "расходы", "трата", "потратил", "потратила", "минус"}
+IN_WORDS = {"доход", "получил", "получила", "плюс", "приход"}
+FX_WORDS = {"обмен", "обменял", "обменяла", "поменял", "поменяла"}
+BALANCE_WORDS = {"баланс"}
+
+# 350 · 1 500 · 1,500 · 350,50 · 90к · 90 тыс
+NUM_RE = re.compile(r"(\d{1,3}(?:[ ,.]\d{3})+|\d+)(?:[.,](\d{1,2}))?(?:\s*(к|k|тыс)(?![а-яa-z]))?", re.I)
+DATE_RE = re.compile(r"(?:^|\s)(\d{1,2})\.(\d{1,2})(?:\.(\d{2}|\d{4}))?(?=\s|$)")
+
+
+def _number(m: re.Match) -> int:
+    whole, frac, thousands = m.groups()
+    value = int(re.sub(r"[ ,.]", "", whole)) * 100 + int((frac or "0").ljust(2, "0"))
+    return value * 1000 if thousands else value
 
 
 def parse_amount(text: str) -> int | None:
-    """'12 500,50' -> 1250050 (копейки)."""
-    m = re.fullmatch(r"\s*-?(\d{1,3}(?: \d{3})+|\d+)(?:[.,](\d{1,2}))?\s*", text)
-    if not m:
-        return None
-    return int(m.group(1).replace(" ", "")) * 100 + int((m.group(2) or "0").ljust(2, "0"))
+    m = NUM_RE.fullmatch(text.strip())
+    return _number(m) if m else None
 
 
-def parse_tx(text: str, today: date) -> Tx | None:
-    """'-350 кафе обед', '+120 000 зарплата', '1500 такси 25.09', 'вчера'."""
-    m = AMOUNT_RE.match(text)
-    if not m:
-        return None
-    sign, whole, frac, rest = m.groups()
-    amount = int(whole.replace(" ", "")) * 100 + int((frac or "0").ljust(2, "0"))
-    if amount <= 0:
-        return None
+def normalize_category(word: str) -> str:
+    word = word.strip()
+    return ALIASES.get(word.lower(), word[:1].upper() + word[1:])[:30]
 
-    day = today
-    words = rest.split()
-    if "вчера" in (w.lower() for w in words):
-        day = today - timedelta(days=1)
-        words = [w for w in words if w.lower() != "вчера"]
-    rest = " ".join(words)
-    if dm := DATE_RE.search(rest):
+
+def label(category: str) -> str:
+    return f"{EMOJI.get(category, '🏷')} {category}"
+
+
+@dataclass
+class Parsed:
+    kind: str  # in / out / fx / balance
+    amount: int = 0  # баты; для fx — полученные баты
+    rub: int = 0  # для fx — отданные рубли
+    category: str | None = None
+    note: str = ""
+    day: date | None = None
+    swapped: bool = False
+
+    def to_tx(self) -> Tx:
+        return Tx(kind=self.kind, amount=self.amount, category=self.category or "", note=self.note,
+                  day=self.day, rub=self.rub)
+
+
+class ParseError(ValueError):
+    pass
+
+
+def _extract_date(text: str, today: date) -> tuple[date, str]:
+    words = text.split()
+    for word, delta in (("вчера", 1), ("позавчера", 2)):
+        if word in (w.lower() for w in words):
+            words = [w for w in words if w.lower() != word]
+            return today - timedelta(days=delta), " ".join(words)
+    text = " ".join(words)
+    if dm := DATE_RE.search(text):
         d, mo, y = dm.groups()
         year = today.year if not y else int(y) + (2000 if len(y) == 2 else 0)
         try:
             day = date(year, int(mo), int(d))
-        except ValueError:
-            return None
+        except ValueError as exc:
+            raise ParseError("Не понял дату. Пример: 25.09") from exc
         if not y and day > today:
             day = day.replace(year=year - 1)
-        rest = (rest[: dm.start()] + rest[dm.end() :]).strip()
+        return day, (text[: dm.start()] + " " + text[dm.end():]).strip()
+    return today, text
 
-    kind = "in" if sign == "+" else "out"
-    category, _, note = rest.strip().partition(" ")
-    category = category.lower() or ("доход" if kind == "in" else "прочее")
-    return Tx(kind=kind, amount=amount, category=category[:40], note=note.strip()[:200], day=day)
 
+def parse_fx(text: str) -> tuple[int, int, bool]:
+    """'90000 - 30000', '90к 30к', '90 000 → 30 000' -> (рубли, баты, поменяны_ли_местами)."""
+    nums = [_number(m) for m in NUM_RE.finditer(text)]
+    if len(nums) < 2 or not all(nums[:2]):
+        raise ParseError("Нужны две суммы: сколько рублей отдали и сколько бат получили. "
+                         "Например: <code>90000 30000</code>")
+    rub, thb = nums[0], nums[1]
+    # Рубль дешевле бата, поэтому рублей всегда больше. Если наоборот — перепутан порядок.
+    if rub < thb:
+        return thb, rub, True
+    return rub, thb, False
+
+
+def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
+    """Понимает: -350 · 350 еда · расход 350 кафе обед · +5000 · доход 5000 зп ·
+    обмен 90000 - 30000 · баланс 12000 · даты '25.09', 'вчера'."""
+    day, text = _extract_date(text.strip(), today)
+    first, _, rest = text.partition(" ")
+    word = first.lower().rstrip(":")
+
+    if word in FX_WORDS:
+        rub, thb, swapped = parse_fx(rest)
+        return Parsed("fx", amount=thb, rub=rub, day=day, swapped=swapped)
+
+    if word in BALANCE_WORDS:
+        value_text = rest.strip()
+        negative = value_text[:1] in "-−"
+        m = NUM_RE.match(value_text.lstrip("-−").strip())
+        if not m:
+            raise ParseError("Укажите сумму: <code>баланс 12000</code>")
+        value = _number(m)
+        return Parsed("balance", amount=-value if negative else value, day=day)
+
+    kind = default_kind
+    if word in OUT_WORDS:
+        kind, text = "out", rest
+    elif word in IN_WORDS:
+        kind, text = "in", rest
+    text = text.strip()
+    if text[:1] in "-−":
+        kind, text = "out", text[1:].strip()
+    elif text[:1] == "+":
+        kind, text = "in", text[1:].strip()
+
+    m = NUM_RE.match(text)
+    if not m:
+        raise ParseError("Не нашёл сумму. Примеры: <code>-350 еда</code>, <code>+5000 зп</code>, "
+                         "<code>обмен 90000 30000</code>")
+    amount = _number(m)
+    if amount <= 0:
+        raise ParseError("Сумма должна быть больше нуля.")
+    rest = text[m.end():].strip()
+    category, _, note = rest.partition(" ")
+    return Parsed(kind, amount=amount, category=normalize_category(category) if category else None,
+                  note=note.strip()[:200], day=day)
+
+
+# ---------- статистика ----------
 
 def shift_month(year: int, month: int, delta: int) -> tuple[int, int]:
     index = year * 12 + (month - 1) + delta
@@ -67,10 +189,16 @@ class MonthTotals:
     month: int
     income: int = 0
     expense: int = 0
+    fx_rub: int = 0
+    fx_thb: int = 0
 
     @property
     def net(self) -> int:
         return self.income - self.expense
+
+    @property
+    def rate(self) -> float | None:
+        return self.fx_rub / self.fx_thb if self.fx_thb else None
 
 
 def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTotals]:
@@ -82,8 +210,11 @@ def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTot
             continue
         if tx.kind == "in":
             bucket.income += tx.amount
-        else:
+        elif tx.kind == "out":
             bucket.expense += tx.amount
+        elif tx.kind == "fx":
+            bucket.fx_rub += tx.rub
+            bucket.fx_thb += tx.amount
     return [totals[k] for k in keys]
 
 
@@ -95,19 +226,58 @@ def categories(txs: list[Tx], year: int, month: int, kind: str = "out") -> list[
     return sorted(sums.items(), key=lambda kv: kv[1], reverse=True)
 
 
-def pct_change(current: int, previous: int) -> float | None:
-    if previous == 0:
+def balance(txs: list[Tx]) -> int:
+    """Баты «на руках»: доходы + полученное при обмене − расходы ± корректировки."""
+    total = 0
+    for tx in txs:
+        if tx.kind in ("in", "fx", "adj"):
+            total += tx.amount
+        elif tx.kind == "out":
+            total -= tx.amount
+    return total
+
+
+def last_rate(txs: list[Tx]) -> float | None:
+    fx = [t for t in txs if t.kind == "fx" and t.amount]
+    if not fx:
+        return None
+    last = max(fx, key=lambda t: (t.day, t.id or 0))
+    return last.rub / last.amount
+
+
+def frequent_categories(txs: list[Tx], kind: str, limit: int = 12) -> list[str]:
+    """Сначала ваши частые категории, затем стандартные."""
+    defaults = [name for _, name in (EXPENSE_CATEGORIES if kind == "out" else INCOME_CATEGORIES)]
+    used = Counter(t.category for t in txs if t.kind == kind and t.category)
+    ordered = [c for c, _ in used.most_common()]
+    ordered += [c for c in defaults if c not in ordered]
+    if "Другое" in ordered[:limit]:
+        ordered.remove("Другое")
+    return ordered[: limit - 1] + ["Другое"]
+
+
+def pct_change(current: int | float, previous: int | float | None) -> float | None:
+    if not previous:
         return None
     return (current - previous) / previous * 100
 
 
-def money(kopecks: int, currency: str = "₽") -> str:
-    rub, kop = divmod(abs(kopecks), 100)
-    sign = "−" if kopecks < 0 else ""
-    text = f"{rub:,}".replace(",", " ")
-    if kop:
-        text += f",{kop:02d}"
+def money(value: int, currency: str = THB) -> str:
+    whole, frac = divmod(abs(value), 100)
+    sign = "−" if value < 0 else ""
+    text = f"{whole:,}".replace(",", " ")
+    if frac:
+        text += f",{frac:02d}"
     return f"{sign}{text} {currency}"
+
+
+def approx_rub(thb: int, rate: float) -> str:
+    """Рублёвый эквивалент, округлённый до рубля: '≈ 90 000 ₽'."""
+    return "≈ " + money(round(thb * rate / 100) * 100, RUB)
+
+
+def fmt_rate(rate: float | None) -> str:
+    return "—" if rate is None else f"{rate:.2f}".replace(".", ",") + f" {RUB}/{THB}"
 
 
 def fmt_pct(value: float | None) -> str:

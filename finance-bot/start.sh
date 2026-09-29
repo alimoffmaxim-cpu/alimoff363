@@ -95,5 +95,11 @@ if [ -n "$SAVED_TOKEN" ] && [ "$SAVED_OWNER" = "${SAVED_TOKEN%%:*}" ]; then
 fi
 unset SAVED_TOKEN
 
+# Бот считает в батах: переводим «сегодня» со старого значения по умолчанию на время Таиланда.
+if grep -qx 'TIMEZONE=Europe/Moscow' .env; then
+    umask 077
+    awk '/^TIMEZONE=Europe\/Moscow$/{print "TIMEZONE=Asia/Bangkok"; next} {print}' .env > .env.tmp && mv .env.tmp .env
+fi
+
 echo "Запускаю бота... Первый запуск может занять 1–3 минуты (подготовка графиков). Остановить: Ctrl+C"
 exec .venv/bin/python -m finbot

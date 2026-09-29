@@ -16,7 +16,6 @@ class Config:
     db_path: Path
     session_minutes: int
     auto_delete_minutes: int
-    currency: str
     tz: ZoneInfo
 
 
@@ -45,8 +44,7 @@ def load_config() -> Config:
         db_path=Path(os.environ.get("DB_PATH", "data/finance.db")),
         session_minutes=int(os.environ.get("SESSION_MINUTES", "15")),
         auto_delete_minutes=int(os.environ.get("AUTO_DELETE_MINUTES", "10")),
-        currency=os.environ.get("CURRENCY", "₽"),
-        tz=ZoneInfo(os.environ.get("TIMEZONE", "Europe/Moscow")),
+        tz=ZoneInfo(os.environ.get("TIMEZONE", "Asia/Bangkok")),
     )
     # Секреты больше не нужны в окружении процесса — убираем, чтобы не утекли в дочерние процессы/дампы.
     for name in ("BOT_TOKEN", "MASTER_KEY"):

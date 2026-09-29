@@ -21,12 +21,13 @@ TABLES = ("transactions", "accounts")
 
 @dataclass
 class Tx:
-    kind: str  # "in" — доход, "out" — расход
-    amount: int  # в копейках
+    kind: str  # "in" — доход, "out" — расход, "fx" — обмен ₽→฿, "adj" — корректировка баланса
+    amount: int  # баты в сотых (для "adj" может быть отрицательной)
     category: str
     note: str
     day: date
     id: int | None = None
+    rub: int = 0  # для "fx": сколько рублей отдано (в копейках)
 
     def dump(self) -> bytes:
         data = asdict(self)
@@ -116,6 +117,14 @@ class Storage:
         with self.conn:
             self.conn.execute("DELETE FROM accounts WHERE id = ?", (existing.id,))
         return True
+
+    # --- полный сброс ---
+    def wipe(self) -> None:
+        with self.conn:
+            for table in (*TABLES, "meta"):
+                self.conn.execute(f"DELETE FROM {table}")
+            self.conn.execute("DELETE FROM sqlite_sequence")
+        self.conn.execute("VACUUM")
 
     # --- смена PIN ---
     def reencrypt(self, old: Cipher, new: Cipher, meta: dict[str, bytes]) -> None:

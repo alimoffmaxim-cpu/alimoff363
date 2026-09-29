@@ -7,7 +7,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from .finance import categories, fmt_pct, money, month_label, monthly_totals, pct_change  # noqa: E402
+from .finance import (  # noqa: E402
+    MONTHS_FULL, MONTHS_WITH, RUB, approx_rub, balance, categories, fmt_pct, fmt_rate, last_rate, money, month_label, monthly_totals,
+    pct_change,
+)
 from .storage import Tx  # noqa: E402
 
 SURFACE = "#fcfcfb"
@@ -30,7 +33,7 @@ def _short(value: float) -> str:
     return f"{value:.0f}"
 
 
-def render(txs: list[Tx], today: date, currency: str, accounts_total: int | None) -> bytes:
+def render(txs: list[Tx], today: date) -> bytes:
     months = monthly_totals(txs, today, 6)
     cur, prev = months[-1], months[-2]
     cats = categories(txs, cur.year, cur.month)[:7]
@@ -39,15 +42,17 @@ def render(txs: list[Tx], today: date, currency: str, accounts_total: int | None
     fig = plt.figure(figsize=(10, 10.5), facecolor=SURFACE)
     grid = fig.add_gridspec(3, 4, height_ratios=[0.9, 2.2, 2.0], hspace=0.55, wspace=0.3)
 
-    fig.text(0.06, 0.965, f"Финансы · {month_label(cur.year, cur.month)}", fontsize=18, weight="bold")
+    fig.text(0.06, 0.965, f"Финансы · {MONTHS_FULL[cur.month - 1]} {cur.year}", fontsize=18, weight="bold")
     fig.text(0.06, 0.94, f"на {today:%d.%m.%Y} · сравнение с {month_label(prev.year, prev.month)}",
              fontsize=10, color=TEXT_2)
 
+    bal = balance(txs)
+    rate = last_rate(txs)
     tiles = [
-        ("Доходы", money(cur.income, currency), fmt_pct(pct_change(cur.income, prev.income))),
-        ("Расходы", money(cur.expense, currency), fmt_pct(pct_change(cur.expense, prev.expense))),
-        ("Итог месяца", money(cur.net, currency), f"пр. мес.: {money(prev.net, currency)}"),
-        ("На счетах", money(accounts_total, currency) if accounts_total is not None else "—", "сумма балансов"),
+        ("Доходы", money(cur.income), fmt_pct(pct_change(cur.income, prev.income))),
+        ("Расходы", money(cur.expense), fmt_pct(pct_change(cur.expense, prev.expense))),
+        ("Обмен ₽→฿", money(cur.fx_thb), f"курс {fmt_rate(cur.rate)}" if cur.rate else "в этом месяце не было"),
+        ("Баланс", money(bal), approx_rub(bal, rate) if rate else "по операциям"),
     ]
     for i, (title, value, sub) in enumerate(tiles):
         ax = fig.add_subplot(grid[0, i])
@@ -73,14 +78,14 @@ def render(txs: list[Tx], today: date, currency: str, accounts_total: int | None
     ax.set_xticks(list(x), [month_label(m.year, m.month) for m in months])
     ax.set_ylim(0, top * 1.15)
     ax.yaxis.set_major_formatter(lambda v, _: _short(v))
-    ax.set_title("Доходы и расходы за 6 месяцев", loc="left", fontsize=12, weight="bold", pad=30)
+    ax.set_title("Доходы и расходы за 6 месяцев, ฿", loc="left", fontsize=12, weight="bold", pad=30)
     ax.legend(loc="lower left", frameon=False, ncols=2, bbox_to_anchor=(-0.01, 1.0), borderaxespad=0.2)
     _style(ax)
     ax.grid(axis="y", color=GRID, linewidth=0.8)
 
     # Структура расходов текущего месяца
     ax = fig.add_subplot(grid[2, :])
-    ax.set_title("Куда ушли деньги в этом месяце", loc="left", fontsize=12, weight="bold", pad=12)
+    ax.set_title("Куда ушли деньги в этом месяце, ฿", loc="left", fontsize=12, weight="bold", pad=12)
     if cats:
         names = [c for c, _ in cats][::-1]
         values = [_rub(v) for _, v in cats][::-1]
@@ -111,12 +116,20 @@ def _style(ax) -> None:
     ax.set_axisbelow(True)
 
 
-def caption(txs: list[Tx], today: date, currency: str) -> str:
-    months = monthly_totals(txs, today, 2)
-    prev, cur = months
-    return (
-        f"<b>{month_label(cur.year, cur.month)}</b> vs {month_label(prev.year, prev.month)}\n"
-        f"Доходы: <b>{money(cur.income, currency)}</b> ({fmt_pct(pct_change(cur.income, prev.income))})\n"
-        f"Расходы: <b>{money(cur.expense, currency)}</b> ({fmt_pct(pct_change(cur.expense, prev.expense))})\n"
-        f"Итог: <b>{money(cur.net, currency)}</b>"
-    )
+def caption(txs: list[Tx], today: date) -> str:
+    prev, cur = monthly_totals(txs, today, 2)
+    lines = [
+        f"<b>{MONTHS_FULL[cur.month - 1]}</b> в сравнении с {MONTHS_WITH[prev.month - 1]}",
+        f"➕ Доходы: <b>{money(cur.income)}</b> ({fmt_pct(pct_change(cur.income, prev.income))})",
+        f"➖ Расходы: <b>{money(cur.expense)}</b> ({fmt_pct(pct_change(cur.expense, prev.expense))})",
+    ]
+    rate = cur.rate or last_rate(txs)
+    if rate and cur.expense:
+        lines.append(f"     {approx_rub(cur.expense, rate)} по курсу {fmt_rate(rate)}")
+    lines.append(f"📈 Итог месяца: <b>{money(cur.net)}</b>")
+    if cur.fx_thb:
+        change = fmt_pct(pct_change(cur.rate, prev.rate)) if prev.rate else "курс прошлого месяца неизвестен"
+        lines.append(f"💱 Обмен: {money(cur.fx_rub, RUB)} → {money(cur.fx_thb)}, "
+                     f"курс {fmt_rate(cur.rate)} ({change})")
+    lines.append(f"💰 Баланс: <b>{money(balance(txs))}</b>")
+    return "\n".join(lines)

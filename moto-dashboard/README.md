@@ -33,10 +33,11 @@ VK Реклама ─┐
 ## 1. Установка
 
 1. Создайте Google Таблицу → **Расширения → Apps Script**.
-2. Создайте файлы скрипта (**+ → Скрипт**) **строго по порядку номеров** и вставьте в каждый
-   код из одноимённого файла: `00_config`, `01_menu`, `02_util`, `10_ads_vk`,
-   `11_ads_yandex_avito`, `20_amo`, `30_moyklass`, `40_attribution`, `50_setup`, `90_debug`.
-   Порядок важен: файлы ниже используют настройки из `00_config`. Сохраните.
+2. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную вставку, и появляется
+   ошибка вида `SyntaxError: Unexpected identifier`. Вместо этого создайте 10 отдельных файлов
+   (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
+   Удобнее всего копировать с raw-страниц (Cmd+A → Cmd+C): [`00_config`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/00_config.gs), [`01_menu`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/01_menu.gs), [`02_util`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/02_util.gs), [`10_ads_vk`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/10_ads_vk.gs), [`11_ads_yandex_avito`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/11_ads_yandex_avito.gs), [`20_amo`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/20_amo.gs), [`30_moyklass`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/30_moyklass.gs), [`40_attribution`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/40_attribution.gs), [`50_setup`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/50_setup.gs), [`90_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/laughing-gates-9lubop/moto-dashboard/90_debug.gs).
+   Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка): часовой пояс `Europe/Moscow` (или ваш). В самой
    таблице (**Файл → Настройки**) поставьте тот же часовой пояс.
 4. Обновите страницу таблицы — появится меню **Дашборд**.

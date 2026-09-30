@@ -73,36 +73,6 @@ function setupSettings_() {
 
 // ---------- Сводки ----------
 
-const FROM = "'" + SHEETS.dash + "'!$B$3";
-const TO = "'" + SHEETS.dash + "'!$B$4";
-const PERIOD = ',fact!$A:$A,">="&' + FROM + ',fact!$A:$A,"<="&' + TO;
-
-const div_ = (a, b) => 'IFERROR(' + a + '/' + b + ',"")';
-
-// Колонки сводок. sum: [колонка fact, событие]; calc: формула из ссылок на ячейки строки.
-const METRICS = [
-  { key: 'spend', h: 'Расход, ₽', sum: ['F', EV.spend] },
-  { key: 'leads', h: 'Лиды', sum: ['E', EV.lead] },
-  { key: 'cpl', h: 'Цена лида, ₽', calc: c => div_(c.spend, c.leads) },
-  { key: 'trials', h: 'Пробные (пришли)', sum: ['E', EV.trial] },
-  { key: 'crTrial', h: 'CR лид → пробное', calc: c => div_(c.trials, c.leads), fmt: '0.0%' },
-  { key: 'repeat', h: 'Повторные тренировки', sum: ['E', EV.repeat] },
-  { key: 'subs', h: 'Абонементы', sum: ['E', EV.sub] },
-  { key: 'crSub', h: 'CR пробное → абонемент', calc: c => div_(c.subs, c.trials), fmt: '0.0%' },
-  { key: 'revenue', h: 'Выручка, ₽', sum: ['F', EV.pay] },
-  { key: 'margin', h: 'Выручка − реклама, ₽', calc: c => c.revenue + '-' + c.spend },
-  { key: 'drr', h: 'ДРР', calc: c => div_(c.spend, c.revenue), fmt: '0.0%' },
-  { key: 'romi', h: 'ROMI', calc: c => div_('(' + c.revenue + '-' + c.spend + ')', c.spend), fmt: '0%' },
-];
-
-// Для месяцев — плюс постоянные расходы и чистая прибыль
-const COSTS = "'" + SHEETS.costs + "'";
-const MONTH_EXTRA = [
-  { key: 'costs', h: 'Прочие расходы, ₽',
-    raw: (r, total) => total ? 'SUM(' + COSTS + '!$C:$C)'
-      : 'SUMIFS(' + COSTS + '!$C:$C,' + COSTS + '!$A:$A,">="&$A' + r + ',' + COSTS + '!$A:$A,"<"&EDATE($A' + r + ',1))' },
-  { key: 'profit', h: 'Чистая прибыль, ₽', calc: c => c.revenue + '-' + c.spend + '-' + c.costs },
-];
 
 function sumF_(col, event, cond) {
   return 'SUMIFS(fact!$' + col + ':$' + col + ',fact!$B:$B,"' + event + '"' + cond + ')';
@@ -157,8 +127,6 @@ function buildSummary_(o) {
   return sh;
 }
 
-const periodTitle_ = t => '="' + t + ': "&TEXT(' + FROM + ',"dd.mm.yyyy")&" — "&TEXT(' + TO + ',"dd.mm.yyyy")';
-const inPeriod_ = 'fact!A2:A>=' + FROM + ',fact!A2:A<=' + TO;
 
 function buildSummaries_() {
   buildSummary_({

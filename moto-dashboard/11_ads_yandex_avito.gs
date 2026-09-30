@@ -12,25 +12,27 @@ function loadYandex_(from, to, p) {
 }
 
 function yandexReport_(login, from, to, p) {
+  // Лиды — конверсии по целям Метрики: заданным в YANDEX_GOALS или целям из настроек кампаний
+  const goals = list_(p.YANDEX_GOALS).map(Number).filter(n => n > 0);
+  const params = {
+    SelectionCriteria: { DateFrom: from, DateTo: to },
+    FieldNames: ['Date', 'CampaignId', 'CampaignName', 'Impressions', 'Clicks', 'Cost', 'Conversions'],
+    ReportName: 'dashboard ' + (login || 'main') + ' ' + from + ' ' + to + ' ' + Date.now(),
+    ReportType: 'CAMPAIGN_PERFORMANCE_REPORT',
+    DateRangeType: 'CUSTOM_DATE',
+    Format: 'TSV',
+    IncludeVAT: bool_(p.YANDEX_VAT) ? 'YES' : 'NO',
+  };
+  if (goals.length) { params.Goals = goals; params.AttributionModels = ['AUTO']; }
   // Тело не меняется между повторами: по ReportName Директ отдаёт уже готовый отчёт
-  const body = JSON.stringify({
-    params: {
-      SelectionCriteria: { DateFrom: from, DateTo: to },
-      FieldNames: ['Date', 'CampaignId', 'CampaignName', 'Impressions', 'Clicks', 'Cost'],
-      ReportName: 'dashboard ' + (login || 'main') + ' ' + from + ' ' + to + ' ' + Date.now(),
-      ReportType: 'CAMPAIGN_PERFORMANCE_REPORT',
-      DateRangeType: 'CUSTOM_DATE',
-      Format: 'TSV',
-      IncludeVAT: bool_(p.YANDEX_VAT) ? 'YES' : 'NO',
-    },
-  });
+  const body = JSON.stringify({ params: params });
   const headers = {
     Authorization: 'Bearer ' + prop_('YANDEX_TOKEN'),
     'Accept-Language': 'ru',
     processingMode: 'auto',
     returnMoneyInMicros: 'false',
     skipReportHeader: 'true',
-    skipColumnHeader: 'true',
+    skipColumnHeader: 'false', // при нескольких целях колонок Conversions_… несколько
     skipReportSummary: 'true',
   };
   if (login) headers['Client-Login'] = login;
@@ -52,10 +54,18 @@ function yandexReport_(login, from, to, p) {
   throw new Error('Яндекс Директ: отчёт не успел сформироваться, повторите обновление позже.');
 }
 
+/** TSV с заголовком колонок → строки raw_ads. Все колонки Conversions* складываются в лиды. */
 function parseYandexTsv_(text, login) {
-  return text.split('\n').filter(l => l.trim()).map(l => {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (!lines.length) return [];
+  const head = lines[0].split('\t');
+  const at = name => head.indexOf(name);
+  const conv = head.map((h, i) => (/^Conversions/.test(h) ? i : -1)).filter(i => i >= 0);
+  return lines.slice(1).map(l => {
     const c = l.split('\t');
-    return [day_(c[0]), 'Яндекс Директ', login || 'основной', c[1], c[2], num_(c[3]), num_(c[4]), num_(c[5])];
+    const leads = conv.reduce((s, i) => s + num_(c[i]), 0);
+    return [day_(c[at('Date')]), 'Яндекс Директ', login || 'основной', c[at('CampaignId')], c[at('CampaignName')],
+      num_(c[at('Impressions')]), num_(c[at('Clicks')]), num_(c[at('Cost')]), leads];
   }).filter(r => r[0]);
 }
 
@@ -120,6 +130,6 @@ function loadAvito_(from, to, p) {
   });
   return Object.keys(sums).map(k => {
     const parts = k.split('|');
-    return [day_(parts[0]), 'Авито', 'Авито', parts[1], parts[1], 0, 0, Math.round(sums[k] * 100) / 100];
+    return [day_(parts[0]), 'Авито', 'Авито', parts[1], parts[1], 0, 0, Math.round(sums[k] * 100) / 100, 0];
   });
 }

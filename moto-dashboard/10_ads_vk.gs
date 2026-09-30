@@ -33,7 +33,7 @@ function updateAds() {
 
 function vkConfigured_() { return !!(prop_('VK_CLIENT_ID') || prop_('VK_ACCESS_TOKEN')); }
 
-/** Строки raw_ads: расход по каждой кампании за каждый день. */
+/** Строки raw_ads: расход и лиды (base.vk.result) по каждой кампании за каждый день. */
 function loadVk_(from, to) {
   const names = vkObjectNames_();
   const ids = Object.keys(names);
@@ -45,9 +45,10 @@ function loadVk_(from, to) {
     (res.items || []).forEach(item => {
       (item.rows || []).forEach(r => {
         const b = r.base || {};
-        if (!num_(b.spent) && !num_(b.shows) && !num_(b.clicks)) return;
+        const leads = num_((b.vk || {}).result);
+        if (!num_(b.spent) && !num_(b.shows) && !num_(b.clicks) && !leads) return;
         rows.push([day_(r.date), 'VK Реклама', 'VK', String(item.id), names[item.id] || String(item.id),
-          num_(b.shows), num_(b.clicks), Math.round(num_(b.spent) * 100) / 100]);
+          num_(b.shows), num_(b.clicks), Math.round(num_(b.spent) * 100) / 100, leads]);
       });
     });
   }

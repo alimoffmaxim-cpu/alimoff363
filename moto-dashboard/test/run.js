@@ -140,7 +140,7 @@ const D = s => vm.runInContext('new Date("' + s + 'T00:00:00")', ctx);
 const data = {
   ads: [
     { 'Дата': D('2026-09-01'), 'Площадка': 'VK Реклама', 'Кабинет': 'VK', 'ID кампании': '11', 'Кампания': 'Мотокросс дети', 'Расход': 1000 },
-    { 'Дата': D('2026-09-01'), 'Площадка': 'Яндекс Директ', 'Кабинет': 'основной', 'ID кампании': '555', 'Кампания': 'Посевы Макс', 'Расход': 500 },
+    { 'Дата': D('2026-09-01'), 'Площадка': 'Яндекс Директ', 'Кабинет': 'основной', 'ID кампании': '555', 'Кампания': 'Посевы Макс', 'Расход': 500, 'Лиды (кабинет)': 4 },
   ],
   adsManual: [{ 'Дата': D('2026-09-02'), 'Канал': 'Telegram', 'Кампания': 'Посев @moto', 'Расход': 3000 }],
   amo: [
@@ -178,6 +178,8 @@ test('buildFacts_: атрибуция first touch, фильтр статусов
   const sum = (rs, i) => rs.reduce((s, r) => s + r[i], 0);
 
   assert.deepStrictEqual(by('расход').map(r => [r[2], r[5]]), [['VK Реклама', 1000], ['Макс', 500], ['Telegram', 3000]]);
+  // Лиды из кабинета — отдельное событие с каналом кампании
+  assert.deepStrictEqual(by('лид_кабинет').map(r => [r[2], r[3], r[4]]), [['Макс', 'Посевы Макс', 4]]);
   // Спам не лид; сделка без UTM — «Не определён»
   assert.strictEqual(by('лид').length, 3);
   assert.strictEqual(by('лид', 'Не определён').length, 1);
@@ -208,8 +210,15 @@ test('mergeRows_: окно перезагрузки удаляет старые 
 });
 
 test('parseYandexTsv_', () => {
-  const rows = t.parseYandexTsv_('2026-09-01\t555\tПосевы Макс\t1000\t20\t1234.5\n', '');
-  assert.deepStrictEqual([rows[0][2], rows[0][3], rows[0][4], rows[0][7]], ['основной', '555', 'Посевы Макс', 1234.5]);
+  const tsv = 'Date\tCampaignId\tCampaignName\tImpressions\tClicks\tCost\tConversions_1_AUTO\tConversions_2_AUTO\n' +
+    '2026-09-01\t555\tПосевы Макс\t1000\t20\t1234.5\t3\t--\n2026-09-02\t555\tПосевы Макс\t10\t1\t50\t1\t2\n';
+  const rows = plain(t.parseYandexTsv_(tsv, ''));
+  assert.deepStrictEqual(rows.map(r => [r[2], r[3], r[4], r[7], r[8]]),
+    [['основной', '555', 'Посевы Макс', 1234.5, 3], ['основной', '555', 'Посевы Макс', 50, 3]]);
+  // Одна колонка Conversions (цели по умолчанию)
+  const one = t.parseYandexTsv_('Date\tCampaignId\tCampaignName\tImpressions\tClicks\tCost\tConversions\n2026-09-01\t1\tA\t1\t1\t10\t4\n', 'login');
+  assert.strictEqual(one[0][8], 4);
+  assert.strictEqual(one[0][2], 'login');
 });
 
 test('setupSheets + rebuildFacts на моке таблицы', () => {
@@ -225,12 +234,13 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   console.log('     Сводка_каналы!A5 =', f('Сводка_каналы', 'A5'));
   console.log('     Сводка_каналы!B2 =', f('Сводка_каналы', 'B2'));
   console.log('     Сводка_каналы!D5 =', f('Сводка_каналы', 'D5'));
-  console.log('     Сводка_каналы!M5 =', f('Сводка_каналы', 'M5'));
-  console.log('     Сводка_месяцы!N5 =', f('Сводка_месяцы', 'N5'));
-  console.log('     Сводка_месяцы!O2 =', f('Сводка_месяцы', 'O2'));
-  console.log('     Дашборд!J7     =', f('Дашборд', 'J7'));
+  console.log('     Сводка_каналы!O5 =', f('Сводка_каналы', 'O5'));
+  console.log('     Сводка_месяцы!P5 =', f('Сводка_месяцы', 'P5'));
+  console.log('     Сводка_месяцы!Q2 =', f('Сводка_месяцы', 'Q2'));
+  console.log('     Дашборд!K7     =', f('Дашборд', 'K7'));
   console.log('     Данные_графиков!A2 =', f('Данные_графиков', 'A2'));
-  assert.ok(f('Сводка_каналы', 'M5').includes('IFERROR((J5-B5)/B5'));
+  assert.ok(f('Сводка_каналы', 'O5').includes('IFERROR((L5-B5)/B5'));
+  assert.ok(f('Сводка_каналы', 'E5').includes('"лид_кабинет"'));
   // Мок не считает формулы, поэтому проверка локали видит «ошибку» и включает «;».
   // Ни в одной формуле не должно остаться запятых вне строк и имён листов.
   const bare = x => x.replace(/"[^"]*"|'[^']*'/g, '');
@@ -239,7 +249,18 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
     if (fm) assert.ok(!bare(fm).includes(','), s.getName() + ' ' + k + ': ' + fm);
   }));
   assert.strictEqual(f('Дашборд', 'B3'), '=DATE(YEAR(TODAY());MONTH(TODAY());1)');
-  assert.ok(f('Сводка_месяцы', 'O5').includes('J5-B5-N5'));
+  assert.ok(f('Сводка_месяцы', 'Q5').includes('L5-B5-P5'));
+  assert.strictEqual(f('Дашборд', 'L7'), '=H7-A7-K7');
+
+  // Повторный запуск на старом листе «Настройки» без YANDEX_GOALS: параметр дописывается, правила целы
+  const st = sh('Настройки');
+  const rowOf = code => Object.keys(st.cells).find(k => k.endsWith(',8') && st.cells[k].v === code);
+  const gk = rowOf('YANDEX_GOALS');
+  delete st.cells[gk]; delete st.cells[gk.replace(',8', ',9')]; delete st.cells[gk.replace(',8', ',10')];
+  t.setupSheets();
+  assert.ok(rowOf('YANDEX_GOALS'), 'YANDEX_GOALS не дописан');
+  assert.strictEqual(t.params_().rules.length, p.rules.length);
+  assert.strictEqual(Object.keys(st.cells).filter(k => k.endsWith(',8') && st.cells[k].v === 'YANDEX_GOALS').length, 1);
 
   // Сырые данные → fact
   const put = (name, head, objs) => sh(name).getRange(2, 1, objs.length, head.length).setValues(objs.map(o => head.map(h => (h in o ? o[h] : ''))));

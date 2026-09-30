@@ -55,6 +55,8 @@ function buildFacts_(d, p) {
       площадка: a['Площадка'], кабинет: a['Кабинет'], кампания: name, 'id кампании': a['ID кампании'],
     }) || a['Площадка'];
     push(a['Дата'], EV.spend, ch, name, 0, num_(a['Расход']), a['ID кампании'], '');
+    const adLeads = num_(a['Лиды (кабинет)']);
+    if (adLeads) push(a['Дата'], EV.adLead, ch, name, adLeads, 0, a['ID кампании'], '');
   });
   d.adsManual.forEach(a => push(a['Дата'], EV.spend, a['Канал'], a['Кампания'], 0, num_(a['Расход']), '', ''));
 

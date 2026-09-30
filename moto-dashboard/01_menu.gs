@@ -4,6 +4,7 @@ function onOpen() {
     .addItem('Обновить всё', 'menuUpdateAll')
     .addSeparator()
     .addItem('Обновить рекламу', 'menuAds')
+    .addItem('Перезагрузить рекламу полностью', 'menuAdsFull')
     .addItem('Обновить амоCRM', 'menuAmo')
     .addItem('Обновить Мой Класс', 'menuMk')
     .addItem('Пересобрать сводку (fact)', 'menuFacts')
@@ -65,6 +66,17 @@ function withFacts_(name, fn) {
 function menuAds() { withFacts_('Реклама', updateAds); }
 function menuAmo() { withFacts_('амоCRM', updateAmo); }
 function menuMk() { withFacts_('Мой Класс', updateMk); }
+
+/** Удаляет всю рекламу с raw_ads и грузит заново за INITIAL_DAYS (нужно после добавления новых колонок). */
+function menuAdsFull() {
+  const ui = SpreadsheetApp.getUi();
+  const ok = ui.alert('Перезагрузить рекламу', 'Лист raw_ads будет очищен и загружен заново за ' +
+    params_().INITIAL_DAYS + ' дней. Продолжить?', ui.ButtonSet.OK_CANCEL);
+  if (ok !== ui.Button.OK) return;
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEETS.ads);
+  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, sh.getLastColumn()).clearContent();
+  withFacts_('Реклама', updateAds);
+}
 function menuFacts() { alert_(runJob_('Сводка', rebuildFacts)); }
 
 function setupTriggers() {

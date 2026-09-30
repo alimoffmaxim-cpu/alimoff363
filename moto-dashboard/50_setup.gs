@@ -47,7 +47,20 @@ function setupSheets() {
 
 function setupSettings_() {
   const ss = SpreadsheetApp.getActive();
-  if (ss.getSheetByName(SHEETS.settings)) return;
+  const existing = ss.getSheetByName(SHEETS.settings);
+  if (existing) { // дописываем параметры, появившиеся в новых версиях
+    const last = Math.max(existing.getLastRow(), 1);
+    const have = existing.getRange(1, 8, last, 1).getValues().map(r => String(r[0]));
+    const missing = PARAMS.filter(x => have.indexOf(x[0]) < 0);
+    if (missing.length) {
+      // Первое место под списком параметров, где подряд свободно нужное число строк
+      const h = existing.getRange(1, 8, last + missing.length, 1).getValues().map(r => r[0]);
+      let row = 2;
+      while (h.slice(row - 1, row - 1 + missing.length).some(v => v !== '')) row++;
+      existing.getRange(row, 8, missing.length, 3).setValues(missing);
+    }
+    return;
+  }
   const sh = ss.insertSheet(SHEETS.settings);
   sh.getRange(1, 1, 1, 10).setValues([['Поле', 'Содержит', 'Канал', '', 'Абонемент МК: название содержит', 'Тип', '',
     'Параметр', 'Значение', 'Пояснение']]).setFontWeight('bold');
@@ -191,8 +204,9 @@ function buildDashboard_() {
   const m = key => ch + metricCol_(key, 1) + '2';
   const kpi = [
     ['Расход на рекламу', '=' + m('spend'), '#,##0 ₽'],
-    ['Лиды', '=' + m('leads'), '#,##0'],
-    ['Цена лида', '=' + m('cpl'), '#,##0 ₽'],
+    ['Лиды (CRM)', '=' + m('leads'), '#,##0'],
+    ['Лиды (кабинет)', '=' + m('adLeads'), '#,##0'],
+    ['Цена лида (CRM)', '=' + m('cpl'), '#,##0 ₽'],
     ['Пробные', '=' + m('trials'), '#,##0'],
     ['Повторные', '=' + m('repeat'), '#,##0'],
     ['Абонементы', '=' + m('subs'), '#,##0'],
@@ -201,8 +215,10 @@ function buildDashboard_() {
     ['ROMI', '=' + m('romi'), '0%'],
     ['Прочие расходы', "=SUMIFS(" + COSTS + "!$C:$C," + COSTS + "!$A:$A,\">=\"&DATE(YEAR(B3),MONTH(B3),1)," +
       COSTS + "!$A:$A,\"<=\"&B4)", '#,##0 ₽'],
-    ['Чистая прибыль', '=G7-A7-J7', '#,##0 ₽'],
+    ['Чистая прибыль', null, '#,##0 ₽'],
   ];
+  const kc = label => col_(kpi.findIndex(k => k[0] === label) + 1) + '7';
+  kpi[kpi.length - 1][1] = '=' + kc('Выручка') + '-' + kc('Расход на рекламу') + '-' + kc('Прочие расходы');
   sh.getRange(6, 1, 1, kpi.length).setValues([kpi.map(k => k[0])])
     .setFontColor('#666666').setWrap(true).setVerticalAlignment('bottom');
   setFs_(sh.getRange(7, 1, 1, kpi.length), [kpi.map(k => k[1])])
@@ -241,11 +257,13 @@ function buildCharts_(dash, row) {
     setF_(sh.getRange(2, at), '=IFERROR(FILTER({' + keys.map(k => src + k + '5:' + k + end).join(',') + '},' +
       src + 'A5:A' + end + '<>""),"")');
   };
-  block(1, ch, cEnd, ['A', c('leads'), c('trials'), c('subs')], ['Канал', 'Лиды', 'Пробные', 'Абонементы']);
-  block(6, ch, cEnd, ['A', c('spend'), c('revenue')], ['Канал', 'Расход', 'Выручка']);
-  block(10, dy, dEnd, ['A', c('spend'), c('revenue'), c('leads')], ['Дата', 'Расход', 'Выручка', 'Лиды']);
-  sh.getRange('J2:J').setNumberFormat('dd.mm');
-  sh.getRange('O1').setValue('Служебный лист для графиков дашборда — не редактируйте.').setFontColor('#888888');
+  block(1, ch, cEnd, ['A', c('adLeads'), c('leads'), c('trials'), c('subs')],
+    ['Канал', 'Лиды (кабинет)', 'Лиды (CRM)', 'Пробные', 'Абонементы']);
+  block(7, ch, cEnd, ['A', c('spend'), c('revenue')], ['Канал', 'Расход', 'Выручка']);
+  block(11, dy, dEnd, ['A', c('spend'), c('revenue'), c('adLeads'), c('leads')],
+    ['Дата', 'Расход', 'Выручка', 'Лиды (кабинет)', 'Лиды (CRM)']);
+  sh.getRange('K2:K').setNumberFormat('dd.mm');
+  sh.getRange('Q1').setValue('Служебный лист для графиков дашборда — не редактируйте.').setFontColor('#888888');
 
   const add = (type, ranges, title, r, col, opts) => {
     let b = dash.newChart().setChartType(type).setPosition(r, col, 0, 0)
@@ -255,8 +273,8 @@ function buildCharts_(dash, row) {
     Object.keys(opts || {}).forEach(k => { b = b.setOption(k, opts[k]); });
     dash.insertChart(b.build());
   };
-  add(Charts.ChartType.COLUMN, ['A1:D' + (CFG.ROWS_CHANNELS + 1)], 'Лиды → пробные → абонементы по каналам', row, 1);
-  add(Charts.ChartType.COLUMN, ['F1:H' + (CFG.ROWS_CHANNELS + 1)], 'Расход и выручка по каналам', row, 8);
-  add(Charts.ChartType.LINE, ['J1:L' + (CFG.ROWS_DAYS + 1)], 'Расход и выручка по дням', row + 18, 1, { curveType: 'function' });
-  add(Charts.ChartType.COLUMN, ['J1:J' + (CFG.ROWS_DAYS + 1), 'M1:M' + (CFG.ROWS_DAYS + 1)], 'Лиды по дням', row + 18, 8);
+  add(Charts.ChartType.COLUMN, ['A1:E' + (CFG.ROWS_CHANNELS + 1)], 'Лиды → пробные → абонементы по каналам', row, 1);
+  add(Charts.ChartType.COLUMN, ['G1:I' + (CFG.ROWS_CHANNELS + 1)], 'Расход и выручка по каналам', row, 8);
+  add(Charts.ChartType.LINE, ['K1:M' + (CFG.ROWS_DAYS + 1)], 'Расход и выручка по дням', row + 18, 1, { curveType: 'function' });
+  add(Charts.ChartType.COLUMN, ['K1:K' + (CFG.ROWS_DAYS + 1), 'N1:O' + (CFG.ROWS_DAYS + 1)], 'Лиды по дням', row + 18, 8);
 }

@@ -95,7 +95,7 @@ function buildSummary_(o) {
   const metrics = METRICS.concat(o.extra || []);
   const nd = o.dims.length;
   const first = 5;
-  sh.getRange('A1').setFormula(o.title).setFontWeight('bold').setFontSize(13);
+  setF_(sh.getRange('A1'), o.title).setFontWeight('bold').setFontSize(13);
   sh.getRange(4, 1, 1, nd + metrics.length).setValues([o.dims.concat(metrics.map(m => m.h))])
     .setFontWeight('bold').setWrap(true).setBackground('#eeeeee');
 
@@ -110,13 +110,13 @@ function buildSummary_(o) {
   };
   if (o.total) {
     sh.getRange(2, 1).setValue('Итого');
-    sh.getRange(2, nd + 1, 1, metrics.length).setFormulas([rowFormulas(2, true)]);
+    setFs_(sh.getRange(2, nd + 1, 1, metrics.length), [rowFormulas(2, true)]);
     sh.getRange(2, 1, 1, nd + metrics.length).setFontWeight('bold').setBackground('#fff8e1');
   }
   const f = [];
   for (let r = first; r < first + o.rows; r++) f.push(rowFormulas(r, false));
-  sh.getRange(first, nd + 1, o.rows, metrics.length).setFormulas(f);
-  sh.getRange(first, 1).setFormula(o.list);
+  setFs_(sh.getRange(first, nd + 1, o.rows, metrics.length), f);
+  setF_(sh.getRange(first, 1), o.list);
 
   metrics.forEach((m, i) => sh.getRange(2, nd + i + 1, first + o.rows - 2, 1).setNumberFormat(m.fmt || '#,##0'));
   if (o.dimFormat) sh.getRange(first, 1, o.rows, 1).setNumberFormat(o.dimFormat);
@@ -172,13 +172,13 @@ function buildDashboard_() {
   const ch = "'" + SHEETS.byChannel + "'!";
 
   sh.getRange('A1').setValue('Школа мотокросса — сквозная аналитика').setFontWeight('bold').setFontSize(16);
-  sh.getRange('A2').setFormula('=IFERROR("Последнее обновление: "&TEXT(MAX(\'' + SHEETS.log + '\'!A:A),"dd.mm.yyyy hh:mm"),"")')
+  setF_(sh.getRange('A2'), '=IFERROR("Последнее обновление: "&TEXT(MAX(\'' + SHEETS.log + '\'!A:A),"dd.mm.yyyy hh:mm"),"")')
     .setFontColor('#888888');
   sh.getRange('A3:A4').setValues([['Период с'], ['по']]).setFontWeight('bold');
   const setDate = (a1, v, def) => {
     const cell = sh.getRange(a1);
-    if (v === '' || v == null) cell.setFormula(def);
-    else if (String(v)[0] === '=') cell.setFormula(v);
+    if (v === '' || v == null) setF_(cell, def);
+    else if (String(v)[0] === '=') setF_(cell, v);
     else cell.setValue(v);
   };
   setDate('B3', keep && keep[0], '=DATE(YEAR(TODAY()),MONTH(TODAY()),1)');
@@ -205,7 +205,7 @@ function buildDashboard_() {
   ];
   sh.getRange(6, 1, 1, kpi.length).setValues([kpi.map(k => k[0])])
     .setFontColor('#666666').setWrap(true).setVerticalAlignment('bottom');
-  sh.getRange(7, 1, 1, kpi.length).setFormulas([kpi.map(k => k[1])])
+  setFs_(sh.getRange(7, 1, 1, kpi.length), [kpi.map(k => k[1])])
     .setFontSize(15).setFontWeight('bold');
   kpi.forEach((k, i) => sh.getRange(7, i + 1).setNumberFormat(k[2]));
   sh.getRange(6, 1, 2, kpi.length).setBackground('#fafafa')
@@ -217,8 +217,8 @@ function buildDashboard_() {
   const last = col_(1 + METRICS.length);
   const end = 4 + CFG.ROWS_CHANNELS;
   sh.getRange('A10').setValue('По каналам').setFontWeight('bold').setFontSize(12);
-  sh.getRange('A11').setFormula('={' + ch + 'A4:' + last + '4;' + ch + 'A2:' + last + '2}');
-  sh.getRange('A13').setFormula('=IFERROR(FILTER(' + ch + 'A5:' + last + end + ',' + ch + 'A5:A' + end + '<>""),"Нет данных за период")');
+  setF_(sh.getRange('A11'), '={' + ch + 'A4:' + last + '4;' + ch + 'A2:' + last + '2}');
+  setF_(sh.getRange('A13'), '=IFERROR(FILTER(' + ch + 'A5:' + last + end + ',' + ch + 'A5:A' + end + '<>""),"Нет данных за период")');
   sh.getRange(11, 1, 1, 1 + METRICS.length).setFontWeight('bold').setWrap(true).setBackground('#eeeeee');
   sh.getRange(12, 1, 1, 1 + METRICS.length).setFontWeight('bold').setBackground('#fff8e1');
   METRICS.forEach((mt, i) => sh.getRange(12, i + 2, CFG.ROWS_CHANNELS + 2, 1).setNumberFormat(mt.fmt || '#,##0'));
@@ -238,7 +238,7 @@ function buildCharts_(dash, row) {
   const c = key => metricCol_(key, 1);
   const block = (at, src, end, keys, heads) => {
     sh.getRange(1, at, 1, heads.length).setValues([heads]).setFontWeight('bold');
-    sh.getRange(2, at).setFormula('=IFERROR(FILTER({' + keys.map(k => src + k + '5:' + k + end).join(',') + '},' +
+    setF_(sh.getRange(2, at), '=IFERROR(FILTER({' + keys.map(k => src + k + '5:' + k + end).join(',') + '},' +
       src + 'A5:A' + end + '<>""),"")');
   };
   block(1, ch, cEnd, ['A', c('leads'), c('trials'), c('subs')], ['Канал', 'Лиды', 'Пробные', 'Абонементы']);

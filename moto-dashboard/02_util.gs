@@ -182,3 +182,51 @@ function log_(task, msg) {
   sh.appendRow([new Date(), task, msg]);
   if (sh.getLastRow() > 1000) sh.deleteRows(2, sh.getLastRow() - 1000);
 }
+
+// ---------- Формулы и локаль таблицы ----------
+// В русской (и других «запятая = дробь») локали аргументы разделяются «;»,
+// а столбцы массива {…} — «\». Формулы в коде пишутся с запятыми и переводятся здесь.
+
+/** Переводит запятые формулы в синтаксис локали. Строки "…" и имена листов '…' не трогает. */
+function localizeFormula_(f, semi) {
+  if (!semi) return f;
+  let out = '';
+  let quote = '';
+  let depth = 0;
+  for (let i = 0; i < f.length; i++) {
+    const ch = f[i];
+    if (quote) {
+      if (ch === quote) quote = '';
+      out += ch;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+      out += ch;
+    } else {
+      if (ch === '{') depth++;
+      if (ch === '}') depth--;
+      out += ch === ',' ? (depth > 0 ? '\\' : ';') : ch;
+    }
+  }
+  return out;
+}
+
+let formulaSemi_ = null;
+
+/** true, если таблица не понимает формулы с запятыми (проверка на служебной ячейке). */
+function formulaSemicolons_() {
+  if (formulaSemi_ !== null) return formulaSemi_;
+  const sh = sheet_(SHEETS.log, HEAD.log);
+  const cell = sh.getRange(1, 26);
+  cell.setFormula('=SUM(1,2)');
+  SpreadsheetApp.flush();
+  formulaSemi_ = cell.getValue() !== 3;
+  cell.clearContent();
+  return formulaSemi_;
+}
+
+function setF_(range, f) { return range.setFormula(localizeFormula_(f, formulaSemicolons_())); }
+
+function setFs_(range, rows) {
+  const semi = formulaSemicolons_();
+  return range.setFormulas(rows.map(r => r.map(f => localizeFormula_(f, semi))));
+}

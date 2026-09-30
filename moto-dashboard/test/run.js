@@ -79,7 +79,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -104,6 +104,18 @@ test('col_, qs_, chunks_', () => {
   assert.strictEqual(t.col_(27), 'AA');
   assert.strictEqual(t.qs_({ date: ['2026-01-01', '2026-01-31'], x: 1 }), '?date=2026-01-01&date=2026-01-31&x=1');
   assert.deepStrictEqual(plain(t.chunks_('2026-01-01', '2026-01-10', 7)), [['2026-01-01', '2026-01-07'], ['2026-01-08', '2026-01-10']]);
+});
+
+test('localizeFormula_: запятые → ; и \\ в массивах, строки и листы не трогаются', () => {
+  const L = f => t.localizeFormula_(f, true);
+  assert.strictEqual(t.localizeFormula_('=SUM(1,2)', false), '=SUM(1,2)');
+  assert.strictEqual(L('=DATE(YEAR(TODAY()),MONTH(TODAY()),1)'), '=DATE(YEAR(TODAY());MONTH(TODAY());1)');
+  assert.strictEqual(L('=IFERROR(TEXT(A1,"dd.mm, yyyy"),"a,b")'), '=IFERROR(TEXT(A1;"dd.mm, yyyy");"a,b")');
+  assert.strictEqual(L("=SUM('Лист, 1'!A:A,B1)"), "=SUM('Лист, 1'!A:A;B1)");
+  assert.strictEqual(L('=FILTER({A1:A,B1:B},A1:A<>"")'), '=FILTER({A1:A\\B1:B};A1:A<>"")');
+  assert.strictEqual(L('={A4:M4;A2:M2}'), '={A4:M4;A2:M2}');
+  const once = L('=IFERROR(FILTER({A,B},C),"")');
+  assert.strictEqual(L(once), once);
 });
 
 test('subType_', () => {
@@ -219,6 +231,14 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   console.log('     Дашборд!J7     =', f('Дашборд', 'J7'));
   console.log('     Данные_графиков!A2 =', f('Данные_графиков', 'A2'));
   assert.ok(f('Сводка_каналы', 'M5').includes('IFERROR((J5-B5)/B5'));
+  // Мок не считает формулы, поэтому проверка локали видит «ошибку» и включает «;».
+  // Ни в одной формуле не должно остаться запятых вне строк и имён листов.
+  const bare = x => x.replace(/"[^"]*"|'[^']*'/g, '');
+  Object.values(ss.sheets).forEach(s => Object.keys(s.cells).forEach(k => {
+    const fm = s.cells[k].f;
+    if (fm) assert.ok(!bare(fm).includes(','), s.getName() + ' ' + k + ': ' + fm);
+  }));
+  assert.strictEqual(f('Дашборд', 'B3'), '=DATE(YEAR(TODAY());MONTH(TODAY());1)');
   assert.ok(f('Сводка_месяцы', 'O5').includes('J5-B5-N5'));
 
   // Сырые данные → fact

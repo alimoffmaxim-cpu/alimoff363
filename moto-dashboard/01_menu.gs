@@ -58,9 +58,13 @@ function menuUpdateAll() {
     runJob_('Сводка', rebuildFacts),
   ].join('\n'));
 }
-function menuAds() { alert_(runJob_('Реклама', updateAds)); }
-function menuAmo() { alert_(runJob_('амоCRM', updateAmo)); }
-function menuMk() { alert_(runJob_('Мой Класс', updateMk)); }
+/** Загрузка из меню: сразу пересобирает fact, чтобы данные появились в сводках. */
+function withFacts_(name, fn) {
+  alert_(runJob_(name, fn) + '\n' + runJob_('Сводка', rebuildFacts));
+}
+function menuAds() { withFacts_('Реклама', updateAds); }
+function menuAmo() { withFacts_('амоCRM', updateAmo); }
+function menuMk() { withFacts_('Мой Класс', updateMk); }
 function menuFacts() { alert_(runJob_('Сводка', rebuildFacts)); }
 
 function setupTriggers() {

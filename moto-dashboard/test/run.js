@@ -271,7 +271,8 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   put('raw_mk_subs', t.HEAD.mkSubs, data.subs);
   put('raw_mk_payments', t.HEAD.mkPays, data.pays);
   const msg = t.rebuildFacts();
-  assert.ok(/строк/.test(msg), msg);
+  assert.ok(/лиды \(кабинет\) 4, лиды \(CRM\) 3/.test(msg), msg);
+  console.log('     rebuildFacts →', msg);
   assert.strictEqual(t.readRows_('fact').length, t.buildFacts_(Object.assign({}, data, { adsManual: [] }), p).length);
 });
 

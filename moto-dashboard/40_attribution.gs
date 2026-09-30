@@ -14,8 +14,25 @@ function rebuildFacts() {
   };
   const rows = buildFacts_(d, params_());
   writeTable_(SHEETS.fact, HEAD.fact, rows);
-  const lost = rows.filter(r => r[1] !== EV.spend && r[1] !== EV.lead && r[2] === NO_LEAD).length;
-  return rows.length + ' строк' + (lost ? '; событий МК без заявки в амо: ' + lost : '');
+  return factsSummary_(rows);
+}
+
+/** Короткий итог для сообщения: период данных, расход и количество по событиям. */
+function factsSummary_(rows) {
+  if (!rows.length) return 'нет данных';
+  const qty = {};
+  let spend = 0;
+  rows.forEach(r => {
+    if (r[1] === EV.spend) spend += r[5];
+    else qty[r[1]] = (qty[r[1]] || 0) + r[4];
+  });
+  const lost = rows.filter(r => r[1] !== EV.spend && r[1] !== EV.lead && r[1] !== EV.adLead && r[2] === NO_LEAD).length;
+  const fmt = d => pad2_(d.getDate()) + '.' + pad2_(d.getMonth() + 1) + '.' + d.getFullYear();
+  return rows.length + ' строк за ' + fmt(rows[0][0]) + '–' + fmt(rows[rows.length - 1][0]) +
+    '; расход ' + Math.round(spend) + ' ₽' +
+    '; лиды (кабинет) ' + (qty[EV.adLead] || 0) + ', лиды (CRM) ' + (qty[EV.lead] || 0) +
+    ', пробные ' + (qty[EV.trial] || 0) + ', абонементы ' + (qty[EV.sub] || 0) +
+    (lost ? '; событий МК без заявки в амо: ' + lost : '');
 }
 
 /** Первое подходящее правило {field, contains, channel} или ''. */

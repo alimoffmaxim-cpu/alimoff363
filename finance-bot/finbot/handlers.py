@@ -27,6 +27,8 @@ from .finance import (
     RUB,
     ParseError,
     approx_rub,
+    fmt_pct,
+    pct_change,
     Parsed,
     balance,
     categories,
@@ -35,7 +37,11 @@ from .finance import (
     label,
     last_rate,
     money,
+    MONTHS_FULL,
+    MONTHS_WITH,
+    month_totals,
     monthly_totals,
+    shift_month,
     normalize_category,
     parse_input,
 )
@@ -48,14 +54,15 @@ BTN_IN = "➕ Доход"
 BTN_FX = "💱 Обмен"
 BTN_DASH = "📊 Дашборд"
 BTN_HISTORY = "🧾 История"
-BTN_BALANCE = "💰 Баланс"
+BTN_MONTH = "📅 Месяц"
+BTN_BALANCE_OLD = "💰 Баланс"  # старая кнопка — может остаться в клавиатуре до /start
 BTN_LOCK = "🔒 Заблокировать"
-BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_BALANCE, BTN_LOCK}
+BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_MONTH, BTN_BALANCE_OLD, BTN_LOCK}
 
 KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text=BTN_OUT), KeyboardButton(text=BTN_IN), KeyboardButton(text=BTN_FX)],
-        [KeyboardButton(text=BTN_DASH), KeyboardButton(text=BTN_HISTORY), KeyboardButton(text=BTN_BALANCE)],
+        [KeyboardButton(text=BTN_DASH), KeyboardButton(text=BTN_HISTORY), KeyboardButton(text=BTN_MONTH)],
         [KeyboardButton(text=BTN_LOCK)],
     ],
     resize_keyboard=True,
@@ -71,7 +78,10 @@ HELP = """<b>Как пользоваться</b>
 <b>Расход:</b> <code>-350</code> · <code>350 еда</code> · <code>расход 1200 такси</code>
 <b>Доход:</b> <code>+50000</code> · <code>доход 50000 зп</code>
 <b>Обмен:</b> <code>обмен 90000 - 30000</code> — отдали ₽, получили ฿
-<b>Баланс:</b> <code>баланс 12000</code> — если баланс в боте разошёлся с реальным
+<b>Остаток:</b> <code>баланс 12000</code> — если остаток на руках разошёлся с реальным
+
+Доходы и расходы считаются по календарным месяцам: 1-го числа счёт начинается с нуля.
+«📅 Месяц» — итоги текущего месяца по категориям, стрелками можно листать прошлые.
 
 Если категория не указана — бот покажет кнопки с категориями.
 Можно указать дату: <code>-500 еда вчера</code>, <code>-900 такси 25.09</code>
@@ -198,12 +208,16 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         storage.add_tx(vault.cipher, tx)
         text = "✅ " + describe(tx)
         txs = storage.list_tx(vault.cipher)
-        if tx.kind == "out":
-            spent = dict(categories(txs, tx.day.year, tx.day.month)).get(tx.category, 0)
-            text += f"\nНа «{html.escape(tx.category)}» в этом месяце: {money(spent)}"
         if tx.kind == "fx" and parsed.swapped:
             text += "\n(суммы поменял местами: рублей при обмене всегда больше, чем бат)"
-        text += f"\n💰 Баланс: {money(balance(txs))}"
+        m = month_totals(txs, tx.day.year, tx.day.month)
+        name = MONTHS_FULL[tx.day.month - 1]
+        text += f"\n\n📅 <b>{name}</b>: расходы {money(m.expense)} · доходы {money(m.income)}"
+        if tx.kind == "out":
+            spent = dict(categories(txs, tx.day.year, tx.day.month)).get(tx.category, 0)
+            text += f"\n{label(html.escape(tx.category))} за {name.lower()}: {money(spent)}"
+        if tx.kind == "fx":
+            text += f"\n💱 Обменяно за {name.lower()}: {money(m.fx_thb)} (курс {fmt_rate(m.rate)})"
         return text, undo_markup(tx.id)
 
     def category_markup(cats: list[str]) -> InlineKeyboardMarkup:
@@ -376,28 +390,62 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
                                           caption=dashboard.caption(txs, today()))
         janitor.later(message, sent)
 
-    @router.message(Command("balance"))
-    @router.message(F.text == BTN_BALANCE)
-    async def cmd_balance(message: Message, state: FSMContext) -> None:
-        await state.clear()
+    def month_report(year: int, month: int) -> tuple[str, InlineKeyboardMarkup]:
         txs = storage.list_tx(vault.cipher)
-        bal = balance(txs)
-        rate = last_rate(txs)
-        cur = monthly_totals(txs, today(), 1)[0]
-        lines = [f"💰 Баланс: <b>{money(bal)}</b>"]
-        if rate:
-            lines.append(f"{approx_rub(bal, rate)} по последнему курсу {fmt_rate(rate)}")
-        lines += [
-            "",
-            "<b>Этот месяц</b>",
-            f"➕ Доходы: {money(cur.income)}",
-            f"➖ Расходы: {money(cur.expense)}",
-        ]
-        if cur.fx_thb:
-            lines.append(f"💱 Обмен: {money(cur.fx_rub, RUB)} → {money(cur.fx_thb)} ({fmt_rate(cur.rate)})")
-        lines.append("\nБаланс считается по операциям. Если разошёлся с реальным — "
-                     "отправьте <code>баланс 12000</code>.")
-        await reply(message, "\n".join(lines))
+        m = month_totals(txs, year, month)
+        py, pm = shift_month(year, month, -1)
+        prev = month_totals(txs, py, pm)
+        name = MONTHS_FULL[month - 1]
+
+        def change(cur: int, old: int) -> str:
+            pct = pct_change(cur, old)
+            return "" if pct is None else f" ({fmt_pct(pct)})"
+
+        lines = [f"📅 <b>{name} {year}</b>", ""]
+        lines.append(f"➖ Расходы: <b>{money(m.expense)}</b>{change(m.expense, prev.expense)}")
+        rate = m.rate or last_rate(txs)
+        if rate and m.expense:
+            lines.append(f"     {approx_rub(m.expense, rate)}")
+        lines.append(f"➕ Доходы: <b>{money(m.income)}</b>{change(m.income, prev.income)}")
+        lines.append(f"📈 Итог месяца: <b>{money(m.net)}</b>")
+        if m.fx_thb:
+            lines.append(f"💱 Обмен: {money(m.fx_rub, RUB)} → {money(m.fx_thb)} ({fmt_rate(m.rate)})")
+        cats = categories(txs, year, month)
+        if cats:
+            lines += ["", "<b>Расходы по категориям</b>"]
+            for cat, amount in cats[:12]:
+                share = round(amount / m.expense * 100) if m.expense else 0
+                lines.append(f"{label(html.escape(cat))}: {money(amount)} · {share}%")
+        if (prev.income or prev.expense) and not (m.income or m.expense):
+            lines += ["", "В этом месяце операций пока нет — счёт начат с нуля."]
+        if prev.income or prev.expense:
+            lines += ["", f"<i>В скобках — изменение по сравнению с {MONTHS_WITH[pm - 1]}.</i>"]
+        lines.append(f"💰 Остаток на руках (за всё время): {money(balance(txs))}")
+
+        ny, nm = shift_month(year, month, 1)
+        nav = [InlineKeyboardButton(text=f"◀ {MONTHS_FULL[pm - 1]}", callback_data=f"month:{py}-{pm}")]
+        if (ny, nm) <= (today().year, today().month):
+            nav.append(InlineKeyboardButton(text=f"{MONTHS_FULL[nm - 1]} ▶", callback_data=f"month:{ny}-{nm}"))
+        return "\n".join(lines), InlineKeyboardMarkup(inline_keyboard=[nav])
+
+    @router.message(Command("month"))
+    @router.message(Command("balance"))
+    @router.message(F.text == BTN_MONTH)
+    @router.message(F.text == BTN_BALANCE_OLD)
+    async def cmd_month(message: Message, state: FSMContext) -> None:
+        await state.clear()
+        text, markup = month_report(today().year, today().month)
+        # Заодно обновляем клавиатуру, если у пользователя осталась старая кнопка.
+        if message.text == BTN_BALANCE_OLD:
+            await reply(message, "Кнопка «💰 Баланс» теперь называется «📅 Месяц».", reply_markup=KEYBOARD)
+        await reply(message, text, reply_markup=markup)
+
+    @router.callback_query(F.data.startswith("month:"))
+    async def cb_month(call: CallbackQuery) -> None:
+        year, month = (int(x) for x in call.data.split(":", 1)[1].split("-"))
+        text, markup = month_report(year, month)
+        await call.answer()
+        await call.message.edit_text(text, reply_markup=markup)
 
     @router.message(Command("history"))
     @router.message(F.text == BTN_HISTORY)

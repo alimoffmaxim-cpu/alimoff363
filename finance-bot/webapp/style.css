@@ -40,12 +40,12 @@ main { max-width: 640px; margin: 0 auto; padding: 16px 16px 32px; }
 header h1 { font-size: 20px; margin: 4px 0 2px; }
 header p { margin: 0; }
 
-.hero { margin: 18px 0 6px; }
+.hero { margin: 16px 0 6px; }
 .hero .label { font-size: 13px; color: var(--text-2); }
 .hero .value { font-size: 40px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.15; }
 .hero .sub { font-size: 14px; color: var(--text-2); }
 
-.months { display: flex; gap: 6px; overflow-x: auto; margin: 16px -16px 4px; padding: 0 16px 4px; scrollbar-width: none; }
+.months { display: flex; gap: 6px; overflow-x: auto; margin: 14px -16px 0; padding: 0 16px 4px; scrollbar-width: none; }
 .months::-webkit-scrollbar { display: none; }
 .months button {
   flex: 0 0 auto; border: 0; border-radius: 16px; padding: 7px 13px; font: inherit; font-size: 14px;

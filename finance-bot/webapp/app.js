@@ -87,13 +87,7 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     header.appendChild(el("p", "muted small", "Данные на " + data.t + " · все суммы в батах"));
     app.appendChild(header);
 
-    var hero = el("div", "hero");
-    hero.appendChild(el("div", "label", "Баланс сейчас"));
-    hero.appendChild(el("div", "value", thb(data.b)));
-    if (lastRate) hero.appendChild(el("div", "sub", "≈ " + rub(data.b * lastRate) + " по курсу " + rate(lastRate)));
-    app.appendChild(hero);
-
-    // Выбор месяца
+    // Выбор месяца — всё ниже считается только за выбранный месяц
     var bar = el("div", "months");
     ms.forEach(function (m, i) {
       var b = el("button", i === state.sel ? "active" : "", MONTHS[m.month - 1] + (m.year !== ms[ms.length - 1].year ? " " + m.year : ""));
@@ -103,21 +97,28 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     app.appendChild(bar);
     setTimeout(function () { var a = bar.querySelector(".active"); if (a && a.scrollIntoView) a.scrollIntoView({ inline: "center", block: "nearest" }); }, 0);
 
-    if (prev) app.appendChild(el("p", "muted small", "Изменения — в сравнении с предыдущим месяцем (" + MONTHS[prev.month - 1].toLowerCase() + ")"));
+    var effRate = cur.rate || lastRate;
+    var hero = el("div", "hero");
+    hero.appendChild(el("div", "label", "Расходы · " + MONTHS[cur.month - 1] + " " + cur.year));
+    hero.appendChild(el("div", "value", thb(cur.expense)));
+    var heroSub = el("div", "sub");
+    heroSub.appendChild(delta(cur.expense, prev && prev.expense, false));
+    if (effRate && cur.expense) heroSub.appendChild(document.createTextNode(" · ≈ " + rub(cur.expense * effRate)));
+    hero.appendChild(heroSub);
+    app.appendChild(hero);
+
+    if (prev) app.appendChild(el("p", "muted small", "Каждый месяц считается с нуля. Изменения — по сравнению с месяцем «" + MONTHS[prev.month - 1].toLowerCase() + "»."));
 
     // Плитки месяца
     var tiles = el("div", "tiles");
-    var effRate = cur.rate || lastRate;
-    tiles.appendChild(tile("income", "Доходы", thb(cur.income), [delta(cur.income, prev && prev.income, true)]));
-    tiles.appendChild(tile("expense", "Расходы", thb(cur.expense), [
-      delta(cur.expense, prev && prev.expense, false),
-      effRate && cur.expense ? el("div", null, "≈ " + rub(cur.expense * effRate)) : null
-    ]));
+    tiles.appendChild(tile("income", "Доходы за месяц", thb(cur.income), [delta(cur.income, prev && prev.income, true)]));
     var net = cur.income - cur.expense;
     tiles.appendChild(tile(null, "Итог месяца", thb(net), [el("span", null, prev ? "прошлый: " + thb(prev.income - prev.expense) : "доходы − расходы")]));
     tiles.appendChild(tile("rate", "Обмен ₽ → ฿", cur.fxThb ? thb(cur.fxThb) : "—",
       cur.fxThb ? [el("div", null, "за " + rub(cur.fxRub) + " · " + rate(cur.rate)),
         prev && prev.rate ? delta(cur.rate, prev.rate, false) : null] : [el("span", null, "в этом месяце не было")]));
+    tiles.appendChild(tile(null, "Остаток на руках", thb(data.b),
+      [el("span", null, "за всё время" + (lastRate ? " · ≈ " + rub(data.b * lastRate) : ""))]));
     app.appendChild(tiles);
 
     app.appendChild(columnsChart(ms));

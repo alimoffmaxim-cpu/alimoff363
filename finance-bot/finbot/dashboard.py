@@ -54,7 +54,7 @@ def render(txs: list[Tx], today: date) -> bytes:
         ("Доходы", money(cur.income), fmt_pct(pct_change(cur.income, prev.income))),
         ("Расходы", money(cur.expense), fmt_pct(pct_change(cur.expense, prev.expense))),
         ("Обмен ₽→฿", money(cur.fx_thb), f"курс {fmt_rate(cur.rate)}" if cur.rate else "в этом месяце не было"),
-        ("Баланс", money(bal), approx_rub(bal, rate) if rate else "по операциям"),
+        ("Остаток (всё время)", money(bal), approx_rub(bal, rate) if rate else "по операциям"),
     ]
     for i, (title, value, sub) in enumerate(tiles):
         ax = fig.add_subplot(grid[0, i])
@@ -133,7 +133,7 @@ def caption(txs: list[Tx], today: date) -> str:
         change = fmt_pct(pct_change(cur.rate, prev.rate)) if prev.rate else "курс прошлого месяца неизвестен"
         lines.append(f"💱 Обмен: {money(cur.fx_rub, RUB)} → {money(cur.fx_thb)}, "
                      f"курс {fmt_rate(cur.rate)} ({change})")
-    lines.append(f"💰 Баланс: <b>{money(balance(txs))}</b>")
+    lines.append(f"💰 Остаток на руках (за всё время): {money(balance(txs))}")
     return "\n".join(lines)
 
 

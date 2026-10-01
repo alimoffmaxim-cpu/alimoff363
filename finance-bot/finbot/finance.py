@@ -218,6 +218,11 @@ def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTot
     return [totals[k] for k in keys]
 
 
+def month_totals(txs: list[Tx], year: int, month: int) -> MonthTotals:
+    """Итоги одного календарного месяца — каждый месяц считается с нуля."""
+    return monthly_totals(txs, date(year, month, 1), 1)[0]
+
+
 def categories(txs: list[Tx], year: int, month: int, kind: str = "out") -> list[tuple[str, int]]:
     sums: dict[str, int] = defaultdict(int)
     for tx in txs:

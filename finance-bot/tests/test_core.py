@@ -123,3 +123,14 @@ def test_webapp_payload_roundtrip_and_limit():
     # много длинных категорий — ссылка всё равно не превышает лимит
     many = [Tx("out", 100 * i, f"Категория-номер-{i}-с-длинным-названием", "", TODAY, id=i) for i in range(1, 200)]
     assert len(dashboard.webapp_payload(many, datetime(2026, 9, 29))) <= dashboard.WEBAPP_PAYLOAD_LIMIT
+
+
+def test_each_month_starts_from_zero():
+    from finbot.finance import month_totals
+
+    txs = [Tx("out", 500000, "Еда", "", date(2026, 9, 30), id=1), Tx("in", 1000000, "Зарплата", "", date(2026, 9, 5), id=2),
+           Tx("out", 20000, "Кафе", "", date(2026, 10, 1), id=3)]
+    sep, octo = month_totals(txs, 2026, 9), month_totals(txs, 2026, 10)
+    assert (sep.expense, sep.income) == (500000, 1000000)
+    assert (octo.expense, octo.income) == (20000, 0)  # октябрь начат с нуля
+    assert balance(txs) == 1000000 - 500000 - 20000  # а остаток — за всё время

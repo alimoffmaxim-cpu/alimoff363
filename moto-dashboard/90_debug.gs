@@ -32,25 +32,71 @@ function debugAmoFields() {
   debugOut_(rows);
 }
 
-/** По несколько записей каждого эндпоинта Мой Класс — сверить названия полей. */
+/**
+ * Мой Класс: какие поля реально заполнены у учеников (ищем рекламный источник),
+ * справочник рекламных источников, флаги пробных/посещений, типы платежей
+ * и по несколько сырых записей каждого эндпоинта.
+ */
 function debugMk() {
   const today = dayKey_(new Date());
   const monthAgo = dayKey_(addDays_(new Date(), -30));
-  const calls = [
+  const rows = [];
+  const tryGet = (path, params) => {
+    try { return mkGet_(path, params); } catch (e) { return { error: e.message }; }
+  };
+
+  // 1. Поля учеников: сколько заполнено и примеры
+  const users = (tryGet('/users', { limit: 500 }).users) || [];
+  const fields = {};
+  const walk = (v, key) => {
+    if (v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length)) return;
+    if (Array.isArray(v)) { v.forEach(x => walk(x, key + '[]')); return; }
+    if (typeof v === 'object') { Object.keys(v).forEach(k => walk(v[k], key + '.' + k)); return; }
+    const f = fields[key] = fields[key] || { n: 0, ex: {} };
+    f.n++;
+    if (Object.keys(f.ex).length < 5) f.ex[String(v).slice(0, 60)] = true;
+  };
+  users.forEach(u => Object.keys(u).forEach(k => walk(u[k], k)));
+  rows.push(['ПОЛЯ УЧЕНИКОВ (первые ' + users.length + ')', 'Заполнено', 'Примеры значений']);
+  Object.keys(fields).sort().forEach(k => rows.push([k, fields[k].n, Object.keys(fields[k].ex).join(' ; ')]));
+
+  // 2. Справочник рекламных источников
+  rows.push([''], ['РЕКЛАМНЫЕ ИСТОЧНИКИ (/advSources)']);
+  const adv = tryGet('/advSources', {});
+  if (adv.error) rows.push(['нет данных: ' + adv.error.slice(0, 200)]);
+  else (Array.isArray(adv) ? adv : adv.advSources || adv.sources || []).forEach(x => rows.push([x.id, x.name || JSON.stringify(x)]));
+
+  // 3. Пробные и посещения за 30 дней
+  const lessons = (tryGet('/lessons', { date: [monthAgo, today], includeRecords: true, limit: 100 }).lessons) || [];
+  let recs = 0, test = 0, visit = 0, both = 0;
+  lessons.forEach(l => (l.records || []).forEach(r => {
+    recs++;
+    if (bool_(r.test)) test++;
+    if (bool_(r.visit)) visit++;
+    if (bool_(r.test) && bool_(r.visit)) both++;
+  }));
+  rows.push([''], ['ЗАНЯТИЯ ЗА 30 ДНЕЙ (до 100)', 'Значение'],
+    ['занятий', lessons.length], ['записей', recs], ['test = true (пробные)', test],
+    ['visit = true (пришёл)', visit], ['пробные, где пришёл', both]);
+
+  // 4. Типы платежей за 30 дней
+  const pays = (tryGet('/payments', { date: [monthAgo, today], limit: 500 }).payments) || [];
+  const types = {};
+  pays.forEach(x => { const t = x.optype || x.type || '(пусто)'; types[t] = (types[t] || [0, 0]); types[t][0]++; types[t][1] += num_(x.summa); });
+  rows.push([''], ['ПЛАТЕЖИ ЗА 30 ДНЕЙ: тип операции', 'Кол-во', 'Сумма']);
+  Object.keys(types).forEach(t => rows.push([t, types[t][0], types[t][1]]));
+
+  // 5. Сырые примеры
+  rows.push([''], ['ЗАПРОС', 'ОТВЕТ (первые записи)']);
+  [
     ['/users', {}],
     ['/subscriptions', {}],
     ['/lessons', { date: [monthAgo, today], includeRecords: true }],
     ['/userSubscriptions', { sellDate: [monthAgo, today] }],
     ['/payments', { date: [monthAgo, today] }],
-  ];
-  const rows = [['Запрос', 'Ответ (первые записи)']];
-  calls.forEach(c => {
-    let text;
-    try {
-      text = JSON.stringify(mkGet_(c[0], Object.assign({ limit: 3 }, c[1])), null, 1);
-    } catch (e) {
-      text = 'ОШИБКА: ' + e.message;
-    }
+  ].forEach(c => {
+    const res = tryGet(c[0], Object.assign({ limit: 3 }, c[1]));
+    const text = res.error ? 'ОШИБКА: ' + res.error : JSON.stringify(res, null, 1);
     rows.push([c[0] + qs_(c[1]), text.slice(0, 45000)]);
   });
   debugOut_(rows);

@@ -64,6 +64,17 @@ else
     mv "$TMP"/*/finance-bot "$TMP/finance-bot"
 fi
 install -d -m 755 -o root -g root "$APP"
+# Перед обновлением — резервная копия базы (она зашифрована). Храним 10 последних копий.
+if [ -f "$APP/data/finance.db" ]; then
+    [ -n "${FINBOT_SKIP_SYSTEMD:-}" ] || systemctl stop finbot 2>/dev/null || true
+    install -d -m 700 -o finbot -g finbot "$APP/data/backups"
+    BACKUP="$APP/data/backups/finance-$(date +%Y%m%d-%H%M%S).db"
+    cp -p "$APP/data/finance.db" "$BACKUP"
+    chown finbot:finbot "$BACKUP"
+    chmod 600 "$BACKUP"
+    ls -1t "$APP/data/backups"/finance-*.db | tail -n +11 | xargs -r rm -f
+    echo "Резервная копия данных: $BACKUP"
+fi
 # Код принадлежит root и доступен боту только на чтение — бот не может изменить сам себя.
 rm -rf "$APP/finbot" "$APP/deploy"
 cp -r "$TMP/finance-bot/finbot" "$TMP/finance-bot/deploy" "$APP/"

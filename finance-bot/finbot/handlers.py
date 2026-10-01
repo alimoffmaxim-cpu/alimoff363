@@ -56,15 +56,16 @@ BTN_FX = "💱 Обмен"
 BTN_DASH = "📊 Дашборд"
 BTN_HISTORY = "🧾 История"
 BTN_MONTH = "📅 Месяц"
+BTN_BALANCE = "💰 Остаток"
 BTN_BALANCE_OLD = "💰 Баланс"  # старая кнопка — может остаться в клавиатуре до /start
 BTN_LOCK = "🔒 Заблокировать"
-BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_MONTH, BTN_BALANCE_OLD, BTN_LOCK}
+BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_MONTH, BTN_BALANCE, BTN_BALANCE_OLD, BTN_LOCK}
 
 KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text=BTN_OUT), KeyboardButton(text=BTN_IN), KeyboardButton(text=BTN_FX)],
         [KeyboardButton(text=BTN_DASH), KeyboardButton(text=BTN_HISTORY), KeyboardButton(text=BTN_MONTH)],
-        [KeyboardButton(text=BTN_LOCK)],
+        [KeyboardButton(text=BTN_BALANCE), KeyboardButton(text=BTN_LOCK)],
     ],
     resize_keyboard=True,
     is_persistent=True,
@@ -463,16 +464,38 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         return "\n".join(lines), InlineKeyboardMarkup(inline_keyboard=[nav])
 
     @router.message(Command("month"))
-    @router.message(Command("balance"))
     @router.message(F.text == BTN_MONTH)
-    @router.message(F.text == BTN_BALANCE_OLD)
     async def cmd_month(message: Message, state: FSMContext) -> None:
         await state.clear()
         text, markup = month_report(today().year, today().month)
-        # Заодно обновляем клавиатуру, если у пользователя осталась старая кнопка.
-        if message.text == BTN_BALANCE_OLD:
-            await reply(message, "Кнопка «💰 Баланс» теперь называется «📅 Месяц».", reply_markup=KEYBOARD)
         await reply(message, text, reply_markup=markup)
+
+    @router.message(Command("balance"))
+    @router.message(F.text == BTN_BALANCE)
+    @router.message(F.text == BTN_BALANCE_OLD)
+    async def cmd_balance(message: Message, state: FSMContext) -> None:
+        await state.clear()
+        txs = storage.list_tx(vault.cipher)
+        thb, rub = balances(txs)
+        rate = last_rate(txs)
+        lines = [
+            "💰 <b>Остатки</b> — копятся всё время, со сменой месяца не обнуляются",
+            "",
+            f"฿ Баты: <b>{money(thb)}</b>" + (f"  ({approx_rub(thb, rate)})" if rate and thb else ""),
+            f"₽ Рубли: <b>{money(rub, RUB)}</b>",
+        ]
+        if rate:
+            lines.append(f"Последний курс обмена: {fmt_rate(rate)}")
+        lines += [
+            "",
+            "Расход в батах уменьшает ฿, обмен списывает ₽ и добавляет ฿, доход добавляется в своей валюте.",
+            "",
+            "Чтобы задать или поправить остаток, отправьте свою реальную сумму:",
+            "<code>баланс 12000</code> — баты",
+            "<code>баланс 150000 ₽</code> — рубли",
+        ]
+        # reply_markup=KEYBOARD заодно обновит клавиатуру, если в ней осталась старая кнопка
+        await reply(message, "\n".join(lines), reply_markup=KEYBOARD)
 
     @router.callback_query(F.data.startswith("month:"))
     async def cb_month(call: CallbackQuery) -> None:

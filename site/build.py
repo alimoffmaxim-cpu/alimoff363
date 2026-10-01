@@ -14,8 +14,8 @@ page = f"""<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Alimov Agency — клиенты для детских школ</title>
 <meta name="description" content="Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.">
-<meta name="theme-color" content="#F4F4F0">
-<style>html {{ scroll-behavior: smooth; scroll-padding-top: 80px; }} body {{ margin: 0; background: #F4F4F0; }}</style>
+<meta name="theme-color" content="#F2F6F6">
+<style>html {{ scroll-behavior: smooth; scroll-padding-top: 80px; }} body {{ margin: 0; background: #F2F6F6; }}</style>
 </head>
 <body>
 {fragment}

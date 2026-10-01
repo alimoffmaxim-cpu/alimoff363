@@ -131,6 +131,7 @@
 .aa-cases table { width: 100%; border-collapse: collapse; min-width: 640px; font-variant-numeric: tabular-nums; }
 .aa-cases th { text-align: left; font-weight: 500; padding: 16px 24px 16px 0; border-bottom: 1px solid var(--aa-line); }
 .aa-cases td { padding: 28px 24px 28px 0; border-bottom: 1px solid var(--aa-line); vertical-align: top; color: var(--aa-muted); }
+.aa-cases td:first-child a { text-decoration: none; }
 .aa-cases td:first-child { color: var(--aa-ink); font-family: var(--aa-display); font-size: 20px; letter-spacing: -0.015em; width: 28%; }
 .aa-cases td.aa-cases__num { color: var(--aa-ink); font-family: var(--aa-display); font-size: clamp(28px, 3vw, 40px); letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
 .aa-cases__num small { display: block; margin-top: 8px; font-family: var(--aa-body); font-size: 14px; letter-spacing: 0; color: var(--aa-muted); white-space: normal; }
@@ -167,6 +168,7 @@
 .aa-foot { padding-block: 32px; font-size: 14px; color: var(--aa-muted); }
 .aa-foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
 .aa-foot__row a { text-decoration: none; }
+.aa-foot__note { margin-top: 16px; font-size: 12px; }
 
 /* load-in: content is visible at rest; this only adds a short rise on first paint */
 @keyframes aa-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -237,39 +239,39 @@
     <section class="aa-hero">
       <div class="aa-wrap aa-hero__grid">
         <div class="aa-hero__text">
-          <p class="aa-label">Агентство performance-маркетинга</p>
-          <h1 class="aa-h1">Приводим заявки из&nbsp;VK&nbsp;Рекламы и&nbsp;Яндекс&nbsp;Директа</h1>
-          <p class="aa-lead">Настраиваем рекламу, считаем каждую заявку и каждое утро присылаем отчёт в&nbsp;Google Таблицу. Вы знаете, сколько стоит клиент, уже на следующий день, а не в конце месяца.</p>
+          <p class="aa-label">Клиенты для детских школ</p>
+          <h1 class="aa-h1">Заявки для детских школ из&nbsp;VK&nbsp;Рекламы</h1>
+          <p class="aa-lead">Качественные и недорогие заявки для вашего бизнеса: от&nbsp;135&nbsp;₽ за&nbsp;заявку и&nbsp;ROMI до&nbsp;1600% в&nbsp;наших кейсах. Работаем с&nbsp;онлайн-школами и&nbsp;сетями офлайн-студий.</p>
           <div>
             <div class="aa-hero__cta">
-              <a class="aa-btn" href="#contact">Обсудить проект
+              <a class="aa-btn" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
                 <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
               </a>
-              <a class="aa-btn aa-btn--ghost" href="#cases">Посмотреть кейсы</a>
+              <a class="aa-btn aa-btn--ghost" href="#cases">Смотреть кейсы</a>
             </div>
-            <ul class="aa-channels" aria-label="Рекламные каналы">
-              <li>VK Реклама</li>
-              <li>Яндекс Директ</li>
-              <li>Telegram Ads</li>
+            <ul class="aa-channels" aria-label="С кем работаем">
+              <li>VK Ads</li>
+              <li>Онлайн-школы</li>
+              <li>Офлайн-студии и филиалы</li>
             </ul>
           </div>
         </div>
 
-        <figure class="aa-report" aria-label="Пример ежедневного отчёта">
+        <figure class="aa-report" aria-label="Итоги кейса Genius school">
           <div class="aa-report__top">
-            <span class="aa-label">Отчёт за вчера</span>
-            <span class="aa-report__date">08:00 · Google Таблица</span>
+            <span class="aa-label">Кейс Genius school</span>
+            <span class="aa-report__date">VK Ads · онлайн-школа</span>
           </div>
           <table>
             <tbody>
-              <tr><th scope="row">Показы</th><td>48 210</td></tr>
-              <tr><th scope="row">Клики</th><td>1 236</td></tr>
-              <tr><th scope="row">Расход</th><td>18 540 ₽</td></tr>
-              <tr><th scope="row">Заявки</th><td>41</td></tr>
-              <tr class="aa-report__key"><th scope="row">Цена заявки</th><td>452 ₽</td></tr>
+              <tr><th scope="row">Бюджет</th><td>1 704 393 ₽</td></tr>
+              <tr><th scope="row">Заявки</th><td>12 652</td></tr>
+              <tr><th scope="row">Средний ROMI</th><td>800%</td></tr>
+              <tr><th scope="row">Рекордный ROMI</th><td>1600%</td></tr>
+              <tr class="aa-report__key"><th scope="row">Цена заявки</th><td>135 ₽</td></tr>
             </tbody>
           </table>
-          <figcaption class="aa-report__foot">Пример отчёта. Цифры условные.</figcaption>
+          <figcaption class="aa-report__foot"><a class="aa-ul" href="https://alimov.agency/genius_school" target="_blank" rel="noopener">Открыть кейс целиком →</a></figcaption>
         </figure>
       </div>
     </section>
@@ -278,28 +280,28 @@
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <h2 class="aa-h2" id="aa-services-title">Услуги</h2>
-          <p class="aa-lead">Берём на себя рекламу целиком: от стратегии и креативов до ежедневной аналитики.</p>
+          <p class="aa-lead">Таргетированная реклама для детских школ под ключ: аудитории, креативы и контроль цены заявки.</p>
         </div>
         <ul class="aa-services">
           <li class="aa-service">
             <h3 class="aa-h3">Таргетированная реклама VK</h3>
-            <p>Аудитории, креативы и лид-формы в VK Рекламе. Запуск за 3 дня, первые заявки в первую неделю.</p>
-            <span class="aa-service__tag">VK Реклама</span>
+            <p>Запуск и ведение кампаний в VK Ads, в новом и старом кабинетах. Цель — максимум заявок в рамках бюджета при заданной цене заявки.</p>
+            <span class="aa-service__tag">VK Ads</span>
           </li>
           <li class="aa-service">
-            <h3 class="aa-h3">Контекстная реклама</h3>
-            <p>Поиск и РСЯ в Яндекс Директе. Семантика, минус-слова и стратегии ставок под цену заявки.</p>
-            <span class="aa-service__tag">Яндекс Директ</span>
+            <h3 class="aa-h3">Креативы</h3>
+            <p>Основной акцент делаем на креативы: от них зависят объём, качество и стоимость заявок. Видео и статичные изображения, в среднем 75% — видео.</p>
+            <span class="aa-service__tag">Видео и статика</span>
           </li>
           <li class="aa-service">
-            <h3 class="aa-h3">Реклама в Telegram</h3>
-            <p>Посевы в каналах и Telegram Ads для ниш, где клиенты читают, а не листают ленту.</p>
-            <span class="aa-service__tag">Telegram</span>
+            <h3 class="aa-h3">Реклама для онлайн-школ</h3>
+            <p>Широкие сегменты: мамы по всей России. Так работали с Genius school, «Тетрикой» и «Юникодом».</p>
+            <span class="aa-service__tag">Вся Россия</span>
           </li>
           <li class="aa-service">
-            <h3 class="aa-h3">Аналитика и отчётность</h3>
-            <p>Цели, метрики и автоматический отчёт: расход, заявки и цена заявки по каждому кабинету.</p>
-            <span class="aa-service__tag">Google Таблицы</span>
+            <h3 class="aa-h3">Реклама для офлайн-филиалов</h3>
+            <p>Мамы в регионах ваших филиалов, узкие аудитории в радиусе 1–3 км от филиала и школ рядом с ним.</p>
+            <span class="aa-service__tag">Гео филиалов</span>
           </li>
         </ul>
       </div>
@@ -344,7 +346,7 @@
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <h2 class="aa-h2" id="aa-cases-title">Кейсы</h2>
-          <p class="aa-lead">Несколько проектов, где мы снизили цену заявки или увеличили их количество.</p>
+          <p class="aa-lead">Детские онлайн-школы и сети офлайн-студий. Нажмите на проект, чтобы открыть кейс целиком.</p>
         </div>
         <div class="aa-cases">
           <table>
@@ -353,19 +355,34 @@
             </thead>
             <tbody>
               <tr>
-                <td data-draft>Стоматология, Москва</td>
-                <td>Заявки на имплантацию дорожали каждый месяц. Перестроили аудитории и лид-формы в VK.</td>
-                <td class="aa-cases__num">−38%<small>цена заявки за 6 недель</small></td>
+                <td><a class="aa-ul" href="https://alimov.agency/irbis_2324" target="_blank" rel="noopener">Театральная студия «Ирбис», учебный год 2023–24</a></td>
+                <td>Сеть студий для детей 4–17 лет: театр, танцы, сценическая речь. VK&nbsp;Ads на&nbsp;мам в&nbsp;регионах филиалов, 75% креативов — видео.</td>
+                <td class="aa-cases__num">9&nbsp;633<small>заявки по 468 ₽ · бюджет 4,5 млн ₽</small></td>
               </tr>
               <tr>
-                <td data-draft>Онлайн-школа английского</td>
-                <td>Нужно было вырасти по заявкам без роста бюджета. Добавили Telegram и РСЯ.</td>
-                <td class="aa-cases__num">×2,1<small>заявок при том же бюджете</small></td>
+                <td><a class="aa-ul" href="https://alimov.agency/genius_school" target="_blank" rel="noopener">Онлайн-школа Genius school</a></td>
+                <td>Скорочтение, математика и программирование для детей. Оффер — платное пробное занятие, VK&nbsp;Ads на&nbsp;мам по&nbsp;всей России.</td>
+                <td class="aa-cases__num">12&nbsp;652<small>заявки по 135 ₽ · средний ROMI 800%, рекорд 1600%</small></td>
               </tr>
               <tr>
-                <td data-draft>Застройщик, Казань</td>
-                <td>Реклама шла, но отдел продаж не понимал, откуда клиенты. Настроили сквозной отчёт.</td>
-                <td class="aa-cases__num">100%<small>заявок с источником в отчёте</small></td>
+                <td><a class="aa-ul" href="https://alimov.agency/tetrica_case" target="_blank" rel="noopener">Онлайн-школа «Тетрика»</a></td>
+                <td>Онлайн-репетиторы по школьным предметам, подготовка к школе, логопед. Цель — заявка не&nbsp;дороже 800 ₽, старый и новый кабинеты VK.</td>
+                <td class="aa-cases__num">8&nbsp;143<small>заявки по 567 ₽ · бюджет 4,6 млн ₽</small></td>
+              </tr>
+              <tr>
+                <td><a class="aa-ul" href="https://alimov.agency/irbis_case" target="_blank" rel="noopener">Театральная студия «Ирбис», офлайн</a></td>
+                <td>Тестовый бюджет на филиалы в 17 регионах, цель — заявка не&nbsp;дороже 1200 ₽. Аудитории в радиусе 1 км от филиала и школ рядом с ним.</td>
+                <td class="aa-cases__num">1&nbsp;919<small>заявок по 567 ₽ · бюджет 1,09 млн ₽</small></td>
+              </tr>
+              <tr>
+                <td><a class="aa-ul" href="https://alimov.agency/uchi_case" target="_blank" rel="noopener">Школы программирования «Учи.ру»</a></td>
+                <td>Очные школы для детей 7–15 лет, цель — заявка не&nbsp;дороже 1000 ₽. Таргет в Instagram/Facebook*, мамы в радиусе до 3 км от филиала.</td>
+                <td class="aa-cases__num">4&nbsp;823<small>заявки по 517 ₽ · бюджет 2,5 млн ₽</small></td>
+              </tr>
+              <tr>
+                <td><a class="aa-ul" href="https://alimov.agency/unicode_case" target="_blank" rel="noopener">Онлайн-школа программирования «Юникод»</a></td>
+                <td>Программирование для детей 5–18 лет, цель — заявка не&nbsp;дороже 500 ₽. Широкие аудитории мам по всей России, видеокреативы.</td>
+                <td class="aa-cases__num">614<small>заявок по 257 ₽ · бюджет 158 тыс. ₽</small></td>
               </tr>
             </tbody>
           </table>
@@ -380,8 +397,12 @@
         </div>
         <div class="aa-faq">
           <details>
-            <summary class="aa-h3">Какой минимальный рекламный бюджет?<i aria-hidden="true"></i></summary>
-            <p data-draft>Рекомендуем от 50 000 ₽ в месяц на один канал. С меньшим бюджетом статистика копится слишком долго, и оптимизировать нечего.</p>
+            <summary class="aa-h3">С какими школами вы работаете?<i aria-hidden="true"></i></summary>
+            <p>С детскими онлайн-школами и сетями офлайн-студий: программирование, скорочтение и математика, онлайн-репетиторы, театральные студии.</p>
+          </details>
+          <details>
+            <summary class="aa-h3">Какой нужен рекламный бюджет?<i aria-hidden="true"></i></summary>
+            <p>В наших кейсах бюджеты от 157 тыс. до 4,6 млн ₽. Под ваш бюджет и допустимую цену заявки посчитаем, сколько заявок можно получить.</p>
           </details>
           <details>
             <summary class="aa-h3">Сколько стоят ваши услуги?<i aria-hidden="true"></i></summary>
@@ -403,16 +424,17 @@
       <div class="aa-wrap aa-contact__grid">
         <div class="aa-contact__text">
           <p class="aa-label">Контакты</p>
-          <h2 class="aa-h2" id="aa-contact-title">Расскажите о задаче. Ответим в течение рабочего дня.</h2>
-          <p class="aa-lead">Первый разбор проекта бесплатный: посмотрим текущую рекламу и скажем, что можно улучшить.</p>
-          <div><a class="aa-btn" href="https://t.me/USERNAME" target="_blank" rel="noopener">Написать в Telegram
+          <h2 class="aa-h2" id="aa-contact-title">Хотите так же? Напишите, чтобы обсудить сотрудничество.</h2>
+          <p class="aa-lead">Расскажите о школе, бюджете и допустимой цене заявки. Кейсы и разборы рекламы публикуем в Telegram-канале.</p>
+          <div><a class="aa-btn" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
           </a></div>
         </div>
         <dl>
-          <div><dt>Telegram</dt><dd><a class="aa-ul" href="https://t.me/USERNAME" target="_blank" rel="noopener" data-draft>@USERNAME</a></dd></div>
-          <div><dt>Телефон</dt><dd><a class="aa-ul" href="tel:+70000000000" data-draft>+7 000 000-00-00</a></dd></div>
-          <div><dt>Почта</dt><dd><a class="aa-ul" href="mailto:hello@alimov.agency" data-draft>hello@alimov.agency</a></dd></div>
+          <div><dt>Telegram</dt><dd><a class="aa-ul" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">@alimoffmaxim</a></dd></div>
+          <div><dt>Канал</dt><dd><a class="aa-ul" href="https://t.me/alimov_pro" target="_blank" rel="noopener">@alimov_pro</a></dd></div>
+          <div><dt>ВКонтакте</dt><dd><a class="aa-ul" href="https://vk.com/alimovmaksim" target="_blank" rel="noopener">vk.com/alimovmaksim</a></dd></div>
+          <div><dt>Instagram*</dt><dd><a class="aa-ul" href="https://www.instagram.com/alimowmaxim/" target="_blank" rel="noopener">@alimowmaxim</a></dd></div>
         </dl>
       </div>
     </section>
@@ -424,6 +446,7 @@
       <span data-draft>ИП Алимов · ИНН 000000000000</span>
       <a class="aa-ul" href="#" data-draft>Политика конфиденциальности</a>
     </div>
+    <div class="aa-wrap aa-foot__note">* Instagram и Facebook принадлежат Meta Platforms Inc., деятельность которой признана экстремистской и запрещена в России.</div>
   </footer>
 </div>
 

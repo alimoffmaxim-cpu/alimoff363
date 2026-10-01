@@ -12,8 +12,8 @@ page = f"""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Alimov Agency — реклама VK и Яндекс Директ</title>
-<meta name="description" content="Агентство performance-маркетинга: VK Реклама, Яндекс Директ, Telegram. Ежедневный отчёт по заявкам в Google Таблице.">
+<title>Alimov Agency — клиенты для детских школ</title>
+<meta name="description" content="Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.">
 <meta name="theme-color" content="#F4F4F0">
 <style>html {{ scroll-behavior: smooth; scroll-padding-top: 80px; }} body {{ margin: 0; background: #F4F4F0; }}</style>
 </head>

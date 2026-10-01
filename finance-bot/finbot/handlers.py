@@ -80,7 +80,8 @@ HELP = """<b>Как пользоваться</b>
 <b>Расход:</b> <code>-350</code> · <code>350 еда</code> · <code>расход 1200 такси</code>
 <b>Доход:</b> <code>+50000</code> · <code>доход 50000 зп</code> · в рублях: <code>+100000₽ зп</code>
 <b>Обмен:</b> <code>обмен 90000 - 30000</code> — отдали ₽, получили ฿
-<b>Остатки:</b> <code>баланс 12000</code> — баты, <code>баланс 150000 ₽</code> — рубли
+<b>Остатки:</b> <code>баланс 12000 б</code> — баты, <code>баланс 150000 р</code> — рубли
+(только выравнивает остаток, в доходы и расходы не попадает)
 
 Два остатка, ฿ и ₽, копятся всё время: расход в батах уменьшает ฿,
 обмен списывает ₽ и добавляет ฿, доход добавляется в своей валюте.
@@ -201,7 +202,12 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
 
     def balances_line(txs: list[Tx]) -> str:
         thb, rub = balances(txs)
-        return f"💰 Остаток: <b>{money(thb)}</b> · <b>{money(rub, RUB)}</b>"
+        line = f"💰 Остаток: <b>{money(thb)}</b> · <b>{money(rub, RUB)}</b>"
+        if rub < 0:
+            line += "\n⚠️ Остаток рублей ушёл в минус — задайте реальный: <code>баланс 150000 р</code>"
+        if thb < 0:
+            line += "\n⚠️ Остаток бат ушёл в минус — задайте реальный: <code>баланс 12000 б</code>"
+        return line
 
     def describe(tx: Tx) -> str:
         note = f" · {html.escape(tx.note)}" if tx.note else ""
@@ -491,8 +497,9 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
             "Расход в батах уменьшает ฿, обмен списывает ₽ и добавляет ฿, доход добавляется в своей валюте.",
             "",
             "Чтобы задать или поправить остаток, отправьте свою реальную сумму:",
-            "<code>баланс 12000</code> — баты",
-            "<code>баланс 150000 ₽</code> — рубли",
+            "<code>баланс 12000 б</code> — баты",
+            "<code>баланс 150000 р</code> — рубли",
+            "Это только выравнивает остаток — в доходы и расходы месяца не попадает.",
         ]
         # reply_markup=KEYBOARD заодно обновит клавиатуру, если в ней осталась старая кнопка
         await reply(message, "\n".join(lines), reply_markup=KEYBOARD)

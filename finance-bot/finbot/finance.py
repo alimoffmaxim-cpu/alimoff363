@@ -50,9 +50,9 @@ OUT_WORDS = {"расход", "расходы", "трата", "потратил",
 IN_WORDS = {"доход", "получил", "получила", "плюс", "приход"}
 FX_WORDS = {"обмен", "обменял", "обменяла", "поменял", "поменяла"}
 BALANCE_WORDS = {"баланс", "остаток"}
-RUB_WORDS = {"₽", "р", "руб", "рубль", "рубля", "рублей", "rub", "rur"}
-THB_WORDS = {"฿", "бат", "бата", "батов", "thb", "baht"}
-CURRENCY_GLUED_RE = re.compile(r"(\d)(₽|฿|руб\w*|р|бат\w*|thb|rub)(?=[\s.]|$)", re.I)
+RUB_WORDS = {"₽", "р", "руб", "рубль", "рубля", "рублей", "рубли", "рублях", "rub", "rur"}
+THB_WORDS = {"฿", "б", "бат", "бата", "батов", "баты", "батах", "thb", "baht"}
+CURRENCY_GLUED_RE = re.compile(r"(\d)(₽|฿|руб\w*|р|б|бат\w*|thb|rub)(?=[\s.]|$)", re.I)
 
 # 350 · 1 500 · 1,500 · 350,50 · 90к · 90 тыс
 NUM_RE = re.compile(r"(\d{1,3}(?:[ ,.]\d{3})+|\d+)(?:[.,](\d{1,2}))?(?:\s*(к|k|тыс)(?![а-яa-z]))?", re.I)
@@ -162,9 +162,14 @@ def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
     if word in BALANCE_WORDS:
         value_text = rest.strip()
         negative = value_text[:1] in "-−"
-        m = NUM_RE.match(value_text.lstrip("-−").strip())
+        number_text = value_text.lstrip("-−").strip()
+        m = NUM_RE.match(number_text)
         if not m:
-            raise ParseError("Укажите сумму: <code>баланс 12000</code> (баты) или <code>баланс 50000 ₽</code>")
+            raise ParseError("Укажите сумму и валюту: <code>баланс 12000 б</code> или <code>баланс 150000 р</code>")
+        if number_text[m.end():].strip():
+            # Лишнее слово после суммы — скорее всего, неизвестное обозначение валюты. Не угадываем.
+            raise ParseError("Не понял валюту. Напишите <code>баланс 12000 б</code> — баты "
+                             "или <code>баланс 150000 р</code> — рубли.")
         value = _number(m)
         return Parsed("balance", amount=-value if negative else value, day=day, cur=cur or "THB")
 

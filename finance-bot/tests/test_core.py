@@ -175,3 +175,22 @@ def test_old_records_without_currency_load_as_baht():
     import json
     old = json.dumps({"kind": "out", "amount": 100, "category": "Еда", "note": "", "day": "2026-09-01", "rub": 0}).encode()
     assert Tx.load(1, old).cur == "THB"
+
+
+def test_balance_command_currency_letters():
+    assert parse_input("баланс 100 б", TODAY).cur == "THB"
+    assert parse_input("баланс 100 р", TODAY).cur == "RUB"
+    assert parse_input("баланс 100 рубли", TODAY).cur == "RUB"
+    assert parse_input("баланс 100р", TODAY).cur == "RUB"
+    with pytest.raises(ParseError):
+        parse_input("баланс 100 долларов", TODAY)  # не угадываем — переспрашиваем
+
+
+def test_balance_correction_does_not_touch_month_income():
+    from finbot.finance import balances, month_totals
+
+    txs = [Tx("adj", 10000000, "Корректировка", "", TODAY, id=1, cur="RUB"),
+           Tx("adj", 1200000, "Корректировка", "", TODAY, id=2)]
+    m = month_totals(txs, TODAY.year, TODAY.month)
+    assert (m.income, m.expense, m.income_rub, m.expense_rub) == (0, 0, 0, 0)
+    assert balances(txs) == (1200000, 10000000)

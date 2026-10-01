@@ -3,15 +3,20 @@
 // в Тильде: Настройки сайта → Формы → Webhook. Каждая заявка дописывается на лист raw_tilda:
 // телефон (для сопоставления с Мой Класс и амо) и UTM-метки (для канала).
 
-/** Тильда шлёт заявку POST-запросом (application/x-www-form-urlencoded). */
+/** Тильда шлёт заявку POST-запросом: формой (x-www-form-urlencoded) или JSON. */
 function doPost(e) {
-  const params = (e && e.parameter) || {};
+  const params = tildaParams_(e);
   // При подключении вебхука Тильда присылает test=test и ждёт ответ «ok»
   if (params.test) return ContentService.createTextOutput('ok');
   const secret = prop_('TILDA_SECRET');
-  if (!secret || params.key !== secret) {
-    log_('Тильда', 'ОТКЛОНЕНО: ' + (params.key ? 'неверный ключ' : 'в адресе нет ?key=…') +
-      '; поля: ' + Object.keys(params).join(', '));
+  // Ключ может прийти и в адресе, и в теле (поля API NAME / API KEY в Тильде)
+  const sent = [].concat((e && e.parameters && e.parameters.key) || [], params.key || []).map(String)
+    .filter((k, i, a) => a.indexOf(k) === i);
+  if (!secret || sent.indexOf(secret) < 0) {
+    const mask = k => k ? k.slice(0, 4) + '…' : '—';
+    log_('Тильда', 'ОТКЛОНЕНО: ' + (sent.length ? 'неверный ключ (пришёл ' + sent.map(mask).join(', ') +
+      ', ожидается ' + mask(secret) + ')' : 'нет ключа ?key=…') +
+      '; формат: ' + ((e && e.postData && e.postData.type) || '—') + '; поля: ' + Object.keys(params).join(', '));
     return ContentService.createTextOutput('forbidden');
   }
 
@@ -33,6 +38,24 @@ function doPost(e) {
     lock.releaseLock();
   }
   return ContentService.createTextOutput('ok');
+}
+
+/** Поля заявки: параметры формы/адреса плюс JSON-тело, если Тильда шлёт JSON. */
+function tildaParams_(e) {
+  const params = Object.assign({}, (e && e.parameter) || {});
+  const body = e && e.postData && e.postData.contents;
+  if (body && /json/i.test(e.postData.type || '') || /^\s*[{[]/.test(body || '')) {
+    try {
+      const data = JSON.parse(body);
+      const obj = Array.isArray(data) ? data[0] || {} : data;
+      Object.keys(obj).forEach(k => {
+        const v = obj[k];
+        if (k === 'key' && params.key) return; // ключ из адреса важнее
+        params[k] = v !== null && typeof v === 'object' ? JSON.stringify(v) : v;
+      });
+    } catch (err) { /* не JSON — оставляем поля формы */ }
+  }
+  return params;
 }
 
 /** Проверка адреса в браузере. */

@@ -79,7 +79,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -129,6 +129,28 @@ test('Тильда: телефон, имя, UTM из COOKIES и из полей 
   // Скрытые поля формы важнее куки
   assert.strictEqual(t.tildaUtm_({ utm_source: 'vk', COOKIES: cookies }).utm_source, 'vk');
   assert.strictEqual(t.tildaUtm_({}).utm_source, '');
+});
+
+test('Тильда: вебхук принимает форму и JSON, ключ из адреса или тела', () => {
+  ctx.ContentService = { createTextOutput: x => x };
+  ctx.LockService = { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) };
+  props.TILDA_SECRET = 'sekret123';
+  const before = t.readRows_('raw_tilda').length;
+  assert.strictEqual(t.doPost({ parameter: { test: 'test' } }), 'ok');
+  // JSON-тело, ключ в адресе
+  assert.strictEqual(t.doPost({ parameter: { key: 'sekret123' }, parameters: { key: ['sekret123'] },
+    postData: { type: 'application/json', contents: JSON.stringify({ Name: 'Ира', Phone: '89161112233', tranid: 'j1' }) } }), 'ok');
+  // Форма, ключ в теле (поля API NAME / API KEY)
+  assert.strictEqual(t.doPost({ parameter: { key: 'sekret123', Phone: '+79162223344', tranid: 'f1' },
+    postData: { type: 'application/x-www-form-urlencoded', contents: 'key=sekret123&Phone=%2B79162223344&tranid=f1' } }), 'ok');
+  // В адресе старый ключ, в теле правильный — принимается
+  assert.strictEqual(t.doPost({ parameter: { key: 'old' }, parameters: { key: ['old', 'sekret123'] }, postData: { type: 'x', contents: '' } }), 'ok');
+  assert.strictEqual(t.doPost({ parameter: { key: 'bad', Phone: '1' }, parameters: { key: ['bad'] } }), 'forbidden');
+  const rows = plain(t.readRows_('raw_tilda')).slice(before);
+  assert.deepStrictEqual(rows.slice(0, 2).map(r => [r[1], r[5]]), [['j1', '79161112233'], ['f1', '79162223344']]);
+  const log = plain(t.readRows_('Лог')).map(r => r[2]).join('\n');
+  assert.ok(/неверный ключ \(пришёл bad…, ожидается sekr…\)/.test(log), log);
+  ss.sheets['raw_tilda'].clear();
 });
 
 test('subType_', () => {

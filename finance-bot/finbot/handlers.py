@@ -194,6 +194,8 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
     router.message.middleware(gate)
     router.callback_query.middleware(gate)
 
+    last_dashboard: list[Message] = []  # последнее сообщение с кнопкой дашборда
+
     def today() -> date:
         return datetime.now(config.tz).date()
 
@@ -509,11 +511,18 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         await state.clear()
         txs = storage.list_tx(vault.cipher)
         if config.webapp_url:
+            now = datetime.now(config.tz)
             # Данные идут во фрагменте ссылки (после #): браузер не отправляет его на сервер.
-            url = f"{config.webapp_url}#d.{dashboard.webapp_payload(txs, datetime.now(config.tz))}"
+            # ?v=<время> — только чтобы Telegram не показывал закэшированную старую версию страницы.
+            url = f"{config.webapp_url}?v={int(now.timestamp())}#d.{dashboard.webapp_payload(txs, now)}"
             markup = InlineKeyboardMarkup(inline_keyboard=[[
                 InlineKeyboardButton(text="📊 Открыть дашборд", web_app=WebAppInfo(url=url))]])
-            await reply(message, dashboard.caption(txs, today()), reply_markup=markup)
+            # Старое сообщение с дашбордом удаляем, чтобы случайно не открыть устаревший снимок.
+            if last_dashboard:
+                await janitor.now(last_dashboard.pop())
+            sent = await reply(message, dashboard.caption(txs, today()) + f"\n\n<i>Снимок на {now:%H:%M}</i>",
+                               reply_markup=markup)
+            last_dashboard.append(sent)
             return
         png = await asyncio.to_thread(dashboard.render, txs, today())
         sent = await message.answer_photo(BufferedInputFile(png, filename="dashboard.png"),

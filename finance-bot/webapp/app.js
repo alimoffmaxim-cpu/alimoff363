@@ -1,7 +1,8 @@
 "use strict";
 // Данные приходят только во фрагменте ссылки (#d.<base64url JSON>) — на сервер они не попадают.
 // Фрагмент читаем сразу, до загрузки скрипта Telegram.
-var RAW_HASH = (function () { try { return String(location.hash || ""); } catch (e) { return ""; } })();
+var RAW_HASH = window.FINBOT_HASH ||
+  (function () { try { return String(location.hash || ""); } catch (e) { return ""; } })();
 
 (function () {
   var MONTHS = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь",

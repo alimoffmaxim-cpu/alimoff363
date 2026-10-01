@@ -127,7 +127,7 @@
 .aa-sticker--table div:first-child dd { color: var(--aa-accent-text); }
 .aa-sticker--table a { display: flex; justify-content: space-between; padding: 14px clamp(24px, 3vw, 32px); font-weight: 600; font-size: 14px; text-decoration: none; transition: color .2s; }
 .aa-sticker--table a:hover { color: var(--aa-accent-text); }
-.aa-seal { position: absolute; right: clamp(24px, 3vw, 32px); top: clamp(24px, 3vw, 32px); padding: 6px 12px; border-radius: 999px; background: var(--aa-accent); color: var(--aa-on-accent); font-size: 12px; font-weight: 600; }
+.aa-seal { justify-self: start; padding: 6px 12px; border-radius: 999px; background: var(--aa-accent); color: var(--aa-on-accent); font-size: 12px; font-weight: 600; }
 .aa-seal b { font-weight: 700; }
 
 /* sections */
@@ -242,6 +242,28 @@
 .aa-foot a:not(.aa-logo):hover { color: var(--aa-ink); }
 
 
+
+/* hero: rotating niche + case panel that follows it */
+.aa-hero .aa-h1 { font-size: clamp(34px, 4.5vw, 62px); min-height: 3.06em; display: flex; flex-direction: column; justify-content: flex-end; overflow-wrap: anywhere; }
+.aa-rot { display: block; color: var(--aa-accent); transition: opacity .35s ease, transform .35s ease; }
+.aa-rot.is-out { opacity: 0; transform: translateY(-.25em); }
+.aa-rot.is-pre { opacity: 0; transform: translateY(.25em); transition: none; }
+.aa-hero__side { display: grid; gap: 16px; min-width: 0; }
+.aa-stack [data-k] { transition: opacity .3s ease; }
+.aa-sticker--main [data-k="label"] { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.aa-stack.is-swap [data-k] { opacity: 0; }
+.aa-dots { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.aa-dot { position: relative; height: 34px; padding: 0 12px; border: 0; border-radius: 999px; background: var(--aa-card); color: var(--aa-muted); font: 500 13px/1 var(--aa-body); white-space: nowrap; cursor: pointer; overflow: hidden; transition: color .2s, background .2s; }
+.aa-dot:hover { color: var(--aa-ink); }
+.aa-dot[aria-pressed="true"] { background: var(--aa-ink); color: #fff; }
+.aa-dot[aria-pressed="true"]::after { content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--aa-accent); transform-origin: left; animation: aa-progress var(--aa-dur, 5s) linear both; }
+.aa-hero.is-paused .aa-dot::after { animation-play-state: paused; }
+@keyframes aa-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* section reveal: content rises in once it reaches the viewport */
+.aa-rv { transition: opacity .7s cubic-bezier(.2, .7, .2, 1), transform .7s cubic-bezier(.2, .7, .2, 1); }
+.aa-rv.is-hidden { opacity: 0; transform: translateY(24px); }
+
 /* hero glow behind the result panel */
 .aa-hero { position: relative; isolation: isolate; }
 .aa-hero::before { content: ""; position: absolute; z-index: -1; right: 4%; top: 18%; width: min(560px, 60vw); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(230, 0, 126, .22), rgba(230, 0, 126, 0)); filter: blur(10px); }
@@ -295,6 +317,8 @@
 @media (prefers-reduced-motion: reduce) {
   .aa *, .aa *::before, .aa *::after { animation: none !important; transition: none !important; }
   .aa-js .aa-chart:not(.is-in) .aa-chart__bar { width: var(--w); }
+  .aa-rv.is-hidden { opacity: 1; transform: none; }
+  .aa-dot[aria-pressed="true"]::after { display: none; }
 }
 
 /* tablet */
@@ -304,6 +328,7 @@
   .aa-why { grid-template-columns: minmax(0, 1fr); }
   .aa-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-num { grid-template-columns: minmax(0, 1fr); }
+  .aa-hero::before { display: none; }
 }
 
 /* phone */
@@ -322,8 +347,9 @@
   .aa-panel, .aa-cases { grid-template-columns: minmax(0, 1fr); }
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
-  .aa-seal { position: static; justify-self: start; margin: 0 0 4px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
+  .aa-hero .aa-h1 { min-height: 0; }
+  .aa-dots { flex-wrap: wrap; }
   .aa-chart li { grid-template-columns: minmax(0, 1fr) 4.6em; }
   .aa-chart li > span:first-child { grid-column: 1 / -1; }
 }
@@ -351,33 +377,41 @@
       <div class="aa-wrap aa-hero__grid">
         <div class="aa-hero__text">
           <span class="aa-chip">Таргет VK для детских школ</span>
-          <h1 class="aa-h1">Заявки для детских школ от&nbsp;135&nbsp;₽ и&nbsp;<mark class="aa-mark">ROMI до&nbsp;1600%</mark></h1>
-          <p class="aa-lead">Качественные и недорогие заявки для онлайн-школ и сетей офлайн-студий. Больше 37 тысяч заявок в шести кейсах.</p>
+          <h1 class="aa-h1">Заявки для <span class="aa-rot" id="aa-word">детских школ</span></h1>
+          <p class="aa-lead">Качественные и недорогие заявки из VK Рекламы: от&nbsp;135&nbsp;₽ за&nbsp;заявку и&nbsp;<mark class="aa-mark">ROMI до&nbsp;1600%</mark>. Больше 37 тысяч заявок в шести кейсах.</p>
           <div class="aa-hero__cta">
             <a class="aa-btn aa-btn--dark" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
             <a class="aa-btn" href="#cases">Смотреть кейсы</a>
           </div>
-          <ul class="aa-niches" aria-label="Ниши">
-            <li>театральные студии</li><li>программирование</li><li>скорочтение</li><li>онлайн-репетиторы</li>
-          </ul>
         </div>
 
-        <div class="aa-stack">
-          <div class="aa-sticker aa-sticker--main">
-            <small>Кейс Genius school · VK Ads</small>
-            <p class="aa-seal">Рекордный ROMI <b>1600%</b></p>
-            <p class="aa-big" data-count="12652">12&nbsp;652</p>
-            <small>заявки для онлайн-школы скорочтения, математики и программирования</small>
+<!-- hero:start -->
+        <div class="aa-hero__side">
+          <div class="aa-stack">
+            <div class="aa-sticker aa-sticker--main">
+              <small data-k="label">Кейс · Онлайн-школа Genius school</small>
+              <p class="aa-seal" data-k="badge">Рекордный ROMI 1600%</p>
+              <p class="aa-big" data-k="leads" data-count="12652">12 652</p>
+              <small data-k="desc">заявки для онлайн-школы скорочтения, математики и программирования</small>
+            </div>
+            <dl class="aa-sticker aa-sticker--table">
+              <div><dt>Цена заявки</dt><dd data-k="cpl">135 ₽</dd></div>
+              <div><dt data-k="row_label">Средний ROMI</dt><dd data-k="row_value">800%</dd></div>
+              <div><dt>Бюджет</dt><dd data-k="budget">1 704 393 ₽</dd></div>
+              <a data-k="href" href="cases/genius_school.html">Открыть кейс <span aria-hidden="true">→</span></a>
+            </dl>
           </div>
-          <dl class="aa-sticker aa-sticker--table">
-            <div><dt>Цена заявки</dt><dd>135 ₽</dd></div>
-            <div><dt>Средний ROMI</dt><dd>800%</dd></div>
-            <div><dt>Бюджет</dt><dd>1&nbsp;704&nbsp;393 ₽</dd></div>
-            <a href="cases/genius_school.html">Открыть кейс <span aria-hidden="true">→</span></a>
-          </dl>
+          <div class="aa-dots" role="group" aria-label="Кейсы на первом экране">
+            <button class="aa-dot" type="button" aria-pressed="true">Genius school</button>
+            <button class="aa-dot" type="button" aria-pressed="false">«Ирбис»</button>
+            <button class="aa-dot" type="button" aria-pressed="false">«Тетрика»</button>
+            <button class="aa-dot" type="button" aria-pressed="false">«Учи.ру»</button>
+          </div>
+          <script type="application/json" id="aa-hero-data">[{"word": "онлайн-школ", "label": "Кейс · Онлайн-школа Genius school", "badge": "Рекордный ROMI 1600%", "leads": "12 652", "count": 12652, "desc": "заявки для онлайн-школы скорочтения, математики и программирования", "cpl": "135 ₽", "row_label": "Средний ROMI", "row_value": "800%", "budget": "1 704 393 ₽", "href": "cases/genius_school.html"}, {"word": "театральных студий", "label": "Кейс · Театральная студия «Ирбис»", "badge": "Самый большой кейс", "leads": "9 633", "count": 9633, "desc": "заявки для сети театральных студий за один учебный год", "cpl": "468 ₽", "row_label": "Креативов с видео", "row_value": "75%", "budget": "4 502 654 ₽", "href": "cases/irbis_2324.html"}, {"word": "онлайн-репетиторов", "label": "Кейс · Онлайн-школа «Тетрика»", "badge": "−29% к цели по цене заявки", "leads": "8 143", "count": 8143, "desc": "заявки для онлайн-репетиторов, подготовки к школе и логопедов", "cpl": "567 ₽", "row_label": "Цель по цене заявки", "row_value": "до 800 ₽", "budget": "4 614 448 ₽", "href": "cases/tetrica_case.html"}, {"word": "школ программирования", "label": "Кейс · Школы программирования «Учи.ру»", "badge": "−48% к цели по цене заявки", "leads": "4 823", "count": 4823, "desc": "заявки для очных школ программирования для детей 7–15 лет", "cpl": "517 ₽", "row_label": "Цель по цене заявки", "row_value": "до 1000 ₽", "budget": "2 493 581 ₽", "href": "cases/uchi_case.html"}]</script>
         </div>
+<!-- hero:end -->
       </div>
     </section>
 
@@ -682,6 +716,76 @@
         d.classList.add('is-lit');
       });
       d.addEventListener('pointerleave', function () { d.classList.remove('is-lit'); });
+    });
+  }
+
+  // hero: the niche in the title and the case panel change together
+  var heroData = document.getElementById('aa-hero-data');
+  var panel = document.querySelector('.aa-stack');
+  var word = document.getElementById('aa-word');
+  var dots = Array.prototype.slice.call(document.querySelectorAll('.aa-dot'));
+  var heroSec = document.querySelector('.aa-hero');
+  if (heroData && panel && word && dots.length) {
+    var items = JSON.parse(heroData.textContent);
+    var cur = 0, timer = null, paused = false, DUR = 5000;
+    var show = function (i, animate) {
+      cur = (i + items.length) % items.length;
+      var it = items[cur];
+      dots.forEach(function (d, k) { d.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); });
+      var fill = function () {
+        panel.querySelectorAll('[data-k]').forEach(function (el) {
+          var k = el.getAttribute('data-k');
+          if (k === 'href') el.setAttribute('href', it.href); else el.textContent = it[k];
+        });
+        var big = panel.querySelector('[data-k="leads"]');
+        big.setAttribute('data-count', it.count);
+        if (animate) countUp(big);
+        panel.classList.remove('is-swap');
+      };
+      if (!animate) { word.textContent = it.word; fill(); return; }
+      word.classList.add('is-out');
+      panel.classList.add('is-swap');
+      setTimeout(function () {
+        word.textContent = it.word;
+        word.classList.remove('is-out');
+        word.classList.add('is-pre');
+        void word.offsetWidth;
+        word.classList.remove('is-pre');
+        fill();
+      }, 320);
+    };
+    var schedule = function () {
+      clearTimeout(timer);
+      if (reduce || paused) return;
+      timer = setTimeout(function () { show(cur + 1, true); schedule(); }, DUR);
+    };
+    heroSec.style.setProperty('--aa-dur', DUR + 'ms');
+    dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k, true); schedule(); }); });
+    var pause = function (on) { paused = on; heroSec.classList.toggle('is-paused', on); if (on) clearTimeout(timer); else schedule(); };
+    panel.addEventListener('pointerenter', function () { pause(true); });
+    panel.addEventListener('pointerleave', function () { pause(false); });
+    panel.addEventListener('focusin', function () { pause(true); });
+    panel.addEventListener('focusout', function () { pause(false); });
+    show(0, false);
+    schedule();
+  }
+
+  // reveal sections as they scroll in
+  if ('IntersectionObserver' in window && !reduce) {
+    var rv = document.querySelectorAll('.aa-sec__head, .aa-approach, .aa-why > li, .aa-feature, .aa-tg, .aa-num__head, .aa-chart, .aa-panel, .aa-case, .aa-faq, .aa-contact, .aa-about, .aa-ab, .aa-did > li, .aa-hl, .aa-plan');
+    var vo = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        vo.unobserve(e.target);
+        e.target.classList.remove('is-hidden');
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    Array.prototype.forEach.call(rv, function (el, i) {
+      var r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) return;
+      el.classList.add('aa-rv', 'is-hidden');
+      el.style.transitionDelay = (i % 3) * 70 + 'ms';
+      vo.observe(el);
     });
   }
 

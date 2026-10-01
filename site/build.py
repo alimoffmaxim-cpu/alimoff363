@@ -118,6 +118,42 @@ chart = f"""          <figure class="aa-chart">
 {chr(10).join(rows)}
             </ol>
           </figure>"""
+# первый экран: карточка кейса, которая меняется вместе с нишей в заголовке
+import json
+heroes = [c for c in CASES if c.get("hero")]
+order = {"genius_school": 0, "irbis_2324": 1, "tetrica_case": 2, "uchi_case": 3}
+heroes.sort(key=lambda c: order.get(c["slug"], 99))
+items = [{
+    "word": c["hero"]["word"], "label": f"Кейс · {c['client']}",
+    "badge": c["hero"]["badge"], "leads": num(c["leads"]), "count": c["leads"], "desc": c["hero"]["desc"],
+    "cpl": f"{num(c['cpl'])} ₽", "row_label": c["hero"]["row"][0], "row_value": c["hero"]["row"][1],
+    "budget": f"{num(c['budget'])} ₽", "href": f"{SITE}{c['slug']}",
+} for c in heroes]
+f0 = items[0]
+dots = "\n".join(f'            <button class="aa-dot" type="button" aria-pressed="{"true" if i == 0 else "false"}">{c["short"].split(",")[0]}</button>' for i, c in enumerate(heroes))
+hero_html = f"""        <div class="aa-hero__side">
+          <div class="aa-stack">
+            <div class="aa-sticker aa-sticker--main">
+              <small data-k="label">{f0['label']}</small>
+              <p class="aa-seal" data-k="badge">{f0['badge']}</p>
+              <p class="aa-big" data-k="leads" data-count="{f0['count']}">{f0['leads']}</p>
+              <small data-k="desc">{f0['desc']}</small>
+            </div>
+            <dl class="aa-sticker aa-sticker--table">
+              <div><dt>Цена заявки</dt><dd data-k="cpl">{f0['cpl']}</dd></div>
+              <div><dt data-k="row_label">{f0['row_label']}</dt><dd data-k="row_value">{f0['row_value']}</dd></div>
+              <div><dt>Бюджет</dt><dd data-k="budget">{f0['budget']}</dd></div>
+              <a data-k="href" href="{f0['href']}">Открыть кейс <span aria-hidden="true">→</span></a>
+            </dl>
+          </div>
+          <div class="aa-dots" role="group" aria-label="Кейсы на первом экране">
+{dots}
+          </div>
+          <script type="application/json" id="aa-hero-data">{json.dumps(items, ensure_ascii=False)}</script>
+        </div>"""
+H_START, H_END = "<!-- hero:start -->", "<!-- hero:end -->"
+main = main.replace(between(main, H_START, H_END), f"{H_START}\n{hero_html}\n{H_END}")
+
 CH_START, CH_END = "<!-- chart:start -->", "<!-- chart:end -->"
 main = main.replace(between(main, CH_START, CH_END), f"{CH_START}\n{chart}\n{CH_END}")
 src.write_text(main, encoding="utf-8")
@@ -402,6 +438,7 @@ def case_fragment(c, home, link):
 preview_main = main
 for c in CASES:
     preview_main = preview_main.replace(f'href="{SITE}{c["slug"]}"', f'href="cases/{c["slug"]}.html"')
+    preview_main = preview_main.replace(f'"href": "{SITE}{c["slug"]}"', f'"href": "cases/{c["slug"]}.html"')
 (here / "index.html").write_text(page(
     "Alimov Agency — клиенты для детских школ",
     "Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.",

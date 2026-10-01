@@ -101,9 +101,9 @@ var RAW_HASH = window.FINBOT_HASH ||
     // Остатки — копятся всё время и не обнуляются по месяцам
     var balancesRow = el("div", "tiles balances");
     balancesRow.appendChild(tile(null, "Остаток в батах", thb(data.b),
-      [el("span", null, lastRate ? "≈ " + rub(data.b * lastRate) : "не обнуляется")]));
-    balancesRow.appendChild(tile(null, "Остаток в рублях", rub(data.br || 0), [el("span", null, "не обнуляется")]));
-    balancesRow.appendChild(tile(" wide", "💼 Рубли (бизнес)", rub(data.bb || 0), [el("span", null, "не обнуляется")]));
+      lastRate ? [el("span", null, "≈ " + rub(data.b * lastRate))] : []));
+    balancesRow.appendChild(tile(null, "Остаток в рублях", rub(data.br || 0), []));
+    balancesRow.appendChild(tile(" wide", "💼 Рубли (бизнес)", rub(data.bb || 0), []));
     app.appendChild(balancesRow);
 
     // Выбор месяца — всё ниже считается только за выбранный месяц

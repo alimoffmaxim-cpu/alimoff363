@@ -39,8 +39,8 @@ def page(title, description, body):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{description}">
-<meta name="theme-color" content="#F4F6FB">
-<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #F4F6FB; }}</style>
+<meta name="theme-color" content="#E4E4E8">
+<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #E4E4E8; }}</style>
 </head>
 <body>
 {body}
@@ -131,21 +131,23 @@ CASE_CSS = """<style>
 .aa-facts dt { color: var(--aa-muted); flex: none; }
 .aa-facts dd { font-weight: 600; text-align: right; min-width: 0; }
 
-.aa-board { margin-top: clamp(40px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px 40px; align-items: center; padding: clamp(24px, 4vw, 44px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: var(--aa-shadow); color: #fff; background-color: var(--aa-blue); background-image: linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px); background-size: 28px 28px; }
+.aa-board { margin-top: clamp(40px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px 40px; align-items: center; padding: clamp(24px, 4vw, 44px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: 8px 8px 0 var(--aa-accent); color: #fff; background-color: var(--aa-strong); background-image: linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px); background-size: 28px 28px; }
 .aa-board__main { display: grid; gap: 10px; justify-items: start; }
 .aa-board__main small { font-size: 16px; opacity: .9; }
 .aa-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .aa-tile { background: var(--aa-card); color: var(--aa-ink); border: 2px solid var(--aa-ink); border-radius: 16px; padding: 16px 18px; display: grid; gap: 4px; }
 .aa-tile b { font-family: var(--aa-display); font-weight: 500; font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .aa-tile span { color: var(--aa-muted); font-size: 14px; }
-.aa-tile--hot { background: var(--aa-yellow); }
+.aa-tile--hot { background: var(--aa-accent); color: var(--aa-on-accent); }
+.aa-tile--hot span { color: var(--aa-on-accent); opacity: .9; }
 
 .aa-csec { padding-block: 0 clamp(64px, 8vw, 104px); }
 .aa-about { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 32px); font-size: clamp(17px, 1.5vw, 20px); max-width: 52em; }
 
 .aa-ab { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; align-items: center; }
 .aa-ab__card { align-self: stretch; display: grid; gap: 18px; align-content: start; padding: clamp(24px, 3vw, 34px); border-radius: var(--aa-r); border: 2px dashed var(--aa-ink); background: rgba(255, 255, 255, .6); font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; }
-.aa-ab__card--b { border-style: solid; background: var(--aa-yellow); box-shadow: var(--aa-shadow); }
+.aa-ab__card--b { border-style: solid; background: var(--aa-accent); color: var(--aa-on-accent); box-shadow: var(--aa-shadow); }
+.aa-ab__card--b .aa-ab__label b { background: var(--aa-on-accent); color: var(--aa-accent-text); }
 .aa-ab__label { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
 .aa-ab__label b { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: var(--aa-ink); color: #fff; font-family: var(--aa-display); font-size: 20px; font-weight: 600; }
 .aa-ab__arrow { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px; border: 2px solid var(--aa-ink); background: var(--aa-card); }
@@ -153,28 +155,28 @@ CASE_CSS = """<style>
 
 .aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 18px; }
 .aa-did > li { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(22px, 3vw, 28px); display: grid; gap: 12px; align-content: start; }
-.aa-did > li:first-child { background: var(--aa-navy); color: #fff; }
-.aa-did > li:first-child p { color: var(--aa-navy-muted); }
-.aa-did > li:first-child .aa-did__label { color: var(--aa-yellow); }
+.aa-did > li:first-child { background: var(--aa-dark); color: #fff; }
+.aa-did > li:first-child p { color: var(--aa-dark-muted); }
+.aa-did > li:first-child .aa-did__label { color: var(--aa-accent); }
 .aa-did p { color: var(--aa-muted); font-size: 16px; }
-.aa-did__label { color: var(--aa-blue); font-size: 14px; font-weight: 600; }
+.aa-did__label { color: var(--aa-accent-text); font-size: 14px; font-weight: 600; }
 .aa-did .aa-niches { margin-top: 2px; }
 
-.aa-hl { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px 48px; align-items: end; padding: clamp(28px, 5vw, 56px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: 8px 8px 0 var(--aa-yellow); color: #fff; background-color: var(--aa-navy); background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px); background-size: 28px 28px; }
+.aa-hl { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px 48px; align-items: end; padding: clamp(28px, 5vw, 56px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: 8px 8px 0 var(--aa-accent); color: #fff; background-color: var(--aa-dark); background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px); background-size: 28px 28px; }
 .aa-hl__head { display: grid; gap: 18px; justify-items: start; }
-.aa-hl .aa-kicker { color: var(--aa-yellow); }
-.aa-hl__text { color: var(--aa-navy-muted); font-size: clamp(17px, 1.5vw, 19px); }
+.aa-hl .aa-kicker { color: var(--aa-accent); }
+.aa-hl__text { color: var(--aa-dark-muted); font-size: clamp(17px, 1.5vw, 19px); }
 
 .aa-plan { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(24px, 4vw, 44px); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 28px 56px; align-items: center; }
-.aa-plan__delta b { display: block; font-family: var(--aa-display); font-weight: 500; font-size: clamp(56px, 8vw, 104px); line-height: .95; letter-spacing: -0.06em; color: var(--aa-blue); }
+.aa-plan__delta b { display: block; font-family: var(--aa-display); font-weight: 500; font-size: clamp(56px, 8vw, 104px); line-height: .95; letter-spacing: -0.06em; color: var(--aa-accent-text); }
 .aa-plan__delta span { display: block; margin-top: 10px; color: var(--aa-muted); }
 .aa-bars { display: grid; gap: 18px; }
 .aa-bar { display: grid; gap: 8px; }
 .aa-bar__label { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; }
 .aa-bar__label b { font-weight: 600; font-variant-numeric: tabular-nums; }
 .aa-bar__track { height: 40px; border-radius: 12px; border: 2px solid var(--aa-ink); background: var(--aa-paper); overflow: hidden; }
-.aa-bar__fill { height: 100%; width: var(--w); background: repeating-linear-gradient(-45deg, #C9CEE3 0 8px, #DCE0EF 8px 16px); border-right: 2px solid var(--aa-ink); }
-.aa-bar--fact .aa-bar__fill { background: var(--aa-blue); }
+.aa-bar__fill { height: 100%; width: var(--w); background: repeating-linear-gradient(-45deg, #C4C4CC 0 8px, #D9D9DF 8px 16px); border-right: 2px solid var(--aa-ink); }
+.aa-bar--fact .aa-bar__fill { background: var(--aa-accent); }
 
 .aa-dark + .aa-sec { padding-top: clamp(72px, 10vw, 128px); }
 
@@ -266,7 +268,7 @@ def case_body(c, home, link):
           <a href="{home}#services">Услуги</a>
           <a href="{home}#cases">Кейсы</a>
           <a href="{home}#faq">Вопросы</a>
-          <a class="aa-btn aa-btn--yellow" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Обсудить проект</a>
+          <a class="aa-btn aa-btn--accent" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Обсудить проект</a>
         </nav>
       </div>
     </div>
@@ -361,7 +363,7 @@ def case_body(c, home, link):
               <p class="aa-kicker">Ещё результаты</p>
               <h2 class="aa-h2" id="aa-cases-title">Другие кейсы</h2>
             </div>
-            <a class="aa-btn aa-btn--yellow" href="{home}#cases">Все кейсы</a>
+            <a class="aa-btn aa-btn--accent" href="{home}#cases">Все кейсы</a>
           </div>
           <div class="aa-cases">
 {others_html}

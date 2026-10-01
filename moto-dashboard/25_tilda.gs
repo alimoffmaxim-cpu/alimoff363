@@ -9,7 +9,11 @@ function doPost(e) {
   // При подключении вебхука Тильда присылает test=test и ждёт ответ «ok»
   if (params.test) return ContentService.createTextOutput('ok');
   const secret = prop_('TILDA_SECRET');
-  if (!secret || params.key !== secret) return ContentService.createTextOutput('forbidden');
+  if (!secret || params.key !== secret) {
+    log_('Тильда', 'ОТКЛОНЕНО: ' + (params.key ? 'неверный ключ' : 'в адресе нет ?key=…') +
+      '; поля: ' + Object.keys(params).join(', '));
+    return ContentService.createTextOutput('forbidden');
+  }
 
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -22,6 +26,9 @@ function doPost(e) {
       sh.appendRow(row);
       sh.getRange(sh.getLastRow(), 6).setNumberFormat('@').setValue(row[5]);
     }
+  } catch (err) {
+    log_('Тильда', 'ОШИБКА при записи заявки: ' + err.message);
+    throw err;
   } finally {
     lock.releaseLock();
   }
@@ -78,14 +85,30 @@ function tildaUtm_(params) {
   return out;
 }
 
-/** Меню: создаёт секретный ключ и показывает адрес для Тильды. */
-function menuTilda() {
+/** Отладка: записывает тестовую заявку так же, как это делает вебхук. */
+function debugTildaTest() {
+  menuTildaSecret_();
+  doPost({ parameter: {
+    key: prop_('TILDA_SECRET'), tranid: 'test-' + Date.now(), formname: 'Тестовая заявка (удалите строку)',
+    Name: 'Тест', Phone: '+7 900 000-00-00', utm_source: 'test', utm_campaign: 'check',
+  } });
+  SpreadsheetApp.getActive().setActiveSheet(sheet_(SHEETS.tilda, HEAD.tilda));
+  SpreadsheetApp.getUi().alert('Тестовая заявка записана на лист raw_tilda. Если её там нет — смотрите лист «Лог».');
+}
+
+function menuTildaSecret_() {
   const props = PropertiesService.getScriptProperties();
   let secret = props.getProperty('TILDA_SECRET');
   if (!secret) {
     secret = Utilities.getUuid().replace(/-/g, '');
     props.setProperty('TILDA_SECRET', secret);
   }
+  return secret;
+}
+
+/** Меню: создаёт секретный ключ и показывает адрес для Тильды. */
+function menuTilda() {
+  const secret = menuTildaSecret_();
   sheet_(SHEETS.tilda, HEAD.tilda);
   const url = ScriptApp.getService().getUrl();
   const html = HtmlService.createHtmlOutput(

@@ -110,6 +110,20 @@ CASE_CSS = """<style>
 .aa-bar__fill { height: 100%; width: var(--w); border-radius: 999px; background: #C3CDCD; }
 .aa-bar--fact .aa-bar__fill { background: var(--aa-grad); }
 
+.aa-ab { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; }
+.aa-ab__card { align-self: stretch; display: grid; gap: 18px; align-content: start; padding: clamp(24px, 3vw, 36px); border-radius: 28px; border: 2px dashed #C3CDCD; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; }
+.aa-ab__card--b { border: 0; background: var(--aa-grad); color: #fff; }
+.aa-ab__label { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
+.aa-ab__label b { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--aa-ink); color: #fff; font-size: 22px; font-weight: 600; }
+.aa-ab__card--b .aa-ab__label b { background: #fff; color: var(--aa-orange); }
+.aa-ab__arrow { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--aa-card); box-shadow: 0 8px 24px rgba(18, 18, 18, .08); }
+.aa-ab__arrow svg { width: 22px; height: 22px; }
+
+.aa-hl { position: relative; overflow: hidden; isolation: isolate; display: grid; gap: 18px; padding: clamp(32px, 5vw, 64px); border-radius: clamp(24px, 3vw, 36px); background: var(--aa-dark); color: #fff; }
+.aa-hl::before { content: ""; position: absolute; z-index: -1; width: 480px; height: 480px; left: -160px; bottom: -260px; border-radius: 50%; background: var(--aa-grad); filter: blur(90px); opacity: .5; }
+.aa-hl .aa-h2 { max-width: 16em; }
+.aa-hl__text { max-width: 40em; color: #C9C9C9; font-size: clamp(17px, 1.5vw, 20px); }
+
 .aa-story { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .aa-story > div { background: var(--aa-card); border-radius: 24px; padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
 .aa-story > div:only-child { grid-column: 1 / -1; }
@@ -126,7 +140,8 @@ CASE_CSS = """<style>
 .aa-did .aa-chips li:nth-child(3n+2) { background: var(--aa-orange); }
 
 @media (max-width: 960px) {
-  .aa-chero__grid, .aa-plan, .aa-story, .aa-did { grid-template-columns: minmax(0, 1fr); }
+  .aa-chero__grid, .aa-plan, .aa-story, .aa-did, .aa-ab { grid-template-columns: minmax(0, 1fr); }
+  .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
 }
 </style>"""
 
@@ -187,16 +202,11 @@ def case_body(c, home, link):
     </section>
 """
 
-    story = f"""          <div>
-            <h3 class="aa-h3">О клиенте</h3>
-            <p>{c['about']}</p>
-          </div>"""
-    if c["goal"]:
-        story += f"""
-          <div>
-            <h3 class="aa-h3">Задача</h3>
-            <p>{c['goal']}</p>
-          </div>"""
+    draft_a = "Что было до начала работы: была ли реклама, сколько стоила заявка, сколько заявок приходило в месяц."
+    point_a = f"<p>{c['point_a']}</p>" if c["point_a"] else f"<p data-draft>{draft_a}</p>"
+    point_b_text = c["point_b"] or c["goal"]
+    point_b = f"<p>{point_b_text}</p>" if point_b_text else "<p data-draft>Какую цель ставил клиент: сколько заявок и по какой цене.</p>"
+    hl_title, hl_text = c["highlight"]
 
     chips = ""
     if c["narrow"]:
@@ -259,7 +269,6 @@ def case_body(c, home, link):
         </div>
       </div>
     </section>
-{plan}
     <section class="aa-sec aa-sec--tight" aria-labelledby="aa-story-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
@@ -267,12 +276,35 @@ def case_body(c, home, link):
           <h2 class="aa-h2" id="aa-story-title">{c['niche']}</h2>
         </div>
         <div class="aa-story">
-{story}
+          <div>
+            <h3 class="aa-h3">О клиенте</h3>
+            <p>{c['about']}</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="aa-sec aa-sec--flush" aria-labelledby="aa-did-title">
+    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-ab-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Задача</p>
+          <h2 class="aa-h2" id="aa-ab-title">Из точки А в точку Б</h2>
+        </div>
+        <div class="aa-ab">
+          <div class="aa-ab__card">
+            <span class="aa-ab__label"><b>А</b>Было</span>
+            {point_a}
+          </div>
+          <span class="aa-ab__arrow" aria-hidden="true">{ARROW}</span>
+          <div class="aa-ab__card aa-ab__card--b">
+            <span class="aa-ab__label"><b>Б</b>Цель</span>
+            {point_b}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Как получили заявки</p>
@@ -284,6 +316,16 @@ def case_body(c, home, link):
       </div>
     </section>
 
+    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-hl-title">
+      <div class="aa-wrap">
+        <div class="aa-hl">
+          <p class="aa-kicker">Самое крутое в проекте</p>
+          <h2 class="aa-h2" id="aa-hl-title">{hl_title}</h2>
+          <p class="aa-hl__text">{hl_text}</p>
+        </div>
+      </div>
+    </section>
+{plan}
     <div class="aa-dark">
       <section class="aa-sec" id="cases" aria-labelledby="aa-cases-title">
         <div class="aa-wrap">

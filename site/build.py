@@ -2,7 +2,8 @@
 
 Запуск: python3 site/build.py
 
-Что получается:
+Что делает:
+  site/tilda-t123.html           — обновляет карточки кейсов между метками cases:start и cases:end
   site/index.html                — главная для предпросмотра в браузере
   site/cases/<slug>.t123.html    — страница кейса для блока T123 в Tilda
   site/cases/<slug>.html         — та же страница кейса для предпросмотра
@@ -20,7 +21,7 @@ from cases import CASES
 
 here = Path(__file__).parent
 SITE = "https://alimov.agency/"
-main = (here / "tilda-t123.html").read_text(encoding="utf-8")
+START, END = "<!-- cases:start -->", "<!-- cases:end -->"
 
 
 def between(text, start, end):
@@ -28,12 +29,6 @@ def between(text, start, end):
     a = text.index(start)
     b = text.index(end, a) + len(end)
     return text[a:b]
-
-
-fonts = "\n".join(line for line in main.splitlines() if "fonts.g" in line)
-style = between(main, "<style>", "</style>")
-script = between(main, "<script>", "</script>")
-contact = between(main, '<section class="aa-sec aa-sec--flush" id="contact"', "</footer>")
 
 
 def page(title, description, body):
@@ -44,8 +39,8 @@ def page(title, description, body):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{description}">
-<meta name="theme-color" content="#F2F6F6">
-<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #F2F6F6; }}</style>
+<meta name="theme-color" content="#F4F6FB">
+<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #F4F6FB; }}</style>
 </head>
 <body>
 {body}
@@ -79,107 +74,160 @@ def plural(n, one, few, many):
     return many
 
 
+def leads_word(c):
+    return plural(c["leads"], "заявка", "заявки", "заявок")
+
+
 ARROW = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-TG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 4.2 2.9 11.3c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5ZM9.4 14l9-5.7c.4-.3.8-.1.5.2l-7.4 6.7-.3 3.1L9.4 14Z"/></svg>'
-
-CASE_CSS = """<style>
-/* case page: left-aligned hero with a facts list, plan-vs-fact bars, story and method cards */
-.aa-chero { padding-block: clamp(40px, 6vw, 72px) 0; }
-.aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 36px); font-size: 15px; font-weight: 500; text-decoration: none; opacity: .7; transition: opacity .2s; }
-.aa-back:hover { opacity: 1; }
-.aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
-.aa-chero__grid { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 32px 56px; align-items: end; }
-.aa-chero__text { display: grid; gap: 20px; }
-.aa-chero .aa-h1 { font-size: clamp(34px, 5vw, 64px); }
-.aa-meta { display: grid; border-top: 1px solid #D6DEDE; }
-.aa-meta div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 12px; border-bottom: 1px solid #D6DEDE; font-size: 15px; }
-.aa-meta dt { color: var(--aa-muted); flex: none; }
-.aa-meta dd { font-weight: 500; text-align: right; min-width: 0; }
-
-.aa-sec__head .aa-kicker { margin-bottom: -4px; }
-.aa-chero ~ .aa-sec:not(:last-child) { padding-bottom: clamp(48px, 6vw, 80px); }
-
-.aa-plan { background: var(--aa-card); border-radius: 28px; padding: clamp(24px, 4vw, 48px); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px 56px; align-items: center; }
-.aa-plan__delta b { display: block; font-weight: 500; font-size: clamp(64px, 9vw, 120px); line-height: .9; letter-spacing: -0.06em; color: var(--aa-orange); }
-.aa-plan__delta span { display: block; margin-top: 12px; color: var(--aa-muted); }
-.aa-bars { display: grid; gap: 18px; }
-.aa-bar { display: grid; gap: 8px; }
-.aa-bar__label { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; }
-.aa-bar__label b { font-weight: 600; font-variant-numeric: tabular-nums; }
-.aa-bar__track { height: 44px; border-radius: 999px; background: #E6ECEC; overflow: hidden; }
-.aa-bar__fill { height: 100%; width: var(--w); border-radius: 999px; background: #C3CDCD; }
-.aa-bar--fact .aa-bar__fill { background: var(--aa-grad); }
-
-.aa-ab { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; }
-.aa-ab__card { align-self: stretch; display: grid; gap: 18px; align-content: start; padding: clamp(24px, 3vw, 36px); border-radius: 28px; border: 2px dashed #C3CDCD; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; }
-.aa-ab__card--b { border: 0; background: var(--aa-grad); color: #fff; }
-.aa-ab__label { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
-.aa-ab__label b { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--aa-ink); color: #fff; font-size: 22px; font-weight: 600; }
-.aa-ab__card--b .aa-ab__label b { background: #fff; color: var(--aa-orange); }
-.aa-ab__arrow { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: var(--aa-card); box-shadow: 0 8px 24px rgba(18, 18, 18, .08); }
-.aa-ab__arrow svg { width: 22px; height: 22px; }
-
-.aa-hl { position: relative; overflow: hidden; isolation: isolate; display: grid; gap: 18px; padding: clamp(32px, 5vw, 64px); border-radius: clamp(24px, 3vw, 36px); background: var(--aa-dark); color: #fff; }
-.aa-hl::before { content: ""; position: absolute; z-index: -1; width: 480px; height: 480px; left: -160px; bottom: -260px; border-radius: 50%; background: var(--aa-grad); filter: blur(90px); opacity: .5; }
-.aa-hl .aa-h2 { max-width: 16em; }
-.aa-hl__text { max-width: 40em; color: #C9C9C9; font-size: clamp(17px, 1.5vw, 20px); }
-
-.aa-story { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.aa-story > div { background: var(--aa-card); border-radius: 24px; padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
-.aa-story > div:only-child { grid-column: 1 / -1; }
-.aa-story p { color: var(--aa-muted); }
-
-.aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 16px; }
-.aa-did > li { border: 1.5px solid #D6DEDE; border-radius: 24px; padding: clamp(24px, 3vw, 28px); display: grid; gap: 12px; align-content: start; }
-.aa-did > li:first-child { background: var(--aa-ink); border-color: var(--aa-ink); color: #fff; }
-.aa-did > li:first-child p { color: var(--aa-dark-muted); }
-.aa-did p { color: var(--aa-muted); font-size: 16px; }
-.aa-did__label { color: var(--aa-orange); font-size: 14px; font-weight: 600; }
-.aa-did .aa-chips { justify-content: flex-start; margin-top: 4px; }
-.aa-did .aa-chips li { padding: 8px 14px; font-size: 14px; background: #E3E9E9; }
-.aa-did .aa-chips li:nth-child(3n+2) { background: var(--aa-orange); }
-
-@media (max-width: 960px) {
-  .aa-chero__grid, .aa-plan, .aa-story, .aa-did, .aa-ab { grid-template-columns: minmax(0, 1fr); }
-  .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
-}
-</style>"""
 
 
 def case_card(c, href):
+    """Карточка кейса: одна и та же на главной и в блоке «Другие кейсы»."""
+    if c["target"]:
+        pct = round(c["cpl"] / c["target"] * 100)
+        meter = f"""<div class="aa-meter"><span>заявка <b>{num(c['cpl'])} ₽</b> при цели {num(c['target'])} ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:{pct}%"></div></div></div>"""
+    elif c["romi"]:
+        meter = f"""<div class="aa-meter"><span>ROMI <b>до {c['romi'][1]}%</b>, средний {c['romi'][0]}%</span></div>"""
+    else:
+        meter = f"""<div class="aa-meter"><span>бюджет <b>{money_short(c['budget'])}</b></span></div>"""
     return f"""            <a class="aa-case" href="{href}">
               <div class="aa-case__top"><span class="aa-case__logo">{c['card_logo']}</span><div><b>{c['client']}</b><small>{c['card_sub']}</small></div></div>
-              <p class="aa-case__num">{num(c['leads'])}<small>{plural(c['leads'], 'заявка', 'заявки', 'заявок')} по {num(c['cpl'])} ₽</small></p>
+              <p class="aa-case__num">{num(c['leads'])}<small>{leads_word(c)} по {num(c['cpl'])} ₽</small></p>
+              {meter}
               <p>{c['card_text']}</p>
               <span class="aa-case__more">Открыть кейс<i>{ARROW}</i></span>
             </a>"""
 
 
+# --- главная: вставляем карточки кейсов -------------------------------------
+
+src = here / "tilda-t123.html"
+main = src.read_text(encoding="utf-8")
+cards = "\n".join(case_card(c, f"{SITE}{c['slug']}") for c in CASES)
+main = main.replace(between(main, START, END), f"{START}\n{cards}\n{END}")
+src.write_text(main, encoding="utf-8")
+print("site/tilda-t123.html: карточки кейсов обновлены")
+
+fonts = "\n".join(line for line in main.splitlines() if "fonts.g" in line)
+style = between(main, "<style>", "</style>")
+script = between(main, "<script>", "</script>")
+# блок контактов, конец <main> и подвал
+contact = between(main, '<section class="aa-sec aa-sec--flush" id="contact"', "</footer>")
+
+
+# --- страница кейса ----------------------------------------------------------
+
+CASE_CSS = """<style>
+/* case page: facts sticker beside the title, blue result board, A→B, method cards, highlight, plan-vs-fact */
+.aa-chero { padding-block: clamp(36px, 5vw, 64px) clamp(48px, 6vw, 80px); }
+.aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 36px); font-size: 15px; font-weight: 600; text-decoration: none; color: var(--aa-muted); transition: color .2s; }
+.aa-back:hover { color: var(--aa-ink); }
+.aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
+.aa-chero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 32px 56px; align-items: start; }
+.aa-chero__text { display: grid; gap: 22px; justify-items: start; }
+.aa-facts { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); box-shadow: var(--aa-shadow); }
+.aa-facts div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 13px 20px; border-bottom: 1.5px dashed var(--aa-line); font-size: 15px; }
+.aa-facts div:last-child { border-bottom: 0; }
+.aa-facts dt { color: var(--aa-muted); flex: none; }
+.aa-facts dd { font-weight: 600; text-align: right; min-width: 0; }
+
+.aa-board { margin-top: clamp(40px, 5vw, 64px); display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 28px 40px; align-items: center; padding: clamp(24px, 4vw, 44px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: var(--aa-shadow); color: #fff; background-color: var(--aa-blue); background-image: linear-gradient(rgba(255, 255, 255, .09) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .09) 1px, transparent 1px); background-size: 28px 28px; }
+.aa-board__main { display: grid; gap: 10px; justify-items: start; }
+.aa-board__main small { font-size: 16px; opacity: .9; }
+.aa-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.aa-tile { background: var(--aa-card); color: var(--aa-ink); border: 2px solid var(--aa-ink); border-radius: 16px; padding: 16px 18px; display: grid; gap: 4px; }
+.aa-tile b { font-family: var(--aa-display); font-weight: 500; font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.04em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.aa-tile span { color: var(--aa-muted); font-size: 14px; }
+.aa-tile--hot { background: var(--aa-yellow); }
+
+.aa-csec { padding-block: 0 clamp(64px, 8vw, 104px); }
+.aa-about { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 32px); font-size: clamp(17px, 1.5vw, 20px); max-width: 52em; }
+
+.aa-ab { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 18px; align-items: center; }
+.aa-ab__card { align-self: stretch; display: grid; gap: 18px; align-content: start; padding: clamp(24px, 3vw, 34px); border-radius: var(--aa-r); border: 2px dashed var(--aa-ink); background: rgba(255, 255, 255, .6); font-size: clamp(17px, 1.5vw, 20px); line-height: 1.45; }
+.aa-ab__card--b { border-style: solid; background: var(--aa-yellow); box-shadow: var(--aa-shadow); }
+.aa-ab__label { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
+.aa-ab__label b { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: var(--aa-ink); color: #fff; font-family: var(--aa-display); font-size: 20px; font-weight: 600; }
+.aa-ab__arrow { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 14px; border: 2px solid var(--aa-ink); background: var(--aa-card); }
+.aa-ab__arrow svg { width: 22px; height: 22px; }
+
+.aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 18px; }
+.aa-did > li { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(22px, 3vw, 28px); display: grid; gap: 12px; align-content: start; }
+.aa-did > li:first-child { background: var(--aa-navy); color: #fff; }
+.aa-did > li:first-child p { color: var(--aa-navy-muted); }
+.aa-did > li:first-child .aa-did__label { color: var(--aa-yellow); }
+.aa-did p { color: var(--aa-muted); font-size: 16px; }
+.aa-did__label { color: var(--aa-blue); font-size: 14px; font-weight: 600; }
+.aa-did .aa-niches { margin-top: 2px; }
+
+.aa-hl { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px 48px; align-items: end; padding: clamp(28px, 5vw, 56px); border-radius: 28px; border: 2px solid var(--aa-ink); box-shadow: 8px 8px 0 var(--aa-yellow); color: #fff; background-color: var(--aa-navy); background-image: linear-gradient(rgba(255, 255, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px); background-size: 28px 28px; }
+.aa-hl__head { display: grid; gap: 18px; justify-items: start; }
+.aa-hl .aa-kicker { color: var(--aa-yellow); }
+.aa-hl__text { color: var(--aa-navy-muted); font-size: clamp(17px, 1.5vw, 19px); }
+
+.aa-plan { background: var(--aa-card); border: 2px solid var(--aa-ink); border-radius: var(--aa-r); padding: clamp(24px, 4vw, 44px); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 28px 56px; align-items: center; }
+.aa-plan__delta b { display: block; font-family: var(--aa-display); font-weight: 500; font-size: clamp(56px, 8vw, 104px); line-height: .95; letter-spacing: -0.06em; color: var(--aa-blue); }
+.aa-plan__delta span { display: block; margin-top: 10px; color: var(--aa-muted); }
+.aa-bars { display: grid; gap: 18px; }
+.aa-bar { display: grid; gap: 8px; }
+.aa-bar__label { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; }
+.aa-bar__label b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.aa-bar__track { height: 40px; border-radius: 12px; border: 2px solid var(--aa-ink); background: var(--aa-paper); overflow: hidden; }
+.aa-bar__fill { height: 100%; width: var(--w); background: repeating-linear-gradient(-45deg, #C9CEE3 0 8px, #DCE0EF 8px 16px); border-right: 2px solid var(--aa-ink); }
+.aa-bar--fact .aa-bar__fill { background: var(--aa-blue); }
+
+.aa-dark + .aa-sec { padding-top: clamp(72px, 10vw, 128px); }
+
+@media (max-width: 960px) {
+  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl { grid-template-columns: minmax(0, 1fr); }
+  .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
+}
+</style>"""
+
+
 def case_body(c, home, link):
     """home — адрес главной, link(slug) — адрес другого кейса."""
-    leads_word = plural(c["leads"], "заявка", "заявки", "заявок")
-
     meta = [("Клиент", c["client"]), ("Ниша", c["niche"]), ("Формат", c["format"]), ("Канал", c["channel"])]
     if c["period"]:
         meta.append(("Период", c["period"]))
     meta_html = "\n".join(f"            <div><dt>{k}</dt><dd>{v}</dd></div>" for k, v in meta)
 
-    stats = [("aa-stat aa-stat--hot", f"{num(c['cpl'])} ₽", "цена заявки"),
-             ("aa-stat", money_short(c["budget"]), "рекламный бюджет")]
+    tiles = [("aa-tile aa-tile--hot", f"{num(c['cpl'])} ₽", "цена заявки"),
+             ("aa-tile", money_short(c["budget"]), "рекламный бюджет")]
     if c["romi"]:
-        stats += [("aa-stat", f"{c['romi'][1]}%", "рекордный ROMI"), ("aa-stat", f"{c['romi'][0]}%", "средний ROMI")]
+        tiles += [("aa-tile", f"{c['romi'][1]}%", "рекордный ROMI"), ("aa-tile", f"{c['romi'][0]}%", "средний ROMI")]
     elif c["target"]:
-        stats += [("aa-stat", f"до {num(c['target'])} ₽", "цель по цене заявки"),
-                  ("aa-stat", c["format"], "формат")]
+        tiles += [("aa-tile", f"до {num(c['target'])} ₽", "цель по цене заявки"), ("aa-tile", c["format"], "формат")]
     else:
-        stats += [("aa-stat", c["channel"], "канал"), ("aa-stat", c["format"], "формат")]
-    stats_html = "\n".join(f'            <li class="{cls}"><b>{b}</b><span>{s}</span></li>' for cls, b, s in stats)
+        tiles += [("aa-tile", c["channel"], "канал"), ("aa-tile", c["format"], "формат")]
+    tiles_html = "\n".join(f'            <li class="{cls}"><b>{b}</b><span>{s}</span></li>' for cls, b, s in tiles)
+
+    draft_a = "Что было до начала работы: была ли реклама, сколько стоила заявка, сколько заявок приходило в месяц."
+    point_a = f"<p>{c['point_a']}</p>" if c["point_a"] else f"<p data-draft>{draft_a}</p>"
+    point_b_text = c["point_b"] or c["goal"]
+    point_b = f"<p>{point_b_text}</p>" if point_b_text else "<p data-draft>Какую цель ставил клиент: сколько заявок и по какой цене.</p>"
+    hl_title, hl_text = c["highlight"]
+
+    narrow = ""
+    if c["narrow"]:
+        narrow = '\n              <ul class="aa-niches" aria-label="Примеры узких аудиторий">' + "".join(f"<li>{n}</li>" for n in c["narrow"]) + "</ul>"
+    vk = c["channel"].startswith("VK")
+    did = [("Канал", c["channel"], "Таргетированная реклама ВКонтакте." if vk else "Таргетированная реклама.", ""),
+           ("Аудитория", "Мамы", c["audience"], narrow),
+           ("Креативы", "Видео и изображения" if "изображ" in c["creatives"] else "Видео", c["creatives"], "")]
+    if c["offer"]:
+        did.append(("Оффер", c["offer"].rstrip("."), "Заявку оставляют на пробное занятие.", ""))
+    did_html = "\n".join(f"""            <li>
+              <span class="aa-did__label">{label}</span>
+              <h3 class="aa-h3">{h}</h3>
+              <p>{text}</p>{extra}
+            </li>""" for label, h, text, extra in did)
 
     plan = ""
     if c["target"]:
         pct = round(c["cpl"] / c["target"] * 100)
         plan = f"""
-    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-plan-title">
+    <section class="aa-csec" aria-labelledby="aa-plan-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Цель и результат</p>
@@ -202,43 +250,23 @@ def case_body(c, home, link):
     </section>
 """
 
-    draft_a = "Что было до начала работы: была ли реклама, сколько стоила заявка, сколько заявок приходило в месяц."
-    point_a = f"<p>{c['point_a']}</p>" if c["point_a"] else f"<p data-draft>{draft_a}</p>"
-    point_b_text = c["point_b"] or c["goal"]
-    point_b = f"<p>{point_b_text}</p>" if point_b_text else "<p data-draft>Какую цель ставил клиент: сколько заявок и по какой цене.</p>"
-    hl_title, hl_text = c["highlight"]
-
-    chips = ""
-    if c["narrow"]:
-        chips = '\n              <ul class="aa-chips" aria-label="Примеры узких аудиторий">' + "".join(f"<li>{n}</li>" for n in c["narrow"]) + "</ul>"
-    vk = c["channel"].startswith("VK")
-    did = [("Канал", c["channel"], "Таргетированная реклама ВКонтакте." if vk else "Таргетированная реклама.", ""),
-           ("Аудитория", "Мамы", c["audience"], chips),
-           ("Креативы", "Видео и изображения" if "изображ" in c["creatives"] else "Видео", c["creatives"], "")]
-    if c["offer"]:
-        did.append(("Оффер", c["offer"].rstrip("."), "Заявку оставляют на пробное занятие.", ""))
-    did_html = "\n".join(f"""            <li>
-              <span class="aa-did__label">{label}</span>
-              <h3 class="aa-h3">{h}</h3>
-              <p>{text}</p>{extra}
-            </li>""" for label, h, text, extra in did)
-
-    others = "\n".join(case_card(o, link(o["slug"])) for o in CASES if o["slug"] != c["slug"])
+    # три следующих кейса по кругу
+    i = next(k for k, o in enumerate(CASES) if o["slug"] == c["slug"])
+    others = [CASES[(i + k) % len(CASES)] for k in (1, 2, 3)]
+    others_html = "\n".join(case_card(o, link(o["slug"])) for o in others)
 
     return f"""<div class="aa" id="top">
 
   <header class="aa-head" id="aa-head">
     <div class="aa-wrap">
       <div class="aa-head__bar">
-        <a class="aa-logo" href="{home}" aria-label="Alimov Agency — на главную"><i aria-hidden="true"></i>alimov</a>
+        <a class="aa-logo" href="{home}" aria-label="Alimov Agency — на главную"><span>alimov</span><i aria-hidden="true"></i></a>
         <button class="aa-burger" type="button" id="aa-burger" aria-expanded="false" aria-controls="aa-nav" aria-label="Открыть меню"><span></span><span></span></button>
         <nav class="aa-nav" id="aa-nav" aria-label="Разделы">
           <a href="{home}#services">Услуги</a>
           <a href="{home}#cases">Кейсы</a>
           <a href="{home}#faq">Вопросы</a>
-          <a class="aa-btn" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Обсудить проект
-            <span class="aa-btn__ico">{TG}</span>
-          </a>
+          <a class="aa-btn aa-btn--yellow" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Обсудить проект</a>
         </nav>
       </div>
     </div>
@@ -250,45 +278,42 @@ def case_body(c, home, link):
         <a class="aa-back" href="{home}#cases">{ARROW}Все кейсы</a>
         <div class="aa-chero__grid">
           <div class="aa-chero__text">
-            <p class="aa-eyebrow">Кейс · <em>{c['channel']}</em></p>
+            <span class="aa-chip">Кейс · {c['channel']}</span>
             <h1 class="aa-h1">{c['title']}</h1>
           </div>
-          <dl class="aa-meta">
+          <dl class="aa-facts">
 {meta_html}
           </dl>
         </div>
 
-        <div class="aa-stage">
-          <div class="aa-stage__case">
-            <span class="aa-tag">Результат</span>
-            <p class="aa-stage__big">{num(c['leads'])}<small>{leads_word} за {num(c['budget'])} ₽</small></p>
+        <div class="aa-board">
+          <div class="aa-board__main">
+            <span class="aa-chip">Результат</span>
+            <p class="aa-big">{num(c['leads'])}</p>
+            <small>{leads_word(c)} за {num(c['budget'])} ₽</small>
           </div>
-          <ul class="aa-stats">
-{stats_html}
+          <ul class="aa-tiles">
+{tiles_html}
           </ul>
         </div>
       </div>
     </section>
-    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-story-title">
+
+    <section class="aa-csec" aria-labelledby="aa-story-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Клиент</p>
           <h2 class="aa-h2" id="aa-story-title">{c['niche']}</h2>
         </div>
-        <div class="aa-story">
-          <div>
-            <h3 class="aa-h3">О клиенте</h3>
-            <p>{c['about']}</p>
-          </div>
-        </div>
+        <p class="aa-about">{c['about']}</p>
       </div>
     </section>
 
-    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-ab-title">
+    <section class="aa-csec" aria-labelledby="aa-ab-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Задача</p>
-          <h2 class="aa-h2" id="aa-ab-title">Из точки А в точку Б</h2>
+          <h2 class="aa-h2" id="aa-ab-title">Из точки А в&nbsp;точку&nbsp;Б</h2>
         </div>
         <div class="aa-ab">
           <div class="aa-ab__card">
@@ -304,7 +329,7 @@ def case_body(c, home, link):
       </div>
     </section>
 
-    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-did-title">
+    <section class="aa-csec" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Как получили заявки</p>
@@ -316,11 +341,13 @@ def case_body(c, home, link):
       </div>
     </section>
 
-    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-hl-title">
+    <section class="aa-csec" aria-labelledby="aa-hl-title">
       <div class="aa-wrap">
         <div class="aa-hl">
-          <p class="aa-kicker">Самое крутое в проекте</p>
-          <h2 class="aa-h2" id="aa-hl-title">{hl_title}</h2>
+          <div class="aa-hl__head">
+            <p class="aa-kicker">Самое крутое в проекте</p>
+            <h2 class="aa-h2" id="aa-hl-title"><mark class="aa-mark aa-mark--solid">{hl_title}</mark></h2>
+          </div>
           <p class="aa-hl__text">{hl_text}</p>
         </div>
       </div>
@@ -329,26 +356,22 @@ def case_body(c, home, link):
     <div class="aa-dark">
       <section class="aa-sec" id="cases" aria-labelledby="aa-cases-title">
         <div class="aa-wrap">
-          <div class="aa-cases__head">
+          <div class="aa-sec__row">
             <div class="aa-sec__head">
+              <p class="aa-kicker">Ещё результаты</p>
               <h2 class="aa-h2" id="aa-cases-title">Другие кейсы</h2>
-              <p class="aa-muted">Детские онлайн-школы и сети офлайн-студий</p>
             </div>
-            <div class="aa-arrows">
-              <button class="aa-arrow" type="button" data-dir="-1" aria-label="Предыдущие кейсы"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-              <button class="aa-arrow" type="button" data-dir="1" aria-label="Следующие кейсы"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            </div>
+            <a class="aa-btn aa-btn--yellow" href="{home}#cases">Все кейсы</a>
           </div>
-          <div class="aa-track" id="aa-track">
-{others}
+          <div class="aa-cases">
+{others_html}
           </div>
           <p class="aa-note">* Instagram и Facebook принадлежат Meta Platforms Inc., деятельность которой признана экстремистской и запрещена в России.</p>
         </div>
       </section>
-
-      {contact}
     </div>
-  </main>
+
+    {contact.replace('href="#top"', f'href="{home}"', 1)}
 </div>"""
 
 
@@ -363,7 +386,6 @@ def case_fragment(c, home, link):
 preview_main = main
 for c in CASES:
     preview_main = preview_main.replace(f'href="{SITE}{c["slug"]}"', f'href="cases/{c["slug"]}.html"')
-preview_main = re.sub(r'(href="cases/[^"]+\.html") target="_blank" rel="noopener"', r"\1", preview_main)
 (here / "index.html").write_text(page(
     "Alimov Agency — клиенты для детских школ",
     "Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.",
@@ -373,7 +395,7 @@ print("site/index.html")
 out = here / "cases"
 out.mkdir(exist_ok=True)
 for c in CASES:
-    desc = f"{num(c['leads'])} {plural(c['leads'], 'заявка', 'заявки', 'заявок')} по {num(c['cpl'])} ₽ для клиента {c['client']}.".replace(" ", " ")
+    desc = f"{num(c['leads'])} {leads_word(c)} по {num(c['cpl'])} ₽ для клиента {c['client']}.".replace(" ", " ")
     title = re.sub(r"&nbsp;", " ", c["title"])
     (out / f"{c['slug']}.t123.html").write_text(case_fragment(c, SITE, lambda s: f"{SITE}{s}"), encoding="utf-8")
     (out / f"{c['slug']}.html").write_text(page(

@@ -169,8 +169,9 @@ contact = between(main, '<section class="aa-sec aa-sec--flush" id="contact"', "<
 # --- страница кейса ----------------------------------------------------------
 
 CASE_CSS = """<style>
+.aa-rings--case { width: min(760px, 90vw); right: max(-26vw, -380px); top: -300px; }
 /* case page: facts list beside the title, dark result board, A→B, method cards, highlight, plan-vs-fact */
-.aa-chero { padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
+.aa-chero { position: relative; isolation: isolate; padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
 .aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 15px; font-weight: 600; text-decoration: none; color: var(--aa-muted); transition: color .2s; }
 .aa-back:hover { color: var(--aa-ink); }
 .aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
@@ -308,6 +309,7 @@ def case_body(c, home, link):
     others_html = "\n".join(case_card(o, link(o["slug"])) for o in others)
 
     return f"""<div class="aa" id="top">
+  <div class="aa-bg" aria-hidden="true"><i class="aa-blob aa-blob--1"></i><i class="aa-blob aa-blob--2"></i><i class="aa-blob aa-blob--3"></i></div>
 
   <header class="aa-head" id="aa-head">
     <div class="aa-wrap">
@@ -326,6 +328,7 @@ def case_body(c, home, link):
 
   <main>
     <section class="aa-chero">
+      <svg class="aa-rings aa-rings--case" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap">
         <a class="aa-back" href="{home}#cases">{ARROW}Все кейсы</a>
         <div class="aa-chero__grid">

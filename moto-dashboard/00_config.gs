@@ -42,6 +42,7 @@ const SHEETS = {
   mkVisits: 'raw_mk_visits',
   mkSubs: 'raw_mk_subs',
   mkPays: 'raw_mk_payments',
+  tilda: 'raw_tilda',
   chartData: 'Данные_графиков',
   log: 'Лог',
   debug: 'debug',
@@ -57,14 +58,16 @@ const HEAD = {
   mkVisits: ['ID записи', 'Дата', 'ID ученика', 'ID занятия', 'Пробное', 'Пришёл'],
   mkSubs: ['ID', 'Дата продажи', 'ID ученика', 'ID вида абонемента', 'Абонемент', 'Занятий', 'Цена'],
   mkPays: ['ID', 'Дата', 'ID ученика', 'Тип операции', 'Сумма', 'Комментарий'],
+  tilda: ['Получена', 'ID заявки', 'Форма', 'Страница', 'Имя', 'Телефон', 'Email',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'Все поля'],
   fact: ['Дата', 'Событие', 'Канал', 'Кампания', 'Кол-во', 'Сумма', 'Объект', 'ID ученика'],
   log: ['Время', 'Задача', 'Результат'],
 };
 
 // События листа fact
-const EV = { spend: 'расход', lead: 'лид', adLead: 'лид_кабинет', trial: 'пробное', repeat: 'повторная', sub: 'абонемент', pay: 'оплата' };
+const EV = { spend: 'расход', lead: 'лид', adLead: 'лид_кабинет', siteLead: 'заявка_сайт', trial: 'пробное', repeat: 'повторная', sub: 'абонемент', pay: 'оплата' };
 const NO_CHANNEL = 'Не определён';
-const NO_LEAD = 'Без заявки в амо';
+const NO_LEAD = 'Без заявки';
 
 // Параметры на листе «Настройки» (колонки H:J): код, значение по умолчанию, пояснение
 const PARAMS = [
@@ -83,7 +86,7 @@ const PARAMS = [
 // Поля, по которым могут срабатывать правила каналов. «кампания» есть и у расходов, и у лидов:
 // для лида это кампания из utm_campaign (ID из кабинета заменяется названием).
 const RULE_FIELDS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
-  'источник', 'теги', 'воронка', 'статус', 'название сделки', 'площадка', 'кабинет', 'кампания', 'id кампании'];
+  'источник', 'теги', 'воронка', 'статус', 'название сделки', 'площадка', 'кабинет', 'кампания', 'id кампании', 'форма', 'страница'];
 
 // Правила по умолчанию. Срабатывает первое подходящее, поэтому «Макс» стоит выше Яндекса.
 const DEFAULT_RULES = [
@@ -132,6 +135,8 @@ const METRICS = [
   { key: 'cpl', h: 'Цена лида, ₽', calc: c => div_(c.spend, c.leads) },
   { key: 'adLeads', h: 'Лиды (кабинет)', sum: ['E', EV.adLead] },
   { key: 'cplAds', h: 'Цена лида (кабинет), ₽', calc: c => div_(c.spend, c.adLeads) },
+  { key: 'siteLeads', h: 'Заявки с сайта', sum: ['E', EV.siteLead] },
+  { key: 'cplSite', h: 'Цена заявки, ₽', calc: c => div_(c.spend, c.siteLeads) },
   { key: 'trials', h: 'Пробные (пришли)', sum: ['E', EV.trial] },
   { key: 'crTrial', h: 'CR лид → пробное', calc: c => div_(c.trials, c.leads), fmt: '0.0%' },
   { key: 'repeat', h: 'Повторные тренировки', sum: ['E', EV.repeat] },

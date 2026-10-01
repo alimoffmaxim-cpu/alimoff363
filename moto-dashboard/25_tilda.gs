@@ -1,0 +1,106 @@
+// ---------- Тильда: приём заявок вебхуком ----------
+// Скрипт публикуется как веб-приложение, его адрес (с секретным ключом) указывается
+// в Тильде: Настройки сайта → Формы → Webhook. Каждая заявка дописывается на лист raw_tilda:
+// телефон (для сопоставления с Мой Класс и амо) и UTM-метки (для канала).
+
+/** Тильда шлёт заявку POST-запросом (application/x-www-form-urlencoded). */
+function doPost(e) {
+  const params = (e && e.parameter) || {};
+  // При подключении вебхука Тильда присылает test=test и ждёт ответ «ok»
+  if (params.test) return ContentService.createTextOutput('ok');
+  const secret = prop_('TILDA_SECRET');
+  if (!secret || params.key !== secret) return ContentService.createTextOutput('forbidden');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const row = tildaRow_(params, new Date());
+    const sh = sheet_(SHEETS.tilda, HEAD.tilda);
+    // Тильда может повторить отправку — заявку с тем же tranid не дублируем
+    const ids = sh.getLastRow() > 1 ? sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(r => String(r[0])) : [];
+    if (!row[1] || ids.indexOf(String(row[1])) < 0) {
+      sh.appendRow(row);
+      sh.getRange(sh.getLastRow(), 6).setNumberFormat('@').setValue(row[5]);
+    }
+  } finally {
+    lock.releaseLock();
+  }
+  return ContentService.createTextOutput('ok');
+}
+
+/** Проверка адреса в браузере. */
+function doGet() {
+  return ContentService.createTextOutput('Дашборд: приём заявок с Тильды работает.');
+}
+
+/** Параметры вебхука Тильды → строка raw_tilda. */
+function tildaRow_(params, receivedAt) {
+  const keys = Object.keys(params).filter(k => k !== 'key');
+  const find = re => {
+    const k = keys.filter(x => re.test(x))[0];
+    return k ? String(params[k]) : '';
+  };
+  const utm = tildaUtm_(params);
+  const all = keys.filter(k => k !== 'COOKIES').map(k => k + '=' + params[k]).join('; ');
+  return [
+    receivedAt,
+    params.tranid || '',
+    params.formname || params.formid || '',
+    params.pageurl || params.page || params.referer || '',
+    find(/^(name|имя|fio|фио)$/i),
+    normalizePhone_(find(/phone|телефон|tel/i)),
+    find(/e-?mail|почта/i),
+    utm.utm_source, utm.utm_medium, utm.utm_campaign, utm.utm_content, utm.utm_term,
+    all.slice(0, 2000),
+  ];
+}
+
+/**
+ * UTM-метки заявки: из полей utm_* (если в форме есть скрытые поля) или из куки
+ * TILDAUTM, которую Тильда передаёт в поле COOKIES: utm_source=x|||utm_medium=y…
+ */
+function tildaUtm_(params) {
+  const out = { utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '', utm_term: '' };
+  const m = String(params.COOKIES || params.cookies || '').match(/TILDAUTM=([^;]+)/);
+  if (m) {
+    let raw = m[1];
+    try { raw = decodeURIComponent(raw); } catch (e) { /* оставляем как есть */ }
+    raw.split('|||').forEach(pair => {
+      const i = pair.indexOf('=');
+      const k = lc_(pair.slice(0, i));
+      if (k in out) out[k] = pair.slice(i + 1);
+    });
+  }
+  Object.keys(out).forEach(k => {
+    const own = Object.keys(params).filter(x => lc_(x) === k)[0];
+    if (own && params[own]) out[k] = String(params[own]);
+  });
+  return out;
+}
+
+/** Меню: создаёт секретный ключ и показывает адрес для Тильды. */
+function menuTilda() {
+  const props = PropertiesService.getScriptProperties();
+  let secret = props.getProperty('TILDA_SECRET');
+  if (!secret) {
+    secret = Utilities.getUuid().replace(/-/g, '');
+    props.setProperty('TILDA_SECRET', secret);
+  }
+  sheet_(SHEETS.tilda, HEAD.tilda);
+  const url = ScriptApp.getService().getUrl();
+  const html = HtmlService.createHtmlOutput(
+    '<div style="font:14px Arial;line-height:1.5">' +
+    (url
+      ? '<p>Адрес вебхука для Тильды (скопируйте целиком):</p>' +
+        '<textarea style="width:100%;height:70px" onclick="this.select()">' + url + '?key=' + secret + '</textarea>'
+      : '<p><b>Сначала опубликуйте скрипт как веб-приложение</b>: в редакторе Apps Script ' +
+        '«Начать развертывание → Новое развертывание → Веб-приложение», ' +
+        'запуск от имени «Меня», доступ «Все». Потом откройте это окно снова.</p>' +
+        '<p>Ключ, который нужно будет дописать к адресу: <code>?key=' + secret + '</code></p>') +
+    '<p>В Тильде: <b>Настройки сайта → Формы → Webhook</b> → вставьте адрес → «Добавить». ' +
+    'Затем в настройках каждой формы на страницах отметьте этот Webhook.</p>' +
+    '<p>Чтобы в заявках были UTM-метки, в Тильде включите передачу Cookies: ' +
+    'в настройках вебхука отметьте «Передавать Cookies».</p></div>'
+  ).setWidth(520).setHeight(360);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Подключение Тильды');
+}

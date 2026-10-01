@@ -11,6 +11,7 @@ function rebuildFacts() {
     visits: readObjects_(SHEETS.mkVisits),
     subs: readObjects_(SHEETS.mkSubs),
     pays: readObjects_(SHEETS.mkPays),
+    tilda: readObjects_(SHEETS.tilda),
   };
   const rows = buildFacts_(d, params_());
   writeTable_(SHEETS.fact, HEAD.fact, rows);
@@ -26,13 +27,14 @@ function factsSummary_(rows) {
     if (r[1] === EV.spend) spend += r[5];
     else qty[r[1]] = (qty[r[1]] || 0) + r[4];
   });
-  const lost = rows.filter(r => r[1] !== EV.spend && r[1] !== EV.lead && r[1] !== EV.adLead && r[2] === NO_LEAD).length;
+  const lost = rows.filter(r => r[1] !== EV.spend && r[1] !== EV.lead && r[1] !== EV.adLead && r[1] !== EV.siteLead && r[2] === NO_LEAD).length;
   const fmt = d => pad2_(d.getDate()) + '.' + pad2_(d.getMonth() + 1) + '.' + d.getFullYear();
   return rows.length + ' строк за ' + fmt(rows[0][0]) + '–' + fmt(rows[rows.length - 1][0]) +
     '; расход ' + Math.round(spend) + ' ₽' +
-    '; лиды (кабинет) ' + (qty[EV.adLead] || 0) + ', лиды (CRM) ' + (qty[EV.lead] || 0) +
+    '; лиды (кабинет) ' + (qty[EV.adLead] || 0) + ', заявки с сайта ' + (qty[EV.siteLead] || 0) +
+    ', лиды (CRM) ' + (qty[EV.lead] || 0) +
     ', пробные ' + (qty[EV.trial] || 0) + ', абонементы ' + (qty[EV.sub] || 0) +
-    (lost ? '; событий МК без заявки в амо: ' + lost : '');
+    (lost ? '; событий МК без заявки (нет телефона в амо и Тильде): ' + lost : '');
 }
 
 /** Первое подходящее правило {field, contains, channel} или ''. */
@@ -98,7 +100,25 @@ function buildFacts_(d, p) {
       if (phone && (!byPhone[phone] || byPhone[phone].ch === NO_CHANNEL)) byPhone[phone] = { ch: ch, camp: camp };
     });
 
-  // 3. Ученики Мой Класс наследуют канал сделки по телефону
+  // 2б. Заявки с сайта (Тильда). Если по телефону ещё нет сделки амо с каналом,
+  //     канал клиента берётся из его первой заявки.
+  (d.tilda || [])
+    .slice()
+    .sort((a, b) => (day_(a['Получена']) || 0) - (day_(b['Получена']) || 0))
+    .forEach(t => {
+      const utmCampaign = String(t['utm_campaign'] || '');
+      const camp = campaigns[lc_(utmCampaign)] || utmCampaign;
+      const ch = matchRule_(p.rules, {
+        utm_source: t['utm_source'], utm_medium: t['utm_medium'], utm_campaign: t['utm_campaign'],
+        utm_content: t['utm_content'], utm_term: t['utm_term'], форма: t['Форма'], страница: t['Страница'],
+        кампания: camp,
+      }) || String(t['utm_source'] || '') || NO_CHANNEL;
+      push(t['Получена'], EV.siteLead, ch, camp, 1, 0, t['ID заявки'], '');
+      const phone = normalizePhone_(t['Телефон']);
+      if (phone && (!byPhone[phone] || byPhone[phone].ch === NO_CHANNEL)) byPhone[phone] = { ch: ch, camp: camp };
+    });
+
+  // 3. Ученики Мой Класс наследуют канал сделки или заявки по телефону
   const src = {};
   d.clients.forEach(c => {
     src[String(c['ID ученика'])] = byPhone[normalizePhone_(c['Телефон'])] || { ch: NO_LEAD, camp: '' };

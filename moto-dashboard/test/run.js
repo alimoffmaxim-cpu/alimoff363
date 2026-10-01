@@ -79,7 +79,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -118,6 +118,19 @@ test('localizeFormula_: запятые → ; и \\ в массивах, стро
   assert.strictEqual(L(once), once);
 });
 
+test('Тильда: телефон, имя, UTM из COOKIES и из полей формы', () => {
+  const at = vm.runInContext('new Date(2026, 8, 3, 14, 5)', ctx);
+  const cookies = 'TILDAUTM=' + encodeURIComponent('utm_source=yandex|||utm_medium=cpc|||utm_campaign=555|||utm_content=ad1') + '; _ym_uid=1';
+  const r = plain(t.tildaRow_({ Name: 'Иван', Phone: '+7 (916) 000-00-09', Email: 'a@b.ru', tranid: '123:456',
+    formname: 'Пробная тренировка', COOKIES: cookies, key: 'secret' }, at));
+  assert.deepStrictEqual(r.slice(1, 12), ['123:456', 'Пробная тренировка', '', 'Иван', '79160000009', 'a@b.ru',
+    'yandex', 'cpc', '555', 'ad1', '']);
+  assert.ok(!r[12].includes('secret') && !r[12].includes('TILDAUTM'));
+  // Скрытые поля формы важнее куки
+  assert.strictEqual(t.tildaUtm_({ utm_source: 'vk', COOKIES: cookies }).utm_source, 'vk');
+  assert.strictEqual(t.tildaUtm_({}).utm_source, '');
+});
+
 test('subType_', () => {
   const rules = [{ contains: 'пробн', type: 'пробное' }, { contains: 'разов', type: 'разовая' }];
   assert.strictEqual(t.subType_('Разовое занятие', 1, rules), 'разовая');
@@ -143,6 +156,8 @@ const data = {
     { 'Дата': D('2026-09-01'), 'Площадка': 'Яндекс Директ', 'Кабинет': 'основной', 'ID кампании': '555', 'Кампания': 'Посевы Макс', 'Расход': 500, 'Лиды (кабинет)': 4 },
   ],
   adsManual: [{ 'Дата': D('2026-09-02'), 'Канал': 'Telegram', 'Кампания': 'Посев @moto', 'Расход': 3000 }],
+  tilda: [{ 'Получена': D('2026-09-03'), 'ID заявки': 't1', 'Форма': 'Пробная', 'Телефон': '79160000009',
+    'utm_source': 'yandex', 'utm_campaign': '555' }],
   amo: [
     { 'ID сделки': 2, 'Создана': D('2026-09-03'), 'Воронка': 'Основная', 'Статус': 'Новая', 'utm_source': 'vk', 'utm_campaign': '11', 'Телефон': '79160000001' },
     { 'ID сделки': 1, 'Создана': D('2026-09-02'), 'Воронка': 'Основная', 'Статус': 'Новая', 'utm_source': '', 'Источник': '', 'Телефон': '79160000001' },
@@ -158,6 +173,7 @@ const data = {
     { 'ID записи': 'v1', 'Дата': D('2026-09-05'), 'ID ученика': 101, 'Пробное': true, 'Пришёл': true },
     { 'ID записи': 'v2', 'Дата': D('2026-09-05'), 'ID ученика': 102, 'Пробное': true, 'Пришёл': false },
     { 'ID записи': 'v3', 'Дата': D('2026-09-06'), 'ID ученика': 102, 'Пробное': false, 'Пришёл': true },
+    { 'ID записи': 'v4', 'Дата': D('2026-09-07'), 'ID ученика': 103, 'Пробное': true, 'Пришёл': true },
   ],
   subs: [
     { 'ID': 's1', 'Дата продажи': D('2026-09-06'), 'ID ученика': 101, 'Абонемент': '8 тренировок', 'Занятий': 8, 'Цена': 20000 },
@@ -187,10 +203,12 @@ test('buildFacts_: атрибуция first touch, фильтр статусов
   assert.deepStrictEqual(by('лид', 'Макс').map(r => r[3]), ['Посевы Макс']);
   assert.deepStrictEqual(by('лид', 'VK Реклама').map(r => r[3]), ['Мотокросс дети']);
   // Клиент 101: первая сделка без канала, вторая — VK → канал VK
-  assert.deepStrictEqual(by('пробное').map(r => [r[2], r[7]]), [['VK Реклама', 101]]);
+  assert.deepStrictEqual(by('пробное').map(r => [r[2], r[7]]), [['VK Реклама', 101], ['Макс', 103]]);
+  // Заявка с Тильды: канал по UTM, ученик 103 нашёлся по телефону только в Тильде
+  assert.deepStrictEqual(by('заявка_сайт').map(r => [r[2], r[3], r[6]]), [['Макс', 'Посевы Макс', 't1']]);
   assert.deepStrictEqual(by('абонемент').map(r => [r[2], r[5]]), [['VK Реклама', 20000]]);
   assert.deepStrictEqual(by('повторная').map(r => [r[2], r[5]]), [['Макс', 3000]]);
-  // «Пробное» в продажах не считается, клиент 103 без заявки
+  // «Пробное» в продажах не считается
   assert.strictEqual(rows.filter(r => r[6] === 's3').length, 0);
   // Выручка: приход − возврат, списания с баланса не выручка
   assert.strictEqual(sum(by('оплата', 'VK Реклама'), 5), 20000);
@@ -234,12 +252,13 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   console.log('     Сводка_каналы!A5 =', f('Сводка_каналы', 'A5'));
   console.log('     Сводка_каналы!B2 =', f('Сводка_каналы', 'B2'));
   console.log('     Сводка_каналы!D5 =', f('Сводка_каналы', 'D5'));
-  console.log('     Сводка_каналы!O5 =', f('Сводка_каналы', 'O5'));
+  console.log('     Сводка_каналы!Q5 =', f('Сводка_каналы', 'Q5'));
   console.log('     Сводка_месяцы!P5 =', f('Сводка_месяцы', 'P5'));
   console.log('     Сводка_месяцы!Q2 =', f('Сводка_месяцы', 'Q2'));
   console.log('     Дашборд!K7     =', f('Дашборд', 'K7'));
   console.log('     Данные_графиков!A2 =', f('Данные_графиков', 'A2'));
-  assert.ok(f('Сводка_каналы', 'O5').includes('IFERROR((L5-B5)/B5'));
+  assert.ok(f('Сводка_каналы', 'Q5').includes('IFERROR((N5-B5)/B5'));
+  assert.ok(f('Сводка_каналы', 'G5').includes('"заявка_сайт"'));
   assert.ok(f('Сводка_каналы', 'E5').includes('"лид_кабинет"'));
   // Мок не считает формулы, поэтому проверка локали видит «ошибку» и включает «;».
   // Ни в одной формуле не должно остаться запятых вне строк и имён листов.
@@ -249,8 +268,8 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
     if (fm) assert.ok(!bare(fm).includes(','), s.getName() + ' ' + k + ': ' + fm);
   }));
   assert.strictEqual(f('Дашборд', 'B3'), '=DATE(YEAR(TODAY());MONTH(TODAY());1)');
-  assert.ok(f('Сводка_месяцы', 'Q5').includes('L5-B5-P5'));
-  assert.strictEqual(f('Дашборд', 'L7'), '=H7-A7-K7');
+  assert.ok(f('Сводка_месяцы', 'S5').includes('N5-B5-R5'));
+  assert.strictEqual(f('Дашборд', 'M7'), '=I7-A7-L7');
 
   // Повторный запуск на старом листе «Настройки» без YANDEX_GOALS: параметр дописывается, правила целы
   const st = sh('Настройки');
@@ -271,9 +290,9 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   put('raw_mk_subs', t.HEAD.mkSubs, data.subs);
   put('raw_mk_payments', t.HEAD.mkPays, data.pays);
   const msg = t.rebuildFacts();
-  assert.ok(/лиды \(кабинет\) 4, лиды \(CRM\) 3/.test(msg), msg);
+  assert.ok(/лиды \(кабинет\) 4, заявки с сайта 0, лиды \(CRM\) 3/.test(msg), msg);
   console.log('     rebuildFacts →', msg);
-  assert.strictEqual(t.readRows_('fact').length, t.buildFacts_(Object.assign({}, data, { adsManual: [] }), p).length);
+  assert.strictEqual(t.readRows_('fact').length, t.buildFacts_(Object.assign({}, data, { adsManual: [], tilda: [] }), p).length);
 });
 
 console.log('\n' + passed + ' тестов пройдено' + (process.exitCode ? ', есть ошибки' : ''));

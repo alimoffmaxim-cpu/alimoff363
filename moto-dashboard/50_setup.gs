@@ -29,7 +29,7 @@ function setupSheets() {
   sheet_(SHEETS.adsManual, HEAD.adsManual).getRange('A:A').setNumberFormat('dd.mm.yyyy');
   sheet_(SHEETS.costs, HEAD.costs).getRange('A:A').setNumberFormat('mm.yyyy');
   sheet_(SHEETS.costs).getRange('E1').setValue('Месяц — любая дата этого месяца, например 01.09.2026');
-  ['ads', 'amo', 'mkClients', 'mkVisits', 'mkSubs', 'mkPays', 'fact', 'log'].forEach(k => sheet_(SHEETS[k], HEAD[k]));
+  ['ads', 'tilda', 'amo', 'mkClients', 'mkVisits', 'mkSubs', 'mkPays', 'fact', 'log'].forEach(k => sheet_(SHEETS[k], HEAD[k]));
 
   buildSummaries_();
   buildDashboard_();
@@ -206,6 +206,7 @@ function buildDashboard_() {
     ['Расход на рекламу', '=' + m('spend'), '#,##0 ₽'],
     ['Лиды (CRM)', '=' + m('leads'), '#,##0'],
     ['Лиды (кабинет)', '=' + m('adLeads'), '#,##0'],
+    ['Заявки с сайта', '=' + m('siteLeads'), '#,##0'],
     ['Цена лида (CRM)', '=' + m('cpl'), '#,##0 ₽'],
     ['Пробные', '=' + m('trials'), '#,##0'],
     ['Повторные', '=' + m('repeat'), '#,##0'],
@@ -257,13 +258,13 @@ function buildCharts_(dash, row) {
     setF_(sh.getRange(2, at), '=IFERROR(FILTER({' + keys.map(k => src + k + '5:' + k + end).join(',') + '},' +
       src + 'A5:A' + end + '<>""),"")');
   };
-  block(1, ch, cEnd, ['A', c('adLeads'), c('leads'), c('trials'), c('subs')],
-    ['Канал', 'Лиды (кабинет)', 'Лиды (CRM)', 'Пробные', 'Абонементы']);
+  block(1, ch, cEnd, ['A', c('adLeads'), c('siteLeads'), c('leads'), c('trials'), c('subs')],
+    ['Канал', 'Лиды (кабинет)', 'Заявки с сайта', 'Лиды (CRM)', 'Пробные', 'Абонементы']);
   block(7, ch, cEnd, ['A', c('spend'), c('revenue')], ['Канал', 'Расход', 'Выручка']);
-  block(11, dy, dEnd, ['A', c('spend'), c('revenue'), c('adLeads'), c('leads')],
-    ['Дата', 'Расход', 'Выручка', 'Лиды (кабинет)', 'Лиды (CRM)']);
+  block(11, dy, dEnd, ['A', c('spend'), c('revenue'), c('adLeads'), c('siteLeads'), c('leads')],
+    ['Дата', 'Расход', 'Выручка', 'Лиды (кабинет)', 'Заявки с сайта', 'Лиды (CRM)']);
   sh.getRange('K2:K').setNumberFormat('dd.mm');
-  sh.getRange('Q1').setValue('Служебный лист для графиков дашборда — не редактируйте.').setFontColor('#888888');
+  sh.getRange('R1').setValue('Служебный лист для графиков дашборда — не редактируйте.').setFontColor('#888888');
 
   const add = (type, ranges, title, r, col, opts) => {
     let b = dash.newChart().setChartType(type).setPosition(r, col, 0, 0)
@@ -273,8 +274,8 @@ function buildCharts_(dash, row) {
     Object.keys(opts || {}).forEach(k => { b = b.setOption(k, opts[k]); });
     dash.insertChart(b.build());
   };
-  add(Charts.ChartType.COLUMN, ['A1:E' + (CFG.ROWS_CHANNELS + 1)], 'Лиды → пробные → абонементы по каналам', row, 1);
+  add(Charts.ChartType.COLUMN, ['A1:F' + (CFG.ROWS_CHANNELS + 1)], 'Лиды → пробные → абонементы по каналам', row, 1);
   add(Charts.ChartType.COLUMN, ['G1:I' + (CFG.ROWS_CHANNELS + 1)], 'Расход и выручка по каналам', row, 8);
   add(Charts.ChartType.LINE, ['K1:M' + (CFG.ROWS_DAYS + 1)], 'Расход и выручка по дням', row + 18, 1, { curveType: 'function' });
-  add(Charts.ChartType.COLUMN, ['K1:K' + (CFG.ROWS_DAYS + 1), 'N1:O' + (CFG.ROWS_DAYS + 1)], 'Лиды по дням', row + 18, 8);
+  add(Charts.ChartType.COLUMN, ['K1:K' + (CFG.ROWS_DAYS + 1), 'N1:P' + (CFG.ROWS_DAYS + 1)], 'Лиды и заявки по дням', row + 18, 8);
 }

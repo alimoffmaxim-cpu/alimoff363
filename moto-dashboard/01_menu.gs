@@ -8,6 +8,7 @@ function onOpen() {
     .addItem('Обновить амоCRM', 'menuAmo')
     .addItem('Обновить Мой Класс', 'menuMk')
     .addItem('Пересобрать сводку (fact)', 'menuFacts')
+    .addItem('Подключить Тильду (заявки с сайта)', 'menuTilda')
     .addSeparator()
     .addSubMenu(ui.createMenu('Ключи доступа')
       .addItem('VK Реклама: токен на 24 ч', 'promptVkToken')

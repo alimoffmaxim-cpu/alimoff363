@@ -228,3 +228,19 @@ def test_fx_history_rates_and_changes():
     months = fx_by_month(h)
     assert [(y, m, round(r, 3), thb, n) for y, m, r, thb, n in months] == [
         (2026, 9, 3.025, 4000000, 2), (2026, 8, 2.9, 3000000, 1)]
+
+
+def test_income_defaults_to_rubles():
+    from finbot.finance import month_totals
+
+    assert parse_input("+100000 зп", TODAY).to_tx().cur == "RUB"
+    assert parse_input("доход 100000", TODAY).to_tx().cur == "RUB"
+    assert parse_input("+5000 б зп", TODAY).to_tx().cur == "THB"   # баты — только явно
+    assert parse_input("+100000 рб", TODAY).to_tx().cur == "RUBB"
+    assert parse_input("-350 еда", TODAY).to_tx().cur == "THB"     # расходы — по-прежнему в батах
+
+    txs = [parse_input(t, TODAY).to_tx() for t in ("+100000 зп", "+50000 рб", "-3000 еда", "обмен 30000 10000")]
+    m = month_totals(txs, TODAY.year, TODAY.month)
+    assert m.income_rub_total == 15000000
+    assert m.in_rubles(m.rate) == (15000000, 900000)  # 3 000 ฿ × 3,00 = 9 000 ₽
+    assert m.in_rubles(None) is None  # без курса батовые суммы не пересчитать

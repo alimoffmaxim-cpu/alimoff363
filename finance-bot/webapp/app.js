@@ -34,7 +34,8 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
       for (var j = 0; j < pairs.length; j += 2) cats.push({ name: data.c[pairs[j]], amount: pairs[j + 1] });
       return { year: row[0], month: row[1], income: row[2], expense: row[3], fxRub: row[4], fxThb: row[5],
         rate: row[5] ? row[4] / row[5] : null, incomeRub: row[6] || 0, expenseRub: row[7] || 0,
-        incomeBiz: row[8] || 0, expenseBiz: row[9] || 0, cats: cats };
+        incomeBiz: row[8] || 0, expenseBiz: row[9] || 0, cats: cats,
+        incomeMain: (row[6] || 0) + (row[8] || 0) };  // основной доход — рубли (личные + бизнес)
     });
   }
 
@@ -72,6 +73,14 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
       Math.abs(pct).toFixed(1).replace(".", ",") + "%";
     if (pct !== 0) span.className += (pct > 0) === upIsGood ? " good" : " bad";
     return span;
+  }
+
+  // Месяц в рублях: батовые суммы пересчитаны по курсу обмена месяца (или последнему известному).
+  function inRub(m) {
+    var r = m.rate || state.data.r || null;
+    if (!r && (m.income || m.expense)) return null;
+    r = r || 0;
+    return { income: m.incomeMain + m.income * r, expense: m.expenseRub + m.expenseBiz + m.expense * r };
   }
 
   // ---------- рисование ----------
@@ -121,11 +130,13 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
 
     // Плитки месяца
     var tiles = el("div", "tiles");
-    tiles.appendChild(tile("income", "Доходы за месяц", thb(cur.income), [delta(cur.income, prev && prev.income, true),
-      cur.incomeRub ? el("div", null, "и " + rub(cur.incomeRub) + " в рублях") : null,
-      cur.incomeBiz ? el("div", null, "и " + rub(cur.incomeBiz) + " бизнес") : null]));
-    var net = cur.income - cur.expense;
-    tiles.appendChild(tile(null, "Итог месяца", thb(net), [el("span", null, prev ? "прошлый: " + thb(prev.income - prev.expense) : "доходы − расходы")]));
+    tiles.appendChild(tile("income", "Доходы за месяц", rub(cur.incomeMain), [delta(cur.incomeMain, prev && prev.incomeMain, true),
+      cur.incomeBiz ? el("div", null, "из них 💼 бизнес " + rub(cur.incomeBiz)) : null,
+      cur.income ? el("div", null, "и " + thb(cur.income) + " в батах") : null]));
+    var view = inRub(cur), prevView = prev ? inRub(prev) : null;
+    var netValue = view ? (view.income - view.expense > 0 ? "+" : "") + rub(view.income - view.expense) : "—";
+    tiles.appendChild(tile(null, "Итог месяца", netValue, [el("span", null,
+      !view ? "нужен курс обмена" : prevView ? "прошлый: " + rub(prevView.income - prevView.expense) : "доходы − расходы, в рублях")]));
     tiles.appendChild(tile("rate wide", "Обмен ₽ → ฿", cur.fxThb ? thb(cur.fxThb) : "—",
       cur.fxThb ? [el("div", null, "за " + rub(cur.fxRub) + " · " + rate(cur.rate)),
         prev && prev.rate ? delta(cur.rate, prev.rate, false) : null] : [el("span", null, "в этом месяце не было")]));
@@ -166,7 +177,8 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
   // Столбцы: доходы и расходы по месяцам. Нажатие на месяц выбирает его.
   function columnsChart(ms) {
     var sec = el("section");
-    sec.appendChild(el("h2", null, "Доходы и расходы по месяцам"));
+    sec.appendChild(el("h2", null, "Доходы и расходы по месяцам, ₽"));
+    sec.appendChild(el("p", "muted small", "Расходы в батах пересчитаны в рубли по курсу обмена месяца"));
     var legend = el("div", "legend");
     [["income", "Доходы"], ["expense", "Расходы"]].forEach(function (p) {
       var s = el("span"); s.appendChild(el("span", "swatch " + p[0])); s.appendChild(document.createTextNode(p[1])); legend.appendChild(s);
@@ -175,13 +187,17 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     var cur = ms[state.sel];
     var readout = el("div", "readout");
     readout.appendChild(document.createTextNode(MONTHS[cur.month - 1] + ": доходы "));
-    readout.appendChild(el("b", null, thb(cur.income)));
+    readout.appendChild(el("b", null, rub(cur.incomeMain)));
     readout.appendChild(document.createTextNode(", расходы "));
     readout.appendChild(el("b", null, thb(cur.expense)));
+    var cv = inRub(cur);
+    if (cv && cur.expense) readout.appendChild(document.createTextNode(" ≈ " + rub(cv.expense)));
     sec.appendChild(readout);
 
+    // Столбцы в рублях: расходы в батах пересчитаны по курсу обмена
+    var vals = ms.map(function (m) { return inRub(m) || { income: m.incomeMain, expense: m.expenseRub + m.expenseBiz }; });
     var W = chartWidth(), H = 210, top = 16, bottom = 26, left = 40, right = 4;
-    var max = Math.max.apply(null, ms.map(function (m) { return Math.max(m.income, m.expense); }).concat([1]));
+    var max = Math.max.apply(null, vals.map(function (v) { return Math.max(v.income, v.expense); }).concat([1]));
     var step = niceStep(max / 4);
     var yMax = Math.ceil(max / step) * step;
     var plotH = H - top - bottom, band = (W - left - right) / ms.length;
@@ -195,7 +211,7 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     ms.forEach(function (m, i) {
       var cx = left + band * i + band / 2;
       var dim = i === state.sel ? "" : " dim";
-      [[m.income, "bar-income", cx - barW - 1], [m.expense, "bar-expense", cx + 1]].forEach(function (b) {
+      [[vals[i].income, "bar-income", cx - barW - 1], [vals[i].expense, "bar-expense", cx + 1]].forEach(function (b) {
         if (!b[0]) return;
         var h = Math.max(1, b[0] / yMax * plotH);
         root.appendChild(svg("path", { d: roundedTop(b[2], top + plotH - h, barW, h, 4), "class": b[1] + dim }));

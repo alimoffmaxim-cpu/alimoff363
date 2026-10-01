@@ -52,7 +52,7 @@ def render(txs: list[Tx], today: date) -> bytes:
     bal = wallets["THB"]
     rate = last_rate(txs)
     tiles = [
-        ("Доходы", money(cur.income), fmt_pct(pct_change(cur.income, prev.income))),
+        ("Доходы", money(cur.income_rub_total, RUB), fmt_pct(pct_change(cur.income_rub_total, prev.income_rub_total))),
         ("Расходы", money(cur.expense), fmt_pct(pct_change(cur.expense, prev.expense))),
         ("Обмен ₽→฿", money(cur.fx_thb), f"курс {fmt_rate(cur.rate)}" if cur.rate else "в этом месяце не было"),
         ("Остаток ฿", money(bal), f"₽ {money(wallets['RUB'], RUB)} · бизнес {money(wallets['RUBB'], RUB)}"),
@@ -69,8 +69,10 @@ def render(txs: list[Tx], today: date) -> bytes:
     ax = fig.add_subplot(grid[1, :])
     x = range(len(months))
     width = 0.36
-    inc = [_rub(m.income) for m in months]
-    exp = [_rub(m.expense) for m in months]
+    # Основной доход — в рублях, расходы — в батах: на графике всё в рублях по курсу обмена месяца.
+    views = [m.in_rubles(m.rate or rate) or (m.income_rub_total, m.expense_rub + m.expense_rubb) for m in months]
+    inc = [_rub(v[0]) for v in views]
+    exp = [_rub(v[1]) for v in views]
     ax.bar([i - width / 2 - 0.01 for i in x], inc, width, color=INCOME, label="Доходы")
     ax.bar([i + width / 2 + 0.01 for i in x], exp, width, color=EXPENSE, label="Расходы")
     top = max(inc + exp + [1])
@@ -81,7 +83,7 @@ def render(txs: list[Tx], today: date) -> bytes:
     ax.set_xticks(list(x), [month_label(m.year, m.month) for m in months])
     ax.set_ylim(0, top * 1.15)
     ax.yaxis.set_major_formatter(lambda v, _: _short(v))
-    ax.set_title("Доходы и расходы за 6 месяцев, ฿", loc="left", fontsize=12, weight="bold", pad=30)
+    ax.set_title("Доходы и расходы за 6 месяцев, ₽ (баты — по курсу обмена)", loc="left", fontsize=12, weight="bold", pad=30)
     ax.legend(loc="lower left", frameon=False, ncols=2, bbox_to_anchor=(-0.01, 1.0), borderaxespad=0.2)
     _style(ax)
     ax.grid(axis="y", color=GRID, linewidth=0.8)
@@ -123,21 +125,26 @@ def caption(txs: list[Tx], today: date) -> str:
     prev, cur = monthly_totals(txs, today, 2)
     lines = [
         f"<b>{MONTHS_FULL[cur.month - 1]}</b> в сравнении с {MONTHS_WITH[prev.month - 1]}",
-        f"➕ Доходы: <b>{money(cur.income)}</b> ({fmt_pct(pct_change(cur.income, prev.income))})",
+        f"➕ Доходы: <b>{money(cur.income_rub_total, RUB)}</b> "
+        f"({fmt_pct(pct_change(cur.income_rub_total, prev.income_rub_total))})"
+        + (f" + {money(cur.income)}" if cur.income else ""),
         f"➖ Расходы: <b>{money(cur.expense)}</b> ({fmt_pct(pct_change(cur.expense, prev.expense))})",
     ]
     rate = cur.rate or last_rate(txs)
     if rate and cur.expense:
         lines.append(f"     {approx_rub(cur.expense, rate)} по курсу {fmt_rate(rate)}")
-    lines.append(f"📈 Итог месяца: <b>{money(cur.net)}</b>")
+    view = cur.in_rubles(rate)
+    if view is not None:
+        net = view[0] - view[1]
+        lines.append(f"📈 Итог месяца: <b>{'+' if net > 0 else ''}{money(net, RUB)}</b>")
     if cur.fx_thb:
         change = fmt_pct(pct_change(cur.rate, prev.rate)) if prev.rate else "курс прошлого месяца неизвестен"
         lines.append(f"💱 Обмен: {money(cur.fx_rub, RUB)} → {money(cur.fx_thb)}, "
                      f"курс {fmt_rate(cur.rate)} ({change})")
-    if cur.income_rub or cur.expense_rub:
-        lines.append(f"₽ В рублях: доходы {money(cur.income_rub, RUB)} · расходы {money(cur.expense_rub, RUB)}")
-    if cur.income_rubb or cur.expense_rubb:
-        lines.append(f"💼 Рубли (бизнес): доходы {money(cur.income_rubb, RUB)} · расходы {money(cur.expense_rubb, RUB)}")
+    if cur.income_rubb:
+        lines.append(f"💼 Из доходов — бизнес: {money(cur.income_rubb, RUB)}")
+    if cur.expense_rub or cur.expense_rubb:
+        lines.append(f"₽ Расходы в рублях: {money(cur.expense_rub + cur.expense_rubb, RUB)}")
     wallets = balances(txs)
     lines.append("💰 Остаток: " + " · ".join(f"<b>{wallet_money(v, w)}</b>" for w, v in wallets.items()))
     return "\n".join(lines)

@@ -86,7 +86,7 @@ HELP = """<b>Как пользоваться</b>
 Или пишите сразу одной строкой (без значка валюты — в батах):
 
 <b>Расход:</b> <code>-350</code> · <code>350 еда</code> · <code>расход 1200 такси</code>
-<b>Доход:</b> <code>+50000</code> — баты · <code>+100000 р зп</code> — рубли · <code>+100000 рб</code> — рубли (бизнес)
+<b>Доход</b> (по умолчанию в рублях): <code>+100000 зп</code> · бизнес: <code>+100000 рб</code> · в батах: <code>+5000 б</code>
 <b>Обмен:</b> <code>обмен 90000 - 30000</code> — отдали ₽, получили ฿
 <b>Остатки:</b> <code>баланс 12000 б</code> — баты, <code>баланс 150000 р</code> — рубли, <code>баланс 500000 рб</code> — рубли (бизнес)
 (только выравнивает остаток, в доходы и расходы не попадает)
@@ -257,6 +257,23 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
                          f"<code>баланс 10000 {WALLET_CMD[w]}</code>")
         return line
 
+    def income_text(m) -> str:
+        """Доходы месяца: основные — в рублях (личные + бизнес), баты — только если были."""
+        text = money(m.income_rub_total, RUB)
+        if m.income_rubb:
+            text += f" (из них 💼 {money(m.income_rubb, RUB)})"
+        if m.income:
+            text += f" + {money(m.income)}"
+        return text
+
+    def net_text(m, rate: float | None) -> str | None:
+        """Итог месяца в рублях: батовые суммы по курсу обмена."""
+        view = m.in_rubles(rate)
+        if view is None:
+            return None
+        net = view[0] - view[1]
+        return f"{'+' if net > 0 else ''}{money(net, RUB)}" + (f" (по курсу {fmt_rate(rate)})" if rate and m.expense else "")
+
     def describe(tx: Tx) -> str:
         note = f" · {html.escape(tx.note)}" if tx.note else ""
         day = "" if tx.day == today() else f" · {tx.day:%d.%m}"
@@ -289,11 +306,9 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
                 text += "\n📈 Первый обмен — с него начнётся история курса"
         m = month_totals(txs, tx.day.year, tx.day.month)
         name = MONTHS_FULL[tx.day.month - 1]
-        text += f"\n\n📅 <b>{name}</b>: расходы {money(m.expense)} · доходы {money(m.income)}"
-        if m.income_rub or m.expense_rub:
-            text += f"\n     в рублях: расходы {money(m.expense_rub, RUB)} · доходы {money(m.income_rub, RUB)}"
-        if m.income_rubb or m.expense_rubb:
-            text += f"\n     💼 бизнес: расходы {money(m.expense_rubb, RUB)} · доходы {money(m.income_rubb, RUB)}"
+        text += f"\n\n📅 <b>{name}</b>: расходы {money(m.expense)} · доходы {income_text(m)}"
+        if m.expense_rub or m.expense_rubb:
+            text += f"\n     расходы в рублях: {money(m.expense_rub + m.expense_rubb, RUB)}"
         if tx.kind == "out" and tx.cur == "THB":
             spent = dict(categories(txs, tx.day.year, tx.day.month)).get(tx.category, 0)
             text += f"\n{label(html.escape(tx.category))} за {name.lower()}: {money(spent)}"
@@ -330,7 +345,7 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
             await state.set_state(Entry.category)
             await state.update_data(pending=_pending_dump(parsed), cats=cats)
             what = "Расход" if parsed.kind == "out" else "Доход"
-            await reply(message, f"{what} <b>{wallet_money(parsed.amount, parsed.cur or 'THB')}</b> — выберите категорию:",
+            await reply(message, f"{what} <b>{wallet_money(parsed.amount, parsed.wallet)}</b> — выберите категорию:",
                         reply_markup=category_markup(cats))
             return
         await state.clear()
@@ -439,12 +454,19 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
 
     @router.message(F.text == BTN_IN)
     async def btn_income(message: Message, state: FSMContext) -> None:
-        await state.clear()
-        markup = InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="฿ Баты", callback_data="income:THB"),
-            InlineKeyboardButton(text="₽ Рубли", callback_data="income:RUB"),
-            InlineKeyboardButton(text="💼 Рубли (бизнес)", callback_data="income:RUBB")]])
-        await reply(message, "➕ Куда пришёл доход?", reply_markup=markup)
+        # Основной доход — в рублях: сразу спрашиваем сумму, другие кошельки — кнопками ниже.
+        await state.set_state(Entry.amount)
+        await state.update_data(kind="in", cur="RUB")
+        await reply(message, income_prompt("RUB"), reply_markup=income_markup("RUB"))
+
+    def income_prompt(cur: str) -> str:
+        return (f"➕ Доход — {WALLET_ICONS[cur]} <b>{WALLET_NAMES[cur].lower()}</b>. Сумма? "
+                "Например, <code>100000</code> или сразу <code>100000 зп</code>")
+
+    def income_markup(cur: str) -> InlineKeyboardMarkup:
+        options = {"RUB": "₽ В рубли", "RUBB": "💼 В бизнес", "THB": "฿ В баты"}
+        return InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text=text, callback_data=f"income:{w}") for w, text in options.items() if w != cur]])
 
     @router.callback_query(F.data.startswith("income:"))
     async def cb_income_currency(call: CallbackQuery, state: FSMContext) -> None:
@@ -455,8 +477,7 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         await state.set_state(Entry.amount)
         await state.update_data(kind="in", cur=cur)
         await call.answer()
-        await call.message.edit_text(f"{WALLET_ICONS[cur]} Доход — {WALLET_NAMES[cur].lower()}. Сумма? "
-                                     "Например, <code>50000</code> или сразу <code>50000 зп</code>")
+        await call.message.edit_text(income_prompt(cur), reply_markup=income_markup(cur))
 
     @router.message(F.text == BTN_FX)
     async def btn_fx(message: Message, state: FSMContext) -> None:
@@ -523,12 +544,11 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         rate = m.rate or last_rate(txs)
         if rate and m.expense:
             lines.append(f"     {approx_rub(m.expense, rate)}")
-        lines.append(f"➕ Доходы: <b>{money(m.income)}</b>{change(m.income, prev.income)}")
-        lines.append(f"📈 Итог месяца: <b>{money(m.net)}</b>")
-        if m.income_rub or m.expense_rub:
-            lines.append(f"₽ Рубли: доходы {money(m.income_rub, RUB)} · расходы {money(m.expense_rub, RUB)}")
-        if m.income_rubb or m.expense_rubb:
-            lines.append(f"💼 Рубли (бизнес): доходы {money(m.income_rubb, RUB)} · расходы {money(m.expense_rubb, RUB)}")
+        if m.expense_rub or m.expense_rubb:
+            lines.append(f"     и в рублях: {money(m.expense_rub + m.expense_rubb, RUB)}")
+        lines.append(f"➕ Доходы: <b>{income_text(m)}</b>{change(m.income_rub_total, prev.income_rub_total)}")
+        if net := net_text(m, rate):
+            lines.append(f"📈 Итог месяца: <b>{net}</b>")
         if m.fx_thb:
             lines.append(f"💱 Обмен: {money(m.fx_rub, RUB)} → {money(m.fx_thb)} ({fmt_rate(m.rate)})")
         cats = categories(txs, year, month)
@@ -537,9 +557,9 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
             for cat, amount in cats[:12]:
                 share = round(amount / m.expense * 100) if m.expense else 0
                 lines.append(f"{label(html.escape(cat))}: {money(amount)} · {share}%")
-        if (prev.income or prev.expense) and not (m.income or m.expense):
+        if (prev.income_rub_total or prev.expense) and not (m.income_rub_total or m.income or m.expense):
             lines += ["", "В этом месяце операций пока нет — счёт начат с нуля."]
-        if prev.income or prev.expense:
+        if prev.income_rub_total or prev.expense:
             lines += ["", f"<i>В скобках — изменение по сравнению с {MONTHS_WITH[pm - 1]}.</i>"]
         lines += ["", balances_line(txs) + " <i>(копится, не обнуляется)</i>"]
 

@@ -19,6 +19,11 @@ WALLET_NAMES = {"THB": "Баты", "RUB": "Рубли", "RUBB": "Рубли (б�
 WALLET_ICONS = {"THB": "฿", "RUB": "₽", "RUBB": "💼"}
 WALLET_CMD = {"THB": "б", "RUB": "р", "RUBB": "рб"}
 
+
+def default_wallet(kind: str) -> str:
+    """Основной доход — в рублях; расходы и корректировки по умолчанию — в батах."""
+    return "RUB" if kind == "in" else "THB"
+
 MONTHS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
 MONTHS_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
@@ -97,9 +102,14 @@ class Parsed:
     swapped: bool = False
     cur: str | None = None  # валюта, если указана явно (₽, руб, ฿, бат); иначе — баты
 
+    @property
+    def wallet(self) -> str:
+        """Кошелёк операции: явно указанный, иначе доход — в рублях, остальное — в батах."""
+        return self.cur or default_wallet(self.kind)
+
     def to_tx(self) -> Tx:
         return Tx(kind=self.kind, amount=self.amount, category=self.category or "", note=self.note,
-                  day=self.day, rub=self.rub, cur=self.cur or "THB")
+                  day=self.day, rub=self.rub, cur=self.wallet)
 
 
 class ParseError(ValueError):
@@ -238,6 +248,20 @@ class MonthTotals:
     @property
     def rate(self) -> float | None:
         return self.fx_rub / self.fx_thb if self.fx_thb else None
+
+    @property
+    def income_rub_total(self) -> int:
+        """Основной доход: рубли личные + бизнес."""
+        return self.income_rub + self.income_rubb
+
+    def in_rubles(self, rate: float | None) -> tuple[int, int] | None:
+        """(доходы, расходы) месяца в рублях: батовые суммы пересчитаны по курсу обмена."""
+        if rate is None and (self.income or self.expense):
+            return None
+        rate = rate or 0
+        income = self.income_rub_total + round(self.income * rate)
+        expense = self.expense_rub + self.expense_rubb + round(self.expense * rate)
+        return income, expense
 
 
 def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTotals]:

@@ -239,6 +239,46 @@
 .aa-foot a:not(.aa-logo) { text-decoration: none; }
 .aa-foot a:not(.aa-logo):hover { color: var(--aa-ink); }
 
+
+/* hero glow behind the result panel */
+.aa-hero { position: relative; isolation: isolate; }
+.aa-hero::before { content: ""; position: absolute; z-index: -1; right: 4%; top: 18%; width: min(560px, 60vw); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(230, 0, 126, .22), rgba(230, 0, 126, 0)); filter: blur(10px); }
+
+/* numbers: huge total, mini stats and the price chart */
+.aa-num { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 6fr); gap: 48px 64px; align-items: end; }
+.aa-num__head { display: grid; gap: 16px; justify-items: start; min-width: 0; }
+.aa-huge { font-family: var(--aa-display); font-weight: 600; font-size: clamp(76px, 12.5vw, 184px); line-height: .86; letter-spacing: -0.065em; background: linear-gradient(100deg, #fff 35%, var(--aa-accent) 95%); -webkit-background-clip: text; background-clip: text; color: transparent; font-variant-numeric: tabular-nums; padding-bottom: .04em; }
+.aa-huge__label { font-size: clamp(18px, 1.7vw, 22px); color: #D6D6DD; max-width: 20em; }
+.aa-minis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; width: 100%; margin-top: 20px; background: var(--aa-dark-line); border: 1px solid var(--aa-dark-line); border-radius: 16px; overflow: hidden; }
+.aa-minis li { background: var(--aa-dark); padding: 16px 18px; display: grid; gap: 4px; }
+.aa-minis b { font-family: var(--aa-display); font-weight: 600; font-size: clamp(18px, 1.8vw, 24px); letter-spacing: -0.03em; white-space: nowrap; }
+.aa-minis span { font-size: 13px; color: var(--aa-dark-muted); }
+.aa-chart { margin: 0; padding: clamp(22px, 3vw, 32px); border-radius: var(--aa-r); background: var(--aa-dark-card); border: 1px solid var(--aa-dark-line); display: grid; gap: 16px; min-width: 0; }
+.aa-chart figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; font-size: 14px; color: var(--aa-dark-muted); }
+.aa-chart figcaption b { color: #fff; font-weight: 600; font-size: 16px; }
+.aa-chart__legend { display: inline-flex; align-items: center; gap: 8px; }
+.aa-chart__legend::before { content: ""; width: 2px; height: 14px; background: #fff; }
+.aa-chart ol { display: grid; gap: 14px; }
+.aa-chart li { display: grid; grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr) 4.6em; gap: 12px; align-items: center; font-size: 14px; }
+.aa-chart li > span:first-child { color: #D6D6DD; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aa-chart__track { position: relative; height: 10px; border-radius: 10px; background: #26262C; }
+.aa-chart__bar { position: absolute; inset: 0 auto 0 0; width: var(--w); border-radius: 10px; background: linear-gradient(90deg, rgba(230, 0, 126, .55), var(--aa-accent)); transition: width 1.1s cubic-bezier(.2, .7, .2, 1); }
+.aa-js .aa-chart:not(.is-in) .aa-chart__bar { width: 0; }
+.aa-chart__goal { position: absolute; top: -5px; bottom: -5px; left: var(--g); width: 2px; border-radius: 2px; background: #fff; }
+.aa-chart li > b { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* spotlight that follows the cursor in the dark part */
+.aa-dark { position: relative; isolation: isolate; }
+.aa-dark::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .4s; background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 30%), rgba(230, 0, 126, .14), transparent 70%); }
+.aa-dark.is-lit::before { opacity: 1; }
+
+/* hover details */
+.aa-case:hover { box-shadow: 0 0 0 2px var(--aa-accent); }
+.aa-case:hover .aa-case__num { color: var(--aa-accent); }
+.aa-case__num { transition: color .2s; }
+.aa-card__ico { transition: background .2s, color .2s, border-color .2s; }
+.aa-card:hover .aa-card__ico { background: var(--aa-accent); border-color: var(--aa-accent); color: var(--aa-on-accent); }
+
 /* draft marker: remove data-draft from an element once its text is real */
 .aa [data-draft]::after { content: "черновик"; display: inline-block; vertical-align: middle; margin-left: 10px; padding: 2px 6px; border: 1px dashed currentColor; border-radius: 4px; font-family: var(--aa-body); font-size: 10px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; opacity: .7; }
 
@@ -252,6 +292,7 @@
 .aa-stack { animation-delay: .25s; }
 @media (prefers-reduced-motion: reduce) {
   .aa *, .aa *::before, .aa *::after { animation: none !important; transition: none !important; }
+  .aa-js .aa-chart:not(.is-in) .aa-chart__bar { width: var(--w); }
 }
 
 /* tablet */
@@ -260,6 +301,7 @@
   .aa-stack { max-width: 520px; }
   .aa-why { grid-template-columns: minmax(0, 1fr); }
   .aa-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aa-num { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* phone */
@@ -279,6 +321,9 @@
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-seal { position: static; justify-self: start; margin: 0 0 4px; }
+  .aa-minis { grid-template-columns: minmax(0, 1fr); }
+  .aa-chart li { grid-template-columns: minmax(0, 1fr) 4.6em; }
+  .aa-chart li > span:first-child { grid-column: 1 / -1; }
 }
 </style>
 <style>
@@ -386,7 +431,7 @@
         <div class="aa-board">
           <div class="aa-board__main">
             <span class="aa-chip">Результат</span>
-            <p class="aa-big">12 652</p>
+            <p class="aa-big" data-count="12652">12 652</p>
             <small>заявки за 1 704 393 ₽</small>
           </div>
           <ul class="aa-tiles">
@@ -573,6 +618,48 @@
     Array.prototype.forEach.call(marks, function (m) { io.observe(m); });
   } else {
     Array.prototype.forEach.call(marks, function (m) { m.classList.add('is-in'); });
+  }
+
+  // counters: numbers count up once they scroll into view
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0'); };
+  var countUp = function (el) {
+    var end = Number(el.getAttribute('data-count'));
+    if (!end || reduce) return;
+    var t0 = null;
+    var step = function (t) {
+      if (t0 === null) t0 = t;
+      var k = Math.min(1, (t - t0) / 1400);
+      el.textContent = fmt(Math.round(end * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  var reveal = document.querySelectorAll('[data-count], .aa-chart');
+  if ('IntersectionObserver' in window) {
+    var ro = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        ro.unobserve(e.target);
+        if (e.target.hasAttribute('data-count')) countUp(e.target); else e.target.classList.add('is-in');
+      });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    Array.prototype.forEach.call(reveal, function (el) { ro.observe(el); });
+  } else {
+    Array.prototype.forEach.call(reveal, function (el) { el.classList.add('is-in'); });
+  }
+
+  // spotlight in the dark part follows the cursor
+  if (window.matchMedia && window.matchMedia('(hover: hover)').matches && !reduce) {
+    Array.prototype.forEach.call(document.querySelectorAll('.aa-dark'), function (d) {
+      d.addEventListener('pointermove', function (e) {
+        var r = d.getBoundingClientRect();
+        d.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        d.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        d.classList.add('is-lit');
+      });
+      d.addEventListener('pointerleave', function () { d.classList.remove('is-lit'); });
+    });
   }
 
   // service tabs

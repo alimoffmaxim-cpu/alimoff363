@@ -105,6 +105,21 @@ src = here / "tilda-t123.html"
 main = src.read_text(encoding="utf-8")
 cards = "\n".join(case_card(c, f"{SITE}{c['slug']}") for c in CASES)
 main = main.replace(between(main, START, END), f"{START}\n{cards}\n{END}")
+
+# график «Цена заявки по кейсам»: полоса — цена заявки, белая отметка — цель клиента
+scale = max(max(c["cpl"], c["target"] or 0) for c in CASES) * 1.08
+rows = []
+for c in sorted(CASES, key=lambda c: c["cpl"]):
+    goal = f'<i class="aa-chart__goal" style="--g:{c["target"] / scale * 100:.1f}%" title="цель {num(c["target"])} ₽"></i>' if c["target"] else ""
+    rows.append(f'              <li><span>{c["short"]}</span><div class="aa-chart__track"><i class="aa-chart__bar" style="--w:{c["cpl"] / scale * 100:.1f}%"></i>{goal}</div><b>{num(c["cpl"])} ₽</b></li>')
+chart = f"""          <figure class="aa-chart">
+            <figcaption><b>Цена заявки по кейсам</b><span class="aa-chart__legend">цель клиента</span></figcaption>
+            <ol>
+{chr(10).join(rows)}
+            </ol>
+          </figure>"""
+CH_START, CH_END = "<!-- chart:start -->", "<!-- chart:end -->"
+main = main.replace(between(main, CH_START, CH_END), f"{CH_START}\n{chart}\n{CH_END}")
 src.write_text(main, encoding="utf-8")
 print("site/tilda-t123.html: карточки кейсов обновлены")
 
@@ -290,7 +305,7 @@ def case_body(c, home, link):
         <div class="aa-board">
           <div class="aa-board__main">
             <span class="aa-chip">Результат</span>
-            <p class="aa-big">{num(c['leads'])}</p>
+            <p class="aa-big" data-count="{c['leads']}">{num(c['leads'])}</p>
             <small>{leads_word(c)} за {num(c['budget'])} ₽</small>
           </div>
           <ul class="aa-tiles">

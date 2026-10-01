@@ -118,7 +118,7 @@ def test_webapp_payload_roundtrip_and_limit():
     raw = dashboard.webapp_payload(txs, datetime(2026, 9, 29, 20, 15))
     data = json.loads(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
     assert data["v"] == 1 and data["b"] == 30000 - 350 and data["r"] == 3.0
-    assert data["m"][-1] == [2026, 9, 0, 350, 90000, 30000, 0, 0]
+    assert data["m"][-1] == [2026, 9, 0, 350, 90000, 30000, 0, 0, 0, 0]
     assert data["br"] == -90000
     assert data["c"][data["k"][-1][0]] == "Еда"
     # много длинных категорий — ссылка всё равно не превышает лимит
@@ -149,7 +149,8 @@ def test_two_balances_never_reset():
         Tx("in", 500000, "Фриланс", "", date(2026, 10, 1), id=6),                      # +5 000 ฿ (октябрь)
         Tx("out", 35000, "Еда", "", date(2026, 10, 1), id=7),                          # −350 ฿ (октябрь)
     ]
-    thb, rub = balances(txs)
+    bal = balances(txs)
+    thb, rub = bal["THB"], bal["RUB"]
     assert thb == 500000 + 3000000 - 1200000 + 500000 - 35000      # 27 650 ฿ — копится через месяцы
     assert rub == 15000000 - 9000000 + 10000000                    # 160 000 ₽
     octo = month_totals(txs, 2026, 10)
@@ -193,4 +194,22 @@ def test_balance_correction_does_not_touch_month_income():
            Tx("adj", 1200000, "Корректировка", "", TODAY, id=2)]
     m = month_totals(txs, TODAY.year, TODAY.month)
     assert (m.income, m.expense, m.income_rub, m.expense_rub) == (0, 0, 0, 0)
-    assert balances(txs) == (1200000, 10000000)
+    assert balances(txs) == {"THB": 1200000, "RUB": 10000000, "RUBB": 0}
+
+
+
+def test_business_rubles_wallet():
+    from finbot.finance import balances, month_totals
+
+    p = parse_input("баланс 500000 рб", TODAY)
+    assert (p.kind, p.amount, p.cur) == ("balance", 50000000, "RUBB")
+    assert parse_input("+100000 рб", TODAY).cur == "RUBB"
+    assert parse_input("доход 100000рб фриланс", TODAY).category == "Фриланс"
+    assert parse_input("обмен 90000 30000 рб", TODAY).to_tx().cur == "RUBB"
+    assert parse_input("обмен 90000 30000", TODAY).to_tx().cur == "THB"  # личные рубли
+
+    txs = [parse_input(t, TODAY).to_tx() for t in
+           ("+100000 рб", "обмен 30000 10000 рб", "обмен 9000 3000", "+50000 р", "-500 еда", "-2000 рб реклама")]
+    assert balances(txs) == {"THB": 1250000, "RUB": 4100000, "RUBB": 6800000}
+    m = month_totals(txs, TODAY.year, TODAY.month)
+    assert (m.income_rubb, m.expense_rubb, m.income_rub, m.expense) == (10000000, 200000, 5000000, 50000)

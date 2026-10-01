@@ -13,6 +13,12 @@ from .storage import Tx
 THB = "฿"
 RUB = "₽"
 
+# Кошельки: баты, рубли (личные), рубли (бизнес). Остаток каждого копится отдельно.
+WALLETS = ("THB", "RUB", "RUBB")
+WALLET_NAMES = {"THB": "Баты", "RUB": "Рубли", "RUBB": "Рубли (бизнес)"}
+WALLET_ICONS = {"THB": "฿", "RUB": "₽", "RUBB": "💼"}
+WALLET_CMD = {"THB": "б", "RUB": "р", "RUBB": "рб"}
+
 MONTHS = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"]
 MONTHS_FULL = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
@@ -50,9 +56,10 @@ OUT_WORDS = {"расход", "расходы", "трата", "потратил",
 IN_WORDS = {"доход", "получил", "получила", "плюс", "приход"}
 FX_WORDS = {"обмен", "обменял", "обменяла", "поменял", "поменяла"}
 BALANCE_WORDS = {"баланс", "остаток"}
+BIZ_WORDS = {"рб", "бизнес", "biz"}  # рубли (бизнес) — отдельный кошелёк
 RUB_WORDS = {"₽", "р", "руб", "рубль", "рубля", "рублей", "рубли", "рублях", "rub", "rur"}
 THB_WORDS = {"฿", "б", "бат", "бата", "батов", "баты", "батах", "thb", "baht"}
-CURRENCY_GLUED_RE = re.compile(r"(\d)(₽|฿|руб\w*|р|б|бат\w*|thb|rub)(?=[\s.]|$)", re.I)
+CURRENCY_GLUED_RE = re.compile(r"(\d)(рб|₽|฿|руб\w*|р|б|бат\w*|thb|rub)(?=[\s.]|$)", re.I)
 
 # 350 · 1 500 · 1,500 · 350,50 · 90к · 90 тыс
 NUM_RE = re.compile(r"(\d{1,3}(?:[ ,.]\d{3})+|\d+)(?:[.,](\d{1,2}))?(?:\s*(к|k|тыс)(?![а-яa-z]))?", re.I)
@@ -120,12 +127,14 @@ def _extract_date(text: str, today: date) -> tuple[date, str]:
 
 
 def _extract_currency(text: str) -> tuple[str | None, str]:
-    """'100000₽ зп' / 'доход 100000 руб' -> ('RUB', '100000 зп')."""
+    """'100000₽ зп' -> ('RUB', '100000 зп'); '100000 рб' -> ('RUBB', ...) — рубли (бизнес)."""
     text = CURRENCY_GLUED_RE.sub(r"\1 \2", text)
     cur, words = None, []
     for word in text.split():
         bare = word.lower().rstrip(".")
-        if bare in RUB_WORDS:
+        if bare in BIZ_WORDS:
+            cur = "RUBB"
+        elif bare in RUB_WORDS:
             cur = "RUB"
         elif bare in THB_WORDS:
             cur = "THB"
@@ -157,7 +166,8 @@ def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
 
     if word in FX_WORDS:
         rub, thb, swapped = parse_fx(rest)
-        return Parsed("fx", amount=thb, rub=rub, day=day, swapped=swapped)
+        # «обмен … рб» — рубли списываются с бизнес-кошелька, иначе с личного
+        return Parsed("fx", amount=thb, rub=rub, day=day, swapped=swapped, cur="RUBB" if cur == "RUBB" else None)
 
     if word in BALANCE_WORDS:
         value_text = rest.strip()
@@ -218,6 +228,8 @@ class MonthTotals:
     fx_thb: int = 0
     income_rub: int = 0  # доходы и расходы в рублях — отдельно от батовых
     expense_rub: int = 0
+    income_rubb: int = 0  # то же для рублей (бизнес)
+    expense_rubb: int = 0
 
     @property
     def net(self) -> int:
@@ -235,17 +247,10 @@ def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTot
         bucket = totals.get((tx.day.year, tx.day.month))
         if bucket is None:
             continue
-        rub = tx.cur == "RUB"
-        if tx.kind == "in":
-            if rub:
-                bucket.income_rub += tx.amount
-            else:
-                bucket.income += tx.amount
-        elif tx.kind == "out":
-            if rub:
-                bucket.expense_rub += tx.amount
-            else:
-                bucket.expense += tx.amount
+        suffix = {"RUB": "_rub", "RUBB": "_rubb"}.get(tx.cur, "")
+        if tx.kind in ("in", "out"):
+            field = ("income" if tx.kind == "in" else "expense") + suffix
+            setattr(bucket, field, getattr(bucket, field) + tx.amount)
         elif tx.kind == "fx":
             bucket.fx_rub += tx.rub
             bucket.fx_thb += tx.amount
@@ -265,29 +270,33 @@ def categories(txs: list[Tx], year: int, month: int, kind: str = "out") -> list[
     return sorted(sums.items(), key=lambda kv: kv[1], reverse=True)
 
 
-def balances(txs: list[Tx]) -> tuple[int, int]:
-    """Остатки за всё время (не обнуляются по месяцам): (баты, рубли).
+def balances(txs: list[Tx]) -> dict[str, int]:
+    """Остатки за всё время по кошелькам (не обнуляются по месяцам): {"THB", "RUB", "RUBB"}.
 
-    Расход уменьшает остаток своей валюты, доход увеличивает,
-    обмен списывает рубли и добавляет баты, корректировка выравнивает остаток.
+    Расход уменьшает остаток своего кошелька, доход увеличивает, корректировка выравнивает.
+    Обмен добавляет баты и списывает рубли — личные или, если указано «рб», бизнес.
     """
-    thb = rub = 0
+    totals = dict.fromkeys(WALLETS, 0)
     for tx in txs:
         if tx.kind == "fx":
-            thb += tx.amount
-            rub -= tx.rub
+            totals["THB"] += tx.amount
+            totals["RUBB" if tx.cur == "RUBB" else "RUB"] -= tx.rub
             continue
-        sign = -1 if tx.kind == "out" else 1
-        if tx.cur == "RUB":
-            rub += sign * tx.amount
-        else:
-            thb += sign * tx.amount
-    return thb, rub
+        wallet = tx.cur if tx.cur in totals else "THB"
+        totals[wallet] += -tx.amount if tx.kind == "out" else tx.amount
+    return totals
 
 
 def balance(txs: list[Tx]) -> int:
     """Остаток в батах."""
-    return balances(txs)[0]
+    return balances(txs)["THB"]
+
+
+def wallet_money(value: int, wallet: str) -> str:
+    """'1 000 ฿', '1 000 ₽', '1 000 ₽ (бизнес)'."""
+    if wallet == "THB":
+        return money(value, THB)
+    return money(value, RUB) + (" (бизнес)" if wallet == "RUBB" else "")
 
 
 def last_rate(txs: list[Tx]) -> float | None:

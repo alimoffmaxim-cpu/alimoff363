@@ -31,7 +31,12 @@ from .finance import (
     fmt_pct,
     pct_change,
     Parsed,
+    WALLET_CMD,
+    WALLET_ICONS,
+    WALLET_NAMES,
+    WALLETS,
     balances,
+    wallet_money,
     categories,
     fmt_rate,
     frequent_categories,
@@ -78,13 +83,13 @@ HELP = """<b>Как пользоваться</b>
 Или пишите сразу одной строкой (без значка валюты — в батах):
 
 <b>Расход:</b> <code>-350</code> · <code>350 еда</code> · <code>расход 1200 такси</code>
-<b>Доход:</b> <code>+50000</code> · <code>доход 50000 зп</code> · в рублях: <code>+100000₽ зп</code>
+<b>Доход:</b> <code>+50000</code> — баты · <code>+100000 р зп</code> — рубли · <code>+100000 рб</code> — рубли (бизнес)
 <b>Обмен:</b> <code>обмен 90000 - 30000</code> — отдали ₽, получили ฿
-<b>Остатки:</b> <code>баланс 12000 б</code> — баты, <code>баланс 150000 р</code> — рубли
+<b>Остатки:</b> <code>баланс 12000 б</code> — баты, <code>баланс 150000 р</code> — рубли, <code>баланс 500000 рб</code> — рубли (бизнес)
 (только выравнивает остаток, в доходы и расходы не попадает)
 
-Два остатка, ฿ и ₽, копятся всё время: расход в батах уменьшает ฿,
-обмен списывает ₽ и добавляет ฿, доход добавляется в своей валюте.
+Три остатка — ฿, ₽ и 💼 ₽ (бизнес) — копятся всё время: расход уменьшает остаток
+своего кошелька, доход добавляется в свой, обмен списывает ₽ (с «рб» — бизнес) и добавляет ฿.
 
 Доходы и расходы считаются по календарным месяцам: 1-го числа счёт начинается с нуля.
 «📅 Месяц» — итоги текущего месяца по категориям, стрелками можно листать прошлые.
@@ -197,28 +202,25 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         return InlineKeyboardMarkup(inline_keyboard=[[
             InlineKeyboardButton(text="↩️ Отменить", callback_data=f"del:{tx_id}")]])
 
-    def cur_sign(tx: Tx) -> str:
-        return RUB if tx.cur == "RUB" else THB
-
     def balances_line(txs: list[Tx]) -> str:
-        thb, rub = balances(txs)
-        line = f"💰 Остаток: <b>{money(thb)}</b> · <b>{money(rub, RUB)}</b>"
-        if rub < 0:
-            line += "\n⚠️ Остаток рублей ушёл в минус — задайте реальный: <code>баланс 150000 р</code>"
-        if thb < 0:
-            line += "\n⚠️ Остаток бат ушёл в минус — задайте реальный: <code>баланс 12000 б</code>"
+        bal = balances(txs)
+        line = "💰 Остаток: " + " · ".join(f"<b>{wallet_money(bal[w], w)}</b>" for w in WALLETS)
+        for w in WALLETS:
+            if bal[w] < 0:
+                line += (f"\n⚠️ {WALLET_NAMES[w]}: остаток ушёл в минус — задайте реальный: "
+                         f"<code>баланс 10000 {WALLET_CMD[w]}</code>")
         return line
 
     def describe(tx: Tx) -> str:
         note = f" · {html.escape(tx.note)}" if tx.note else ""
         day = "" if tx.day == today() else f" · {tx.day:%d.%m}"
         if tx.kind == "fx":
-            return (f"💱 Обмен: {money(tx.rub, RUB)} → <b>{money(tx.amount)}</b>, "
+            return (f"💱 Обмен: {wallet_money(tx.rub, 'RUBB' if tx.cur == 'RUBB' else 'RUB')} → <b>{money(tx.amount)}</b>, "
                     f"курс {fmt_rate(tx.rub / tx.amount)}{day}")
         if tx.kind == "adj":
-            return f"⚖️ Корректировка остатка {'+' if tx.amount > 0 else ''}{money(tx.amount, cur_sign(tx))}{day}"
+            return f"⚖️ Корректировка остатка {'+' if tx.amount > 0 else ''}{wallet_money(tx.amount, tx.cur)}{day}"
         sign = "+" if tx.kind == "in" else "−"
-        return f"{sign}{money(tx.amount, cur_sign(tx))} · {label(html.escape(tx.category))}{note}{day}"
+        return f"{sign}{wallet_money(tx.amount, tx.cur)} · {label(html.escape(tx.category))}{note}{day}"
 
     def save(parsed: Parsed) -> tuple[str, InlineKeyboardMarkup]:
         """Сохраняет операцию и возвращает подтверждение с кнопкой отмены."""
@@ -233,6 +235,8 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         text += f"\n\n📅 <b>{name}</b>: расходы {money(m.expense)} · доходы {money(m.income)}"
         if m.income_rub or m.expense_rub:
             text += f"\n     в рублях: расходы {money(m.expense_rub, RUB)} · доходы {money(m.income_rub, RUB)}"
+        if m.income_rubb or m.expense_rubb:
+            text += f"\n     💼 бизнес: расходы {money(m.expense_rubb, RUB)} · доходы {money(m.income_rubb, RUB)}"
         if tx.kind == "out" and tx.cur == "THB":
             spent = dict(categories(txs, tx.day.year, tx.day.month)).get(tx.category, 0)
             text += f"\n{label(html.escape(tx.category))} за {name.lower()}: {money(spent)}"
@@ -252,17 +256,15 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         if parsed.kind == "balance":
             await state.clear()
             cur = parsed.cur or "THB"
-            sign = RUB if cur == "RUB" else THB
-            thb, rub = balances(storage.list_tx(vault.cipher))
-            current = rub if cur == "RUB" else thb
+            current = balances(storage.list_tx(vault.cipher))[cur]
             delta = parsed.amount - current
             if delta == 0:
-                await reply(message, f"💰 Остаток уже {money(current, sign)}, ничего менять не нужно.")
+                await reply(message, f"💰 {WALLET_NAMES[cur]}: остаток уже {wallet_money(current, cur)}, менять не нужно.")
                 return
             tx = Tx(kind="adj", amount=delta, category="Корректировка", note="", day=parsed.day, cur=cur)
             storage.add_tx(vault.cipher, tx)
-            await reply(message, f"✅ Остаток в {'рублях' if cur == 'RUB' else 'батах'}: <b>{money(parsed.amount, sign)}</b> "
-                                 f"(корректировка {'+' if delta > 0 else ''}{money(delta, sign)})\n"
+            await reply(message, f"✅ {WALLET_NAMES[cur]}: остаток <b>{wallet_money(parsed.amount, cur)}</b> "
+                                 f"(корректировка {'+' if delta > 0 else ''}{wallet_money(delta, cur)}; в доходы не идёт)\n"
                                  + balances_line(storage.list_tx(vault.cipher)),
                         reply_markup=undo_markup(tx.id))
             return
@@ -271,8 +273,7 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
             await state.set_state(Entry.category)
             await state.update_data(pending=_pending_dump(parsed), cats=cats)
             what = "Расход" if parsed.kind == "out" else "Доход"
-            sign = RUB if parsed.cur == "RUB" else THB
-            await reply(message, f"{what} <b>{money(parsed.amount, sign)}</b> — выберите категорию:",
+            await reply(message, f"{what} <b>{wallet_money(parsed.amount, parsed.cur or 'THB')}</b> — выберите категорию:",
                         reply_markup=category_markup(cats))
             return
         await state.clear()
@@ -377,24 +378,28 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         await state.set_state(Entry.amount)
         await state.update_data(kind="out", cur="THB")
         await reply(message, "Сумма расхода в батах? Например, <code>350</code> или сразу <code>350 еда обед</code>\n"
-                             "Расход в рублях — добавьте ₽: <code>990₽ подписка</code>")
+                             "Расход в рублях — добавьте р: <code>990 р подписка</code>, бизнес — рб: <code>5000 рб реклама</code>")
 
     @router.message(F.text == BTN_IN)
     async def btn_income(message: Message, state: FSMContext) -> None:
         await state.clear()
         markup = InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="฿ В батах", callback_data="income:THB"),
-            InlineKeyboardButton(text="₽ В рублях", callback_data="income:RUB")]])
-        await reply(message, "➕ В какой валюте доход?", reply_markup=markup)
+            InlineKeyboardButton(text="฿ Баты", callback_data="income:THB"),
+            InlineKeyboardButton(text="₽ Рубли", callback_data="income:RUB"),
+            InlineKeyboardButton(text="💼 Рубли (бизнес)", callback_data="income:RUBB")]])
+        await reply(message, "➕ Куда пришёл доход?", reply_markup=markup)
 
     @router.callback_query(F.data.startswith("income:"))
     async def cb_income_currency(call: CallbackQuery, state: FSMContext) -> None:
         cur = call.data.split(":", 1)[1]
+        if cur not in WALLETS:
+            await call.answer()
+            return
         await state.set_state(Entry.amount)
         await state.update_data(kind="in", cur=cur)
         await call.answer()
-        where = "рублях" if cur == "RUB" else "батах"
-        await call.message.edit_text(f"Сумма дохода в {where}? Например, <code>50000</code> или сразу <code>50000 зп</code>")
+        await call.message.edit_text(f"{WALLET_ICONS[cur]} Доход — {WALLET_NAMES[cur].lower()}. Сумма? "
+                                     "Например, <code>50000</code> или сразу <code>50000 зп</code>")
 
     @router.message(F.text == BTN_FX)
     async def btn_fx(message: Message, state: FSMContext) -> None:
@@ -402,7 +407,8 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         rate = last_rate(storage.list_tx(vault.cipher))
         hint = f"\nПрошлый курс: {fmt_rate(rate)}" if rate else ""
         await reply(message, "💱 Сколько <b>рублей</b> отдали и сколько <b>бат</b> получили?\n"
-                             f"Например: <code>90000 30000</code> или <code>90к 30к</code>{hint}")
+                             f"Например: <code>90000 30000</code> или <code>90к 30к</code>\n"
+                             f"Рубли с бизнес-кошелька — добавьте рб: <code>90000 30000 рб</code>{hint}")
 
     @router.message(Command("dash"))
     @router.message(F.text == BTN_DASH)
@@ -448,7 +454,9 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         lines.append(f"➕ Доходы: <b>{money(m.income)}</b>{change(m.income, prev.income)}")
         lines.append(f"📈 Итог месяца: <b>{money(m.net)}</b>")
         if m.income_rub or m.expense_rub:
-            lines.append(f"₽ В рублях: доходы {money(m.income_rub, RUB)} · расходы {money(m.expense_rub, RUB)}")
+            lines.append(f"₽ Рубли: доходы {money(m.income_rub, RUB)} · расходы {money(m.expense_rub, RUB)}")
+        if m.income_rubb or m.expense_rubb:
+            lines.append(f"💼 Рубли (бизнес): доходы {money(m.income_rubb, RUB)} · расходы {money(m.expense_rubb, RUB)}")
         if m.fx_thb:
             lines.append(f"💱 Обмен: {money(m.fx_rub, RUB)} → {money(m.fx_thb)} ({fmt_rate(m.rate)})")
         cats = categories(txs, year, month)
@@ -482,23 +490,23 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
     async def cmd_balance(message: Message, state: FSMContext) -> None:
         await state.clear()
         txs = storage.list_tx(vault.cipher)
-        thb, rub = balances(txs)
+        bal = balances(txs)
         rate = last_rate(txs)
-        lines = [
-            "💰 <b>Остатки</b> — копятся всё время, со сменой месяца не обнуляются",
-            "",
-            f"฿ Баты: <b>{money(thb)}</b>" + (f"  ({approx_rub(thb, rate)})" if rate and thb else ""),
-            f"₽ Рубли: <b>{money(rub, RUB)}</b>",
-        ]
+        lines = ["💰 <b>Остатки</b> — копятся всё время, со сменой месяца не обнуляются", ""]
+        for w in WALLETS:
+            extra = f"  ({approx_rub(bal[w], rate)})" if w == "THB" and rate and bal[w] else ""
+            lines.append(f"{WALLET_ICONS[w]} {WALLET_NAMES[w]}: <b>{money(bal[w], THB if w == 'THB' else RUB)}</b>{extra}")
         if rate:
             lines.append(f"Последний курс обмена: {fmt_rate(rate)}")
         lines += [
             "",
-            "Расход в батах уменьшает ฿, обмен списывает ₽ и добавляет ฿, доход добавляется в своей валюте.",
+            "Расход уменьшает остаток своего кошелька, доход — увеличивает. "
+            "Обмен списывает рубли (личные; с «рб» — бизнес) и добавляет баты.",
             "",
             "Чтобы задать или поправить остаток, отправьте свою реальную сумму:",
             "<code>баланс 12000 б</code> — баты",
             "<code>баланс 150000 р</code> — рубли",
+            "<code>баланс 500000 рб</code> — рубли (бизнес)",
             "Это только выравнивает остаток — в доходы и расходы месяца не попадает.",
         ]
         # reply_markup=KEYBOARD заодно обновит клавиатуру, если в ней осталась старая кнопка

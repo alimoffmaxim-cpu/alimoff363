@@ -33,7 +33,8 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
       var pairs = data.k[i] || [];
       for (var j = 0; j < pairs.length; j += 2) cats.push({ name: data.c[pairs[j]], amount: pairs[j + 1] });
       return { year: row[0], month: row[1], income: row[2], expense: row[3], fxRub: row[4], fxThb: row[5],
-        rate: row[5] ? row[4] / row[5] : null, incomeRub: row[6] || 0, expenseRub: row[7] || 0, cats: cats };
+        rate: row[5] ? row[4] / row[5] : null, incomeRub: row[6] || 0, expenseRub: row[7] || 0,
+        incomeBiz: row[8] || 0, expenseBiz: row[9] || 0, cats: cats };
     });
   }
 
@@ -92,6 +93,7 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     balancesRow.appendChild(tile(null, "Остаток в батах", thb(data.b),
       [el("span", null, lastRate ? "≈ " + rub(data.b * lastRate) : "не обнуляется")]));
     balancesRow.appendChild(tile(null, "Остаток в рублях", rub(data.br || 0), [el("span", null, "не обнуляется")]));
+    balancesRow.appendChild(tile(" wide", "💼 Рубли (бизнес)", rub(data.bb || 0), [el("span", null, "не обнуляется")]));
     app.appendChild(balancesRow);
 
     // Выбор месяца — всё ниже считается только за выбранный месяц
@@ -120,7 +122,8 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     // Плитки месяца
     var tiles = el("div", "tiles");
     tiles.appendChild(tile("income", "Доходы за месяц", thb(cur.income), [delta(cur.income, prev && prev.income, true),
-      cur.incomeRub ? el("div", null, "и " + rub(cur.incomeRub) + " в рублях") : null]));
+      cur.incomeRub ? el("div", null, "и " + rub(cur.incomeRub) + " в рублях") : null,
+      cur.incomeBiz ? el("div", null, "и " + rub(cur.incomeBiz) + " бизнес") : null]));
     var net = cur.income - cur.expense;
     tiles.appendChild(tile(null, "Итог месяца", thb(net), [el("span", null, prev ? "прошлый: " + thb(prev.income - prev.expense) : "доходы − расходы")]));
     tiles.appendChild(tile("rate wide", "Обмен ₽ → ฿", cur.fxThb ? thb(cur.fxThb) : "—",
@@ -282,10 +285,10 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
         amt.appendChild(el("div", "when", rub(o[4]) + " · " + rate(o[4] / o[2])));
       } else if (o[1] === "a") {
         what.appendChild(el("div", null, "⚖️ Корректировка"));
-        amt = el("div", "amt", (o[2] > 0 ? "+" : "") + (o[5] ? rub : thb)(o[2]));
+        amt = el("div", "amt", (o[2] > 0 ? "+" : "") + (o[5] ? rub : thb)(o[2]) + (o[5] === 2 ? " (бизнес)" : ""));
       } else {
         what.appendChild(el("div", null, emoji(name) + " " + name));
-        var money = o[5] ? rub : thb;
+        var money = o[5] === 2 ? function (v) { return rub(v) + " (бизнес)"; } : o[5] ? rub : thb;
         amt = el("div", "amt" + (o[1] === "i" ? " in" : ""), (o[1] === "i" ? "+" : "−") + money(o[2]));
       }
       what.appendChild(el("div", "when", o[0]));

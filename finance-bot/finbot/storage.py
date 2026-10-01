@@ -28,7 +28,7 @@ class Tx:
     day: date
     id: int | None = None
     rub: int = 0  # для "fx": сколько рублей отдано (в копейках)
-    cur: str = "THB"  # валюта дохода/расхода/корректировки: "THB" или "RUB" (у старых записей — THB)
+    cur: str = "THB"  # кошелёк: "THB", "RUB" или "RUBB" (рубли, бизнес); для "fx" — откуда списаны рубли
 
     def dump(self) -> bytes:
         data = asdict(self)

@@ -10,7 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from .finance import (  # noqa: E402
-    MONTHS_FULL, MONTHS_WITH, RUB, approx_rub, balances, categories, fmt_pct, fmt_rate, last_rate, money, month_label, monthly_totals,
+    MONTHS_FULL, MONTHS_WITH, RUB, approx_rub, balances, categories, wallet_money, fmt_pct, fmt_rate, last_rate, money, month_label, monthly_totals,
     pct_change,
 )
 from .storage import Tx  # noqa: E402
@@ -48,13 +48,14 @@ def render(txs: list[Tx], today: date) -> bytes:
     fig.text(0.06, 0.94, f"на {today:%d.%m.%Y} · сравнение с {month_label(prev.year, prev.month)}",
              fontsize=10, color=TEXT_2)
 
-    bal, bal_rub = balances(txs)
+    wallets = balances(txs)
+    bal = wallets["THB"]
     rate = last_rate(txs)
     tiles = [
         ("Доходы", money(cur.income), fmt_pct(pct_change(cur.income, prev.income))),
         ("Расходы", money(cur.expense), fmt_pct(pct_change(cur.expense, prev.expense))),
         ("Обмен ₽→฿", money(cur.fx_thb), f"курс {fmt_rate(cur.rate)}" if cur.rate else "в этом месяце не было"),
-        ("Остаток ฿ и ₽", money(bal), f"и {money(bal_rub, RUB)}"),
+        ("Остаток ฿", money(bal), f"₽ {money(wallets['RUB'], RUB)} · бизнес {money(wallets['RUBB'], RUB)}"),
     ]
     for i, (title, value, sub) in enumerate(tiles):
         ax = fig.add_subplot(grid[0, i])
@@ -135,8 +136,10 @@ def caption(txs: list[Tx], today: date) -> str:
                      f"курс {fmt_rate(cur.rate)} ({change})")
     if cur.income_rub or cur.expense_rub:
         lines.append(f"₽ В рублях: доходы {money(cur.income_rub, RUB)} · расходы {money(cur.expense_rub, RUB)}")
-    thb, rub = balances(txs)
-    lines.append(f"💰 Остаток: <b>{money(thb)}</b> · <b>{money(rub, RUB)}</b>")
+    if cur.income_rubb or cur.expense_rubb:
+        lines.append(f"💼 Рубли (бизнес): доходы {money(cur.income_rubb, RUB)} · расходы {money(cur.expense_rubb, RUB)}")
+    wallets = balances(txs)
+    lines.append("💰 Остаток: " + " · ".join(f"<b>{wallet_money(v, w)}</b>" for w, v in wallets.items()))
     return "\n".join(lines)
 
 
@@ -175,19 +178,22 @@ def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, mon
     for tx in sorted(txs, key=lambda t: (t.day, t.id or 0), reverse=True)[:recent]:
         ops.append([f"{tx.day:%d.%m}", kinds.get(tx.kind, "o"), round(tx.amount / 100),
                     index(tx.category) if tx.kind in ("in", "out") and tx.category else -1, round(tx.rub / 100),
-                    1 if tx.cur == "RUB" else 0])
+                    {"RUB": 1, "RUBB": 2}.get(tx.cur, 0)])
 
     rate = last_rate(txs)
+    wallets = balances(txs)
     data = {
         "v": 1,
         "t": f"{now:%d.%m %H:%M}",
         "m": [[m.year, m.month, round(m.income / 100), round(m.expense / 100),
                round(m.fx_rub / 100), round(m.fx_thb / 100),
-               round(m.income_rub / 100), round(m.expense_rub / 100)] for m in totals],
+               round(m.income_rub / 100), round(m.expense_rub / 100),
+               round(m.income_rubb / 100), round(m.expense_rubb / 100)] for m in totals],
         "c": names,
         "k": per_month,
-        "b": round(balances(txs)[0] / 100),
-        "br": round(balances(txs)[1] / 100),
+        "b": round(wallets["THB"] / 100),
+        "br": round(wallets["RUB"] / 100),
+        "bb": round(wallets["RUBB"] / 100),
         "r": round(rate, 4) if rate else 0,
         "o": ops,
     }

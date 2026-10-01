@@ -1,0 +1,449 @@
+<!--
+  Alimov Agency — главная страница.
+  Этот файл целиком вставляется в Tilda в блок T123 («HTML-код»).
+  Все стили и скрипты привязаны к обёртке .aa и не задевают остальную страницу.
+  Тексты, помеченные data-draft, — черновые: замените их на свои (см. site/README.md).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&family=Golos+Text:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+/* Layout: одна колонка max 1200px, крупная типографика, секции разделены тонкими линиями; цвет — только у кнопок и отчёта в первом экране */
+.aa {
+  --aa-paper: #F4F4F0;
+  --aa-surface: #FFFFFF;
+  --aa-ink: #1B1D1A;
+  --aa-muted: #62665F;
+  --aa-line: #DCDDD5;
+  --aa-pine: #2D4A3C;
+  --aa-pine-ink: #F4F4F0;
+  --aa-pine-soft: #E3EAE4;
+
+  --aa-display: "Onest", "Helvetica Neue", Arial, sans-serif;
+  --aa-body: "Golos Text", "Helvetica Neue", Arial, sans-serif;
+  --aa-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --aa-gutter: max(16px, 4vw);
+  --aa-max: 1200px;
+  --aa-radius: 6px;
+
+  background: var(--aa-paper);
+  color: var(--aa-ink);
+  font-family: var(--aa-body);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+:where(.aa) *, :where(.aa) *::before, :where(.aa) *::after { box-sizing: border-box; }
+/* resets are wrapped in :where() so they never outrank component classes */
+:where(.aa) a { color: inherit; }
+:where(.aa) :where(h1, h2, h3, p, ul, ol, dl, dd, figure) { margin: 0; }
+:where(.aa) :where(ul, ol) { padding: 0; list-style: none; }
+
+.aa-wrap { max-width: var(--aa-max); margin-inline: auto; padding-inline: var(--aa-gutter); }
+
+/* type scale */
+.aa-h1 { font-family: var(--aa-display); font-weight: 500; font-size: clamp(38px, 6.2vw, 80px); line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance; }
+.aa-h2 { font-family: var(--aa-display); font-weight: 500; font-size: clamp(30px, 4vw, 52px); line-height: 1.08; letter-spacing: -0.03em; text-wrap: balance; }
+.aa-h3 { font-family: var(--aa-display); font-weight: 500; font-size: clamp(20px, 2vw, 24px); line-height: 1.25; letter-spacing: -0.015em; }
+.aa-lead { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.55; color: var(--aa-muted); max-width: 36em; }
+.aa-label { font-family: var(--aa-mono); font-size: 12px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--aa-muted); }
+
+/* links & buttons */
+.aa-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 15px 24px; border-radius: var(--aa-radius);
+  font-family: var(--aa-display); font-size: 16px; font-weight: 500; text-decoration: none; line-height: 1;
+  border: 1px solid var(--aa-pine); background: var(--aa-pine); color: var(--aa-pine-ink);
+  transition: background .2s ease, color .2s ease;
+}
+.aa-btn:hover { background: var(--aa-ink); border-color: var(--aa-ink); }
+.aa-btn--ghost { background: transparent; color: var(--aa-ink); border-color: var(--aa-line); }
+.aa-btn--ghost:hover { background: transparent; border-color: var(--aa-ink); color: var(--aa-ink); }
+.aa-btn svg { width: 16px; height: 16px; transition: transform .2s ease; }
+.aa-btn:hover svg { transform: translateX(3px); }
+.aa a:focus-visible, .aa button:focus-visible, .aa summary:focus-visible { outline: 2px solid var(--aa-pine); outline-offset: 3px; border-radius: 2px; }
+
+.aa-ul { text-decoration: none; background-image: linear-gradient(currentColor, currentColor); background-size: 0 1px; background-position: 0 100%; background-repeat: no-repeat; transition: background-size .25s ease; }
+.aa-ul:hover { background-size: 100% 1px; }
+
+/* header */
+.aa-head { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--aa-paper); border-bottom: 1px solid var(--aa-line); }
+.aa-head__row { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 72px; }
+.aa-logo { display: inline-flex; align-items: baseline; gap: 8px; text-decoration: none; }
+.aa-logo b { font-family: var(--aa-display); font-weight: 600; font-size: 21px; letter-spacing: -0.03em; }
+.aa-logo span { font-family: var(--aa-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--aa-muted); }
+.aa-nav { display: flex; align-items: center; gap: 32px; font-size: 15px; }
+.aa-nav a:not(.aa-btn) { text-decoration: none; color: var(--aa-muted); transition: color .2s; }
+.aa-nav a:not(.aa-btn):hover { color: var(--aa-ink); }
+.aa-nav .aa-btn { padding: 11px 18px; font-size: 15px; }
+.aa-burger { display: none; background: none; border: 0; padding: 8px; margin-right: -8px; cursor: pointer; color: var(--aa-ink); }
+.aa-burger span { display: block; width: 22px; height: 1.5px; background: currentColor; transition: transform .25s ease; }
+.aa-burger span + span { margin-top: 6px; }
+.aa-head[data-open] .aa-burger span:first-child { transform: translateY(3.75px) rotate(45deg); }
+.aa-head[data-open] .aa-burger span:last-child { transform: translateY(-3.75px) rotate(-45deg); }
+
+/* sections */
+.aa-sec { padding-block: clamp(72px, 10vw, 128px); border-top: 1px solid var(--aa-line); }
+.aa-sec__head { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 24px 48px; margin-bottom: clamp(40px, 6vw, 72px); align-items: end; }
+.aa-sec__head .aa-lead { justify-self: end; max-width: 30em; }
+
+/* hero */
+.aa-hero { padding-block: clamp(56px, 8vw, 104px) clamp(64px, 9vw, 112px); }
+.aa-hero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: end; }
+.aa-hero__text { display: grid; gap: 28px; min-width: 0; }
+.aa-hero__cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.aa-channels { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; font-family: var(--aa-mono); font-size: 13px; color: var(--aa-muted); }
+.aa-channels li { display: inline-flex; align-items: center; gap: 8px; }
+.aa-channels li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--aa-pine); }
+
+/* the daily report card — the one coloured object on the page */
+.aa-report { background: var(--aa-surface); border: 1px solid var(--aa-line); border-radius: 10px; overflow: hidden; min-width: 0; }
+.aa-report__top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--aa-line); }
+.aa-report__top .aa-label { color: var(--aa-ink); }
+.aa-report__date { font-family: var(--aa-mono); font-size: 12px; color: var(--aa-muted); }
+.aa-report table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.aa-report th, .aa-report td { padding: 12px 20px; text-align: left; font-weight: 400; font-size: 15px; border-bottom: 1px solid var(--aa-line); }
+.aa-report td { text-align: right; font-family: var(--aa-mono); font-size: 14px; }
+.aa-report th { color: var(--aa-muted); }
+.aa-report tr:last-child th, .aa-report tr:last-child td { border-bottom: 0; }
+.aa-report__key th, .aa-report__key td { background: var(--aa-pine-soft); color: var(--aa-pine); font-weight: 500; }
+.aa-report__foot { padding: 12px 20px; font-family: var(--aa-mono); font-size: 11px; color: var(--aa-muted); border-top: 1px solid var(--aa-line); background: var(--aa-paper); }
+
+/* services */
+.aa-services { border-top: 1px solid var(--aa-ink); }
+.aa-service { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 6fr) minmax(0, 2fr); gap: 16px 48px; padding-block: 32px; border-bottom: 1px solid var(--aa-line); align-items: baseline; transition: background .2s; }
+.aa-service p { color: var(--aa-muted); max-width: 34em; }
+.aa-service__tag { justify-self: end; font-family: var(--aa-mono); font-size: 12px; color: var(--aa-muted); white-space: nowrap; }
+
+/* process */
+.aa-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--aa-ink); counter-reset: aa-step; }
+.aa-step { padding: 28px 28px 8px 0; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.aa-step + .aa-step { padding-left: 28px; border-left: 1px solid var(--aa-line); }
+.aa-step__n { font-family: var(--aa-mono); font-size: 13px; color: var(--aa-pine); }
+.aa-step p { color: var(--aa-muted); font-size: 16px; }
+.aa-step__time { font-family: var(--aa-mono); font-size: 12px; color: var(--aa-muted); padding-top: 6px; }
+
+/* cases */
+.aa-cases { overflow-x: auto; border-top: 1px solid var(--aa-ink); }
+.aa-cases table { width: 100%; border-collapse: collapse; min-width: 640px; font-variant-numeric: tabular-nums; }
+.aa-cases th { text-align: left; font-weight: 500; padding: 16px 24px 16px 0; border-bottom: 1px solid var(--aa-line); }
+.aa-cases td { padding: 28px 24px 28px 0; border-bottom: 1px solid var(--aa-line); vertical-align: top; color: var(--aa-muted); }
+.aa-cases td:first-child { color: var(--aa-ink); font-family: var(--aa-display); font-size: 20px; letter-spacing: -0.015em; width: 28%; }
+.aa-cases td.aa-cases__num { color: var(--aa-ink); font-family: var(--aa-display); font-size: clamp(28px, 3vw, 40px); letter-spacing: -0.03em; line-height: 1; white-space: nowrap; }
+.aa-cases__num small { display: block; margin-top: 8px; font-family: var(--aa-body); font-size: 14px; letter-spacing: 0; color: var(--aa-muted); white-space: normal; }
+
+/* draft marker: remove data-draft from an element once its text is real */
+.aa [data-draft]::after { content: "черновик"; display: inline-block; vertical-align: middle; margin-left: 10px; padding: 2px 6px; border: 1px dashed var(--aa-muted); border-radius: 4px; font-family: var(--aa-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--aa-muted); }
+
+/* faq */
+.aa-faq { border-top: 1px solid var(--aa-ink); max-width: 880px; margin-left: auto; }
+.aa-faq details { border-bottom: 1px solid var(--aa-line); }
+.aa-faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-block: 24px; }
+.aa-faq summary::-webkit-details-marker { display: none; }
+.aa-faq summary i { flex: none; position: relative; width: 14px; height: 14px; }
+.aa-faq summary i::before, .aa-faq summary i::after { content: ""; position: absolute; left: 0; top: 6.5px; width: 14px; height: 1.5px; background: var(--aa-ink); transition: transform .25s ease; }
+.aa-faq summary i::after { transform: rotate(90deg); }
+.aa-faq details[open] summary i::after { transform: rotate(0deg); }
+.aa-faq details p { padding-bottom: 28px; color: var(--aa-muted); max-width: 40em; }
+
+/* contact */
+.aa-contact { background: var(--aa-pine); color: var(--aa-pine-ink); border-top: 0; }
+.aa-contact .aa-label, .aa-contact .aa-lead { color: rgba(244, 244, 240, .72); }
+.aa-contact__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; }
+.aa-contact__text { display: grid; gap: 24px; }
+.aa-contact dl { display: grid; border-top: 1px solid rgba(244, 244, 240, .25); }
+.aa-contact dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 18px; border-bottom: 1px solid rgba(244, 244, 240, .25); }
+.aa-contact dt { font-family: var(--aa-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 244, 240, .72); }
+.aa-contact dd { font-family: var(--aa-display); font-size: clamp(18px, 1.8vw, 22px); letter-spacing: -0.01em; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+.aa-contact dd a { text-decoration: none; }
+.aa-contact .aa-btn { background: var(--aa-pine-ink); color: var(--aa-pine); border-color: var(--aa-pine-ink); }
+.aa-contact .aa-btn:hover { background: transparent; color: var(--aa-pine-ink); }
+.aa-contact a:focus-visible { outline-color: var(--aa-pine-ink); }
+
+/* footer */
+.aa-foot { padding-block: 32px; font-size: 14px; color: var(--aa-muted); }
+.aa-foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 32px; }
+.aa-foot__row a { text-decoration: none; }
+
+/* load-in: content is visible at rest; this only adds a short rise on first paint */
+@keyframes aa-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.aa-hero__text > *, .aa-report { animation: aa-rise .7s cubic-bezier(.2, .7, .2, 1) both; }
+.aa-hero__text > :nth-child(2) { animation-delay: .06s; }
+.aa-hero__text > :nth-child(3) { animation-delay: .12s; }
+.aa-hero__text > :nth-child(4) { animation-delay: .18s; }
+.aa-report { animation-delay: .24s; }
+@media (prefers-reduced-motion: reduce) {
+  .aa *, .aa *::before, .aa *::after { animation: none !important; transition: none !important; }
+}
+
+/* tablet */
+@media (max-width: 960px) {
+  .aa-hero__grid, .aa-contact__grid { grid-template-columns: minmax(0, 1fr); }
+  .aa-report { max-width: 520px; }
+  .aa-sec__head { grid-template-columns: minmax(0, 1fr); }
+  .aa-sec__head .aa-lead { justify-self: start; }
+  .aa-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .aa-step:nth-child(3) { padding-left: 0; border-left: 0; }
+  .aa-step:nth-child(n+3) { border-top: 1px solid var(--aa-line); margin-top: 20px; }
+  .aa-service { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .aa-service__tag { grid-column: 1 / -1; justify-self: start; }
+}
+
+/* phone */
+@media (max-width: 760px) {
+  .aa { font-size: 16px; }
+  .aa-burger { display: block; }
+  .aa-nav { display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; gap: 0; padding: 8px var(--aa-gutter) 24px; background: var(--aa-paper); border-bottom: 1px solid var(--aa-line); }
+  .aa-head[data-open] .aa-nav { display: flex; }
+  .aa-nav a:not(.aa-btn) { padding-block: 14px; font-size: 18px; color: var(--aa-ink); border-bottom: 1px solid var(--aa-line); }
+  .aa-nav .aa-btn { margin-top: 20px; justify-content: center; padding: 15px 24px; }
+  .aa-head__row { height: 64px; }
+  .aa-hero__cta .aa-btn { flex: 1 1 auto; justify-content: center; }
+  .aa-service { grid-template-columns: minmax(0, 1fr); gap: 10px; padding-block: 24px; }
+  .aa-steps { grid-template-columns: minmax(0, 1fr); }
+  .aa-step, .aa-step + .aa-step { padding: 24px 0 8px; border-left: 0; }
+  .aa-step + .aa-step { border-top: 1px solid var(--aa-line); }
+  .aa-step:nth-child(n+3) { margin-top: 0; }
+  .aa-contact dl > div { flex-direction: column; gap: 4px; }
+  .aa-cases table { min-width: 0; }
+  .aa-cases thead { display: none; }
+  .aa-cases tr { display: grid; gap: 10px; padding-block: 24px; border-bottom: 1px solid var(--aa-line); }
+  .aa-cases td { display: block; width: auto !important; padding: 0; border: 0; }
+  .aa-cases td.aa-cases__num { padding-top: 6px; }
+  .aa-contact dd { text-align: left; }
+}
+</style>
+
+<div class="aa" id="top">
+
+  <header class="aa-head" id="aa-head">
+    <div class="aa-wrap aa-head__row">
+      <a class="aa-logo" href="#top" aria-label="Alimov Agency — наверх"><b>Alimov</b><span>agency</span></a>
+      <button class="aa-burger" type="button" id="aa-burger" aria-expanded="false" aria-controls="aa-nav" aria-label="Открыть меню"><span></span><span></span></button>
+      <nav class="aa-nav" id="aa-nav" aria-label="Разделы">
+        <a href="#services">Услуги</a>
+        <a href="#process">Как работаем</a>
+        <a href="#cases">Кейсы</a>
+        <a href="#faq">Вопросы</a>
+        <a class="aa-btn" href="#contact">Обсудить проект</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="aa-hero">
+      <div class="aa-wrap aa-hero__grid">
+        <div class="aa-hero__text">
+          <p class="aa-label">Агентство performance-маркетинга</p>
+          <h1 class="aa-h1">Приводим заявки из&nbsp;VK&nbsp;Рекламы и&nbsp;Яндекс&nbsp;Директа</h1>
+          <p class="aa-lead">Настраиваем рекламу, считаем каждую заявку и каждое утро присылаем отчёт в&nbsp;Google Таблицу. Вы знаете, сколько стоит клиент, уже на следующий день, а не в конце месяца.</p>
+          <div>
+            <div class="aa-hero__cta">
+              <a class="aa-btn" href="#contact">Обсудить проект
+                <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+              </a>
+              <a class="aa-btn aa-btn--ghost" href="#cases">Посмотреть кейсы</a>
+            </div>
+            <ul class="aa-channels" aria-label="Рекламные каналы">
+              <li>VK Реклама</li>
+              <li>Яндекс Директ</li>
+              <li>Telegram Ads</li>
+            </ul>
+          </div>
+        </div>
+
+        <figure class="aa-report" aria-label="Пример ежедневного отчёта">
+          <div class="aa-report__top">
+            <span class="aa-label">Отчёт за вчера</span>
+            <span class="aa-report__date">08:00 · Google Таблица</span>
+          </div>
+          <table>
+            <tbody>
+              <tr><th scope="row">Показы</th><td>48 210</td></tr>
+              <tr><th scope="row">Клики</th><td>1 236</td></tr>
+              <tr><th scope="row">Расход</th><td>18 540 ₽</td></tr>
+              <tr><th scope="row">Заявки</th><td>41</td></tr>
+              <tr class="aa-report__key"><th scope="row">Цена заявки</th><td>452 ₽</td></tr>
+            </tbody>
+          </table>
+          <figcaption class="aa-report__foot">Пример отчёта. Цифры условные.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="aa-sec" id="services" aria-labelledby="aa-services-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <h2 class="aa-h2" id="aa-services-title">Услуги</h2>
+          <p class="aa-lead">Берём на себя рекламу целиком: от стратегии и креативов до ежедневной аналитики.</p>
+        </div>
+        <ul class="aa-services">
+          <li class="aa-service">
+            <h3 class="aa-h3">Таргетированная реклама VK</h3>
+            <p>Аудитории, креативы и лид-формы в VK Рекламе. Запуск за 3 дня, первые заявки в первую неделю.</p>
+            <span class="aa-service__tag">VK Реклама</span>
+          </li>
+          <li class="aa-service">
+            <h3 class="aa-h3">Контекстная реклама</h3>
+            <p>Поиск и РСЯ в Яндекс Директе. Семантика, минус-слова и стратегии ставок под цену заявки.</p>
+            <span class="aa-service__tag">Яндекс Директ</span>
+          </li>
+          <li class="aa-service">
+            <h3 class="aa-h3">Реклама в Telegram</h3>
+            <p>Посевы в каналах и Telegram Ads для ниш, где клиенты читают, а не листают ленту.</p>
+            <span class="aa-service__tag">Telegram</span>
+          </li>
+          <li class="aa-service">
+            <h3 class="aa-h3">Аналитика и отчётность</h3>
+            <p>Цели, метрики и автоматический отчёт: расход, заявки и цена заявки по каждому кабинету.</p>
+            <span class="aa-service__tag">Google Таблицы</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="aa-sec" id="process" aria-labelledby="aa-process-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <h2 class="aa-h2" id="aa-process-title">Как работаем</h2>
+          <p class="aa-lead">Четыре шага от первого созвона до стабильного потока заявок.</p>
+        </div>
+        <ol class="aa-steps">
+          <li class="aa-step">
+            <span class="aa-step__n">01</span>
+            <h3 class="aa-h3">Разбор</h3>
+            <p>Изучаем продукт, конкурентов и прошлые кампании. Считаем, какая цена заявки окупается.</p>
+            <span class="aa-step__time">1–2 дня</span>
+          </li>
+          <li class="aa-step">
+            <span class="aa-step__n">02</span>
+            <h3 class="aa-h3">Запуск</h3>
+            <p>Готовим креативы и лид-формы, настраиваем цели и запускаем первые кампании.</p>
+            <span class="aa-step__time">3–5 дней</span>
+          </li>
+          <li class="aa-step">
+            <span class="aa-step__n">03</span>
+            <h3 class="aa-h3">Оптимизация</h3>
+            <p>Отключаем то, что не приносит заявок, и масштабируем связки, которые работают.</p>
+            <span class="aa-step__time">2–4 недели</span>
+          </li>
+          <li class="aa-step">
+            <span class="aa-step__n">04</span>
+            <h3 class="aa-h3">Отчётность</h3>
+            <p>Каждое утро вы получаете цифры за вчера, раз в месяц мы созваниваемся по итогам.</p>
+            <span class="aa-step__time">постоянно</span>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="aa-sec" id="cases" aria-labelledby="aa-cases-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <h2 class="aa-h2" id="aa-cases-title">Кейсы</h2>
+          <p class="aa-lead">Несколько проектов, где мы снизили цену заявки или увеличили их количество.</p>
+        </div>
+        <div class="aa-cases">
+          <table>
+            <thead>
+              <tr><th scope="col">Проект</th><th scope="col">Задача</th><th scope="col">Результат</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-draft>Стоматология, Москва</td>
+                <td>Заявки на имплантацию дорожали каждый месяц. Перестроили аудитории и лид-формы в VK.</td>
+                <td class="aa-cases__num">−38%<small>цена заявки за 6 недель</small></td>
+              </tr>
+              <tr>
+                <td data-draft>Онлайн-школа английского</td>
+                <td>Нужно было вырасти по заявкам без роста бюджета. Добавили Telegram и РСЯ.</td>
+                <td class="aa-cases__num">×2,1<small>заявок при том же бюджете</small></td>
+              </tr>
+              <tr>
+                <td data-draft>Застройщик, Казань</td>
+                <td>Реклама шла, но отдел продаж не понимал, откуда клиенты. Настроили сквозной отчёт.</td>
+                <td class="aa-cases__num">100%<small>заявок с источником в отчёте</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="aa-sec" id="faq" aria-labelledby="aa-faq-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <h2 class="aa-h2" id="aa-faq-title">Вопросы</h2>
+        </div>
+        <div class="aa-faq">
+          <details>
+            <summary class="aa-h3">Какой минимальный рекламный бюджет?<i aria-hidden="true"></i></summary>
+            <p data-draft>Рекомендуем от 50 000 ₽ в месяц на один канал. С меньшим бюджетом статистика копится слишком долго, и оптимизировать нечего.</p>
+          </details>
+          <details>
+            <summary class="aa-h3">Сколько стоят ваши услуги?<i aria-hidden="true"></i></summary>
+            <p data-draft>Фиксированная оплата за ведение плюс разовая настройка. Точную стоимость называем после разбора проекта.</p>
+          </details>
+          <details>
+            <summary class="aa-h3">Кому принадлежат рекламные кабинеты?<i aria-hidden="true"></i></summary>
+            <p>Вам. Кабинеты создаются на вашу компанию, мы работаем в них по доступу. Если решите прекратить работу, всё останется у вас.</p>
+          </details>
+          <details>
+            <summary class="aa-h3">Как выглядит отчёт?<i aria-hidden="true"></i></summary>
+            <p>Это Google Таблица, которая обновляется каждое утро: показы, клики, расход, заявки и цена заявки по каждому кабинету, плюс итоги за вчера.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="aa-sec aa-contact" id="contact" aria-labelledby="aa-contact-title">
+      <div class="aa-wrap aa-contact__grid">
+        <div class="aa-contact__text">
+          <p class="aa-label">Контакты</p>
+          <h2 class="aa-h2" id="aa-contact-title">Расскажите о задаче. Ответим в течение рабочего дня.</h2>
+          <p class="aa-lead">Первый разбор проекта бесплатный: посмотрим текущую рекламу и скажем, что можно улучшить.</p>
+          <div><a class="aa-btn" href="https://t.me/USERNAME" target="_blank" rel="noopener">Написать в Telegram
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5"/></svg>
+          </a></div>
+        </div>
+        <dl>
+          <div><dt>Telegram</dt><dd><a class="aa-ul" href="https://t.me/USERNAME" target="_blank" rel="noopener" data-draft>@USERNAME</a></dd></div>
+          <div><dt>Телефон</dt><dd><a class="aa-ul" href="tel:+70000000000" data-draft>+7 000 000-00-00</a></dd></div>
+          <div><dt>Почта</dt><dd><a class="aa-ul" href="mailto:hello@alimov.agency" data-draft>hello@alimov.agency</a></dd></div>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="aa-foot">
+    <div class="aa-wrap aa-foot__row">
+      <span>© <span id="aa-year">2026</span> Alimov Agency</span>
+      <span data-draft>ИП Алимов · ИНН 000000000000</span>
+      <a class="aa-ul" href="#" data-draft>Политика конфиденциальности</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var head = document.getElementById('aa-head');
+  var burger = document.getElementById('aa-burger');
+  var nav = document.getElementById('aa-nav');
+  if (!head || !burger || !nav) return;
+
+  function setOpen(open) {
+    if (open) head.setAttribute('data-open', ''); else head.removeAttribute('data-open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    burger.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  }
+  burger.addEventListener('click', function () { setOpen(!head.hasAttribute('data-open')); });
+  nav.addEventListener('click', function (e) { if (e.target.closest('a')) setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+
+  var year = document.getElementById('aa-year');
+  if (year) year.textContent = new Date().getFullYear();
+})();
+</script>

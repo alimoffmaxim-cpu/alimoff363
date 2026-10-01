@@ -151,7 +151,6 @@ var RAW_HASH = window.FINBOT_HASH ||
     app.appendChild(categories(cur));
     app.appendChild(operations(data));
 
-    app.appendChild(el("footer", null, "Цифры — на момент нажатия «📊 Дашборд». Чтобы обновить, нажмите эту кнопку в боте ещё раз."));
   }
 
   function tile(kind, label, value, subs) {

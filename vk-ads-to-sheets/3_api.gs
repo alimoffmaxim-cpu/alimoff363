@@ -60,7 +60,7 @@ function fetchVitaminToken_() {
   if (resp.getResponseCode() !== 200) {
     throw new Error('Vitamin.Tools → ' + resp.getResponseCode() + ': ' + maskSecrets_(text));
   }
-  const token = findToken_(JSON.parse(text));
+  const token = (JSON.parse(text).data || {})[accountId] || findToken_(JSON.parse(text));
   if (!token) throw new Error('Не нашёл токен в ответе Vitamin.Tools: ' + maskSecrets_(text));
   return token;
 }

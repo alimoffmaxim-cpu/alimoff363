@@ -1,19 +1,7 @@
-<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Alimov Agency — клиенты для детских школ</title>
-<meta name="description" content="Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.">
-<meta name="theme-color" content="#F2F6F6">
-<style>html { scroll-behavior: smooth; scroll-padding-top: 90px; } body { margin: 0; background: #F2F6F6; }</style>
-</head>
-<body>
 <!--
-  Alimov Agency — главная страница.
-  Этот файл целиком вставляется в Tilda в блок T123 («HTML-код»).
-  Все стили и скрипты привязаны к обёртке .aa и не задевают остальную страницу.
-  Тексты, помеченные data-draft, — черновые: замените их на свои (см. site/README.md).
+  Alimov Agency — кейс «Онлайн-школа Genius school».
+  Этот файл целиком вставляется в Tilda в блок T123 на странице https://alimov.agency/genius_school.
+  Собран командой python3 site/build.py из site/cases.py — правьте там, а не здесь.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -320,18 +308,65 @@
   .aa-faq details p { padding: 0 18px 20px; }
 }
 </style>
+<style>
+/* case page: left-aligned hero with a facts list, plan-vs-fact bars, story and method cards */
+.aa-chero { padding-block: clamp(40px, 6vw, 72px) 0; }
+.aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 36px); font-size: 15px; font-weight: 500; text-decoration: none; opacity: .7; transition: opacity .2s; }
+.aa-back:hover { opacity: 1; }
+.aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
+.aa-chero__grid { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 32px 56px; align-items: end; }
+.aa-chero__text { display: grid; gap: 20px; }
+.aa-chero .aa-h1 { font-size: clamp(34px, 5vw, 64px); }
+.aa-meta { display: grid; border-top: 1px solid #D6DEDE; }
+.aa-meta div { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-block: 12px; border-bottom: 1px solid #D6DEDE; font-size: 15px; }
+.aa-meta dt { color: var(--aa-muted); flex: none; }
+.aa-meta dd { font-weight: 500; text-align: right; min-width: 0; }
+
+.aa-sec__head .aa-kicker { margin-bottom: -4px; }
+.aa-chero ~ .aa-sec:not(:last-child) { padding-bottom: clamp(48px, 6vw, 80px); }
+
+.aa-plan { background: var(--aa-card); border-radius: 28px; padding: clamp(24px, 4vw, 48px); display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px 56px; align-items: center; }
+.aa-plan__delta b { display: block; font-weight: 500; font-size: clamp(64px, 9vw, 120px); line-height: .9; letter-spacing: -0.06em; color: var(--aa-orange); }
+.aa-plan__delta span { display: block; margin-top: 12px; color: var(--aa-muted); }
+.aa-bars { display: grid; gap: 18px; }
+.aa-bar { display: grid; gap: 8px; }
+.aa-bar__label { display: flex; justify-content: space-between; gap: 16px; font-size: 15px; }
+.aa-bar__label b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.aa-bar__track { height: 44px; border-radius: 999px; background: #E6ECEC; overflow: hidden; }
+.aa-bar__fill { height: 100%; width: var(--w); border-radius: 999px; background: #C3CDCD; }
+.aa-bar--fact .aa-bar__fill { background: var(--aa-grad); }
+
+.aa-story { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.aa-story > div { background: var(--aa-card); border-radius: 24px; padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
+.aa-story > div:only-child { grid-column: 1 / -1; }
+.aa-story p { color: var(--aa-muted); }
+
+.aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 16px; }
+.aa-did > li { border: 1.5px solid #D6DEDE; border-radius: 24px; padding: clamp(24px, 3vw, 28px); display: grid; gap: 12px; align-content: start; }
+.aa-did > li:first-child { background: var(--aa-ink); border-color: var(--aa-ink); color: #fff; }
+.aa-did > li:first-child p { color: var(--aa-dark-muted); }
+.aa-did p { color: var(--aa-muted); font-size: 16px; }
+.aa-did__label { color: var(--aa-orange); font-size: 14px; font-weight: 600; }
+.aa-did .aa-chips { justify-content: flex-start; margin-top: 4px; }
+.aa-did .aa-chips li { padding: 8px 14px; font-size: 14px; background: #E3E9E9; }
+.aa-did .aa-chips li:nth-child(3n+2) { background: var(--aa-orange); }
+
+@media (max-width: 960px) {
+  .aa-chero__grid, .aa-plan, .aa-story, .aa-did { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
 
 <div class="aa" id="top">
 
   <header class="aa-head" id="aa-head">
     <div class="aa-wrap">
       <div class="aa-head__bar">
-        <a class="aa-logo" href="#top" aria-label="Alimov Agency — наверх"><i aria-hidden="true"></i>alimov</a>
+        <a class="aa-logo" href="https://alimov.agency/" aria-label="Alimov Agency — на главную"><i aria-hidden="true"></i>alimov</a>
         <button class="aa-burger" type="button" id="aa-burger" aria-expanded="false" aria-controls="aa-nav" aria-label="Открыть меню"><span></span><span></span></button>
         <nav class="aa-nav" id="aa-nav" aria-label="Разделы">
-          <a href="#services">Услуги</a>
-          <a href="#cases">Кейсы</a>
-          <a href="#faq">Вопросы</a>
+          <a href="https://alimov.agency/#services">Услуги</a>
+          <a href="https://alimov.agency/#cases">Кейсы</a>
+          <a href="https://alimov.agency/#faq">Вопросы</a>
           <a class="aa-btn" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Обсудить проект
             <span class="aa-btn__ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 4.2 2.9 11.3c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5ZM9.4 14l9-5.7c.4-.3.8-.1.5.2l-7.4 6.7-.3 3.1L9.4 14Z"/></svg></span>
           </a>
@@ -341,141 +376,90 @@
   </header>
 
   <main>
-    <section class="aa-hero">
+    <section class="aa-chero">
       <div class="aa-wrap">
-        <div class="aa-hero__text">
-          <p class="aa-eyebrow">Таргетированная реклама VK — <em>клиенты для детских школ</em></p>
-          <h1 class="aa-h1">Заявки для детских школ от&nbsp;135&nbsp;₽ с&nbsp;ROMI до&nbsp;1600%</h1>
-          <p class="aa-hero__lead">Качественные и недорогие заявки для онлайн-школ и сетей офлайн-студий: программирование, театр, скорочтение, репетиторы.</p>
-          <div class="aa-hero__cta">
-            <a class="aa-btn aa-btn--fill" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
-              <span class="aa-btn__ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 4.2 2.9 11.3c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5ZM9.4 14l9-5.7c.4-.3.8-.1.5.2l-7.4 6.7-.3 3.1L9.4 14Z"/></svg></span>
-            </a>
-            <a class="aa-btn" href="#cases">Смотреть кейсы
-              <span class="aa-btn__ico"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14m0 0-6-6m6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            </a>
+        <a class="aa-back" href="https://alimov.agency/#cases"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Все кейсы</a>
+        <div class="aa-chero__grid">
+          <div class="aa-chero__text">
+            <p class="aa-eyebrow">Кейс · <em>VK Ads</em></p>
+            <h1 class="aa-h1">12&nbsp;652 заявки по 135 ₽ для онлайн-школы Genius school</h1>
           </div>
+          <dl class="aa-meta">
+            <div><dt>Клиент</dt><dd>Онлайн-школа Genius school</dd></div>
+            <div><dt>Ниша</dt><dd>Скорочтение, математика и программирование для детей</dd></div>
+            <div><dt>Формат</dt><dd>онлайн</dd></div>
+            <div><dt>Канал</dt><dd>VK Ads</dd></div>
+          </dl>
         </div>
 
         <div class="aa-stage">
           <div class="aa-stage__case">
-            <span class="aa-tag">Кейс Genius school · VK Ads</span>
-            <p class="aa-stage__big">12&nbsp;652<small>заявки для онлайн-школы</small></p>
-            <p class="aa-stage__note">Скорочтение, математика и программирование для детей. Оффер — платное пробное занятие. <a href="cases/genius_school.html">Открыть кейс</a></p>
+            <span class="aa-tag">Результат</span>
+            <p class="aa-stage__big">12 652<small>заявки за 1 704 393 ₽</small></p>
           </div>
           <ul class="aa-stats">
             <li class="aa-stat aa-stat--hot"><b>135 ₽</b><span>цена заявки</span></li>
+            <li class="aa-stat"><b>1,7 млн ₽</b><span>рекламный бюджет</span></li>
             <li class="aa-stat"><b>1600%</b><span>рекордный ROMI</span></li>
             <li class="aa-stat"><b>800%</b><span>средний ROMI</span></li>
-            <li class="aa-stat"><b>1,7 млн ₽</b><span>рекламный бюджет</span></li>
           </ul>
         </div>
       </div>
     </section>
 
-    <section class="aa-sec" aria-label="Подход">
-      <div class="aa-wrap aa-mission">
-        <p class="aa-kicker">Наш подход</p>
-        <p class="aa-mission__text" id="aa-mission">Основной акцент делаем на креативы, потому что именно от них зависят объём, качество и стоимость заявок</p>
+    <section class="aa-sec aa-sec--tight" aria-labelledby="aa-story-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Клиент</p>
+          <h2 class="aa-h2" id="aa-story-title">Скорочтение, математика и программирование для детей</h2>
+        </div>
+        <div class="aa-story">
+          <div>
+            <h3 class="aa-h3">О клиенте</h3>
+            <p>Онлайн-школа для детей. Рекламировали курсы скорочтения, математики и программирования.</p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="aa-sec aa-sec--flush" aria-labelledby="aa-why-title">
+    <section class="aa-sec aa-sec--flush" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
-        <div class="aa-sec__head aa-sec__head--center">
-          <h2 class="aa-h3 aa-h3--lg" id="aa-why-title">Почему детские школы приходят к нам за заявками?</h2>
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Как получили заявки</p>
+          <h2 class="aa-h2" id="aa-did-title">Что сделали</h2>
         </div>
-        <ol class="aa-why">
-          <li>
-            <span class="aa-why__n">01</span>
-            <h3 class="aa-h3">Знаем аудиторию детских школ</h3>
-            <p>Работаем с мамами: по всей России для онлайн-школ и в регионах филиалов для офлайн-студий.</p>
-          </li>
-          <li>
-            <span class="aa-why__n">02</span>
-            <h3 class="aa-h3">Держим цену заявки</h3>
-            <p>Цель — максимум заявок в рамках бюджета при цене заявки не выше той, что вы готовы платить.</p>
-          </li>
-          <li>
-            <span class="aa-why__n">03</span>
-            <h3 class="aa-h3">Масштабируем бюджеты</h3>
-            <p>Ведём проекты с бюджетом от 157 тыс. до 4,6 млн ₽ и приводим тысячи заявок за учебный год.</p>
-          </li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="aa-sec aa-sec--tight" aria-label="Самый большой кейс">
-      <div class="aa-wrap">
-        <a class="aa-banner" href="cases/irbis_2324.html">
-          <div>
-            <span class="aa-tag">Самый большой кейс</span>
-            <h2 class="aa-h2">9&nbsp;633 заявки для театральной студии «Ирбис» за учебный год</h2>
-          </div>
-          <span class="aa-banner__go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 7l10 10m0 0V8m0 9H8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </a>
-        <div class="aa-tg">
-          <div>
-            <b>Подпишитесь на канал в Telegram</b>
-            <span>Кейсы и разборы рекламы для детских школ</span>
-          </div>
-          <a class="aa-btn aa-btn--light" href="https://t.me/alimov_pro" target="_blank" rel="noopener">@alimov_pro
-            <span class="aa-btn__ico"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.4 4.2 2.9 11.3c-1.3.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.6.4.8.9.8.4 0 .6-.2.9-.4l2.3-2.2 4.7 3.5c.9.5 1.5.2 1.7-.8l3.1-14.6c.3-1.3-.5-1.9-1.4-1.5ZM9.4 14l9-5.7c.4-.3.8-.1.5.2l-7.4 6.7-.3 3.1L9.4 14Z"/></svg></span>
-          </a>
-        </div>
+        <ul class="aa-did" style="--cols:2">
+            <li>
+              <span class="aa-did__label">Канал</span>
+              <h3 class="aa-h3">VK Ads</h3>
+              <p>Таргетированная реклама ВКонтакте.</p>
+            </li>
+            <li>
+              <span class="aa-did__label">Аудитория</span>
+              <h3 class="aa-h3">Мамы</h3>
+              <p>Мамы со всей России.</p>
+            </li>
+            <li>
+              <span class="aa-did__label">Креативы</span>
+              <h3 class="aa-h3">Видео и изображения</h3>
+              <p>Видео и статичные изображения.</p>
+            </li>
+            <li>
+              <span class="aa-did__label">Оффер</span>
+              <h3 class="aa-h3">Пробное занятие, платное</h3>
+              <p>Заявку оставляют на пробное занятие.</p>
+            </li>
+        </ul>
       </div>
     </section>
 
     <div class="aa-dark">
-      <section class="aa-sec" id="services" aria-labelledby="aa-services-title">
-        <div class="aa-wrap aa-svc">
-          <div>
-            <h2 class="aa-h3 aa-h3--lg" id="aa-services-title">Услуги</h2>
-            <div class="aa-tabs" role="tablist" aria-label="Для кого">
-              <button class="aa-tab" type="button" role="tab" id="aa-tab-online" aria-controls="aa-panel-online" aria-selected="true">онлайн-школам</button>
-              <button class="aa-tab" type="button" role="tab" id="aa-tab-offline" aria-controls="aa-panel-offline" aria-selected="false" tabindex="-1">офлайн-студиям</button>
-            </div>
-          </div>
-          <div>
-            <div class="aa-panel" role="tabpanel" id="aa-panel-online" aria-labelledby="aa-tab-online">
-              <div class="aa-card"><h3 class="aa-h3">VK Ads</h3><p>Запуск и ведение таргетированной рекламы в новом и старом кабинетах</p><span class="aa-card__art" aria-hidden="true"><i></i><i>VK</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Аудитории</h3><p>Широкие сегменты: мамы со всей России</p><span class="aa-card__art" aria-hidden="true"><i></i><i>РФ</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Креативы</h3><p>Видео и статичные изображения — от них зависят объём и цена заявок</p><span class="aa-card__art" aria-hidden="true"><i></i><i>▶</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Офферы</h3><p>Пробное занятие, в том числе платное, как в кейсе Genius school</p><span class="aa-card__art" aria-hidden="true"><i></i><i>%</i></span></div>
-            </div>
-            <div class="aa-panel" role="tabpanel" id="aa-panel-offline" aria-labelledby="aa-tab-offline" hidden>
-              <div class="aa-card"><h3 class="aa-h3">VK Ads</h3><p>Реклама сразу на все филиалы сети, до 17 регионов в одном проекте</p><span class="aa-card__art" aria-hidden="true"><i></i><i>VK</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Гео филиалов</h3><p>Мамы, которые живут в радиусе 1–3 км от филиала</p><span class="aa-card__art" aria-hidden="true"><i></i><i>км</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Школы рядом</h3><p>Родители детей из школ, расположенных рядом с филиалом</p><span class="aa-card__art" aria-hidden="true"><i></i><i>A+</i></span></div>
-              <div class="aa-card"><h3 class="aa-h3">Креативы</h3><p>Видео и изображения, в 75% креативов — видео</p><span class="aa-card__art" aria-hidden="true"><i></i><i>▶</i></span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="aa-sec aa-sec--flush" aria-label="Результаты">
-        <div class="aa-wrap aa-proof">
-          <div class="aa-proof__big">
-            <b>6</b>
-            <span><strong>кейсов</strong><small>и больше 37 тысяч заявок для детских школ</small></span>
-          </div>
-          <ul class="aa-chips" aria-label="Ниши">
-            <li>театральные студии</li>
-            <li>программирование</li>
-            <li>скорочтение</li>
-            <li>онлайн-репетиторы</li>
-            <li>математика</li>
-            <li>логопеды</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="aa-sec aa-sec--flush" id="cases" aria-labelledby="aa-cases-title">
+      <section class="aa-sec" id="cases" aria-labelledby="aa-cases-title">
         <div class="aa-wrap">
           <div class="aa-cases__head">
             <div class="aa-sec__head">
-              <h2 class="aa-h2" id="aa-cases-title">Кейсы</h2>
-              <p class="aa-muted">Нажмите на карточку, чтобы открыть кейс целиком</p>
+              <h2 class="aa-h2" id="aa-cases-title">Другие кейсы</h2>
+              <p class="aa-muted">Детские онлайн-школы и сети офлайн-студий</p>
             </div>
             <div class="aa-arrows">
               <button class="aa-arrow" type="button" data-dir="-1" aria-label="Предыдущие кейсы"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -483,37 +467,31 @@
             </div>
           </div>
           <div class="aa-track" id="aa-track">
-            <a class="aa-case" href="cases/irbis_2324.html">
+            <a class="aa-case" href="https://alimov.agency/irbis_2324">
               <div class="aa-case__top"><span class="aa-case__logo">И</span><div><b>Театральная студия «Ирбис»</b><small>учебный год 2023–24 · VK Ads</small></div></div>
-              <p class="aa-case__num">9&nbsp;633<small>заявки по 468 ₽</small></p>
+              <p class="aa-case__num">9 633<small>заявки по 468 ₽</small></p>
               <p>Сеть студий для детей 4–17 лет. Мамы в регионах филиалов, 75% креативов — видео. Бюджет 4,5 млн ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
-            <a class="aa-case" href="cases/genius_school.html">
-              <div class="aa-case__top"><span class="aa-case__logo">G</span><div><b>Онлайн-школа Genius school</b><small>VK Ads</small></div></div>
-              <p class="aa-case__num">12&nbsp;652<small>заявки по 135 ₽ · ROMI до 1600%</small></p>
-              <p>Скорочтение, математика и программирование. Платное пробное занятие, мамы со всей России. Бюджет 1,7 млн ₽.</p>
-              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
-            </a>
-            <a class="aa-case" href="cases/tetrica_case.html">
+            <a class="aa-case" href="https://alimov.agency/tetrica_case">
               <div class="aa-case__top"><span class="aa-case__logo">Т</span><div><b>Онлайн-школа «Тетрика»</b><small>VK, старый и новый кабинеты</small></div></div>
-              <p class="aa-case__num">8&nbsp;143<small>заявки по 567 ₽</small></p>
+              <p class="aa-case__num">8 143<small>заявки по 567 ₽</small></p>
               <p>Онлайн-репетиторы, подготовка к школе, логопед. Цель — заявка не дороже 800 ₽. Бюджет 4,6 млн ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
-            <a class="aa-case" href="cases/irbis_case.html">
+            <a class="aa-case" href="https://alimov.agency/irbis_case">
               <div class="aa-case__top"><span class="aa-case__logo">И</span><div><b>Театральная студия «Ирбис»</b><small>офлайн · 17 регионов · VK</small></div></div>
-              <p class="aa-case__num">1&nbsp;919<small>заявок по 567 ₽</small></p>
+              <p class="aa-case__num">1 919<small>заявок по 567,4 ₽</small></p>
               <p>Тестовый бюджет 1,09 млн ₽, цель — заявка не дороже 1200 ₽. Аудитории в радиусе 1 км от филиала.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
-            <a class="aa-case" href="cases/uchi_case.html">
+            <a class="aa-case" href="https://alimov.agency/uchi_case">
               <div class="aa-case__top"><span class="aa-case__logo">У</span><div><b>Школы программирования «Учи.ру»</b><small>офлайн · Instagram/Facebook*</small></div></div>
-              <p class="aa-case__num">4&nbsp;823<small>заявки по 517 ₽</small></p>
+              <p class="aa-case__num">4 823<small>заявки по 517 ₽</small></p>
               <p>Очные школы для детей 7–15 лет. Цель — заявка не дороже 1000 ₽, мамы в радиусе до 3 км. Бюджет 2,5 млн ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
-            <a class="aa-case" href="cases/unicode_case.html">
+            <a class="aa-case" href="https://alimov.agency/unicode_case">
               <div class="aa-case__top"><span class="aa-case__logo">Ю</span><div><b>Онлайн-школа «Юникод»</b><small>VK, видеокреативы</small></div></div>
               <p class="aa-case__num">614<small>заявок по 257 ₽</small></p>
               <p>Программирование для детей 5–18 лет. Цель — заявка не дороже 500 ₽, вышло почти вдвое дешевле. Бюджет 158 тыс. ₽.</p>
@@ -521,45 +499,6 @@
             </a>
           </div>
           <p class="aa-note">* Instagram и Facebook принадлежат Meta Platforms Inc., деятельность которой признана экстремистской и запрещена в России.</p>
-
-          <div class="aa-marquee" aria-label="Клиенты: Ирбис, Genius school, Тетрика, Учи.ру, Юникод">
-            <div class="aa-marquee__row" aria-hidden="true">
-              <ul><li>Ирбис</li><li>Genius school</li><li>Тетрика</li><li>Учи.ру</li><li>Юникод</li></ul>
-              <ul><li>Ирбис</li><li>Genius school</li><li>Тетрика</li><li>Учи.ру</li><li>Юникод</li></ul>
-              <ul><li>Ирбис</li><li>Genius school</li><li>Тетрика</li><li>Учи.ру</li><li>Юникод</li></ul>
-              <ul><li>Ирбис</li><li>Genius school</li><li>Тетрика</li><li>Учи.ру</li><li>Юникод</li></ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="aa-sec" id="faq" aria-labelledby="aa-faq-title">
-        <div class="aa-wrap">
-          <div class="aa-sec__head aa-sec__head--center">
-            <h2 class="aa-h2" id="aa-faq-title">Вопросы</h2>
-          </div>
-          <div class="aa-faq">
-            <details>
-              <summary class="aa-h3">С какими школами вы работаете?<i aria-hidden="true"></i></summary>
-              <p>С детскими онлайн-школами и сетями офлайн-студий: программирование, скорочтение и математика, онлайн-репетиторы, театральные студии.</p>
-            </details>
-            <details>
-              <summary class="aa-h3">Какой нужен рекламный бюджет?<i aria-hidden="true"></i></summary>
-              <p>В наших кейсах бюджеты от 157 тыс. до 4,6 млн ₽. Под ваш бюджет и допустимую цену заявки посчитаем, сколько заявок можно получить.</p>
-            </details>
-            <details>
-              <summary class="aa-h3">Сколько стоят ваши услуги?<i aria-hidden="true"></i></summary>
-              <p data-draft>Фиксированная оплата за ведение плюс разовая настройка. Точную стоимость называем после разбора проекта.</p>
-            </details>
-            <details>
-              <summary class="aa-h3">Кому принадлежат рекламные кабинеты?<i aria-hidden="true"></i></summary>
-              <p>Вам. Кабинеты создаются на вашу компанию, мы работаем в них по доступу. Если решите прекратить работу, всё останется у вас.</p>
-            </details>
-            <details>
-              <summary class="aa-h3">Как выглядит отчёт?<i aria-hidden="true"></i></summary>
-              <p>Это Google Таблица, которая обновляется каждое утро: показы, клики, расход, заявки и цена заявки по каждому кабинету, плюс итоги за вчера.</p>
-            </details>
-          </div>
         </div>
       </section>
 
@@ -677,6 +616,3 @@
   if (year) year.textContent = new Date().getFullYear();
 })();
 </script>
-
-</body>
-</html>

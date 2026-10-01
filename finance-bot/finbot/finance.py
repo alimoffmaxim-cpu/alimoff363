@@ -307,6 +307,44 @@ def last_rate(txs: list[Tx]) -> float | None:
     return last.rub / last.amount
 
 
+@dataclass
+class FxEntry:
+    tx: Tx
+    rate: float  # рублей за 1 бат
+    change: float | None  # % к предыдущему обмену (None — первый обмен)
+
+
+def fx_history(txs: list[Tx]) -> list[FxEntry]:
+    """Все обмены по порядку (старые → новые) с курсом и изменением к предыдущему обмену."""
+    fx = sorted((t for t in txs if t.kind == "fx" and t.amount), key=lambda t: (t.day, t.id or 0))
+    history: list[FxEntry] = []
+    for tx in fx:
+        rate = tx.rub / tx.amount
+        prev = history[-1].rate if history else None
+        history.append(FxEntry(tx, rate, pct_change(rate, prev) if prev else None))
+    return history
+
+
+def fx_by_month(history: list[FxEntry]) -> list[tuple[int, int, float, int, int]]:
+    """Средний курс по месяцам, взвешенный по сумме: [(год, месяц, курс, бат, обменов)], новые сверху."""
+    groups: dict[tuple[int, int], list[int]] = {}
+    for e in history:
+        g = groups.setdefault((e.tx.day.year, e.tx.day.month), [0, 0, 0])
+        g[0] += e.tx.rub
+        g[1] += e.tx.amount
+        g[2] += 1
+    return [(y, m, rub / thb, thb, n) for (y, m), (rub, thb, n) in sorted(groups.items(), reverse=True)]
+
+
+def fmt_rate_change(change: float | None) -> str:
+    """▲ — бат подорожал (за 1 ฿ отдали больше рублей), ▼ — подешевел."""
+    if change is None:
+        return ""
+    if abs(change) < 0.05:
+        return "• 0,0%"
+    return fmt_pct(change)
+
+
 def frequent_categories(txs: list[Tx], kind: str, limit: int = 12) -> list[str]:
     """Сначала ваши частые категории, затем стандартные."""
     defaults = [name for _, name in (EXPENSE_CATEGORIES if kind == "out" else INCOME_CATEGORIES)]

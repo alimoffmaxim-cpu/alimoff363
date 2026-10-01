@@ -36,6 +36,9 @@ from .finance import (
     WALLET_NAMES,
     WALLETS,
     balances,
+    fmt_rate_change,
+    fx_by_month,
+    fx_history,
     wallet_money,
     categories,
     fmt_rate,
@@ -98,6 +101,7 @@ HELP = """<b>Как пользоваться</b>
 Можно указать дату: <code>-500 еда вчера</code>, <code>-900 такси 25.09</code>
 Суммы можно сокращать: <code>90к</code> = 90 000.
 
+/rates — история курса обмена: все обмены, курс, динамика по месяцам
 /undo — отменить последнюю операцию, /del 12 — удалить операцию №12
 /lock — заблокировать и стереть переписку · /changepin — сменить PIN
 /reset — удалить все данные и начать заново
@@ -198,9 +202,51 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         janitor.later(message, sent)
         return sent
 
-    def undo_markup(tx_id: int) -> InlineKeyboardMarkup:
-        return InlineKeyboardMarkup(inline_keyboard=[[
-            InlineKeyboardButton(text="↩️ Отменить", callback_data=f"del:{tx_id}")]])
+    RATES_BUTTON = InlineKeyboardButton(text="📈 История курса", callback_data="rates")
+
+    def undo_markup(tx_id: int, rates: bool = False) -> InlineKeyboardMarkup:
+        row = [InlineKeyboardButton(text="↩️ Отменить", callback_data=f"del:{tx_id}")]
+        if rates:
+            row.append(RATES_BUTTON)
+        return InlineKeyboardMarkup(inline_keyboard=[row])
+
+    def rates_report() -> str:
+        history = fx_history(storage.list_tx(vault.cipher))
+        if not history:
+            return ("📈 Обменов пока не было.\n"
+                    "Запишите обмен — бот сам посчитает курс: <code>обмен 90000 30000</code>")
+        last = history[-1]
+        rates = [e.rate for e in history]
+        lo = min(history, key=lambda e: e.rate)
+        hi = max(history, key=lambda e: e.rate)
+        total_rub = sum(e.tx.rub for e in history)
+        total_thb = sum(e.tx.amount for e in history)
+        lines = [
+            "📈 <b>Курс обмена ₽ → ฿</b> (сколько рублей за 1 бат)",
+            "",
+            f"Последний: <b>{fmt_rate(last.rate)}</b> ({last.tx.day:%d.%m.%Y})",
+            f"Средний за всё время: {fmt_rate(total_rub / total_thb)}",
+        ]
+        if len(rates) > 1:
+            lines.append(f"Лучший: {fmt_rate(lo.rate)} ({lo.tx.day:%d.%m.%y}) · "
+                         f"худший: {fmt_rate(hi.rate)} ({hi.tx.day:%d.%m.%y})")
+        months = fx_by_month(history)
+        if len(months) > 1:
+            lines += ["", "<b>По месяцам</b> (средний курс, взвешенный по сумме)"]
+            for i, (y, mo, rate, thb_sum, n) in enumerate(months[:12]):
+                older = months[i + 1][2] if i + 1 < len(months) else None
+                change = f" {fmt_rate_change(pct_change(rate, older))}" if older else ""
+                lines.append(f"{MONTHS_FULL[mo - 1]} {y}: <b>{fmt_rate(rate)}</b>{change} · {money(thb_sum)}, обменов: {n}")
+        lines += ["", "<b>Все обмены</b> (новые сверху)"]
+        for e in reversed(history[-30:]):
+            biz = " 💼" if e.tx.cur == "RUBB" else ""
+            change = f" {fmt_rate_change(e.change)}" if e.change is not None else ""
+            lines.append(f"{e.tx.day:%d.%m.%y} · {money(e.tx.rub, RUB)}{biz} → {money(e.tx.amount)} · "
+                         f"<b>{fmt_rate(e.rate)}</b>{change}")
+        if len(history) > 30:
+            lines.append(f"…и ещё {len(history) - 30} раньше")
+        lines += ["", "<i>▲ — бат подорожал (за 1 ฿ отдали больше рублей), ▼ — подешевел. 💼 — рубли бизнеса.</i>"]
+        return "\n".join(lines)
 
     def balances_line(txs: list[Tx]) -> str:
         bal = balances(txs)
@@ -230,6 +276,17 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         txs = storage.list_tx(vault.cipher)
         if tx.kind == "fx" and parsed.swapped:
             text += "\n(суммы поменял местами: рублей при обмене всегда больше, чем бат)"
+        if tx.kind == "fx":
+            history = fx_history(txs)
+            idx = next(i for i, e in enumerate(history) if e.tx.id == tx.id)
+            entry = history[idx]
+            prev_rate = history[idx - 1].rate if idx > 0 else None
+            if prev_rate:
+                trend = "бат подорожал" if entry.change > 0.05 else "бат подешевел" if entry.change < -0.05 else "курс тот же"
+                text += (f"\n📈 К прошлому обмену ({fmt_rate(prev_rate)}): "
+                         f"{fmt_rate_change(entry.change)} — {trend}")
+            else:
+                text += "\n📈 Первый обмен — с него начнётся история курса"
         m = month_totals(txs, tx.day.year, tx.day.month)
         name = MONTHS_FULL[tx.day.month - 1]
         text += f"\n\n📅 <b>{name}</b>: расходы {money(m.expense)} · доходы {money(m.income)}"
@@ -243,7 +300,7 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         if tx.kind == "fx":
             text += f"\n💱 Обменяно за {name.lower()}: {money(m.fx_thb)} (курс {fmt_rate(m.rate)})"
         text += "\n" + balances_line(txs)
-        return text, undo_markup(tx.id)
+        return text, undo_markup(tx.id, rates=tx.kind == "fx")
 
     def category_markup(cats: list[str]) -> InlineKeyboardMarkup:
         buttons = [InlineKeyboardButton(text=label(c), callback_data=f"cat:{i}") for i, c in enumerate(cats)]
@@ -408,7 +465,22 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         hint = f"\nПрошлый курс: {fmt_rate(rate)}" if rate else ""
         await reply(message, "💱 Сколько <b>рублей</b> отдали и сколько <b>бат</b> получили?\n"
                              f"Например: <code>90000 30000</code> или <code>90к 30к</code>\n"
-                             f"Рубли с бизнес-кошелька — добавьте рб: <code>90000 30000 рб</code>{hint}")
+                             f"Рубли с бизнес-кошелька — добавьте рб: <code>90000 30000 рб</code>\n"
+                             f"Курс бот посчитает сам.{hint}",
+                    reply_markup=InlineKeyboardMarkup(inline_keyboard=[[RATES_BUTTON]]))
+
+    @router.message(Command("rates"))
+    @router.message(Command("kurs"))
+    async def cmd_rates(message: Message, state: FSMContext) -> None:
+        await state.clear()
+        await reply(message, rates_report())
+
+    @router.callback_query(F.data == "rates")
+    async def cb_rates(call: CallbackQuery, state: FSMContext) -> None:
+        await state.clear()
+        await call.answer()
+        sent = await call.message.answer(rates_report())
+        janitor.later(sent)
 
     @router.message(Command("dash"))
     @router.message(F.text == BTN_DASH)
@@ -536,8 +608,8 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
                 lines.append(f"\n<b>{tx.day:%d.%m}</b>")
             text = describe(tx).replace(f" · {tx.day:%d.%m}", "")
             lines.append(f"<code>#{tx.id}</code> {text}")
-        lines.append("\nУдалить: /del номер, последнюю — /undo")
-        await reply(message, "\n".join(lines))
+        lines.append("\nУдалить: /del номер, последнюю — /undo · история курса обмена — /rates")
+        await reply(message, "\n".join(lines), reply_markup=InlineKeyboardMarkup(inline_keyboard=[[RATES_BUTTON]]))
 
     @router.message(Command("undo"))
     async def cmd_undo(message: Message) -> None:

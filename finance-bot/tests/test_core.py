@@ -213,3 +213,18 @@ def test_business_rubles_wallet():
     assert balances(txs) == {"THB": 1250000, "RUB": 4100000, "RUBB": 6800000}
     m = month_totals(txs, TODAY.year, TODAY.month)
     assert (m.income_rubb, m.expense_rubb, m.income_rub, m.expense) == (10000000, 200000, 5000000, 50000)
+
+
+def test_fx_history_rates_and_changes():
+    from finbot.finance import fx_by_month, fx_history
+
+    txs = [Tx("fx", 3000000, "", "", date(2026, 8, 10), id=1, rub=8700000),   # 2,90
+           Tx("fx", 3000000, "", "", date(2026, 9, 12), id=2, rub=9000000),   # 3,00
+           Tx("fx", 1000000, "", "", date(2026, 9, 20), id=3, rub=3100000, cur="RUBB"),  # 3,10
+           Tx("out", 100, "Еда", "", date(2026, 9, 21), id=4)]
+    h = fx_history(txs)
+    assert [round(e.rate, 2) for e in h] == [2.9, 3.0, 3.1]
+    assert h[0].change is None and round(h[1].change, 2) == 3.45
+    months = fx_by_month(h)
+    assert [(y, m, round(r, 3), thb, n) for y, m, r, thb, n in months] == [
+        (2026, 9, 3.025, 4000000, 2), (2026, 8, 2.9, 3000000, 1)]

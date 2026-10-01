@@ -134,6 +134,8 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     app.appendChild(columnsChart(ms));
     var rateSection = rateChart(ms);
     if (rateSection) app.appendChild(rateSection);
+    var fxSection = exchanges(data);
+    if (fxSection) app.appendChild(fxSection);
     app.appendChild(categories(cur));
     app.appendChild(operations(data));
 
@@ -246,6 +248,32 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
       t.textContent = MONTHS_SHORT[m.month - 1]; root.appendChild(t);
     });
     sec.appendChild(root);
+    return sec;
+  }
+
+  // Все последние обмены с курсом и изменением к предыдущему обмену
+  function exchanges(data) {
+    var list = data.x || [];
+    if (!list.length) return null;
+    var sec = el("section");
+    sec.appendChild(el("h2", null, "Обмены и курс"));
+    sec.appendChild(el("p", "muted small", "▲ — бат подорожал (за 1 ฿ отдали больше рублей), ▼ — подешевел"));
+    var ul = el("ul", "ops");
+    for (var i = list.length - 1; i >= 0; i--) {
+      var x = list[i], r = x[1] / x[2], prev = i > 0 ? list[i - 1][1] / list[i - 1][2] : null;
+      var li = el("li"), what = el("div", "what");
+      what.appendChild(el("div", null, rub(x[1]) + (x[3] ? " 💼" : "") + " → " + thb(x[2])));
+      what.appendChild(el("div", "when", x[0]));
+      var amt = el("div", "amt", rate(r));
+      if (prev) {
+        var d = delta(r, prev, false);
+        d.textContent = d.textContent.replace(" к прошлому месяцу", "");
+        var sub = el("div", "when"); sub.appendChild(d); amt.appendChild(sub);
+      }
+      li.appendChild(what); li.appendChild(amt);
+      ul.appendChild(li);
+    }
+    sec.appendChild(ul);
     return sec;
   }
 

@@ -10,7 +10,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 from .finance import (  # noqa: E402
-    MONTHS_FULL, MONTHS_WITH, RUB, approx_rub, balances, categories, wallet_money, fmt_pct, fmt_rate, last_rate, money, month_label, monthly_totals,
+    MONTHS_FULL, MONTHS_WITH, RUB, approx_rub, balances, categories, fx_history, wallet_money, fmt_pct, fmt_rate, last_rate, money, month_label, monthly_totals,
     pct_change,
 )
 from .storage import Tx  # noqa: E402
@@ -148,14 +148,15 @@ WEBAPP_PAYLOAD_LIMIT = 1700  # запас до лимита длины ссыл�
 
 def webapp_payload(txs: list[Tx], now: datetime) -> str:
     """Снимок для мини-аппа. Если не влезает в ссылку — урезаем детали, но не итоги."""
-    for recent, per_month in ((12, 10), (8, 8), (5, 6), (3, 5), (0, 4), (0, 0)):
-        payload = _payload(txs, now, recent=recent, per_month_cats=per_month)
+    for recent, per_month, fx in ((12, 10, 12), (8, 8, 10), (5, 6, 8), (3, 5, 6), (0, 4, 5), (0, 0, 3)):
+        payload = _payload(txs, now, recent=recent, per_month_cats=per_month, recent_fx=fx)
         if len(payload) <= WEBAPP_PAYLOAD_LIMIT:
             break
     return payload
 
 
-def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, months: int = 6) -> str:
+def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, months: int = 6,
+             recent_fx: int = 12) -> str:
     """Компактный снимок в base64url. Суммы — в целых батах/рублях."""
     today = now.date()
     totals = monthly_totals(txs, today, months)
@@ -182,6 +183,8 @@ def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, mon
 
     rate = last_rate(txs)
     wallets = balances(txs)
+    exchanges = [[f"{e.tx.day:%d.%m.%y}", round(e.tx.rub / 100), round(e.tx.amount / 100), 1 if e.tx.cur == "RUBB" else 0]
+                 for e in fx_history(txs)[-recent_fx:]]
     data = {
         "v": 1,
         "t": f"{now:%d.%m %H:%M}",
@@ -196,6 +199,7 @@ def _payload(txs: list[Tx], now: datetime, recent: int, per_month_cats: int, mon
         "bb": round(wallets["RUBB"] / 100),
         "r": round(rate, 4) if rate else 0,
         "o": ops,
+        "x": exchanges,
     }
     raw = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode()
     return base64.urlsafe_b64encode(raw).decode().rstrip("=")

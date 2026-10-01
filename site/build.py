@@ -11,6 +11,9 @@
 поэтому правки дизайна на главной сразу попадают и в кейсы.
 """
 import re
+import sys
+
+sys.dont_write_bytecode = True  # не оставлять site/__pycache__ после сборки
 from pathlib import Path
 
 from cases import CASES

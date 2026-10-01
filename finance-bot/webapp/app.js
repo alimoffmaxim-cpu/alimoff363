@@ -33,7 +33,7 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
       var pairs = data.k[i] || [];
       for (var j = 0; j < pairs.length; j += 2) cats.push({ name: data.c[pairs[j]], amount: pairs[j + 1] });
       return { year: row[0], month: row[1], income: row[2], expense: row[3], fxRub: row[4], fxThb: row[5],
-        rate: row[5] ? row[4] / row[5] : null, cats: cats };
+        rate: row[5] ? row[4] / row[5] : null, incomeRub: row[6] || 0, expenseRub: row[7] || 0, cats: cats };
     });
   }
 
@@ -84,8 +84,15 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
 
     var header = el("header");
     header.appendChild(el("h1", null, "Финансы"));
-    header.appendChild(el("p", "muted small", "Данные на " + data.t + " · все суммы в батах"));
+    header.appendChild(el("p", "muted small", "Данные на " + data.t));
     app.appendChild(header);
+
+    // Остатки — копятся всё время и не обнуляются по месяцам
+    var balancesRow = el("div", "tiles balances");
+    balancesRow.appendChild(tile(null, "Остаток в батах", thb(data.b),
+      [el("span", null, lastRate ? "≈ " + rub(data.b * lastRate) : "не обнуляется")]));
+    balancesRow.appendChild(tile(null, "Остаток в рублях", rub(data.br || 0), [el("span", null, "не обнуляется")]));
+    app.appendChild(balancesRow);
 
     // Выбор месяца — всё ниже считается только за выбранный месяц
     var bar = el("div", "months");
@@ -104,6 +111,7 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
     var heroSub = el("div", "sub");
     heroSub.appendChild(delta(cur.expense, prev && prev.expense, false));
     if (effRate && cur.expense) heroSub.appendChild(document.createTextNode(" · ≈ " + rub(cur.expense * effRate)));
+    if (cur.expenseRub) heroSub.appendChild(document.createTextNode(" · ещё " + rub(cur.expenseRub) + " в рублях"));
     hero.appendChild(heroSub);
     app.appendChild(hero);
 
@@ -111,14 +119,13 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
 
     // Плитки месяца
     var tiles = el("div", "tiles");
-    tiles.appendChild(tile("income", "Доходы за месяц", thb(cur.income), [delta(cur.income, prev && prev.income, true)]));
+    tiles.appendChild(tile("income", "Доходы за месяц", thb(cur.income), [delta(cur.income, prev && prev.income, true),
+      cur.incomeRub ? el("div", null, "и " + rub(cur.incomeRub) + " в рублях") : null]));
     var net = cur.income - cur.expense;
     tiles.appendChild(tile(null, "Итог месяца", thb(net), [el("span", null, prev ? "прошлый: " + thb(prev.income - prev.expense) : "доходы − расходы")]));
-    tiles.appendChild(tile("rate", "Обмен ₽ → ฿", cur.fxThb ? thb(cur.fxThb) : "—",
+    tiles.appendChild(tile("rate wide", "Обмен ₽ → ฿", cur.fxThb ? thb(cur.fxThb) : "—",
       cur.fxThb ? [el("div", null, "за " + rub(cur.fxRub) + " · " + rate(cur.rate)),
         prev && prev.rate ? delta(cur.rate, prev.rate, false) : null] : [el("span", null, "в этом месяце не было")]));
-    tiles.appendChild(tile(null, "Остаток на руках", thb(data.b),
-      [el("span", null, "за всё время" + (lastRate ? " · ≈ " + rub(data.b * lastRate) : ""))]));
     app.appendChild(tiles);
 
     app.appendChild(columnsChart(ms));
@@ -131,7 +138,9 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
   }
 
   function tile(kind, label, value, subs) {
-    var t = el("div", "tile");
+    var wide = kind && kind.indexOf(" wide") >= 0;
+    if (wide) kind = kind.replace(" wide", "");
+    var t = el("div", "tile" + (wide ? " wide" : ""));
     var l = el("div", "label");
     if (kind) l.appendChild(el("span", "swatch " + kind));
     l.appendChild(document.createTextNode(label));
@@ -273,10 +282,11 @@ var RAW_HASH = (function () { try { return String(location.hash || ""); } catch 
         amt.appendChild(el("div", "when", rub(o[4]) + " · " + rate(o[4] / o[2])));
       } else if (o[1] === "a") {
         what.appendChild(el("div", null, "⚖️ Корректировка"));
-        amt = el("div", "amt", (o[2] > 0 ? "+" : "") + thb(o[2]));
+        amt = el("div", "amt", (o[2] > 0 ? "+" : "") + (o[5] ? rub : thb)(o[2]));
       } else {
         what.appendChild(el("div", null, emoji(name) + " " + name));
-        amt = el("div", "amt" + (o[1] === "i" ? " in" : ""), (o[1] === "i" ? "+" : "−") + thb(o[2]));
+        var money = o[5] ? rub : thb;
+        amt = el("div", "amt" + (o[1] === "i" ? " in" : ""), (o[1] === "i" ? "+" : "−") + money(o[2]));
       }
       what.appendChild(el("div", "when", o[0]));
       li.appendChild(what); li.appendChild(amt);

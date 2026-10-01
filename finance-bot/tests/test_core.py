@@ -118,7 +118,8 @@ def test_webapp_payload_roundtrip_and_limit():
     raw = dashboard.webapp_payload(txs, datetime(2026, 9, 29, 20, 15))
     data = json.loads(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)))
     assert data["v"] == 1 and data["b"] == 30000 - 350 and data["r"] == 3.0
-    assert data["m"][-1] == [2026, 9, 0, 350, 90000, 30000]
+    assert data["m"][-1] == [2026, 9, 0, 350, 90000, 30000, 0, 0]
+    assert data["br"] == -90000
     assert data["c"][data["k"][-1][0]] == "Еда"
     # много длинных категорий — ссылка всё равно не превышает лимит
     many = [Tx("out", 100 * i, f"Категория-номер-{i}-с-длинным-названием", "", TODAY, id=i) for i in range(1, 200)]
@@ -134,3 +135,43 @@ def test_each_month_starts_from_zero():
     assert (sep.expense, sep.income) == (500000, 1000000)
     assert (octo.expense, octo.income) == (20000, 0)  # октябрь начат с нуля
     assert balance(txs) == 1000000 - 500000 - 20000  # а остаток — за всё время
+
+
+def test_two_balances_never_reset():
+    from finbot.finance import balances, month_totals
+
+    txs = [
+        Tx("adj", 15000000, "Корректировка", "", date(2026, 9, 1), id=1, cur="RUB"),   # стартовые 150 000 ₽
+        Tx("adj", 500000, "Корректировка", "", date(2026, 9, 1), id=2),                # стартовые 5 000 ฿
+        Tx("fx", 3000000, "", "", date(2026, 9, 10), id=3, rub=9000000),               # 90 000 ₽ → 30 000 ฿
+        Tx("out", 1200000, "Жильё", "", date(2026, 9, 11), id=4),                      # −12 000 ฿
+        Tx("in", 10000000, "Зарплата", "", date(2026, 9, 25), id=5, cur="RUB"),        # +100 000 ₽
+        Tx("in", 500000, "Фриланс", "", date(2026, 10, 1), id=6),                      # +5 000 ฿ (октябрь)
+        Tx("out", 35000, "Еда", "", date(2026, 10, 1), id=7),                          # −350 ฿ (октябрь)
+    ]
+    thb, rub = balances(txs)
+    assert thb == 500000 + 3000000 - 1200000 + 500000 - 35000      # 27 650 ฿ — копится через месяцы
+    assert rub == 15000000 - 9000000 + 10000000                    # 160 000 ₽
+    octo = month_totals(txs, 2026, 10)
+    assert (octo.income, octo.expense, octo.income_rub) == (500000, 35000, 0)  # а месяц — с нуля
+    sep = month_totals(txs, 2026, 9)
+    assert (sep.income, sep.income_rub, sep.expense) == (0, 10000000, 1200000)
+
+
+def test_currency_in_input():
+    p = parse_input("+100000₽ зп", TODAY)
+    assert (p.kind, p.amount, p.cur, p.category) == ("in", 10000000, "RUB", "Зарплата")
+    p = parse_input("доход 100 000 руб", TODAY)
+    assert (p.cur, p.category) == ("RUB", None)
+    assert parse_input("-350 еда", TODAY).cur is None  # без валюты — баты
+    assert parse_input("-350 еда", TODAY).to_tx().cur == "THB"
+    p = parse_input("баланс 150000 ₽", TODAY)
+    assert (p.kind, p.amount, p.cur) == ("balance", 15000000, "RUB")
+    assert parse_input("баланс 12000", TODAY).cur == "THB"
+    assert parse_input("-500 рис", TODAY).category == "Рис"  # «р» внутри слова — не рубли
+
+
+def test_old_records_without_currency_load_as_baht():
+    import json
+    old = json.dumps({"kind": "out", "amount": 100, "category": "Еда", "note": "", "day": "2026-09-01", "rub": 0}).encode()
+    assert Tx.load(1, old).cur == "THB"

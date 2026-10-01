@@ -49,7 +49,10 @@ ALIASES = {
 OUT_WORDS = {"расход", "расходы", "трата", "потратил", "потратила", "минус"}
 IN_WORDS = {"доход", "получил", "получила", "плюс", "приход"}
 FX_WORDS = {"обмен", "обменял", "обменяла", "поменял", "поменяла"}
-BALANCE_WORDS = {"баланс"}
+BALANCE_WORDS = {"баланс", "остаток"}
+RUB_WORDS = {"₽", "р", "руб", "рубль", "рубля", "рублей", "rub", "rur"}
+THB_WORDS = {"฿", "бат", "бата", "батов", "thb", "baht"}
+CURRENCY_GLUED_RE = re.compile(r"(\d)(₽|฿|руб\w*|р|бат\w*|thb|rub)(?=[\s.]|$)", re.I)
 
 # 350 · 1 500 · 1,500 · 350,50 · 90к · 90 тыс
 NUM_RE = re.compile(r"(\d{1,3}(?:[ ,.]\d{3})+|\d+)(?:[.,](\d{1,2}))?(?:\s*(к|k|тыс)(?![а-яa-z]))?", re.I)
@@ -85,10 +88,11 @@ class Parsed:
     note: str = ""
     day: date | None = None
     swapped: bool = False
+    cur: str | None = None  # валюта, если указана явно (₽, руб, ฿, бат); иначе — баты
 
     def to_tx(self) -> Tx:
         return Tx(kind=self.kind, amount=self.amount, category=self.category or "", note=self.note,
-                  day=self.day, rub=self.rub)
+                  day=self.day, rub=self.rub, cur=self.cur or "THB")
 
 
 class ParseError(ValueError):
@@ -115,6 +119,21 @@ def _extract_date(text: str, today: date) -> tuple[date, str]:
     return today, text
 
 
+def _extract_currency(text: str) -> tuple[str | None, str]:
+    """'100000₽ зп' / 'доход 100000 руб' -> ('RUB', '100000 зп')."""
+    text = CURRENCY_GLUED_RE.sub(r"\1 \2", text)
+    cur, words = None, []
+    for word in text.split():
+        bare = word.lower().rstrip(".")
+        if bare in RUB_WORDS:
+            cur = "RUB"
+        elif bare in THB_WORDS:
+            cur = "THB"
+        else:
+            words.append(word)
+    return cur, " ".join(words)
+
+
 def parse_fx(text: str) -> tuple[int, int, bool]:
     """'90000 - 30000', '90к 30к', '90 000 → 30 000' -> (рубли, баты, поменяны_ли_местами)."""
     nums = [_number(m) for m in NUM_RE.finditer(text)]
@@ -132,6 +151,7 @@ def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
     """Понимает: -350 · 350 еда · расход 350 кафе обед · +5000 · доход 5000 зп ·
     обмен 90000 - 30000 · баланс 12000 · даты '25.09', 'вчера'."""
     day, text = _extract_date(text.strip(), today)
+    cur, text = _extract_currency(text)
     first, _, rest = text.partition(" ")
     word = first.lower().rstrip(":")
 
@@ -144,9 +164,9 @@ def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
         negative = value_text[:1] in "-−"
         m = NUM_RE.match(value_text.lstrip("-−").strip())
         if not m:
-            raise ParseError("Укажите сумму: <code>баланс 12000</code>")
+            raise ParseError("Укажите сумму: <code>баланс 12000</code> (баты) или <code>баланс 50000 ₽</code>")
         value = _number(m)
-        return Parsed("balance", amount=-value if negative else value, day=day)
+        return Parsed("balance", amount=-value if negative else value, day=day, cur=cur or "THB")
 
     kind = default_kind
     if word in OUT_WORDS:
@@ -169,7 +189,7 @@ def parse_input(text: str, today: date, default_kind: str = "out") -> Parsed:
     rest = text[m.end():].strip()
     category, _, note = rest.partition(" ")
     return Parsed(kind, amount=amount, category=normalize_category(category) if category else None,
-                  note=note.strip()[:200], day=day)
+                  note=note.strip()[:200], day=day, cur=cur)
 
 
 # ---------- статистика ----------
@@ -191,6 +211,8 @@ class MonthTotals:
     expense: int = 0
     fx_rub: int = 0
     fx_thb: int = 0
+    income_rub: int = 0  # доходы и расходы в рублях — отдельно от батовых
+    expense_rub: int = 0
 
     @property
     def net(self) -> int:
@@ -208,10 +230,17 @@ def monthly_totals(txs: list[Tx], today: date, months: int = 6) -> list[MonthTot
         bucket = totals.get((tx.day.year, tx.day.month))
         if bucket is None:
             continue
+        rub = tx.cur == "RUB"
         if tx.kind == "in":
-            bucket.income += tx.amount
+            if rub:
+                bucket.income_rub += tx.amount
+            else:
+                bucket.income += tx.amount
         elif tx.kind == "out":
-            bucket.expense += tx.amount
+            if rub:
+                bucket.expense_rub += tx.amount
+            else:
+                bucket.expense += tx.amount
         elif tx.kind == "fx":
             bucket.fx_rub += tx.rub
             bucket.fx_thb += tx.amount
@@ -226,20 +255,34 @@ def month_totals(txs: list[Tx], year: int, month: int) -> MonthTotals:
 def categories(txs: list[Tx], year: int, month: int, kind: str = "out") -> list[tuple[str, int]]:
     sums: dict[str, int] = defaultdict(int)
     for tx in txs:
-        if tx.kind == kind and tx.day.year == year and tx.day.month == month:
+        if tx.kind == kind and tx.cur == "THB" and tx.day.year == year and tx.day.month == month:
             sums[tx.category] += tx.amount
     return sorted(sums.items(), key=lambda kv: kv[1], reverse=True)
 
 
-def balance(txs: list[Tx]) -> int:
-    """Баты «на руках»: доходы + полученное при обмене − расходы ± корректировки."""
-    total = 0
+def balances(txs: list[Tx]) -> tuple[int, int]:
+    """Остатки за всё время (не обнуляются по месяцам): (баты, рубли).
+
+    Расход уменьшает остаток своей валюты, доход увеличивает,
+    обмен списывает рубли и добавляет баты, корректировка выравнивает остаток.
+    """
+    thb = rub = 0
     for tx in txs:
-        if tx.kind in ("in", "fx", "adj"):
-            total += tx.amount
-        elif tx.kind == "out":
-            total -= tx.amount
-    return total
+        if tx.kind == "fx":
+            thb += tx.amount
+            rub -= tx.rub
+            continue
+        sign = -1 if tx.kind == "out" else 1
+        if tx.cur == "RUB":
+            rub += sign * tx.amount
+        else:
+            thb += sign * tx.amount
+    return thb, rub
+
+
+def balance(txs: list[Tx]) -> int:
+    """Остаток в батах."""
+    return balances(txs)[0]
 
 
 def last_rate(txs: list[Tx]) -> float | None:

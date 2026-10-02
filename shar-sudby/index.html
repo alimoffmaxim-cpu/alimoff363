@@ -1,0 +1,205 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Шар судьбы</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@400;600&display=swap">
+<style>
+  /* Layout: one screen, ball in the centre, question field above, hint below. Single dark "night table" look. */
+  :root {
+    --bg: #0e0f1a;
+    --bg-glow: #23264a;
+    --fg: #ecebf5;
+    --muted: #8d8fb0;
+    --window: #0a1a5c;
+    --triangle: #2340d8;
+    --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+    --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: radial-gradient(ellipse at 50% 55%, var(--bg-glow) 0%, var(--bg) 65%) var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    -webkit-tap-highlight-color: transparent;
+  }
+  main {
+    min-height: 100%;
+    box-sizing: border-box;
+    padding-inline: 16px;
+    padding-block: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    text-align: center;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .sub { margin: -14px 0 0; color: var(--muted); font-size: 0.95rem; }
+  #q {
+    width: min(100%, 26rem);
+    box-sizing: border-box;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: 1px solid #34375e;
+    background: #16182b;
+    color: var(--fg);
+    font: 600 1rem var(--body);
+    text-align: center;
+  }
+  #q::placeholder { color: var(--muted); font-weight: 400; }
+  #q:focus-visible { outline: 2px solid var(--triangle); outline-offset: 2px; }
+
+  #ball {
+    width: min(78vw, 340px);
+    aspect-ratio: 1;
+    max-width: 100%;
+    border: 0;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    background:
+      radial-gradient(circle at 32% 26%, rgba(255,255,255,.55) 0, rgba(255,255,255,.08) 9%, transparent 22%),
+      radial-gradient(circle at 50% 50%, #2b2b33 0%, #111116 55%, #000 100%);
+    box-shadow: 0 30px 60px rgba(0,0,0,.55), inset -18px -24px 50px rgba(0,0,0,.8);
+    display: grid;
+    place-items: center;
+  }
+  #ball:focus-visible { outline: 3px solid var(--triangle); outline-offset: 6px; }
+  .window {
+    width: 52%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #13246e 0%, var(--window) 60%, #040a26 100%);
+    box-shadow: inset 0 6px 18px rgba(0,0,0,.9), 0 0 0 6px #050507;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .eight {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(3rem, 18vw, 5.5rem);
+    color: #0d0d10;
+    background: #f4f4f6;
+    width: 100%; height: 100%;
+    display: grid; place-items: center;
+    border-radius: 50%;
+  }
+  .tri {
+    width: 92%;
+    aspect-ratio: 1.15;
+    background: var(--triangle);
+    clip-path: polygon(50% 100%, 0 8%, 100% 8%);
+    display: grid;
+    place-items: start center;
+    padding-top: 16%;
+    box-sizing: border-box;
+    filter: drop-shadow(0 0 10px rgba(60,90,255,.6));
+  }
+  .tri span {
+    width: 62%;
+    font-family: var(--display);
+    font-weight: 500;
+    font-size: clamp(0.62rem, 2.6vw, 0.82rem);
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .reveal { animation: rise 900ms ease-out both; }
+  @keyframes rise {
+    from { opacity: 0; transform: scale(.6) rotate(-12deg); filter: blur(6px); }
+    to   { opacity: 1; transform: none; filter: blur(0); }
+  }
+  .shake { animation: shake 650ms cubic-bezier(.36,.07,.19,.97); }
+  @keyframes shake {
+    10%, 90% { transform: translate(-4px, 2px) rotate(-3deg); }
+    20%, 80% { transform: translate(8px, -4px) rotate(4deg); }
+    30%, 50%, 70% { transform: translate(-12px, 6px) rotate(-6deg); }
+    40%, 60% { transform: translate(12px, -6px) rotate(6deg); }
+  }
+  .hint { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  #answer-text { min-height: 1.6em; margin: 0; font-family: var(--display); font-weight: 500; font-size: 1.1rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .shake { animation: none; }
+  }
+</style>
+
+<main>
+  <h1>Шар судьбы</h1>
+  <p class="sub">Задай вопрос, на который можно ответить «да» или «нет»</p>
+  <input id="q" type="text" placeholder="Например: сегодня всё получится?" autocomplete="off" maxlength="120">
+  <button id="ball" type="button" aria-label="Потрясти шар">
+    <div class="window" id="window"><div class="eight">8</div></div>
+  </button>
+  <p id="answer-text" aria-live="polite"></p>
+  <p class="hint">Тапни по шару или нажми Enter</p>
+</main>
+
+<script>
+  const answers = [
+    "Есть жи",
+    "Базара нет",
+    "Ты базаришь кучеряво",
+    "Не мороси ле",
+    "Вилкой в глаз или в жопу раз?",
+    "Сто пудов",
+    "Отвечаю",
+    "Чётко, ровно",
+    "Даже не думай, братан",
+    "Ну такое…",
+    "Харэ гнать, спроси позже",
+    "Пацаны не поймут",
+    "Звёзды говорят: забей",
+    "Жиза, делай",
+    "Ваще без б",
+    "Слышь, сам решай",
+    "Ля, ну ты дал",
+    "Мамой клянусь — да"
+  ];
+  const ball = document.getElementById("ball");
+  const win = document.getElementById("window");
+  const text = document.getElementById("answer-text");
+  const q = document.getElementById("q");
+  let last = -1, busy = false;
+
+  function pick() {
+    let i;
+    do { i = Math.floor(Math.random() * answers.length); } while (i === last && answers.length > 1);
+    last = i;
+    return answers[i];
+  }
+
+  function shake() {
+    if (busy) return;
+    busy = true;
+    text.textContent = "";
+    win.innerHTML = "";
+    ball.classList.remove("shake");
+    void ball.offsetWidth;
+    ball.classList.add("shake");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTimeout(() => {
+      const a = pick();
+      win.innerHTML = '<div class="tri reveal"><span></span></div>';
+      win.querySelector("span").textContent = a;
+      text.textContent = a;
+      busy = false;
+    }, reduced ? 50 : 700);
+  }
+
+  ball.addEventListener("click", shake);
+  q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); shake(); } });
+</script>

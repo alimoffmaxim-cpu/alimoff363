@@ -6,6 +6,7 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 
 const here = __dirname;
+const LOGO = fs.readFileSync(path.join(__dirname, 'brand', 'alimov-agency-white.svg'), 'utf8').replace(/width="[\d.]+" height="[\d.]+"/, 'height="40"');
 const data = JSON.parse(fs.readFileSync(path.join(here, 'cases.json'), 'utf8'));
 const FONT = '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700&family=Golos+Text:wght@500;600&display=swap">';
 const RINGS = '<svg viewBox="-300 -300 600 600" style="position:absolute;right:-170px;top:-150px;width:760px;color:rgba(255,255,255,.12)"><g fill="none" stroke="currentColor"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle r="175" fill="none" stroke="#E6007E" stroke-width="2" stroke-dasharray="3 13"/><circle r="5" fill="#E6007E"/></svg>';
@@ -14,13 +15,13 @@ const card = ({ kicker, big, title, foot }) => `<!doctype html><html><head><meta
 *{box-sizing:border-box;margin:0}body{width:1200px;height:630px;overflow:hidden;background:#0B0B0D;color:#fff;font-family:"Golos Text",Arial,sans-serif}
 .w{position:relative;height:100%;padding:64px 72px;display:flex;flex-direction:column;justify-content:space-between}
 .glow{position:absolute;left:-200px;bottom:-320px;width:760px;height:760px;border-radius:50%;background:radial-gradient(closest-side,rgba(230,0,126,.35),transparent)}
-.logo{font-family:Geologica;font-weight:700;font-size:40px;letter-spacing:-.05em}.logo i{display:inline-block;width:11px;height:11px;border-radius:50%;background:#E6007E;margin-left:4px}
+.logo{display:flex}.logo svg{height:40px;width:auto}
 .k{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#A6A6B0}.k:before{content:"";width:12px;height:12px;border-radius:50%;background:#E6007E}
 .big{font-family:Geologica;font-weight:600;font-size:150px;line-height:.9;letter-spacing:-.06em;background:linear-gradient(100deg,#fff 40%,#E6007E 100%);-webkit-background-clip:text;color:transparent}
 .t{font-family:Geologica;font-weight:600;font-size:46px;line-height:1.1;letter-spacing:-.03em;max-width:900px}
 .f{font-size:24px;color:#D6D6DD}
 </style></head><body><div class="w"><div class="glow"></div>${RINGS}
-<div class="logo">alimov<i></i></div>
+<div class="logo">${LOGO}</div>
 <div style="display:grid;gap:22px"><div class="k">${kicker}</div>${big ? `<div class="big">${big}</div>` : ''}<div class="t">${title}</div></div>
 <div class="f">${foot}</div></div></body></html>`;
 

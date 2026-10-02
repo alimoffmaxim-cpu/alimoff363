@@ -411,6 +411,18 @@
 .aa-ab__arrow { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--aa-card); color: var(--aa-accent); }
 .aa-ab__arrow svg { width: 20px; height: 20px; }
 
+.aa-stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; counter-reset: none; }
+.aa-stage { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
+.aa-stage:last-child { background: var(--aa-dark); color: #fff; }
+.aa-stage__n { justify-self: start; padding: 5px 12px; border-radius: 999px; background: var(--aa-accent); color: var(--aa-on-accent); font-size: 13px; font-weight: 600; }
+.aa-stage__period { color: var(--aa-muted); font-size: 15px; }
+.aa-stage:last-child .aa-stage__period, .aa-stage:last-child > p:last-child { color: var(--aa-dark-muted); }
+.aa-stage__nums { display: flex; flex-wrap: wrap; gap: 10px 28px; padding-block: 8px; }
+.aa-stage__nums li { display: grid; gap: 2px; }
+.aa-stage__nums b { font-family: var(--aa-display); font-weight: 600; font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.04em; line-height: 1.1; }
+.aa-stage__nums span { font-size: 13px; color: var(--aa-muted); }
+.aa-stage:last-child .aa-stage__nums span { color: var(--aa-dark-muted); }
+.aa-stage > p:last-child { color: var(--aa-muted); }
 .aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 16px; }
 .aa-did > li { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 30px); display: grid; gap: 12px; align-content: start; }
 .aa-did p { color: var(--aa-muted); font-size: 16px; }
@@ -437,7 +449,7 @@
 .aa-dark + .aa-sec { padding-top: clamp(72px, 10vw, 128px); }
 
 @media (max-width: 960px) {
-  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl { grid-template-columns: minmax(0, 1fr); }
+  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl, .aa-stages { grid-template-columns: minmax(0, 1fr); }
   .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
 }
 </style>
@@ -505,6 +517,7 @@
     </section>
 
 
+
     <section class="aa-csec" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
@@ -566,18 +579,18 @@
               <p>Онлайн-репетиторы, подготовка к школе, логопед. Цель — заявка не дороже 800 ₽. Бюджет 4,6 млн ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
-            <a class="aa-case" href="https://alimov.agency/irbis_case">
-              <div class="aa-case__top"><span class="aa-case__logo">И</span><div><b>Театральная студия «Ирбис»</b><small>офлайн · 17 регионов · VK</small></div></div>
-              <p class="aa-case__num">1 919<small>заявок по 567,4 ₽</small></p>
-              <div class="aa-meter"><span>заявка <b>567,4 ₽</b> при цели 1 200 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:47%"></div></div></div>
-              <p>Тестовый бюджет 1,09 млн ₽, цель — заявка не дороже 1200 ₽. Аудитории в радиусе 1 км от филиала.</p>
-              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
-            </a>
             <a class="aa-case" href="https://alimov.agency/uchi_case">
               <div class="aa-case__top"><span class="aa-case__logo">У</span><div><b>Школы программирования «Учи.ру»</b><small>офлайн · Instagram/Facebook*</small></div></div>
               <p class="aa-case__num">4 823<small>заявки по 517 ₽</small></p>
               <div class="aa-meter"><span>заявка <b>517 ₽</b> при цели 1 000 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:52%"></div></div></div>
               <p>Очные школы для детей 7–15 лет. Цель — заявка не дороже 1000 ₽, мамы в радиусе до 3 км. Бюджет 2,5 млн ₽.</p>
+              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
+            </a>
+            <a class="aa-case" href="https://alimov.agency/unicode_case">
+              <div class="aa-case__top"><span class="aa-case__logo">Ю</span><div><b>Онлайн-школа «Юникод»</b><small>VK, видеокреативы</small></div></div>
+              <p class="aa-case__num">614<small>заявок по 257 ₽</small></p>
+              <div class="aa-meter"><span>заявка <b>257 ₽</b> при цели 500 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:51%"></div></div></div>
+              <p>Программирование для детей 5–18 лет. Цель — заявка не дороже 500 ₽, вышло почти вдвое дешевле. Бюджет 158 тыс. ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
           </div>

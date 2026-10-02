@@ -34,7 +34,7 @@ const icon = (size) => `<!doctype html><html><head><meta charset="utf-8">${FONT}
   const exe = process.env.CHROMIUM_PATH;
   const browser = await chromium.launch(exe ? { executablePath: exe, args: process.env.HTTPS_PROXY ? ['--proxy-server=' + process.env.HTTPS_PROXY, '--ignore-certificate-errors'] : [] } : {});
   const page = await browser.newPage({ viewport: { width: 1200, height: 630 } });
-  const shots = [['main', card({ kicker: 'Таргет ВКонтакте для детских школ', big: '37 784', title: 'заявки для детских школ в шести кейсах', foot: 'от 135 ₽ за заявку · ROMI до 1600% · alimov.agency' })]];
+  const shots = [['main', card({ kicker: 'Таргет ВКонтакте для детских школ', big: '37 784', title: 'заявки для детских школ в пяти кейсах', foot: 'от 135 ₽ за заявку · ROMI до 1600% · alimov.agency' })]];
   for (const c of data) shots.push([c.slug, card({ kicker: 'Кейс · ' + c.short, big: c.leads, title: c.client, foot: `цена заявки ${c.cpl} ₽ · бюджет ${c.budget} · alimov.agency` })]);
   for (const [name, html] of shots) {
     await page.setContent(html, { waitUntil: 'networkidle' });

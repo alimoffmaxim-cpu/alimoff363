@@ -28,7 +28,7 @@ START, END = "<!-- cases:start -->", "<!-- cases:end -->"
 BRAND = "Alimov Agency"
 MAIN_TITLE = "Реклама детских школ ВКонтакте — заявки от 135 ₽ | Alimov Agency"
 MAIN_DESC = ("Таргетированная реклама VK для детских онлайн-школ и сетей студий. "
-             "37 784 заявки в 6 кейсах, цена заявки от 135 ₽, ROMI до 1600%. Обсудим вашу школу в Telegram.")
+             "37 784 заявки в 5 кейсах, цена заявки от 135 ₽, ROMI до 1600%. Обсудим вашу школу в Telegram.")
 SAME_AS = ["https://t.me/alimov_pro", "https://t.me/alimoffmaxim", "https://vk.com/alimovmaksim"]
 
 
@@ -175,7 +175,7 @@ chart = f"""          <figure class="aa-chart">
           </figure>"""
 # первый экран: карточка кейса, которая меняется вместе с нишей в заголовке
 heroes = [c for c in CASES if c.get("hero")]
-order = {"genius_school": 0, "irbis_2324": 1, "tetrica_case": 2, "uchi_case": 3}
+order = {"genius_school": 0, "irbis_case": 1, "tetrica_case": 2, "uchi_case": 3}
 heroes.sort(key=lambda c: order.get(c["slug"], 99))
 items = [{
     "word": c["hero"]["word"], "label": f"Кейс · {c['client']}",
@@ -284,6 +284,18 @@ CASE_CSS = """<style>
 .aa-ab__arrow { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--aa-card); color: var(--aa-accent); }
 .aa-ab__arrow svg { width: 20px; height: 20px; }
 
+.aa-stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; counter-reset: none; }
+.aa-stage { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
+.aa-stage:last-child { background: var(--aa-dark); color: #fff; }
+.aa-stage__n { justify-self: start; padding: 5px 12px; border-radius: 999px; background: var(--aa-accent); color: var(--aa-on-accent); font-size: 13px; font-weight: 600; }
+.aa-stage__period { color: var(--aa-muted); font-size: 15px; }
+.aa-stage:last-child .aa-stage__period, .aa-stage:last-child > p:last-child { color: var(--aa-dark-muted); }
+.aa-stage__nums { display: flex; flex-wrap: wrap; gap: 10px 28px; padding-block: 8px; }
+.aa-stage__nums li { display: grid; gap: 2px; }
+.aa-stage__nums b { font-family: var(--aa-display); font-weight: 600; font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.04em; line-height: 1.1; }
+.aa-stage__nums span { font-size: 13px; color: var(--aa-muted); }
+.aa-stage:last-child .aa-stage__nums span { color: var(--aa-dark-muted); }
+.aa-stage > p:last-child { color: var(--aa-muted); }
 .aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 16px; }
 .aa-did > li { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 30px); display: grid; gap: 12px; align-content: start; }
 .aa-did p { color: var(--aa-muted); font-size: 16px; }
@@ -310,7 +322,7 @@ CASE_CSS = """<style>
 .aa-dark + .aa-sec { padding-top: clamp(72px, 10vw, 128px); }
 
 @media (max-width: 960px) {
-  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl { grid-template-columns: minmax(0, 1fr); }
+  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl, .aa-stages { grid-template-columns: minmax(0, 1fr); }
   .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
 }
 </style>"""
@@ -325,7 +337,11 @@ def case_body(c, home, link, publish=False):
 
     tiles = [("aa-tile aa-tile--hot", f"{num(c['cpl'])} ₽", "цена заявки"),
              ("aa-tile", money_short(c["budget"]), "рекламный бюджет")]
-    if c["romi"]:
+    if c.get("stages"):
+        first, last = c["stages"][0], c["stages"][-1]
+        tiles += [("aa-tile", f"{num(first['cpl'])} → {num(last['cpl'])} ₽", "цена заявки: тест → масштаб"),
+                  ("aa-tile", f"×{round(last['budget'] / first['budget'])}", "рост бюджета после теста")]
+    elif c["romi"]:
         tiles += [("aa-tile", f"{c['romi'][1]}%", "рекордный ROMI"), ("aa-tile", f"{c['romi'][0]}%", "средний ROMI")]
     elif c["target"]:
         tiles += [("aa-tile", f"до {num(c['target'])} ₽", "цель по цене заявки"), ("aa-tile", c["format"], "формат")]
@@ -338,6 +354,30 @@ def case_body(c, home, link, publish=False):
     point_b_text = c["point_b"] or c["goal"]
     point_b = f"<p>{point_b_text}</p>" if point_b_text else "<p data-draft>Какую цель ставил клиент: сколько заявок и по какой цене.</p>"
     hl_title, hl_text = c["highlight"]
+    stages_section = ""
+    if c.get("stages"):
+        cards = []
+        for i, st in enumerate(c["stages"], 1):
+            goal = f'<li><b>до {num(st["target"])} ₽</b><span>цель по цене заявки</span></li>' if st["target"] else ""
+            cards.append(f"""          <li class="aa-stage">
+            <span class="aa-stage__n">Этап {i}</span>
+            <h3 class="aa-h3">{st['name']}</h3>
+            <p class="aa-stage__period">{st['period']}</p>
+            <ul class="aa-stage__nums"><li><b>{num(st['leads'])}</b><span>{plural(st['leads'], 'заявка', 'заявки', 'заявок')}</span></li><li><b>{num(st['cpl'])} ₽</b><span>цена заявки</span></li><li><b>{money_short(st['budget'])}</b><span>бюджет</span></li>{goal}</ul>
+            <p>{st['text']}</p>
+          </li>""")
+        stages_section = f"""    <section class="aa-csec" aria-labelledby="aa-stages-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Ход проекта</p>
+          <h2 class="aa-h2" id="aa-stages-title">Этапы проекта</h2>
+        </div>
+        <ol class="aa-stages">
+{chr(10).join(cards)}
+        </ol>
+      </div>
+    </section>
+"""
     if not publish or c["point_a"]:
         ab_section = f"""    <section class="aa-csec" aria-labelledby="aa-ab-title">
       <div class="aa-wrap">
@@ -478,6 +518,7 @@ def case_body(c, home, link, publish=False):
     </section>
 
 {ab_section}
+{stages_section}
     <section class="aa-csec" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">

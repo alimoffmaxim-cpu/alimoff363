@@ -411,6 +411,18 @@
 .aa-ab__arrow { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--aa-card); color: var(--aa-accent); }
 .aa-ab__arrow svg { width: 20px; height: 20px; }
 
+.aa-stages { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; counter-reset: none; }
+.aa-stage { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 32px); display: grid; gap: 12px; align-content: start; }
+.aa-stage:last-child { background: var(--aa-dark); color: #fff; }
+.aa-stage__n { justify-self: start; padding: 5px 12px; border-radius: 999px; background: var(--aa-accent); color: var(--aa-on-accent); font-size: 13px; font-weight: 600; }
+.aa-stage__period { color: var(--aa-muted); font-size: 15px; }
+.aa-stage:last-child .aa-stage__period, .aa-stage:last-child > p:last-child { color: var(--aa-dark-muted); }
+.aa-stage__nums { display: flex; flex-wrap: wrap; gap: 10px 28px; padding-block: 8px; }
+.aa-stage__nums li { display: grid; gap: 2px; }
+.aa-stage__nums b { font-family: var(--aa-display); font-weight: 600; font-size: clamp(22px, 2.4vw, 30px); letter-spacing: -0.04em; line-height: 1.1; }
+.aa-stage__nums span { font-size: 13px; color: var(--aa-muted); }
+.aa-stage:last-child .aa-stage__nums span { color: var(--aa-dark-muted); }
+.aa-stage > p:last-child { color: var(--aa-muted); }
 .aa-did { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: 16px; }
 .aa-did > li { background: var(--aa-card); border-radius: var(--aa-r); padding: clamp(24px, 3vw, 30px); display: grid; gap: 12px; align-content: start; }
 .aa-did p { color: var(--aa-muted); font-size: 16px; }
@@ -437,7 +449,7 @@
 .aa-dark + .aa-sec { padding-top: clamp(72px, 10vw, 128px); }
 
 @media (max-width: 960px) {
-  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl { grid-template-columns: minmax(0, 1fr); }
+  .aa-chero__grid, .aa-board, .aa-plan, .aa-did, .aa-ab, .aa-hl, .aa-stages { grid-template-columns: minmax(0, 1fr); }
   .aa-ab__arrow { justify-self: center; transform: rotate(90deg); }
 }
 </style>
@@ -464,32 +476,32 @@
     <section class="aa-chero">
       <svg class="aa-rings aa-rings--case" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap">
-        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="https://alimov.agency/">Главная</a><span aria-hidden="true">/</span><a href="https://alimov.agency/#cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">«Ирбис», офлайн</span></nav>
+        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="https://alimov.agency/">Главная</a><span aria-hidden="true">/</span><a href="https://alimov.agency/#cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">«Ирбис»</span></nav>
         <div class="aa-chero__grid">
           <div class="aa-chero__text">
-            <span class="aa-chip">Кейс · VK, старый кабинет</span>
-            <h1 class="aa-h1">1&nbsp;919 заявок для сети театральных студий «Ирбис» в 17 регионах</h1>
+            <span class="aa-chip">Кейс · VK Ads</span>
+            <h1 class="aa-h1">11&nbsp;552 заявки для сети театральных студий «Ирбис»</h1>
           </div>
           <dl class="aa-facts">
             <div><dt>Клиент</dt><dd>Театральная студия «Ирбис»</dd></div>
             <div><dt>Ниша</dt><dd>Театр, танцы и сценическая речь для детей 4–17 лет</dd></div>
             <div><dt>Формат</dt><dd>офлайн</dd></div>
-            <div><dt>Канал</dt><dd>VK, старый кабинет</dd></div>
-            <div><dt>Период</dt><dd>тестовый бюджет</dd></div>
+            <div><dt>Канал</dt><dd>VK Ads</dd></div>
+            <div><dt>Период</dt><dd>тест и учебный год 2023–24</dd></div>
           </dl>
         </div>
 
         <div class="aa-board">
           <div class="aa-board__main">
             <span class="aa-chip">Результат</span>
-            <p class="aa-big" data-count="1919">1 919</p>
-            <small>заявок за 1 088 875 ₽</small>
+            <p class="aa-big" data-count="11552">11 552</p>
+            <small>заявки за 5 591 529 ₽</small>
           </div>
           <ul class="aa-tiles">
-            <li class="aa-tile aa-tile--hot"><b>567,4 ₽</b><span>цена заявки</span></li>
-            <li class="aa-tile"><b>1,1 млн ₽</b><span>рекламный бюджет</span></li>
-            <li class="aa-tile"><b>до 1 200 ₽</b><span>цель по цене заявки</span></li>
-            <li class="aa-tile"><b>офлайн</b><span>формат</span></li>
+            <li class="aa-tile aa-tile--hot"><b>484 ₽</b><span>цена заявки</span></li>
+            <li class="aa-tile"><b>5,6 млн ₽</b><span>рекламный бюджет</span></li>
+            <li class="aa-tile"><b>567,4 → 468 ₽</b><span>цена заявки: тест → масштаб</span></li>
+            <li class="aa-tile"><b>×4</b><span>рост бюджета после теста</span></li>
           </ul>
         </div>
       </div>
@@ -501,7 +513,7 @@
           <p class="aa-kicker">Клиент</p>
           <h2 class="aa-h2" id="aa-story-title">Театр, танцы и сценическая речь для детей 4–17 лет</h2>
         </div>
-        <p class="aa-about">Студия обучает детей от 4 до 17 лет театральному искусству, танцам, сценической речи и всему, что нужно для профессии актёра театра и кино. Ученики и выпускники студии снимаются в кино, сериалах и играют в театре.</p>
+        <p class="aa-about">Сеть студий обучает детей от 4 до 17 лет театральному искусству, танцам, сценической речи и всему, что нужно для профессии актёра театра и кино. Ученики и выпускники студии снимаются в кино, сериалах и играют в театре. Филиалы работают в 17 регионах.</p>
       </div>
     </section>
 
@@ -511,7 +523,32 @@
           <p class="aa-kicker">Задача</p>
           <h2 class="aa-h2" id="aa-ab-title">Задача клиента</h2>
         </div>
-        <p class="aa-about">Получить максимум заявок в рамках тестового бюджета при средней цене заявки не дороже 1200 ₽.</p>
+        <p class="aa-about">Получить максимум заявок для филиалов в 17 регионах: на тестовом бюджете — не дороже 1200 ₽ за заявку, затем масштабировать рекламу на учебный год.</p>
+      </div>
+    </section>
+
+    <section class="aa-csec" aria-labelledby="aa-stages-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Ход проекта</p>
+          <h2 class="aa-h2" id="aa-stages-title">Этапы проекта</h2>
+        </div>
+        <ol class="aa-stages">
+          <li class="aa-stage">
+            <span class="aa-stage__n">Этап 1</span>
+            <h3 class="aa-h3">Тест</h3>
+            <p class="aa-stage__period">17 регионов, старый кабинет VK</p>
+            <ul class="aa-stage__nums"><li><b>1 919</b><span>заявок</span></li><li><b>567,4 ₽</b><span>цена заявки</span></li><li><b>1,1 млн ₽</b><span>бюджет</span></li><li><b>до 1 200 ₽</b><span>цель по цене заявки</span></li></ul>
+            <p>Проверили, сколько будет стоить заявка для филиалов. Кроме широких аудиторий запускали гиперлокальные: мам в радиусе 1 км от филиала и родителей детей из ближайших школ.</p>
+          </li>
+          <li class="aa-stage">
+            <span class="aa-stage__n">Этап 2</span>
+            <h3 class="aa-h3">Масштабирование</h3>
+            <p class="aa-stage__period">учебный год 2023–24, VK Ads</p>
+            <ul class="aa-stage__nums"><li><b>9 633</b><span>заявки</span></li><li><b>468 ₽</b><span>цена заявки</span></li><li><b>4,5 млн ₽</b><span>бюджет</span></li></ul>
+            <p>Запустили рекламу в VK Ads на весь учебный год и увеличили бюджет в четыре раза. Заявок стало в пять раз больше, а цена заявки снизилась с 567 до 468 ₽.</p>
+          </li>
+        </ol>
       </div>
     </section>
 
@@ -524,13 +561,13 @@
         <ul class="aa-did" style="--cols:3">
             <li>
               <span class="aa-did__label">Канал</span>
-              <h3 class="aa-h3">VK, старый кабинет</h3>
+              <h3 class="aa-h3">VK Ads</h3>
               <p>Таргетированная реклама ВКонтакте.</p>
             </li>
             <li>
               <span class="aa-did__label">Аудитория</span>
               <h3 class="aa-h3">Мамы</h3>
-              <p>Мамы, которые живут в 17 регионах, где работают филиалы студии. Широкие и узкие сегменты.</p>
+              <p>Мамы, которые живут в регионах, где работают филиалы студии. Широкие и узкие сегменты.</p>
               <ul class="aa-niches" aria-label="Примеры узких аудиторий"><li>живут в радиусе 1 км от филиала</li><li>дети учатся в школах не дальше 3 км от филиала</li></ul>
             </li>
             <li>
@@ -547,31 +584,9 @@
         <div class="aa-hl">
           <div class="aa-hl__head">
             <p class="aa-kicker">Самое крутое в проекте</p>
-            <h2 class="aa-h2" id="aa-hl-title"><mark class="aa-mark aa-mark--solid">Реклама в радиусе 1 км от филиала</mark></h2>
+            <h2 class="aa-h2" id="aa-hl-title"><mark class="aa-mark aa-mark--solid">Бюджет вырос в 4 раза, а заявка подешевела</mark></h2>
           </div>
-          <p class="aa-hl__text">Кроме широких аудиторий запускали гиперлокальные: мам, которые живут в радиусе 1 км от филиала, и родителей детей из школ не дальше 3 км. Так охватили 17 регионов сразу, а заявка обошлась в 567 ₽ при цели 1200 ₽.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="aa-csec" aria-labelledby="aa-plan-title">
-      <div class="aa-wrap">
-        <div class="aa-sec__head">
-          <p class="aa-kicker">Цель и результат</p>
-          <h2 class="aa-h2" id="aa-plan-title">Цена заявки ниже цели</h2>
-        </div>
-        <div class="aa-plan">
-          <p class="aa-plan__delta"><b>−53%</b><span>к цели по цене заявки</span></p>
-          <div class="aa-bars">
-            <div class="aa-bar">
-              <div class="aa-bar__label"><span>Цель клиента</span><b>не дороже 1 200 ₽</b></div>
-              <div class="aa-bar__track"><div class="aa-bar__fill" style="--w:100%"></div></div>
-            </div>
-            <div class="aa-bar aa-bar--fact">
-              <div class="aa-bar__label"><span>Результат</span><b>567,4 ₽ за заявку</b></div>
-              <div class="aa-bar__track"><div class="aa-bar__fill" style="--w:47%"></div></div>
-            </div>
-          </div>
+          <p class="aa-hl__text">На тесте в 17 регионах получили 1 919 заявок по 567 ₽ при цели 1200 ₽. Затем масштабировали рекламу на учебный год 2023–24: ещё 9 633 заявки, а цена заявки снизилась до 468 ₽.</p>
         </div>
       </div>
     </section>
@@ -587,25 +602,25 @@
             <a class="aa-btn aa-btn--accent" href="https://alimov.agency/#cases">Все кейсы</a>
           </div>
           <div class="aa-cases">
+            <a class="aa-case" href="https://alimov.agency/genius_school">
+              <div class="aa-case__top"><span class="aa-case__logo">G</span><div><b>Онлайн-школа Genius school</b><small>VK Ads</small></div></div>
+              <p class="aa-case__num">12 652<small>заявки по 135 ₽</small></p>
+              <div class="aa-meter"><span>ROMI <b>до 1600%</b>, средний 800%</span></div>
+              <p>Скорочтение, математика и программирование. Платное пробное занятие, мамы со всей России. Бюджет 1,7 млн ₽.</p>
+              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
+            </a>
+            <a class="aa-case" href="https://alimov.agency/tetrica_case">
+              <div class="aa-case__top"><span class="aa-case__logo">Т</span><div><b>Онлайн-школа «Тетрика»</b><small>VK, старый и новый кабинеты</small></div></div>
+              <p class="aa-case__num">8 143<small>заявки по 567 ₽</small></p>
+              <div class="aa-meter"><span>заявка <b>567 ₽</b> при цели 800 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:71%"></div></div></div>
+              <p>Онлайн-репетиторы, подготовка к школе, логопед. Цель — заявка не дороже 800 ₽. Бюджет 4,6 млн ₽.</p>
+              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
+            </a>
             <a class="aa-case" href="https://alimov.agency/uchi_case">
               <div class="aa-case__top"><span class="aa-case__logo">У</span><div><b>Школы программирования «Учи.ру»</b><small>офлайн · Instagram/Facebook*</small></div></div>
               <p class="aa-case__num">4 823<small>заявки по 517 ₽</small></p>
               <div class="aa-meter"><span>заявка <b>517 ₽</b> при цели 1 000 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:52%"></div></div></div>
               <p>Очные школы для детей 7–15 лет. Цель — заявка не дороже 1000 ₽, мамы в радиусе до 3 км. Бюджет 2,5 млн ₽.</p>
-              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
-            </a>
-            <a class="aa-case" href="https://alimov.agency/unicode_case">
-              <div class="aa-case__top"><span class="aa-case__logo">Ю</span><div><b>Онлайн-школа «Юникод»</b><small>VK, видеокреативы</small></div></div>
-              <p class="aa-case__num">614<small>заявок по 257 ₽</small></p>
-              <div class="aa-meter"><span>заявка <b>257 ₽</b> при цели 500 ₽</span><div class="aa-meter__track"><div class="aa-meter__fill" style="--w:51%"></div></div></div>
-              <p>Программирование для детей 5–18 лет. Цель — заявка не дороже 500 ₽, вышло почти вдвое дешевле. Бюджет 158 тыс. ₽.</p>
-              <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
-            </a>
-            <a class="aa-case" href="https://alimov.agency/irbis_2324">
-              <div class="aa-case__top"><span class="aa-case__logo">И</span><div><b>Театральная студия «Ирбис»</b><small>учебный год 2023–24 · VK Ads</small></div></div>
-              <p class="aa-case__num">9 633<small>заявки по 468 ₽</small></p>
-              <div class="aa-meter"><span>бюджет <b>4,5 млн ₽</b></span></div>
-              <p>Сеть студий для детей 4–17 лет. Мамы в регионах филиалов, 75% креативов — видео. Бюджет 4,5 млн ₽.</p>
               <span class="aa-case__more">Открыть кейс<i><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></i></span>
             </a>
           </div>
@@ -644,7 +659,7 @@
   </footer>
 </div>
 
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://alimov.agency/"},{"@type":"ListItem","position":2,"name":"Кейсы","item":"https://alimov.agency/#cases"},{"@type":"ListItem","position":3,"name":"«Ирбис», офлайн","item":"https://alimov.agency/irbis_case"}]},{"@type":"Article","headline":"1 919 заявок для сети театральных студий «Ирбис» в 17 регионах","description":"1 919 заявок для сети театральных студий «Ирбис» в 17 регионах из таргетированной рекламы ВКонтакте. Цена заявки 567,4 ₽, бюджет 1,1 млн ₽.","inLanguage":"ru","mainEntityOfPage":"https://alimov.agency/irbis_case","image":"https://alimov.agency/og/irbis_case.png","author":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"publisher":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"about":["таргетированная реклама ВКонтакте","Театр, танцы и сценическая речь для детей 4–17 лет"]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://alimov.agency/"},{"@type":"ListItem","position":2,"name":"Кейсы","item":"https://alimov.agency/#cases"},{"@type":"ListItem","position":3,"name":"«Ирбис»","item":"https://alimov.agency/irbis_case"}]},{"@type":"Article","headline":"11 552 заявки для сети театральных студий «Ирбис»","description":"11 552 заявки для сети театральных студий «Ирбис» из таргетированной рекламы ВКонтакте. Цена заявки 484 ₽, бюджет 5,6 млн ₽.","inLanguage":"ru","mainEntityOfPage":"https://alimov.agency/irbis_case","image":"https://alimov.agency/og/irbis_case.png","author":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"publisher":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"about":["таргетированная реклама ВКонтакте","Театр, танцы и сценическая речь для детей 4–17 лет"]}]}</script>
 
 <script>
 (function () {

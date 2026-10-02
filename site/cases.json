@@ -1,11 +1,11 @@
 [
  {
-  "slug": "irbis_2324",
-  "short": "«Ирбис», 2023–24",
+  "slug": "irbis_case",
+  "short": "«Ирбис»",
   "client": "Театральная студия «Ирбис»",
-  "leads": "9 633",
-  "cpl": "468",
-  "budget": "4,5 млн ₽"
+  "leads": "11 552",
+  "cpl": "484",
+  "budget": "5,6 млн ₽"
  },
  {
   "slug": "genius_school",
@@ -22,14 +22,6 @@
   "leads": "8 143",
   "cpl": "567",
   "budget": "4,6 млн ₽"
- },
- {
-  "slug": "irbis_case",
-  "short": "«Ирбис», офлайн",
-  "client": "Театральная студия «Ирбис»",
-  "leads": "1 919",
-  "cpl": "567,4",
-  "budget": "1,1 млн ₽"
  },
  {
   "slug": "uchi_case",

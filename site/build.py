@@ -316,7 +316,7 @@ CASE_CSS = """<style>
 </style>"""
 
 
-def case_body(c, home, link):
+def case_body(c, home, link, publish=False):
     """home — адрес главной, link(slug) — адрес другого кейса."""
     meta = [("Клиент", c["client"]), ("Ниша", c["niche"]), ("Формат", c["format"]), ("Канал", c["channel"])]
     if c["period"]:
@@ -338,6 +338,41 @@ def case_body(c, home, link):
     point_b_text = c["point_b"] or c["goal"]
     point_b = f"<p>{point_b_text}</p>" if point_b_text else "<p data-draft>Какую цель ставил клиент: сколько заявок и по какой цене.</p>"
     hl_title, hl_text = c["highlight"]
+    if not publish or c["point_a"]:
+        ab_section = f"""    <section class="aa-csec" aria-labelledby="aa-ab-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Задача</p>
+          <h2 class="aa-h2" id="aa-ab-title">Из точки А в&nbsp;точку&nbsp;Б</h2>
+        </div>
+        <div class="aa-ab">
+          <div class="aa-ab__card">
+            <span class="aa-ab__label"><b>А</b>Было</span>
+            {point_a}
+          </div>
+          <span class="aa-ab__arrow" aria-hidden="true">{ARROW}</span>
+          <div class="aa-ab__card aa-ab__card--b">
+            <span class="aa-ab__label"><b>Б</b>Цель</span>
+            {point_b}
+          </div>
+        </div>
+      </div>
+    </section>
+"""
+    elif point_b_text:
+        # для публикации без «Точки А»: показываем только задачу клиента
+        ab_section = f"""    <section class="aa-csec" aria-labelledby="aa-ab-title">
+      <div class="aa-wrap">
+        <div class="aa-sec__head">
+          <p class="aa-kicker">Задача</p>
+          <h2 class="aa-h2" id="aa-ab-title">Задача клиента</h2>
+        </div>
+        <p class="aa-about">{point_b_text}</p>
+      </div>
+    </section>
+"""
+    else:
+        ab_section = ""
 
     narrow = ""
     if c["narrow"]:
@@ -442,26 +477,7 @@ def case_body(c, home, link):
       </div>
     </section>
 
-    <section class="aa-csec" aria-labelledby="aa-ab-title">
-      <div class="aa-wrap">
-        <div class="aa-sec__head">
-          <p class="aa-kicker">Задача</p>
-          <h2 class="aa-h2" id="aa-ab-title">Из точки А в&nbsp;точку&nbsp;Б</h2>
-        </div>
-        <div class="aa-ab">
-          <div class="aa-ab__card">
-            <span class="aa-ab__label"><b>А</b>Было</span>
-            {point_a}
-          </div>
-          <span class="aa-ab__arrow" aria-hidden="true">{ARROW}</span>
-          <div class="aa-ab__card aa-ab__card--b">
-            <span class="aa-ab__label"><b>Б</b>Цель</span>
-            {point_b}
-          </div>
-        </div>
-      </div>
-    </section>
-
+{ab_section}
     <section class="aa-csec" aria-labelledby="aa-did-title">
       <div class="aa-wrap">
         <div class="aa-sec__head">
@@ -520,9 +536,16 @@ def case_body(c, home, link):
 ]})}"""
 
 
-def case_fragment(c, home, link):
+def strip_drafts(html):
+    """Убирает черновые элементы (data-draft) для публикации: вопрос без ответа, пустые реквизиты."""
+    html = re.sub(r"\s*<details>(?:(?!</details>).)*?data-draft(?:(?!</details>).)*?</details>", "", html, flags=re.S)
+    html = re.sub(r"\s*<(span|a)\b[^>]*data-draft[^>]*>.*?</\1>", "", html, flags=re.S)
+    return html
+
+
+def case_fragment(c, home, link, publish=False):
     head = f"<!--\n  Alimov Agency — кейс «{c['client']}».\n  Этот файл целиком вставляется в Tilda в блок T123 на странице {SITE}{c['slug']}.\n  Собран командой python3 site/build.py из site/cases.py — правьте там, а не здесь.\n-->"
-    return "\n".join([head, fonts, "", style, CASE_CSS, "", case_body(c, home, link), "", script, ""])
+    return "\n".join([head, fonts, "", style, CASE_CSS, "", case_body(c, home, link, publish), "", script, ""])
 
 
 # --- build -----------------------------------------------------------------
@@ -538,12 +561,17 @@ print("site/index.html")
 out = here / "cases"
 out.mkdir(exist_ok=True)
 rows = [("Главная", "/", MAIN_TITLE, MAIN_DESC, "og/main.png")]
+# чистые версии для вставки в Tilda: без черновых элементов
+pub = here / "publish"
+pub.mkdir(exist_ok=True)
+(pub / "main.html").write_text(strip_drafts(main), encoding="utf-8")
 for c in CASES:
     (out / f"{c['slug']}.t123.html").write_text(case_fragment(c, SITE, lambda s: f"{SITE}{s}"), encoding="utf-8")
     (out / f"{c['slug']}.html").write_text(page(
         case_title(c), case_desc(c), case_fragment(c, "../index.html", lambda s: f"{s}.html"),
         f"{SITE}{c['slug']}", f"{SITE}og/{c['slug']}.png"), encoding="utf-8")
     rows.append((c["short"], f"/{c['slug']}", case_title(c), case_desc(c), f"og/{c['slug']}.png"))
+    (pub / f"{c['slug']}.html").write_text(strip_drafts(case_fragment(c, SITE, lambda s: f"{SITE}{s}", publish=True)), encoding="utf-8")
     print(f"site/cases/{c['slug']}.t123.html, site/cases/{c['slug']}.html")
 
 # таблица для настроек SEO в Tilda

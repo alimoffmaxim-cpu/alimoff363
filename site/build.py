@@ -11,6 +11,7 @@
 Стили, скрипт, блок контактов и подвал страницы кейса берутся из tilda-t123.html,
 поэтому правки дизайна на главной сразу попадают и в кейсы.
 """
+import json
 import re
 import sys
 
@@ -23,6 +24,44 @@ here = Path(__file__).parent
 SITE = "https://alimov.agency/"
 START, END = "<!-- cases:start -->", "<!-- cases:end -->"
 
+# SEO: заголовки и описания страниц. Их же нужно вписать в настройки страниц Tilda (см. site/SEO.md).
+BRAND = "Alimov Agency"
+MAIN_TITLE = "Реклама детских школ ВКонтакте — заявки от 135 ₽ | Alimov Agency"
+MAIN_DESC = ("Таргетированная реклама VK для детских онлайн-школ и сетей студий. "
+             "37 784 заявки в 6 кейсах, цена заявки от 135 ₽, ROMI до 1600%. Обсудим вашу школу в Telegram.")
+SAME_AS = ["https://t.me/alimov_pro", "https://t.me/alimoffmaxim", "https://vk.com/alimovmaksim"]
+
+
+def plain(text):
+    return re.sub(r"<[^>]+>", "", text).replace("&nbsp;", " ").replace("\u00a0", " ").strip()
+
+
+def case_title(c):
+    t = f"Кейс: {plain(c['title'])} | {BRAND}"
+    return t if len(t) <= 70 else f"Кейс: {plain(c['title'])}"
+
+
+def case_desc(c):
+    where = "ВКонтакте" if c["channel"].startswith("VK") else ""
+    first = f"{plain(c['title'])} из таргетированной рекламы {where}".strip() + "."
+    if c["romi"]:
+        second = f"Средний ROMI {c['romi'][0]}%, рекордный {c['romi'][1]}%."
+    else:
+        second = f"Цена заявки {plain(num(c['cpl']))} ₽, бюджет {plain(money_short(c['budget']))}."
+    full = f"{first} {second} Какие аудитории и креативы сработали."
+    return full if len(full) <= 160 else f"{first} {second}"
+
+
+def ld(data):
+    """JSON-LD для поисковиков (Google и Яндекс читают его и в теле страницы)."""
+    return '<script type="application/ld+json">' + json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "</script>"
+
+
+ORG = {"@type": "ProfessionalService", "@id": f"{SITE}#org", "name": BRAND, "url": SITE,
+       "description": "Таргетированная реклама ВКонтакте для детских онлайн-школ и сетей офлайн-студий.",
+       "areaServed": {"@type": "Country", "name": "Россия"}, "sameAs": SAME_AS,
+       "knowsAbout": ["таргетированная реклама ВКонтакте", "VK Ads", "реклама детских школ", "реклама онлайн-школ"]}
+
 
 def between(text, start, end):
     """Кусок text от start до end включительно."""
@@ -31,7 +70,8 @@ def between(text, start, end):
     return text[a:b]
 
 
-def page(title, description, body):
+def page(title, description, body, url, image):
+    """Полная HTML-страница: для предпросмотра и на случай хостинга вне Tilda."""
     return f"""<!doctype html>
 <html lang="ru">
 <head>
@@ -39,14 +79,29 @@ def page(title, description, body):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
 <meta name="description" content="{description}">
-<meta name="theme-color" content="#E4E4E8">
-<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #E4E4E8; }}</style>
+<link rel="canonical" href="{url}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="{BRAND}">
+<meta property="og:url" content="{url}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{description}">
+<meta property="og:image" content="{image}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="{SITE}favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0B0B0D">
+<style>html {{ scroll-behavior: smooth; scroll-padding-top: 90px; }} body {{ margin: 0; background: #E6E6EA; }}</style>
 </head>
 <body>
 {body}
 </body>
 </html>
 """
+
+
 
 
 # --- helpers ---------------------------------------------------------------
@@ -119,7 +174,6 @@ chart = f"""          <figure class="aa-chart">
             </ol>
           </figure>"""
 # первый экран: карточка кейса, которая меняется вместе с нишей в заголовке
-import json
 heroes = [c for c in CASES if c.get("hero")]
 order = {"genius_school": 0, "irbis_2324": 1, "tetrica_case": 2, "uchi_case": 3}
 heroes.sort(key=lambda c: order.get(c["slug"], 99))
@@ -156,6 +210,26 @@ main = main.replace(between(main, H_START, H_END), f"{H_START}\n{hero_html}\n{H_
 
 CH_START, CH_END = "<!-- chart:start -->", "<!-- chart:end -->"
 main = main.replace(between(main, CH_START, CH_END), f"{CH_START}\n{chart}\n{CH_END}")
+
+# разметка Schema.org для главной; вопросы берутся из блока «Вопросы» (кроме черновых)
+faq = []
+for m in re.finditer(r'<details>\s*<summary[^>]*>(.*?)<i[^>]*></i></summary>\s*<p([^>]*)>(.*?)</p>', main, re.S):
+    if "data-draft" in m.group(2):
+        continue
+    faq.append({"@type": "Question", "name": plain(m.group(1)),
+                "acceptedAnswer": {"@type": "Answer", "text": plain(m.group(3))}})
+schema = {"@context": "https://schema.org", "@graph": [
+    ORG,
+    {"@type": "WebSite", "@id": f"{SITE}#site", "url": SITE, "name": BRAND, "inLanguage": "ru", "publisher": {"@id": f"{SITE}#org"}},
+    {"@type": "Service", "name": "Таргетированная реклама ВКонтакте для детских школ", "serviceType": "Таргетированная реклама VK Ads",
+     "provider": {"@id": f"{SITE}#org"}, "areaServed": {"@type": "Country", "name": "Россия"},
+     "audience": {"@type": "Audience", "audienceType": "Детские онлайн-школы, сети детских студий и образовательные центры"}},
+    {"@type": "ItemList", "name": "Кейсы по рекламе детских школ", "itemListElement": [
+        {"@type": "ListItem", "position": i + 1, "url": f"{SITE}{c['slug']}", "name": plain(c["title"])} for i, c in enumerate(CASES)]},
+    {"@type": "FAQPage", "mainEntity": faq},
+]}
+SC_START, SC_END = "<!-- schema:start -->", "<!-- schema:end -->"
+main = main.replace(between(main, SC_START, SC_END), f"{SC_START}\n{ld(schema)}\n{SC_END}")
 src.write_text(main, encoding="utf-8")
 print("site/tilda-t123.html: карточки кейсов обновлены")
 
@@ -172,6 +246,10 @@ CASE_CSS = """<style>
 .aa-rings--case { width: min(760px, 90vw); right: max(-26vw, -380px); top: -300px; }
 /* case page: facts list beside the title, dark result board, A→B, method cards, highlight, plan-vs-fact */
 .aa-chero { position: relative; isolation: isolate; padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
+.aa-crumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 14px; color: var(--aa-muted); }
+.aa-crumbs a { color: var(--aa-muted); text-decoration: none; transition: color .2s; }
+.aa-crumbs a:hover { color: var(--aa-ink); }
+.aa-crumbs [aria-current] { color: var(--aa-ink); font-weight: 600; }
 .aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 15px; font-weight: 600; text-decoration: none; color: var(--aa-muted); transition: color .2s; }
 .aa-back:hover { color: var(--aa-ink); }
 .aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
@@ -330,7 +408,7 @@ def case_body(c, home, link):
     <section class="aa-chero">
       <svg class="aa-rings aa-rings--case" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap">
-        <a class="aa-back" href="{home}#cases">{ARROW}Все кейсы</a>
+        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="{home}">Главная</a><span aria-hidden="true">/</span><a href="{home}#cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">{c['short']}</span></nav>
         <div class="aa-chero__grid">
           <div class="aa-chero__text">
             <span class="aa-chip">Кейс · {c['channel']}</span>
@@ -427,7 +505,19 @@ def case_body(c, home, link):
     </div>
 
     {contact.replace('href="#top"', f'href="{home}"', 1)}
-</div>"""
+</div>
+
+{ld({"@context": "https://schema.org", "@graph": [
+    {"@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": SITE},
+        {"@type": "ListItem", "position": 2, "name": "Кейсы", "item": f"{SITE}#cases"},
+        {"@type": "ListItem", "position": 3, "name": c["short"], "item": f"{SITE}{c['slug']}"}]},
+    {"@type": "Article", "headline": plain(c["title"]), "description": case_desc(c), "inLanguage": "ru",
+     "mainEntityOfPage": f"{SITE}{c['slug']}", "image": f"{SITE}og/{c['slug']}.png",
+     "author": {"@type": "Organization", "name": BRAND, "url": SITE},
+     "publisher": {"@type": "Organization", "name": BRAND, "url": SITE},
+     "about": ["таргетированная реклама ВКонтакте", c["niche"]]},
+]})}"""
 
 
 def case_fragment(c, home, link):
@@ -442,19 +532,28 @@ preview_main = main
 for c in CASES:
     preview_main = preview_main.replace(f'href="{SITE}{c["slug"]}"', f'href="cases/{c["slug"]}.html"')
     preview_main = preview_main.replace(f'"href": "{SITE}{c["slug"]}"', f'"href": "cases/{c["slug"]}.html"')
-(here / "index.html").write_text(page(
-    "Alimov Agency — клиенты для детских школ",
-    "Заявки для детских онлайн-школ и офлайн-студий из VK Рекламы: от 135 ₽ за заявку, ROMI до 1600% в кейсах.",
-    preview_main), encoding="utf-8")
+(here / "index.html").write_text(page(MAIN_TITLE, MAIN_DESC, preview_main, SITE, f"{SITE}og/main.png"), encoding="utf-8")
 print("site/index.html")
 
 out = here / "cases"
 out.mkdir(exist_ok=True)
+rows = [("Главная", "/", MAIN_TITLE, MAIN_DESC, "og/main.png")]
 for c in CASES:
-    desc = f"{num(c['leads'])} {leads_word(c)} по {num(c['cpl'])} ₽ для клиента {c['client']}.".replace(" ", " ")
-    title = re.sub(r"&nbsp;", " ", c["title"])
     (out / f"{c['slug']}.t123.html").write_text(case_fragment(c, SITE, lambda s: f"{SITE}{s}"), encoding="utf-8")
     (out / f"{c['slug']}.html").write_text(page(
-        f"{title} — кейс Alimov Agency", desc,
-        case_fragment(c, "../index.html", lambda s: f"{s}.html")), encoding="utf-8")
+        case_title(c), case_desc(c), case_fragment(c, "../index.html", lambda s: f"{s}.html"),
+        f"{SITE}{c['slug']}", f"{SITE}og/{c['slug']}.png"), encoding="utf-8")
+    rows.append((c["short"], f"/{c['slug']}", case_title(c), case_desc(c), f"og/{c['slug']}.png"))
     print(f"site/cases/{c['slug']}.t123.html, site/cases/{c['slug']}.html")
+
+# таблица для настроек SEO в Tilda
+meta = ["# Заголовки и описания страниц для Tilda", "",
+        "Собрано командой `python3 site/build.py`. Вставьте в Tilda: Настройки страницы → SEO (заголовок и описание) и → Соцсети (картинка из `site/og/`).", ""]
+for name, path, t, d, img in rows:
+    meta += [f"## {name} — `{path}`", "", f"- **Заголовок (title, {len(t)} симв.):** {t}", f"- **Описание (description, {len(d)} симв.):** {d}", f"- **Картинка для соцсетей:** `site/{img}`", ""]
+# данные для make_images.js (картинки для соцсетей)
+(here / "cases.json").write_text(json.dumps([{"slug": c["slug"], "short": c["short"], "client": c["client"],
+    "leads": plain(num(c["leads"])), "cpl": plain(num(c["cpl"])), "budget": plain(money_short(c["budget"]))} for c in CASES],
+    ensure_ascii=False, indent=1), encoding="utf-8")
+(here / "seo-meta.md").write_text("\n".join(meta), encoding="utf-8")
+print("site/seo-meta.md")

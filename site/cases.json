@@ -1,0 +1,50 @@
+[
+ {
+  "slug": "irbis_2324",
+  "short": "«Ирбис», 2023–24",
+  "client": "Театральная студия «Ирбис»",
+  "leads": "9 633",
+  "cpl": "468",
+  "budget": "4,5 млн ₽"
+ },
+ {
+  "slug": "genius_school",
+  "short": "Genius school",
+  "client": "Онлайн-школа Genius school",
+  "leads": "12 652",
+  "cpl": "135",
+  "budget": "1,7 млн ₽"
+ },
+ {
+  "slug": "tetrica_case",
+  "short": "«Тетрика»",
+  "client": "Онлайн-школа «Тетрика»",
+  "leads": "8 143",
+  "cpl": "567",
+  "budget": "4,6 млн ₽"
+ },
+ {
+  "slug": "irbis_case",
+  "short": "«Ирбис», офлайн",
+  "client": "Театральная студия «Ирбис»",
+  "leads": "1 919",
+  "cpl": "567,4",
+  "budget": "1,1 млн ₽"
+ },
+ {
+  "slug": "uchi_case",
+  "short": "«Учи.ру»",
+  "client": "Школы программирования «Учи.ру»",
+  "leads": "4 823",
+  "cpl": "517",
+  "budget": "2,5 млн ₽"
+ },
+ {
+  "slug": "unicode_case",
+  "short": "«Юникод»",
+  "client": "Онлайн-школа «Юникод»",
+  "leads": "614",
+  "cpl": "257",
+  "budget": "158 тыс. ₽"
+ }
+]

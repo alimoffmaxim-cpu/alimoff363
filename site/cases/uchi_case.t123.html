@@ -194,6 +194,12 @@
 .aa-case:hover .aa-case__more i { background: var(--aa-accent); color: var(--aa-on-accent); }
 .aa-note { margin-top: 20px; font-size: 12px; color: var(--aa-dark-muted); opacity: .8; }
 
+
+/* how we work: indexable text block */
+.aa-how { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
+.aa-how article { display: grid; gap: 12px; align-content: start; padding-block: 28px; border-top: 1px solid var(--aa-line); }
+.aa-how p { color: var(--aa-muted); max-width: 36em; }
+
 /* faq */
 .aa-faq-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px 56px; align-items: start; }
 .aa-faq { border-top: 1px solid var(--aa-ink); }
@@ -335,6 +341,7 @@
   .aa-why { grid-template-columns: minmax(0, 1fr); }
   .aa-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-num { grid-template-columns: minmax(0, 1fr); }
+  .aa-how { grid-template-columns: minmax(0, 1fr); }
   .aa-rings--hero { right: -40vw; top: 70%; opacity: .7; }
 }
 
@@ -355,6 +362,7 @@
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
+  .aa-blob { animation: none; filter: blur(48px); }
   .aa-hero .aa-h1 { min-height: 0; }
   .aa-dots { flex-wrap: wrap; }
   .aa-chart li { grid-template-columns: minmax(0, 1fr) 4.6em; }
@@ -365,6 +373,10 @@
 .aa-rings--case { width: min(760px, 90vw); right: max(-26vw, -380px); top: -300px; }
 /* case page: facts list beside the title, dark result board, A→B, method cards, highlight, plan-vs-fact */
 .aa-chero { position: relative; isolation: isolate; padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
+.aa-crumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 14px; color: var(--aa-muted); }
+.aa-crumbs a { color: var(--aa-muted); text-decoration: none; transition: color .2s; }
+.aa-crumbs a:hover { color: var(--aa-ink); }
+.aa-crumbs [aria-current] { color: var(--aa-ink); font-weight: 600; }
 .aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 15px; font-weight: 600; text-decoration: none; color: var(--aa-muted); transition: color .2s; }
 .aa-back:hover { color: var(--aa-ink); }
 .aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
@@ -452,7 +464,7 @@
     <section class="aa-chero">
       <svg class="aa-rings aa-rings--case" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap">
-        <a class="aa-back" href="https://alimov.agency/#cases"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Все кейсы</a>
+        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="https://alimov.agency/">Главная</a><span aria-hidden="true">/</span><a href="https://alimov.agency/#cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">«Учи.ру»</span></nav>
         <div class="aa-chero__grid">
           <div class="aa-chero__text">
             <span class="aa-chip">Кейс · Instagram/Facebook*</span>
@@ -643,6 +655,8 @@
     </div>
   </footer>
 </div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://alimov.agency/"},{"@type":"ListItem","position":2,"name":"Кейсы","item":"https://alimov.agency/#cases"},{"@type":"ListItem","position":3,"name":"«Учи.ру»","item":"https://alimov.agency/uchi_case"}]},{"@type":"Article","headline":"4 823 заявки для сети школ программирования «Учи.ру»","description":"4 823 заявки для сети школ программирования «Учи.ру» из таргетированной рекламы. Цена заявки 517 ₽, бюджет 2,5 млн ₽. Какие аудитории и креативы сработали.","inLanguage":"ru","mainEntityOfPage":"https://alimov.agency/uchi_case","image":"https://alimov.agency/og/uchi_case.png","author":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"publisher":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"about":["таргетированная реклама ВКонтакте","Очное обучение программированию детей 7–15 лет"]}]}</script>
 
 <script>
 (function () {

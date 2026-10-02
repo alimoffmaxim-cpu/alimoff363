@@ -3,10 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>1 919 заявок для сети театральных студий «Ирбис» в 17 регионах — кейс Alimov Agency</title>
-<meta name="description" content="1 919 заявок по 567,4 ₽ для клиента Театральная студия «Ирбис».">
-<meta name="theme-color" content="#E4E4E8">
-<style>html { scroll-behavior: smooth; scroll-padding-top: 90px; } body { margin: 0; background: #E4E4E8; }</style>
+<title>Кейс: 1 919 заявок для сети театральных студий «Ирбис» в 17 регионах</title>
+<meta name="description" content="1 919 заявок для сети театральных студий «Ирбис» в 17 регионах из таргетированной рекламы ВКонтакте. Цена заявки 567,4 ₽, бюджет 1,1 млн ₽.">
+<link rel="canonical" href="https://alimov.agency/irbis_case">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Alimov Agency">
+<meta property="og:url" content="https://alimov.agency/irbis_case">
+<meta property="og:title" content="Кейс: 1 919 заявок для сети театральных студий «Ирбис» в 17 регионах">
+<meta property="og:description" content="1 919 заявок для сети театральных студий «Ирбис» в 17 регионах из таргетированной рекламы ВКонтакте. Цена заявки 567,4 ₽, бюджет 1,1 млн ₽.">
+<meta property="og:image" content="https://alimov.agency/og/irbis_case.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="https://alimov.agency/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#0B0B0D">
+<style>html { scroll-behavior: smooth; scroll-padding-top: 90px; } body { margin: 0; background: #E6E6EA; }</style>
 </head>
 <body>
 <!--
@@ -205,6 +218,12 @@
 .aa-case:hover .aa-case__more i { background: var(--aa-accent); color: var(--aa-on-accent); }
 .aa-note { margin-top: 20px; font-size: 12px; color: var(--aa-dark-muted); opacity: .8; }
 
+
+/* how we work: indexable text block */
+.aa-how { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; }
+.aa-how article { display: grid; gap: 12px; align-content: start; padding-block: 28px; border-top: 1px solid var(--aa-line); }
+.aa-how p { color: var(--aa-muted); max-width: 36em; }
+
 /* faq */
 .aa-faq-grid { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: 32px 56px; align-items: start; }
 .aa-faq { border-top: 1px solid var(--aa-ink); }
@@ -346,6 +365,7 @@
   .aa-why { grid-template-columns: minmax(0, 1fr); }
   .aa-cases { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-num { grid-template-columns: minmax(0, 1fr); }
+  .aa-how { grid-template-columns: minmax(0, 1fr); }
   .aa-rings--hero { right: -40vw; top: 70%; opacity: .7; }
 }
 
@@ -366,6 +386,7 @@
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
+  .aa-blob { animation: none; filter: blur(48px); }
   .aa-hero .aa-h1 { min-height: 0; }
   .aa-dots { flex-wrap: wrap; }
   .aa-chart li { grid-template-columns: minmax(0, 1fr) 4.6em; }
@@ -376,6 +397,10 @@
 .aa-rings--case { width: min(760px, 90vw); right: max(-26vw, -380px); top: -300px; }
 /* case page: facts list beside the title, dark result board, A→B, method cards, highlight, plan-vs-fact */
 .aa-chero { position: relative; isolation: isolate; padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
+.aa-crumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 14px; color: var(--aa-muted); }
+.aa-crumbs a { color: var(--aa-muted); text-decoration: none; transition: color .2s; }
+.aa-crumbs a:hover { color: var(--aa-ink); }
+.aa-crumbs [aria-current] { color: var(--aa-ink); font-weight: 600; }
 .aa-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 15px; font-weight: 600; text-decoration: none; color: var(--aa-muted); transition: color .2s; }
 .aa-back:hover { color: var(--aa-ink); }
 .aa-back svg { width: 16px; height: 16px; transform: rotate(180deg); }
@@ -463,7 +488,7 @@
     <section class="aa-chero">
       <svg class="aa-rings aa-rings--case" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap">
-        <a class="aa-back" href="../index.html#cases"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Все кейсы</a>
+        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="../index.html">Главная</a><span aria-hidden="true">/</span><a href="../index.html#cases">Кейсы</a><span aria-hidden="true">/</span><span aria-current="page">«Ирбис», офлайн</span></nav>
         <div class="aa-chero__grid">
           <div class="aa-chero__text">
             <span class="aa-chip">Кейс · VK, старый кабинет</span>
@@ -654,6 +679,8 @@
     </div>
   </footer>
 </div>
+
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://alimov.agency/"},{"@type":"ListItem","position":2,"name":"Кейсы","item":"https://alimov.agency/#cases"},{"@type":"ListItem","position":3,"name":"«Ирбис», офлайн","item":"https://alimov.agency/irbis_case"}]},{"@type":"Article","headline":"1 919 заявок для сети театральных студий «Ирбис» в 17 регионах","description":"1 919 заявок для сети театральных студий «Ирбис» в 17 регионах из таргетированной рекламы ВКонтакте. Цена заявки 567,4 ₽, бюджет 1,1 млн ₽.","inLanguage":"ru","mainEntityOfPage":"https://alimov.agency/irbis_case","image":"https://alimov.agency/og/irbis_case.png","author":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"publisher":{"@type":"Organization","name":"Alimov Agency","url":"https://alimov.agency/"},"about":["таргетированная реклама ВКонтакте","Театр, танцы и сценическая речь для детей 4–17 лет"]}]}</script>
 
 <script>
 (function () {

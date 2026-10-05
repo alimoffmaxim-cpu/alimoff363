@@ -5,7 +5,7 @@
 | Лист | Что на нём |
 |---|---|
 | **Сводная** | Итог по всем направлениям: KPI месяца против тех же дней прошлого, таблица направлений с долей бюджета. **Свой период**: даты «Период с … по …» в H3 и J3 (двойной щелчок — календарь); тогда KPI и таблица направлений считаются за него и сравниваются с предыдущим периодом той же длины, пустые поля — текущий месяц. **Тенденция подписок** по завершённым неделям (26) и месяцам (12): по направлениям и всего, изменение к прошлому периоду, средний тренд в % за неделю / месяц. Цена подписки и расход по направлениям. 6 графиков парами, слева подписки, справа расход за те же периоды: по неделям, по месяцам (вся клиника, с линией тренда); ниже подписки по направлениям по неделям и месяцам |
-| **Направление 1/2/3** | Дневная статистика одного кабинета (итог всех кампаний): KPI месяца и **детализация по дням** за последние 90 дней с днём недели. Свой период — те же поля «Период с … по …», что на «Сводной». 3 графика: подписки и расход по дням рядом (с линией тренда), цена подписки по дням |
+| **Направление 1/2/3** | Дневная статистика одного кабинета (итог всех кампаний): KPI периода и **детализация по дням** с днём недели. Период — поля «Период с … по …», как на «Сводной», пусто — текущий месяц. Таблица по дням и 3 графика (подписки и расход по дням рядом, с линией тренда; цена подписки по дням) показывают ровно дни этого периода: скрипт перестраивает их, когда меняются даты в полях и после каждой загрузки данных (до 400 дней; в xlsx-шаблоне — до 92) |
 | **⚙ Настройки** | Направления (подставляются во все листы и графики), статус подключения кабинетов, отчётная дата |
 | **Данные** | 1 строка = 1 день одного направления: дата, направление, расход, показы, клики, подписки |
 
@@ -24,11 +24,11 @@ CPC = расход / клики, цена подписки = расход / по
 
 1. Создайте пустую Google Таблицу (или откройте ту, что уже лежит на Диске).
 2. **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную
-   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 10 отдельных файлов
+   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 11 отдельных файлов
    (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
    Удобнее всего — со страницы [«Код отчёта «Сова»»](https://claude.ai/artifact/HaCzXDMetXXrG3ynRvkr24):
    у каждого файла имя и кнопка «Скопировать код». Или с raw-страниц (Cmd+A → Cmd+C):
-   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs).
+   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs), [`11_days`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/11_days.gs).
    Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка) → часовой пояс `Europe/Moscow`.
 4. Обновите страницу таблицы — появится меню **Сова**.
@@ -68,7 +68,7 @@ CPC = расход / клики, цена подписки = расход / по
 
 ## Как пересобрать xlsx-шаблон
 
-Скрипт (`7_build.gs`–`10_build_sheets.gs`) и `tools/build_xlsx.py` строят один и тот же отчёт; меняете
+Скрипт (`7_build.gs`–`11_days.gs`) и `tools/build_xlsx.py` строят один и тот же отчёт; меняете
 оформление — меняйте в обоих. `tools/build_xlsx.py` собирает `sova-report.xlsx` (нужен `openpyxl`):
 `python3 tools/build_xlsx.py sova-report.xlsx`. Число направлений в шаблоне — 3 (`DIRS`).
 

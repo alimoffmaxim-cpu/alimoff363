@@ -50,11 +50,9 @@ function sbDirection_(ss, cab, index, period) {
   sbBanner_(sh, '="Сова · "&$B$3', '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")');
   sbTopInfo_(sh, '=' + SB.SET + '!$A$' + cab.row);
   sbPeriodInputs_(sh, period || []);
-  const t = sbPeriodTable_(sh, sbKpi_(sh, 5, '$B$3', true), 'day', '$B$3');
-  sbChartsHeading_(sh, '📈 Подписки и расход по дням, последние ' + SB.DAYS);
-  sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [7], [0, 0], [SB.SUBS], true);
-  sbChart_(sh, 'col', 'Расход по дням, ₽ (линия — тренд)', t, [2], [0, 1], [SB.SPEND], true);
-  sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [8], [1, 0], [SB.COST]);
+  sbKpi_(sh, 5, '$B$3', true);
+  sbChartsHeading_(sh, '📈 Подписки и расход по дням за период выше');
+  sbDays_(sh);   // таблица по дням и графики — 11_days.gs
   sh.setFrozenRows(3);
 }
 

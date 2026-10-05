@@ -59,7 +59,7 @@ function menuClearData() {
   const ui = SpreadsheetApp.getUi();
   if (ui.alert('Удалить все строки с листа «Данные»?', 'Например, демо-данные перед первой реальной загрузкой. ' +
     'Настройки и оформление отчёта останутся.', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
-  sovaAlert_(function () { sovaWriteData_({}); return 'Данные удалены.'; });
+  sovaAlert_(function () { sovaWriteData_({}); sbDaysAll_(); return 'Данные удалены.'; });
 }
 
 function setupSovaTrigger() {

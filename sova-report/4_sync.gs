@@ -21,6 +21,7 @@ function sovaSyncAll_() {
     }
   });
   sovaWriteData_(store);
+  try { sbDaysAll_(); } catch (e) { res.errors.push('таблицы по дням: ' + e.message); }
   return res;
 }
 

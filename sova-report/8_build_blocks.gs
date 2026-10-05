@@ -39,7 +39,7 @@ function sbTopInfo_(sh, dirFormula) {
   sh.getRange('E3').setFontWeight('bold').setNumberFormat('dd.MM.yyyy');
 }
 
-function sbSection_(sh, r, text) { sh.getRange(r, 1).setValue(text).setFontSize(12).setFontWeight('bold'); }
+function sbSection_(sh, r, text) { sh.getRange(r, 1).setValue(sbLocF_(text)).setFontSize(12).setFontWeight('bold'); }
 
 function sbHeader_(sh, r, names) {
   sh.getRange(r, 1, 1, names.length).setValues(sbLoc_([names])).setBackground(SB.HEAD).setFontColor('#ffffff')
@@ -129,14 +129,18 @@ function sbPeriodInputs_(sh, period) {
 
 let sbSemi_ = null;
 
-/** true, если таблица не понимает формулы с запятыми (проверка на временном листе). */
+/** true, если таблица не понимает формулы с запятыми (проверка на временном листе, один раз на локаль). */
 function sbSemicolons_() {
   if (sbSemi_ !== null) return sbSemi_;
-  const ss = SpreadsheetApp.getActive(), sh = ss.insertSheet('_sova_locale_check');
+  const ss = SpreadsheetApp.getActive(), props = PropertiesService.getDocumentProperties();
+  const key = 'SOVA_SEMI_' + ss.getSpreadsheetLocale(), saved = props.getProperty(key);   // ответ на локаль запоминается
+  if (saved) return (sbSemi_ = saved === '1');
+  const sh = ss.insertSheet('_sova_locale_check');
   const cell = sh.getRange(1, 1).setFormula('=SUM(1,2)');
   SpreadsheetApp.flush();
   sbSemi_ = cell.getValue() !== 3;
   ss.deleteSheet(sh);
+  props.setProperty(key, sbSemi_ ? '1' : '0');
   return sbSemi_;
 }
 

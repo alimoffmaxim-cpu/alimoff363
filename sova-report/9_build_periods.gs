@@ -10,8 +10,8 @@ function sbCol_(i) {
   return s;
 }
 
-/** Период: число строк, шапка, начало k-го периода (формула), его конец и подпись. */
-function sbPeriod_(kind) {
+/** Период: число строк, шапка, начало k-го периода (формула), его конец и подпись. n — число дней для 'day'. */
+function sbPeriod_(kind, n) {
   if (kind === 'month') return {
     title: '📅 По завершённым месяцам (' + SB.MONTHS + ')', n: SB.MONTHS, first: 'Месяц',
     start: function (k) { return 'EDATE(' + SB_LAST_MONTH + ',' + (k - SB.MONTHS + 1) + ')'; },
@@ -26,17 +26,17 @@ function sbPeriod_(kind) {
     end: function (a) { return '(' + a + '+6)'; },
     label: function (a) { return 'TEXT(' + a + ',"DD.MM")&"–"&TEXT(' + a + '+6,"DD.MM")'; },
   };
-  return {
-    title: '📆 Детализация по дням (последние ' + SB.DAYS + ')', n: SB.DAYS, first: 'День',
-    start: function (k) { return '($E$3-' + (SB.DAYS - 1 - k) + ')'; },
+  return {   // дни периода из блока сверху: с $J$7, n дней (n считает sbDays_)
+    title: '="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', n: n, first: 'День',
+    start: function (k) { return '($J$7+' + k + ')'; },
     end: function (a) { return a; },
     label: function (a) { return 'TEXT(' + a + ',"DD.MM")&" "&CHOOSE(WEEKDAY(' + a + ',2),"пн","вт","ср","чт","пт","сб","вс")'; },
   };
 }
 
 /** Таблица метрик по периодам одного направления (dir) или всех (dir = null). */
-function sbPeriodTable_(sh, r, kind, dir) {
-  const p = sbPeriod_(kind), r1 = r + 2, r2 = r1 + p.n - 1, rows = [];
+function sbPeriodTable_(sh, r, kind, dir, n) {
+  const p = sbPeriod_(kind, n), r1 = r + 2, r2 = r1 + p.n - 1, rows = [];
   sbSection_(sh, r, p.title);
   sbHeader_(sh, r + 1, [p.first].concat(SB.COLS.slice(1)));
   for (let k = 0; k < p.n; k++) {

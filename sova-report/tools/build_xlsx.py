@@ -27,7 +27,7 @@ COLS = ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CP
 FMT = [None, '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0.0" ₽"', '0.0%']
 DELTA_FMT = '"▲ "0%;"▼ "0%;0%'
 GOOD = [0, 0, 1, 1, 1, -1, 1, -1, 1]  # +1 — хорошо, когда растёт; −1 — когда падает
-N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 90
+N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 92  # N_DAYS — строк под дни периода (в скрипте их ровно столько, сколько дней)
 
 thin = Side(style='thin', color=LINE)
 
@@ -178,8 +178,9 @@ PERIODS = {
     'week': ('🗓 По завершённым неделям (26)', N_WEEKS, 'Неделя',
              lambda k: f'({LAST_WEEK}-7*{N_WEEKS - 1 - k})',
              lambda a: f'({a}+6)', lambda a: f'TEXT({a},"DD.MM")&"–"&TEXT({a}+6,"DD.MM")'),
-    'day': (f'📆 Детализация по дням (последние {N_DAYS})', N_DAYS, 'День',
-            lambda k: f'($E$3-{N_DAYS - 1 - k})', lambda a: a,
+    # дни периода из блока сверху (J7:K7); строки после конца периода пустые
+    'day': ('="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', N_DAYS, 'День',
+            lambda k: f'($J$7+{k})', lambda a: a,
             lambda a: f'TEXT({a},"DD.MM")&" "&' + RU_WEEKDAY.format(x=a)),
 }
 
@@ -194,6 +195,9 @@ def period_table(ws, r, period, dir_ref):
         a = start(k)
         ws[f'A{rr}'] = '=' + label(a)
         metric_row(ws, rr, a, end(a), dir_ref)
+        if period == 'day':
+            for L in 'ABCDEFGHI':
+                ws[f'{L}{rr}'] = f'=IF({a}>$K$7,"",{ws[f"{L}{rr}"].value[1:]})'
     r2 = r1 + n - 1
     style_body(ws, r1, r2, 9, FMT)
     heat(ws, f'H{r1}:H{r2}')
@@ -299,7 +303,7 @@ def direction_sheet(wb, i):
     period_inputs(ws)
     r = kpi_block(ws, 5, '$B$3', manual=True)
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
-    charts_heading(ws, f'📈 Подписки и расход по дням, последние {N_DAYS}')
+    charts_heading(ws, '📈 Подписки и расход по дням за период выше')
     subs_charts(ws, d1, d2, (0, 0), 'дням')
     simple_chart(ws, 'col', 'Расход по дням, ₽ (пунктир — тренд)', 1, 2, d1, d2, SPEND, (0, 1), trend=True)
     cost_chart(ws, d1, d2, (1, 0), 'дням')

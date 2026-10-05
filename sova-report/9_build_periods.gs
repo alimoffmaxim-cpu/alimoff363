@@ -36,6 +36,7 @@ function sbPeriod_(kind, n) {
 
 /** Таблица метрик по периодам одного направления (dir) или всех (dir = null). */
 function sbPeriodTable_(sh, r, kind, dir, n) {
+  if (kind === 'day' && !(n > 0)) n = Math.min(Math.max(sbPeriodDates_(sh).n, 1), SB.MAX_DAYS || 400);   // вызов без числа дней
   const p = sbPeriod_(kind, n), r1 = r + 2, r2 = r1 + p.n - 1, rows = [];
   sbSection_(sh, r, p.title);
   sbHeader_(sh, r + 1, [p.first].concat(SB.COLS.slice(1)));

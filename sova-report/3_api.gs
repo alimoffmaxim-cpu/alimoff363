@@ -1,4 +1,6 @@
 // ---------- API VK Реклама и токены (свой доступ на каждый кабинет) ----------
+// Основной способ: постоянный токен кабинета от eLama, вводится через меню (6_connect.gs).
+// Запасной — client_id / client_secret кабинета:
 // У каждого кабинета свои client_id и client_secret (ads.vk.com → Настройки → Доступ к API).
 // Они вводятся через меню и хранятся в Свойствах скрипта, в коде и на листах их нет.
 // Токен VK живёт 24 часа: скрипт сам продлевает его через refresh_token, а если не вышло —
@@ -19,7 +21,7 @@ function sovaApiGet_(cab, path, params, isRetry) {
   if (code === 401) {
     PropertiesService.getScriptProperties().deleteProperty(sovaProp_('TOKEN', cab));
     if (sovaCreds_(cab) && !isRetry) return sovaApiGet_(cab, path, params, true);
-    throw new Error('токен VK недействителен или истёк — подключите кабинет заново через меню.');
+    throw new Error('токен VK недействителен или отозван — запросите новый в eLama и введите его через меню.');
   }
   if (code === 429 && !isRetry) { Utilities.sleep(2000); return sovaApiGet_(cab, path, params, true); }
   if (code !== 200) throw new Error('VK API ' + path + ' → ' + code + ': ' + sovaMask_(resp.getContentText()));

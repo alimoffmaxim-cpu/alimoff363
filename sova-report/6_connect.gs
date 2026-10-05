@@ -18,7 +18,7 @@ function sovaAskText_(title, text) {
   return a.getSelectedButton() === ui.Button.OK ? a.getResponseText().trim() : '';
 }
 
-/** Основной способ: client_id и client_secret кабинета — дальше токены скрипт получает сам. */
+/** Если вместо токена выдали client_id и client_secret — дальше токены скрипт получает сам. */
 function connectCabinet() {
   const cab = sovaAskCabinet_('Подключить кабинет VK');
   if (!cab) return;
@@ -30,13 +30,13 @@ function connectCabinet() {
   sovaCheckCabinet_(cab);
 }
 
-/** Запасной способ: готовый токен на 24 часа (например, если доступ к API ещё не выдан). */
+/** Основной способ: постоянный токен кабинета, который выдаёт eLama (свой на каждый кабинет). */
 function promptCabinetToken() {
-  const cab = sovaAskCabinet_('Токен VK на 24 часа');
+  const cab = sovaAskCabinet_('Токен кабинета VK');
   if (!cab) return;
-  const token = sovaAskText_('Токен VK — ' + cab.name, 'Вставьте токен доступа (действует 24 часа):').replace(/^Bearer\s+/i, '');
+  const token = sovaAskText_('Токен — ' + cab.name, 'Вставьте токен API этого кабинета (из письма eLama):').replace(/^Bearer\s+/i, '');
   if (!token) return;
-  sovaSaveToken_(cab, token, Date.now() + SOVA_DAY_MS);
+  sovaSaveToken_(cab, token, Date.now() + 100 * 365 * SOVA_DAY_MS); // токен eLama бессрочный
   sovaCheckCabinet_(cab);
 }
 

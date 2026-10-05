@@ -30,9 +30,12 @@ function sovaBuildReport() {
     const demo = data.getLastRow() < 2 && ui.alert('Заполнить демо-данными?', 'Лист «Данные» пуст. Демо-цифры за год ' +
       'покажут, как выглядит отчёт. Перед реальной загрузкой их удаляют через меню «Сова».', ui.ButtonSet.YES_NO) === ui.Button.YES;
     if (demo) sbDemoData_(data, cabs);
-    const old = ss.getSheetByName(SB.SUMMARY);   // ручной период переживает пересборку
-    const period = old ? old.getRange('H3:J3').getValues()[0].filter(function (v, i) { return i !== 1; })
-      .map(function (v) { return v instanceof Date ? v : ''; }) : [];
+    const periods = {};   // ручной период каждого листа переживает пересборку
+    [SB.SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
+      const sh = ss.getSheetByName(name);
+      if (sh) periods[name] = sh.getRange('H3:J3').getValues()[0].filter(function (v, i) { return i !== 1; })
+        .map(function (v) { return v instanceof Date ? v : ''; });
+    });
     const keep = [SOVA.SETTINGS_SHEET, SOVA.DATA_SHEET];
     [SB.SUMMARY, SB.OLD_SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
       const s = ss.getSheetByName(name);
@@ -42,8 +45,8 @@ function sovaBuildReport() {
       const s = ss.getSheetByName(name);
       if (s && s.getLastRow() === 0) ss.deleteSheet(s);
     });
-    sbSummary_(ss, cabs, period);
-    cabs.forEach(function (c, i) { sbDirection_(ss, c, i + 1); });
+    sbSummary_(ss, cabs, periods[SB.SUMMARY]);
+    cabs.forEach(function (c, i) { sbDirection_(ss, c, i + 1, periods[c.name]); });
     ss.setActiveSheet(ss.getSheetByName(SB.SUMMARY));
     return 'Отчёт построен: «Сводная» и листов направлений: ' + cabs.length + (demo ? ', с демо-данными' : '') +
       '.\nДальше: «Сова → Ввести токен кабинета» для каждого направления.';

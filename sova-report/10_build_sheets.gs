@@ -40,12 +40,13 @@ function sbSummary_(ss, cabs, period) {
   sh.setFrozenRows(3);
 }
 
-function sbDirection_(ss, cab, index) {
+function sbDirection_(ss, cab, index, period) {
   const sh = ss.insertSheet(cab.name, index);
   sbSetup_(sh, cab.color, SB.WIDTHS);
   sbBanner_(sh, '="Сова · "&$B$3', '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")');
   sbTopInfo_(sh, '=' + SB.SET + '!$A$' + cab.row);
-  const t = sbPeriodTable_(sh, sbKpi_(sh, 5, '$B$3'), 'day', '$B$3');
+  sbPeriodInputs_(sh, period || []);
+  const t = sbPeriodTable_(sh, sbKpi_(sh, 5, '$B$3', true), 'day', '$B$3');
   sbChartsHeading_(sh, '📈 По дням, последние ' + SB.DAYS);
   sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [7], [0, 0], [SB.SUBS], true);
   sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [8], [0, 1], [SB.COST]);

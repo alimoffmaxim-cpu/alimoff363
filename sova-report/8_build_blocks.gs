@@ -78,7 +78,7 @@ function sbUpDown_(sh, a1, good) {
 
 /**
  * Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца.
- * manual — на «Сводной»: период можно задать вручную в H3 («с») и J3 («по»), тогда сравнение
+ * manual — период можно задать вручную в H3 («с») и J3 («по»), тогда сравнение
  * идёт с предыдущим периодом той же длины.
  */
 function sbKpi_(sh, r, dir, manual) {
@@ -107,7 +107,7 @@ function sbKpi_(sh, r, dir, manual) {
   return delta + 2;
 }
 
-/** Поля ручного периода на «Сводной»: H3 — «с», J3 — «по» (даты из календаря); period — прежние значения. */
+/** Поля ручного периода (на «Сводной» и листах направлений): H3 — «с», J3 — «по» (даты из календаря); period — прежние значения. */
 function sbPeriodInputs_(sh, period) {
   sh.getRange('G3:J3').setValues([['Период с', period[0] || '', 'по', period[1] || '']]);
   sh.getRange('G3:J3').setFontColor(SB.MUTED).setHorizontalAlignment('right');

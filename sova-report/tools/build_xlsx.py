@@ -124,7 +124,7 @@ def heat(ws, rng):
 def kpi_block(ws, r, dir_ref, manual=False):
     """Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца.
 
-    manual — на «Сводной»: период можно задать в H3 («с») и J3 («по»), тогда сравнение
+    manual — период можно задать в H3 («с») и J3 («по»), тогда сравнение
     идёт с предыдущим периодом той же длины.
     """
     M = 'OR(ISNUMBER($H$3),ISNUMBER($J$3))' if manual else 'FALSE'
@@ -296,7 +296,8 @@ def direction_sheet(wb, i):
     banner(ws, '="Сова · "&$B$3',
            '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, f'={SET}!$A${i + 2}')
-    r = kpi_block(ws, 5, '$B$3')
+    period_inputs(ws)
+    r = kpi_block(ws, 5, '$B$3', manual=True)
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
     charts_heading(ws, f'📈 По дням, последние {N_DAYS}')
     subs_charts(ws, d1, d2, (0, 0), 'дням')
@@ -367,7 +368,7 @@ def fix_cost_refs(ws, c1, c2, s1, e1):
 
 
 def period_inputs(ws):
-    """Поля ручного периода на «Сводной»: H3 — «с», J3 — «по»."""
+    """Поля ручного периода (на «Сводной» и листах направлений): H3 — «с», J3 — «по»."""
     from openpyxl.worksheet.datavalidation import DataValidation
     ws['G3'], ws['I3'] = 'Период с', 'по'
     for a in ('G3', 'I3'):

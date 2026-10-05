@@ -10,6 +10,9 @@ from datetime import date, timedelta
 
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, LineChart, Reference
+from openpyxl.chart.shapes import GraphicalProperties
+from openpyxl.chart.trendline import Trendline
+from openpyxl.drawing.line import LineProperties
 from openpyxl.formatting.rule import ColorScaleRule, FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
@@ -24,7 +27,7 @@ COLS = ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CP
 FMT = [None, '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0.0" ₽"', '0.0%']
 DELTA_FMT = '"▲ "0%;"▼ "0%;0%'
 GOOD = [0, 0, 1, 1, 1, -1, 1, -1, 1]  # +1 — хорошо, когда растёт; −1 — когда падает
-N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 60
+N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 90
 
 thin = Side(style='thin', color=LINE)
 
@@ -154,20 +157,25 @@ def kpi_block(ws, r, dir_ref):
 
 
 RU_MONTHS = 'CHOOSE(MONTH({x}),"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек")&" "&YEAR({x})'
+RU_WEEKDAY = 'CHOOSE(WEEKDAY({x},2),"пн","вт","ср","чт","пт","сб","вс")'
+# Последний завершённый месяц / неделя: неполный текущий период не попадает в тренд
+LAST_MONTH = 'EDATE(DATE(YEAR($E$3),MONTH($E$3),1),-($E$3<EOMONTH($E$3,0)))'
+LAST_WEEK = '($E$3-WEEKDAY($E$3,2)+1-7*(WEEKDAY($E$3,2)<7))'
 PERIODS = {
     # (заголовок, число строк, шапка 1-й колонки, начало k-го периода, конец, текстовая подпись)
-    'month': ('📅 По месяцам (последние 12)', N_MONTHS, 'Месяц',
-              lambda k: f'EDATE(DATE(YEAR($E$3),MONTH($E$3),1),{k - N_MONTHS + 1})',
+    'month': ('📅 По завершённым месяцам (12)', N_MONTHS, 'Месяц',
+              lambda k: f'EDATE({LAST_MONTH},{k - N_MONTHS + 1})',
               lambda a: f'EOMONTH({a},0)', lambda a: RU_MONTHS.format(x=a)),
-    'week': ('🗓 По неделям (последние 26)', N_WEEKS, 'Неделя',
-             lambda k: f'($E$3-WEEKDAY($E$3,2)+1-7*{N_WEEKS - 1 - k})',
+    'week': ('🗓 По завершённым неделям (26)', N_WEEKS, 'Неделя',
+             lambda k: f'({LAST_WEEK}-7*{N_WEEKS - 1 - k})',
              lambda a: f'({a}+6)', lambda a: f'TEXT({a},"DD.MM")&"–"&TEXT({a}+6,"DD.MM")'),
-    'day': ('📆 По дням (последние 60)', N_DAYS, 'День',
-            lambda k: f'($E$3-{N_DAYS - 1 - k})', lambda a: a, lambda a: f'TEXT({a},"DD.MM")'),
+    'day': (f'📆 Детализация по дням (последние {N_DAYS})', N_DAYS, 'День',
+            lambda k: f'($E$3-{N_DAYS - 1 - k})', lambda a: a,
+            lambda a: f'TEXT({a},"DD.MM")&" "&' + RU_WEEKDAY.format(x=a)),
 }
 
 
-def period_table(ws, r, period, dir_ref, total=False):
+def period_table(ws, r, period, dir_ref):
     title, n, first_col, start, end, label = PERIODS[period]
     section(ws, r, title)
     header(ws, r + 1, [first_col] + COLS[1:])
@@ -178,16 +186,9 @@ def period_table(ws, r, period, dir_ref, total=False):
         ws[f'A{rr}'] = '=' + label(a)
         metric_row(ws, rr, a, end(a), dir_ref)
     r2 = r1 + n - 1
-    tr = None
-    if total:
-        tr = r2 + 1
-        ws[f'A{tr}'] = 'Итого за 12 мес.'
-        for L in 'BCDG':
-            ws[f'{L}{tr}'] = f'=SUM({L}{r1}:{L}{r2})'
-        derived_row(ws, tr)
-    style_body(ws, r1, tr or r2, 9, FMT, tr)
+    style_body(ws, r1, r2, 9, FMT)
     heat(ws, f'H{r1}:H{r2}')
-    return r1, r2, (tr or r2) + 2
+    return r1, r2, r2 + 2
 
 
 # ---------- графики ----------
@@ -225,17 +226,25 @@ def color_series(ch, kind, colors):
             s.graphicalProperties.line.solidFill = c
 
 
-def simple_chart(ws, kind, title, cats_col, val_col, r1, r2, color, cell, fmt='#,##0'):
+def add_trend(series):
+    """Линейный тренд: тёмная пунктирная линия поверх столбиков."""
+    series.trendline = Trendline(trendlineType='linear', dispEq=False, dispRSqr=False, spPr=GraphicalProperties(
+        ln=LineProperties(solidFill=NAVY, prstDash='dash', w=22000)))
+
+
+def simple_chart(ws, kind, title, cats_col, val_col, r1, r2, color, cell, fmt='#,##0', trend=False):
     ch = base_chart(kind, title, fmt)
     ch.add_data(Reference(ws, min_col=val_col, min_row=r1 - 1, max_row=r2), titles_from_data=True)
     ch.set_categories(Reference(ws, min_col=cats_col, min_row=r1, max_row=r2))
     color_series(ch, kind, [color])
+    if trend:
+        add_trend(ch.series[0])
     ch.legend = None
     place(ws, ch, *cell)
 
 
 def subs_charts(ws, r1, r2, cell, name):
-    simple_chart(ws, 'col', f'Подписки по {name}', 1, 7, r1, r2, SUBS, cell)
+    simple_chart(ws, 'col', f'Подписки по {name} (пунктир — тренд)', 1, 7, r1, r2, SUBS, cell, trend=True)
 
 
 def cost_chart(ws, r1, r2, cell, name):
@@ -279,14 +288,10 @@ def direction_sheet(wb, i):
            '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, f'={SET}!$A${i + 2}')
     r = kpi_block(ws, 5, '$B$3')
-    m1, m2, r = period_table(ws, r, 'month', '$B$3', total=True)
-    w1, w2, r = period_table(ws, r, 'week', '$B$3')
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
-    charts_heading(ws, '📈 Подписки: по дням · по неделям · по месяцам')
+    charts_heading(ws, f'📈 По дням, последние {N_DAYS}')
     subs_charts(ws, d1, d2, (0, 0), 'дням')
-    subs_charts(ws, w1, w2, (0, 1), 'неделям')
-    subs_charts(ws, m1, m2, (1, 0), 'месяцам')
-    cost_chart(ws, w1, w2, (1, 1), 'неделям')
+    cost_chart(ws, d1, d2, (0, 1), 'дням')
     ws.freeze_panes = 'A4'
 
 
@@ -295,7 +300,8 @@ def pivot(ws, r, title, period, kind, src=None):
     _, n, first_col, start, end, label = PERIODS[period]
     section(ws, r, title)
     h = r + 1
-    header(ws, h, [first_col] + [None] * 3 + ['Итого'])
+    trend = kind == 'subs'
+    header(ws, h, [first_col] + [None] * 3 + ['Итого'] + (['К прошлой'] if trend else []))
     for j in range(3):
         ws.cell(h, 2 + j).value = f'={SET}!$A${j + 2}'
     r1 = h + 1
@@ -312,12 +318,36 @@ def pivot(ws, r, title, period, kind, src=None):
         ws[f'E{rr}'] = '' if kind == 'cost' else f'=SUM(B{rr}:D{rr})'
     r2 = r1 + n - 1
     f = {'subs': '#,##0', 'cost': '#,##0.0" ₽"'}.get(kind, '#,##0" ₽"')
-    style_body(ws, r1, r2, 5, [None, f, f, f, f])
+    style_body(ws, r1, r2, 6 if trend else 5, [None, f, f, f, f, DELTA_FMT])
     for rr in range(r1, r2 + 1):
         ws[f'E{rr}'].font = font(bold=True)
+    if trend:
+        unit = 'неделю' if period == 'week' else 'месяц'
+        for rr in range(r1 + 1, r2 + 1):
+            ws[f'F{rr}'] = f'=IFERROR(E{rr}/E{rr - 1}-1,"")'
+        xs = ';'.join(str(i) for i in range(1, n + 1))
+        ws[f'D{r}'] = 'Тенденция:'
+        ws[f'D{r}'].font = font(color=MUTED)
+        ws[f'D{r}'].alignment = Alignment(horizontal='right')
+        ws[f'E{r}'] = f'=IFERROR(SLOPE(E{r1}:E{r2},{{{xs}}})/AVERAGE(E{r1}:E{r2}),"")'
+        ws[f'E{r}'].number_format = '"▲ "0.0%;"▼ "0.0%;0%'
+        ws[f'E{r}'].font = font(bold=True, size=11)
+        ws[f'F{r}'] = f'в {unit}'
+        ws[f'F{r}'].font = font(color=MUTED)
+        up_down(ws, f'F{r1 + 1}:F{r2}')
+        up_down(ws, f'E{r}')
     if kind == 'cost':
         heat(ws, f'B{r1}:D{r2}')
     return h, r1, r2, r2 + 2
+
+
+def up_down(ws, rng):
+    """Рост подписок — зелёным, падение — красным."""
+    first = rng.split(':')[0]
+    for op, color in (('>', '1A7F37'), ('<', 'C62828')):
+        sign = '' if op == '>' else '-'
+        ws.conditional_formatting.add(rng, FormulaRule(
+            formula=[f'AND(ISNUMBER({first}),{first}{op}{sign}0.005)'], font=Font(color=color, bold=True)))
 
 
 def fix_cost_refs(ws, c1, c2, s1, e1):
@@ -353,23 +383,20 @@ def summary_sheet(wb):
     r = tt + 2
 
     piv = {}
-    for period, pname in (('month', 'месяцам'), ('week', 'неделям')):
+    for period, pname in (('week', 'неделям'), ('month', 'месяцам')):
         h1, s1, s2, r = pivot(ws, r, f'🧭 Подписки по направлениям, по {pname}', period, 'subs')
         h2, c1, c2, r = pivot(ws, r, f'Цена подписки по направлениям, по {pname}', period, 'cost', None)
         h3, e1, e2, r = pivot(ws, r, f'Расход по направлениям, по {pname}', period, 'spend')
         piv[period] = (h1, s1, s2, h2, c1, c2)
         fix_cost_refs(ws, c1, c2, s1, e1)
 
-    ws.cell(r, 1, 'Итого по клинике').font = font(size=14, bold=True, color=NAVY)
-    d1, d2, r = period_table(ws, r + 1, 'day', None)
-
-    charts_heading(ws, '📈 Подписки по клинике и по направлениям')
-    subs_charts(ws, d1, d2, (0, 0), 'дням (вся клиника)')
-    h1, s1, s2, h2, c1, c2 = piv['week']
-    multi_chart(ws, 'col', 'Подписки по неделям', h1, s1, s2, 3, (0, 1), stacked=True)
-    h1m, s1m, s2m = piv['month'][:3]
-    multi_chart(ws, 'col', 'Подписки по месяцам', h1m, s1m, s2m, 3, (1, 0), stacked=True)
-    multi_chart(ws, 'line', 'Цена подписки по неделям, ₽', h2, c1, c2, 3, (1, 1), fmt='#,##0')
+    charts_heading(ws, '📈 Тенденция подписок по неделям и месяцам (завершённые периоды)')
+    hw, w1, w2 = piv['week'][:3]
+    hm, m1, m2 = piv['month'][:3]
+    simple_chart(ws, 'col', 'Подписки по неделям — вся клиника (пунктир — тренд)', 1, 5, w1, w2, SUBS, (0, 0), trend=True)
+    simple_chart(ws, 'col', 'Подписки по месяцам — вся клиника (пунктир — тренд)', 1, 5, m1, m2, SUBS, (0, 1), trend=True)
+    multi_chart(ws, 'line', 'Подписки по неделям по направлениям', hw, w1, w2, 3, (1, 0))
+    multi_chart(ws, 'line', 'Подписки по месяцам по направлениям', hm, m1, m2, 3, (1, 1))
     ws.freeze_panes = 'A4'
 
 

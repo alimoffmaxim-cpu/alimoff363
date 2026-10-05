@@ -284,7 +284,7 @@ def top_info(ws, dir_formula):
 def direction_sheet(wb, i):
     ws = wb.create_sheet(DIRS[i])
     setup_sheet(ws, DIR_COLORS[i], [18] + [12] * 8 + [11, 11, 3])
-    banner(ws, '="🦉 Сова · "&$B$3',
+    banner(ws, '="Сова · "&$B$3',
            '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, f'={SET}!$A${i + 2}')
     r = kpi_block(ws, 5, '$B$3')
@@ -358,9 +358,9 @@ def fix_cost_refs(ws, c1, c2, s1, e1):
 
 
 def summary_sheet(wb):
-    ws = wb.create_sheet('🦉 Сводная', 0)
+    ws = wb.create_sheet('Сводная', 0)
     setup_sheet(ws, NAVY, [18] + [12] * 8 + [11, 11, 3])
-    banner(ws, '🦉 Сова · Сводная по всем направлениям',
+    banner(ws, 'Сова · Сводная по всем направлениям',
            '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, None)
     r = kpi_block(ws, 5, None)
@@ -466,7 +466,7 @@ def main(out):
     for i in range(3):
         direction_sheet(wb, i)
     summary_sheet(wb)
-    order = ['🦉 Сводная'] + DIRS + ['⚙ Настройки', 'Данные']
+    order = ['Сводная'] + DIRS + ['⚙ Настройки', 'Данные']
     wb._sheets = [wb[n] for n in order]
     wb.active = 0
     wb.save(out)

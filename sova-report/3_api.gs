@@ -46,7 +46,7 @@ function sovaToken_(cab) {
   const access = p.getProperty(sovaProp_('TOKEN', cab));
   if (access && Date.now() < Number(p.getProperty(sovaProp_('EXPIRES', cab)) || 0) - 5 * 60 * 1000) return access;
   const creds = sovaCreds_(cab);
-  if (!creds) throw new Error('кабинет не подключён: меню «🦉 Сова → Подключить кабинет VK».');
+  if (!creds) throw new Error('кабинет не подключён: меню «Сова → Подключить кабинет VK».');
   const refresh = p.getProperty(sovaProp_('REFRESH', cab));
   let res = refresh ? sovaOauth_('/oauth2/token.json',
     { grant_type: 'refresh_token', refresh_token: refresh, client_id: creds.client_id, client_secret: creds.client_secret }) : null;

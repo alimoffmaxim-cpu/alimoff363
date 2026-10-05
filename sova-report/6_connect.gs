@@ -48,7 +48,7 @@ function sovaCheckCabinet_(cab) {
     const n = sovaObjectIds_(cab).length;
     cell.setValue('✅ подключён, кампаний: ' + n + ' (' + Utilities.formatDate(new Date(), tz, 'dd.MM HH:mm') + ')');
     SpreadsheetApp.getUi().alert('Кабинет «' + cab.name + '» подключён, кампаний: ' + n +
-      '.\nТеперь: 🦉 Сова → Загрузить новые данные из VK.');
+      '.\nТеперь: Сова → Загрузить новые данные из VK.');
   } catch (e) {
     cell.setValue('❌ ошибка: ' + e.message.slice(0, 120));
     SpreadsheetApp.getUi().alert('Не удалось подключить «' + cab.name + '»: ' + e.message);

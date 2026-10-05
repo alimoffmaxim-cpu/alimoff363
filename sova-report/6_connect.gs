@@ -1,15 +1,21 @@
 // ---------- Подключение кабинетов через меню ----------
 
-/** Спрашивает номер направления; возвращает его или null. */
+/** Спрашивает направление (номер или название); возвращает его или null. */
 function sovaAskCabinet_(title) {
   const ui = SpreadsheetApp.getUi();
   const cabs = sovaCabinets_();
   const list = cabs.map(function (c, i) { return (i + 1) + ' — ' + c.name; }).join('\n');
-  const a = ui.prompt(title, 'Номер направления:\n' + list, ui.ButtonSet.OK_CANCEL);
+  const a = ui.prompt(title, 'Шаг 1 из 2. Введите только номер направления (цифру), токен спросим следующим окном:\n' + list,
+    ui.ButtonSet.OK_CANCEL);
   if (a.getSelectedButton() !== ui.Button.OK) return null;
-  const cab = cabs[Number(a.getResponseText().trim()) - 1];
-  if (!cab) ui.alert('Нет направления с таким номером.');
-  return cab || null;
+  const text = a.getResponseText().trim(), num = text.match(/^\d+/);
+  const cab = num ? cabs[Number(num[0]) - 1]
+    : cabs.filter(function (c) { return c.name.toLowerCase() === text.toLowerCase(); })[0];
+  if (cab) return cab;
+  ui.alert(text.length > 30
+    ? 'Похоже, в это окно вставлен токен. Сначала введите номер направления (1–' + cabs.length + '), токен — в следующем окне.'
+    : 'Нет направления «' + text + '». Введите цифру от 1 до ' + cabs.length + '.');
+  return null;
 }
 
 function sovaAskText_(title, text) {
@@ -34,7 +40,7 @@ function connectCabinet() {
 function promptCabinetToken() {
   const cab = sovaAskCabinet_('Токен кабинета VK');
   if (!cab) return;
-  const token = sovaAskText_('Токен — ' + cab.name, 'Вставьте токен API этого кабинета (из письма eLama):').replace(/^Bearer\s+/i, '');
+  const token = sovaAskText_('Токен — ' + cab.name, 'Шаг 2 из 2. Вставьте токен API этого кабинета (из письма eLama):').replace(/^Bearer\s+/i, '');
   if (!token) return;
   sovaSaveToken_(cab, token, Date.now() + 100 * 365 * SOVA_DAY_MS); // токен eLama бессрочный
   sovaCheckCabinet_(cab);

@@ -68,9 +68,9 @@ function sbBuildSettings_(ss) {
     const c = String(r[3]).trim();
     if (/^#[0-9a-f]{6}$/i.test(c)) sh.getRange(i + 2, 4).setBackground(c).setFontColor('#ffffff').setFontWeight('bold');
   });
-  sh.getRange('F1').setValue('Отчёт строится по дату (последний день в «Данные», считается сам)')
+  sh.getRange('F1').setValue('Отчёт строится по дату (последний день в «Данные», а если они пусты — вчера)')
     .setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
-  sh.getRange('F2').setFormula(sbLocF_('=INT(MAX(' + SB.D + '!$A:$A))')).setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
+  sh.getRange('F2').setFormula(sbLocF_('=IF(COUNT(' + SB.D + '!$A:$A),INT(MAX(' + SB.D + '!$A:$A)),TODAY()-1)')).setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
   sh.getRange(4, 6, 8, 1).setValues(sbLoc_([
     ['Как пользоваться:'],
     ['• Направления — в колонке A подряд, без пустых строк: 1 строка = 1 кабинет VK. Строка, начинающаяся с #, пропускается.'],

@@ -410,7 +410,7 @@ def settings_sheet(wb):
         ws.cell(j + 2, 4, '#' + DIR_COLORS[j]).fill = fill(DIR_COLORS[j])
         ws.cell(j + 2, 4).font = font(color='FFFFFF', bold=True)
     ws['A7'] = 'Отчёт строится по дату:'
-    ws['B7'] = f'=INT(MAX({D}!$A:$A))'
+    ws['B7'] = f'=IF(COUNT({D}!$A:$A),INT(MAX({D}!$A:$A)),TODAY()-1)'
     ws['B7'].number_format = 'DD.MM.YYYY'
     ws['A7'].font, ws['B7'].font = font(bold=True), font(bold=True)
     ws['C7'] = '← последний день в «Данные», считается сам'

@@ -20,20 +20,35 @@ function sbSummary_(ss, cabs, period) {
   rows.push(['Итого', sum('B'), sum('C'), sum('D'), d[0], d[1], sum('G'), d[2], d[3], '=IFERROR(B' + tt + '/$B$' + tt + ',"")']);
   sh.getRange(t1, 1, n + 1, 10).setValues(sbLoc_(rows));
   sbBody_(sh, t1, tt, SB.FMT.concat(['0%']), tt);
-  r = tt + 2;
+  sbChartsHeading_(sh, '📈 Подписки и расход по неделям и месяцам (завершённые периоды)');
+  sbTrends_(sh, cabs);   // со строки tt + 2 = 15 + число направлений
+  sh.setFrozenRows(3);
+}
 
+/**
+ * Тенденция на «Сводной»: подписки, цена подписки и расход по неделям и месяцам и 6 графиков.
+ * Недели и месяцы — с первого, где есть данные, до последнего завершённого (не больше 26 и 12),
+ * поэтому блок перестраивается после каждой загрузки (sbDaysAll_).
+ */
+function sbTrends_(sh, cabs) {
+  const n = cabs.length, cnt = sbTrendCounts_();
+  let r = 15 + n;
+  sh.getRange(r, 1, sh.getMaxRows() - r + 1, sh.getMaxColumns()).clear()
+    .setFontFamily('Arial').setFontSize(10).setFontColor(SB.INK);
+  sh.setConditionalFormatRules(sh.getConditionalFormatRules()
+    .filter(function (x) { return x.getRanges()[0].getRow() < r; }));
+  sh.getCharts().forEach(function (c) { sh.removeChart(c); });
   const subs = {}, spend = {};
   [['week', 'неделям'], ['month', 'месяцам']].forEach(function (pp) {
-    const len = sbPeriod_(pp[0]).n + 3;   // высота таблицы с заголовком и отступом
-    const s = sbPivot_(sh, r, '🧭 Подписки по направлениям, по ' + pp[1], 'subs', pp[0], cabs);
-    sbPivot_(sh, s.next, 'Цена подписки по направлениям, по ' + pp[1], 'cost', pp[0], cabs, { s1: s.r1, e1: s.next + len + 2 });
-    spend[pp[0]] = sbPivot_(sh, s.next + len, 'Расход по направлениям, по ' + pp[1], 'spend', pp[0], cabs);
+    const c = cnt[pp[0]], len = c + 3;   // высота таблицы с заголовком и отступом
+    sovaEnsureRows_(sh, r + 3 * len + 2);
+    const s = sbPivot_(sh, r, '🧭 Подписки по направлениям, по ' + pp[1], 'subs', pp[0], cabs, null, c);
+    sbPivot_(sh, s.next, 'Цена подписки по направлениям, по ' + pp[1], 'cost', pp[0], cabs, { s1: s.r1, e1: s.next + len + 2 }, c);
+    spend[pp[0]] = sbPivot_(sh, s.next + len, 'Расход по направлениям, по ' + pp[1], 'spend', pp[0], cabs, null, c);
     r = spend[pp[0]].next;
     subs[pp[0]] = s;
   });
-
   // Слева подписки, справа расход за те же периоды — чтобы сравнивать динамику
-  sbChartsHeading_(sh, '📈 Подписки и расход по неделям и месяцам (завершённые периоды)');
   const w = subs.week, m = subs.month, colors = cabs.map(function (c) { return c.color; });
   sbChart_(sh, 'col', 'Подписки по неделям — вся клиника (линия — тренд)', w, [n + 2], [0, 0], [SB.SUBS], true);
   sbChart_(sh, 'col', 'Расход по неделям — вся клиника, ₽ (линия — тренд)', spend.week, [n + 2], [0, 1], [SB.SPEND], true);
@@ -41,7 +56,6 @@ function sbSummary_(ss, cabs, period) {
   sbChart_(sh, 'col', 'Расход по месяцам — вся клиника, ₽ (линия — тренд)', spend.month, [n + 2], [1, 1], [SB.SPEND], true);
   sbChart_(sh, 'line', 'Подписки по неделям по направлениям', w, [2, n], [2, 0], colors);
   sbChart_(sh, 'line', 'Подписки по месяцам по направлениям', m, [2, n], [2, 1], colors);
-  sh.setFrozenRows(3);
 }
 
 function sbDirection_(ss, cab, index, period) {

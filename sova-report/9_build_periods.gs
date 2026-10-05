@@ -10,19 +10,23 @@ function sbCol_(i) {
   return s;
 }
 
-/** Период: число строк, шапка, начало k-го периода (формула), его конец и подпись. n — число дней для 'day'. */
+/**
+ * Период: число строк, шапка, начало k-го периода (формула), его конец и подпись.
+ * n — число строк: дней для 'day', последних завершённых недель / месяцев для 'week' / 'month'.
+ */
 function sbPeriod_(kind, n) {
+  if (kind === 'month') { n = n > 0 ? n : SB.MONTHS; } else if (kind === 'week') { n = n > 0 ? n : SB.WEEKS; }
   if (kind === 'month') return {
-    title: '📅 По завершённым месяцам (' + SB.MONTHS + ')', n: SB.MONTHS, first: 'Месяц',
-    start: function (k) { return 'EDATE(' + SB_LAST_MONTH + ',' + (k - SB.MONTHS + 1) + ')'; },
+    title: '📅 По завершённым месяцам (' + n + ')', n: n, first: 'Месяц',
+    start: function (k) { return 'EDATE(' + SB_LAST_MONTH + ',' + (k - n + 1) + ')'; },
     end: function (a) { return 'EOMONTH(' + a + ',0)'; },
     label: function (a) {
       return 'CHOOSE(MONTH(' + a + '),"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек")&" "&YEAR(' + a + ')';
     },
   };
   if (kind === 'week') return {
-    title: '🗓 По завершённым неделям (' + SB.WEEKS + ')', n: SB.WEEKS, first: 'Неделя',
-    start: function (k) { return '(' + SB_LAST_WEEK + '-7*' + (SB.WEEKS - 1 - k) + ')'; },
+    title: '🗓 По завершённым неделям (' + n + ')', n: n, first: 'Неделя',
+    start: function (k) { return '(' + SB_LAST_WEEK + '-7*' + (n - 1 - k) + ')'; },
     end: function (a) { return '(' + a + '+6)'; },
     label: function (a) { return 'TEXT(' + a + ',"DD.MM")&"–"&TEXT(' + a + '+6,"DD.MM")'; },
   };
@@ -53,9 +57,10 @@ function sbPeriodTable_(sh, r, kind, dir, n) {
 /**
  * Период × направления (+ «Итого»). kind: subs | cost | spend.
  * Цена подписки считается построчно из таблиц подписок и расхода: src = {s1, e1} — их первые строки.
+ * count — сколько последних завершённых недель / месяцев показать.
  */
-function sbPivot_(sh, r, title, kind, period, cabs, src) {
-  const p = sbPeriod_(period), n = cabs.length, T = sbCol_(n + 2), last = sbCol_(n + 1), trend = kind === 'subs';
+function sbPivot_(sh, r, title, kind, period, cabs, src, count) {
+  const p = sbPeriod_(period, count), n = cabs.length, T = sbCol_(n + 2), last = sbCol_(n + 1), trend = kind === 'subs';
   const h = r + 1, r1 = h + 1, r2 = r1 + p.n - 1, rows = [];
   sbSection_(sh, r, title);
   sbHeader_(sh, h, [p.first].concat(cabs.map(function (c) { return '=' + SB.SET + '!$A$' + c.row; }),
@@ -79,11 +84,12 @@ function sbPivot_(sh, r, title, kind, period, cabs, src) {
   if (trend) {
     const tot = T + r1 + ':' + T + r2, F = sbCol_(n + 3);
     sh.getRange(r, n + 1, 1, 3).setValues(sbLoc_([['Тенденция:',
-      '=IFERROR(SLOPE(' + tot + ',SEQUENCE(' + p.n + '))/AVERAGE(' + tot + '),"")', 'в ' + (period === 'week' ? 'неделю' : 'месяц')]]));
+      p.n >= 4 ? '=IFERROR(SLOPE(' + tot + ',SEQUENCE(' + p.n + '))/AVERAGE(' + tot + '),"")' : '—',   // по 1–3 точкам тренд ни о чём
+      p.n >= 4 ? 'в ' + (period === 'week' ? 'неделю' : 'месяц') : 'появится с 4 ' + (period === 'week' ? 'недель' : 'месяцев')]]));
     sh.getRange(r, n + 1).setFontColor(SB.MUTED).setHorizontalAlignment('right');
     sh.getRange(r, n + 2).setNumberFormat('"▲ "0.0%;"▼ "0.0%;0%').setFontWeight('bold').setFontSize(11);
     sh.getRange(r, n + 3).setFontColor(SB.MUTED);
-    sbUpDown_(sh, F + (r1 + 1) + ':' + F + r2, 1);
+    if (p.n > 1) sbUpDown_(sh, F + (r1 + 1) + ':' + F + r2, 1);
     sbUpDown_(sh, T + r, 1);
   }
   return { h: h, r1: r1, r2: r2, next: r2 + 2 };

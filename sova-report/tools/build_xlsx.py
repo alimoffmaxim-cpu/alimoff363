@@ -9,20 +9,19 @@ import sys
 from datetime import date, timedelta
 
 from openpyxl import Workbook
-from openpyxl.chart import BarChart, LineChart, PieChart, Reference
-from openpyxl.chart.series import DataPoint
+from openpyxl.chart import BarChart, LineChart, Reference
 from openpyxl.formatting.rule import ColorScaleRule, FormulaRule
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 NAVY, HEAD, BAND, LINE, INK, MUTED = '1F2A44', '2F3E60', 'F4F6FA', 'DFE3EB', '1F2430', '6B7280'
-SPEND, LEADS, CPL = '2A78D6', '1BAF7A', 'EB6834'
+SPEND, SUBS, COST = '2A78D6', '1BAF7A', 'EB6834'
 DIR_COLORS = ['2A78D6', 'EB6834', '1BAF7A']
 DIRS = ['Направление 1', 'Направление 2', 'Направление 3']
 FONT = 'Arial'
 D = "'Данные'"
 SET = "'⚙ Настройки'"
-COLS = ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CPC', 'Лиды', 'CPL', 'CR в лид']
-FMT = [None, '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0" ₽"', '0.0%']
+COLS = ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CPC', 'Подписки', 'Цена подписки', 'CR в подписку']
+FMT = [None, '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0.0" ₽"', '0.0%']
 DELTA_FMT = '"▲ "0%;"▼ "0%;0%'
 GOOD = [0, 0, 1, 1, 1, -1, 1, -1, 1]  # +1 — хорошо, когда растёт; −1 — когда падает
 N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 60
@@ -54,7 +53,7 @@ def sumifs(src, frm, to, dir_ref):
 
 
 def metric_row(ws, r, frm, to, dir_ref):
-    """B..I: расход, показы, клики, CTR, CPC, лиды, CPL, CR за период [frm; to]."""
+    """B..I: расход, показы, клики, CTR, CPC, подписки, цена подписки, CR за период [frm; to]."""
     ws[f'B{r}'] = '=' + sumifs('C', frm, to, dir_ref)
     ws[f'C{r}'] = '=' + sumifs('D', frm, to, dir_ref)
     ws[f'D{r}'] = '=' + sumifs('E', frm, to, dir_ref)
@@ -193,11 +192,11 @@ def period_table(ws, r, period, dir_ref, total=False):
 
 # ---------- графики ----------
 
-CHART_COLS = ['M', 'U', 'AC']
+CHART_COLS = ['M', 'V']
 
 
 def place(ws, chart, grid_row, grid_col, top=4):
-    chart.width, chart.height = 13.2, 7.2
+    chart.width, chart.height = 14.8, 7.4
     ws.add_chart(chart, f'{CHART_COLS[grid_col]}{top + grid_row * 15}')
 
 
@@ -235,10 +234,12 @@ def simple_chart(ws, kind, title, cats_col, val_col, r1, r2, color, cell, fmt='#
     place(ws, ch, *cell)
 
 
-def metric_charts(ws, r1, r2, grid_row, name):
-    simple_chart(ws, 'col', f'Расход по {name}, ₽', 1, 2, r1, r2, SPEND, (grid_row, 0))
-    simple_chart(ws, 'col', f'Лиды по {name}', 1, 7, r1, r2, LEADS, (grid_row, 1))
-    simple_chart(ws, 'line', f'CPL (цена лида) по {name}, ₽', 1, 8, r1, r2, CPL, (grid_row, 2))
+def subs_charts(ws, r1, r2, cell, name):
+    simple_chart(ws, 'col', f'Подписки по {name}', 1, 7, r1, r2, SUBS, cell)
+
+
+def cost_chart(ws, r1, r2, cell, name):
+    simple_chart(ws, 'line', f'Цена подписки по {name}, ₽', 1, 8, r1, r2, COST, cell)
 
 
 def charts_heading(ws, text):
@@ -254,33 +255,6 @@ def multi_chart(ws, kind, title, r_head, r1, r2, ncols, cell, stacked=False, fmt
     if stacked:
         ch.grouping, ch.overlap = 'stacked', 100
     color_series(ch, kind, DIR_COLORS)
-    place(ws, ch, *cell)
-
-
-def by_dir_chart(ws, kind, title, val_col, r1, r2, cell, fmt='#,##0'):
-    """Одна величина по направлениям, каждое направление — своим цветом."""
-    if kind == 'pie':
-        ch = PieChart()
-        ch.title = title
-        ch.add_data(Reference(ws, min_col=val_col, min_row=r1 - 1, max_row=r2), titles_from_data=True)
-        ch.set_categories(Reference(ws, min_col=1, min_row=r1, max_row=r2))
-        ch.legend.position = 'r'
-        from openpyxl.chart.label import DataLabelList
-        ch.dataLabels = DataLabelList()
-        ch.dataLabels.showPercent = True
-        ch.dataLabels.showVal = ch.dataLabels.showCatName = ch.dataLabels.showSerName = False
-        ch.dataLabels.showLegendKey = False
-    else:
-        ch = base_chart(kind, title, fmt)
-        ch.add_data(Reference(ws, min_col=val_col, min_row=r1 - 1, max_row=r2), titles_from_data=True)
-        ch.set_categories(Reference(ws, min_col=1, min_row=r1, max_row=r2))
-        ch.legend = None
-    s = ch.series[0]
-    for i, c in enumerate(DIR_COLORS):
-        pt = DataPoint(idx=i)
-        pt.graphicalProperties.solidFill = c
-        pt.graphicalProperties.line.solidFill = 'FFFFFF'
-        s.dPt.append(pt)
     place(ws, ch, *cell)
 
 
@@ -308,15 +282,16 @@ def direction_sheet(wb, i):
     m1, m2, r = period_table(ws, r, 'month', '$B$3', total=True)
     w1, w2, r = period_table(ws, r, 'week', '$B$3')
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
-    charts_heading(ws, '📈 Динамика: по дням · по неделям · по месяцам')
-    metric_charts(ws, d1, d2, 0, 'дням')
-    metric_charts(ws, w1, w2, 1, 'неделям')
-    metric_charts(ws, m1, m2, 2, 'месяцам')
+    charts_heading(ws, '📈 Подписки: по дням · по неделям · по месяцам')
+    subs_charts(ws, d1, d2, (0, 0), 'дням')
+    subs_charts(ws, w1, w2, (0, 1), 'неделям')
+    subs_charts(ws, m1, m2, (1, 0), 'месяцам')
+    cost_chart(ws, w1, w2, (1, 1), 'неделям')
     ws.freeze_panes = 'A4'
 
 
 def pivot(ws, r, title, period, kind, src=None):
-    """Месяц/неделя × направления (+ Итого). kind: spend | leads | cpl (cpl считается из src)."""
+    """Месяц/неделя × направления (+ Итого). kind: spend | subs | cost (цена подписки считается из src)."""
     _, n, first_col, start, end, label = PERIODS[period]
     section(ws, r, title)
     h = r + 1
@@ -330,20 +305,26 @@ def pivot(ws, r, title, period, kind, src=None):
         ws[f'A{rr}'] = '=' + label(a)
         for j in range(3):
             L = col(2 + j)
-            if kind == 'cpl':
-                sp, ld = src
-                ws[f'{L}{rr}'] = f'=IFERROR({L}{sp + k}/{L}{ld + k},"")'
+            if kind == 'cost':
+                ws[f'{L}{rr}'] = ''  # заполняется fix_cost_refs, когда таблица расхода уже есть
             else:
                 ws[f'{L}{rr}'] = '=' + sumifs('C' if kind == 'spend' else 'F', a, end(a), f'{L}${h}')
-        ws[f'E{rr}'] = (f'=IFERROR(E{src[0] + k}/E{src[1] + k},"")' if kind == 'cpl' else f'=SUM(B{rr}:D{rr})')
+        ws[f'E{rr}'] = '' if kind == 'cost' else f'=SUM(B{rr}:D{rr})'
     r2 = r1 + n - 1
-    f = '#,##0' if kind == 'leads' else '#,##0" ₽"'
+    f = {'subs': '#,##0', 'cost': '#,##0.0" ₽"'}.get(kind, '#,##0" ₽"')
     style_body(ws, r1, r2, 5, [None, f, f, f, f])
     for rr in range(r1, r2 + 1):
         ws[f'E{rr}'].font = font(bold=True)
-    if kind == 'cpl':
+    if kind == 'cost':
         heat(ws, f'B{r1}:D{r2}')
     return h, r1, r2, r2 + 2
+
+
+def fix_cost_refs(ws, c1, c2, s1, e1):
+    """Цена подписки = расход (таблица e1) / подписки (таблица s1), построчно, включая «Итого»."""
+    for k in range(c2 - c1 + 1):
+        for L in 'BCDE':
+            ws[f'{L}{c1 + k}'] = f'=IFERROR({L}{e1 + k}/{L}{s1 + k},"")'
 
 
 def summary_sheet(wb):
@@ -369,31 +350,33 @@ def summary_sheet(wb):
     for rr in range(t1, tt + 1):
         ws[f'J{rr}'] = f'=IFERROR(B{rr}/$B${tt},"")'
     style_body(ws, t1, tt, 10, FMT + ['0%'], tt)
-    by_dir_chart(ws, 'pie', 'Доля расхода, текущий месяц', 2, t1, tt - 1, (0, 0))
-    by_dir_chart(ws, 'hbar', 'Лиды по направлениям, текущий месяц', 7, t1, tt - 1, (0, 1))
-    by_dir_chart(ws, 'hbar', 'CPL по направлениям, текущий месяц, ₽', 8, t1, tt - 1, (0, 2))
     r = tt + 2
 
-    blocks = {}
-    for period, pname, grid in (('month', 'месяцам', 1), ('week', 'неделям', 2)):
-        h1, s1, s2, r = pivot(ws, r, f'🧭 Расход по направлениям, по {pname}', period, 'spend')
-        h2, l1, l2, r = pivot(ws, r, f'Лиды по направлениям, по {pname}', period, 'leads')
-        h3, c1, c2, r = pivot(ws, r, f'CPL по направлениям, по {pname}', period, 'cpl', (s1, l1))
-        multi_chart(ws, 'col', f'Расход по {pname}, ₽', h1, s1, s2, 3, (grid, 0), stacked=True)
-        multi_chart(ws, 'col', f'Лиды по {pname}', h2, l1, l2, 3, (grid, 1), stacked=True)
-        multi_chart(ws, 'line', f'CPL по {pname}, ₽', h3, c1, c2, 3, (grid, 2))
+    piv = {}
+    for period, pname in (('month', 'месяцам'), ('week', 'неделям')):
+        h1, s1, s2, r = pivot(ws, r, f'🧭 Подписки по направлениям, по {pname}', period, 'subs')
+        h2, c1, c2, r = pivot(ws, r, f'Цена подписки по направлениям, по {pname}', period, 'cost', None)
+        h3, e1, e2, r = pivot(ws, r, f'Расход по направлениям, по {pname}', period, 'spend')
+        piv[period] = (h1, s1, s2, h2, c1, c2)
+        fix_cost_refs(ws, c1, c2, s1, e1)
 
     ws.cell(r, 1, 'Итого по клинике').font = font(size=14, bold=True, color=NAVY)
     d1, d2, r = period_table(ws, r + 1, 'day', None)
-    metric_charts(ws, d1, d2, 3, 'дням (вся клиника)')
-    charts_heading(ws, '📈 Динамика по направлениям и по клинике в целом')
+
+    charts_heading(ws, '📈 Подписки по клинике и по направлениям')
+    subs_charts(ws, d1, d2, (0, 0), 'дням (вся клиника)')
+    h1, s1, s2, h2, c1, c2 = piv['week']
+    multi_chart(ws, 'col', 'Подписки по неделям', h1, s1, s2, 3, (0, 1), stacked=True)
+    h1m, s1m, s2m = piv['month'][:3]
+    multi_chart(ws, 'col', 'Подписки по месяцам', h1m, s1m, s2m, 3, (1, 0), stacked=True)
+    multi_chart(ws, 'line', 'Цена подписки по неделям, ₽', h2, c1, c2, 3, (1, 1), fmt='#,##0')
     ws.freeze_panes = 'A4'
 
 
 def settings_sheet(wb):
     ws = wb.create_sheet('⚙ Настройки')
     setup_sheet(ws, '9AA3B2', [34, 30, 24, 14])
-    header(ws, 1, ['Направление (= название листа)', 'Подключение (заполняет скрипт)', 'Метрика лидов (необяз.)', 'Цвет'])
+    header(ws, 1, ['Направление (= название листа)', 'Подключение (заполняет скрипт)', 'Метрика подписок (необяз.)', 'Цвет'])
     for j, n in enumerate(DIRS):
         ws.cell(j + 2, 1, n).font = font(bold=True)
         ws.cell(j + 2, 2, '— (демо-данные)').font = font(color=MUTED)
@@ -412,7 +395,8 @@ def settings_sheet(wb):
         '• Все цифры берутся с листа «Данные»: 1 строка = 1 день одного направления (итог всех кампаний кабинета).',
         '  Скрипт будет дописывать туда строки каждое утро; пока там демо-данные — удалите строки 2+ перед реальной загрузкой.',
         '• «Этот месяц» = с 1-го числа по отчётную дату; сравнение — с теми же днями прошлого месяца.',
-        '• Неделя — с понедельника по воскресенье. CPL = расход / лиды, CR = лиды / клики.',
+        '• Ключевая цель — вступления в сообщество. Цена подписки = расход / подписки, CR = подписки / клики.',
+        '• Неделя — с понедельника по воскресенье.',
     ]
     for k, t in enumerate(notes):
         ws.cell(9 + k, 1, t).font = font(bold=(k == 0), color=INK if k == 0 else MUTED)
@@ -422,20 +406,20 @@ def settings_sheet(wb):
 def data_sheet(wb, n_days=365, seed=7):
     ws = wb.create_sheet('Данные')
     setup_sheet(ws, '9AA3B2', [12, 22, 12, 12, 10, 8])
-    header(ws, 1, ['Дата', 'Направление', 'Расход', 'Показы', 'Клики', 'Лиды'])
+    header(ws, 1, ['Дата', 'Направление', 'Расход', 'Показы', 'Клики', 'Подписки'])
     rnd = random.Random(seed)
     last = date.today() - timedelta(days=1)
     rows = []
     for i, name in enumerate(DIRS):
-        budget, cpl = 2500 + 2000 * i, 600 + 350 * i
+        budget, cps = 2500 + 2000 * i, 35 + 20 * i  # цена подписки в демо
         for k in range(n_days - 1, -1, -1):
             d = last - timedelta(days=k)
             trend = 1 + 0.5 * (n_days - k) / n_days
             spend = round(budget * trend * (0.7 if d.weekday() >= 5 else 1) * (0.75 + rnd.random() * 0.5))
-            shows = round(spend / (0.25 + rnd.random() * 0.1))
-            clicks = round(shows * (0.007 + rnd.random() * 0.006))
-            leads = max(0, round(spend / (cpl * (0.6 + rnd.random() * 0.8) / trend ** 0.5)))
-            rows.append((d, f'={SET}!$A${i + 2}', spend, shows, clicks, leads))
+            shows = round(spend / (0.18 + rnd.random() * 0.06))
+            clicks = round(shows * (0.014 + rnd.random() * 0.008))
+            subs = max(0, round(spend / (cps * (0.6 + rnd.random() * 0.8) / trend ** 0.5)))
+            rows.append((d, f'={SET}!$A${i + 2}', spend, shows, clicks, subs))
     rows.sort(key=lambda x: (x[0], x[1]))
     for r, row in enumerate(rows, 2):
         for c, v in enumerate(row, 1):

@@ -4,6 +4,7 @@
 
 const SB = {
   SUMMARY: 'Сводная',
+  OLD_SUMMARY: '\uD83E\uDD89 Сводная',   // название в первой версии, удаляется при пересборке
   // геттеры: SOVA объявлен в другом файле, а порядок загрузки файлов в Apps Script не гарантирован
   get D() { return "'" + SOVA.DATA_SHEET + "'"; },
   get SET() { return "'" + SOVA.SETTINGS_SHEET + "'"; },
@@ -19,7 +20,7 @@ const SB = {
 
 function sovaBuildReport() {
   const ss = SpreadsheetApp.getActive(), ui = SpreadsheetApp.getUi();
-  if (ss.getSheetByName(SB.SUMMARY) && ui.alert('Пересобрать отчёт?', 'Листы «Сводная» и направлений будут созданы ' +
+  if ((ss.getSheetByName(SB.SUMMARY) || ss.getSheetByName(SB.OLD_SUMMARY)) && ui.alert('Пересобрать отчёт?', 'Листы «Сводная» и направлений будут созданы ' +
     'заново. «Данные», токены и направления на листе настроек сохранятся.', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
   sovaAlert_(function () {
     ss.setSpreadsheetLocale('ru_RU');
@@ -30,7 +31,7 @@ function sovaBuildReport() {
       'покажут, как выглядит отчёт. Перед реальной загрузкой их удаляют через меню «Сова».', ui.ButtonSet.YES_NO) === ui.Button.YES;
     if (demo) sbDemoData_(data, cabs);
     const keep = [SOVA.SETTINGS_SHEET, SOVA.DATA_SHEET];
-    [SB.SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
+    [SB.SUMMARY, SB.OLD_SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
       const s = ss.getSheetByName(name);
       if (s && keep.indexOf(name) < 0) ss.deleteSheet(s);
     });
@@ -60,7 +61,7 @@ function sbBuildSettings_(ss) {
   if (!rows.length) rows = [1, 2, 3].map(function (i) { return ['Направление ' + i, '❌ не подключён', '', SOVA_DIR_COLORS[i - 1]]; });
   sbSetup_(sh, '#9aa3b2', [240, 260, 200, 110, 24, 720]);
   sbHeader_(sh, 1, ['Направление (= название листа)', 'Подключение (заполняет скрипт)', 'Метрика подписок (необяз.)', 'Цвет (необяз.)']);
-  sh.getRange(2, 1, rows.length, 4).setValues(rows);
+  sh.getRange(2, 1, rows.length, 4).setValues(sbLoc_(rows));
   sh.getRange(2, 1, rows.length, 1).setFontWeight('bold');
   sh.getRange(2, 2, rows.length, 1).setFontColor(SB.MUTED);
   rows.forEach(function (r, i) {
@@ -69,8 +70,8 @@ function sbBuildSettings_(ss) {
   });
   sh.getRange('F1').setValue('Отчёт строится по дату (последний день в «Данные», считается сам)')
     .setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
-  sh.getRange('F2').setFormula('=INT(MAX(' + SB.D + '!$A:$A))').setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
-  sh.getRange(4, 6, 8, 1).setValues([
+  sh.getRange('F2').setFormula(sbLocF_('=INT(MAX(' + SB.D + '!$A:$A))')).setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
+  sh.getRange(4, 6, 8, 1).setValues(sbLoc_([
     ['Как пользоваться:'],
     ['• Направления — в колонке A подряд, без пустых строк: 1 строка = 1 кабинет VK. Строка, начинающаяся с #, пропускается.'],
     ['• Название направления — это и название его листа. Переименовали — подключите кабинет заново и пересоберите отчёт.'],
@@ -79,7 +80,7 @@ function sbBuildSettings_(ss) {
     ['• Все цифры берутся с листа «Данные»: 1 строка = 1 день одного направления (итог всех кампаний кабинета).'],
     ['• «Этот месяц» = с 1-го числа по отчётную дату; сравнение — с теми же днями прошлого месяца. Неделя — пн–вс.'],
     ['• Добавили направление — «Сова → Создать / пересобрать отчёт».'],
-  ]).setFontColor(SB.MUTED);
+  ])).setFontColor(SB.MUTED);
   sh.getRange('F4').setFontWeight('bold').setFontColor(SB.INK);
   sh.setFrozenRows(1);
   return sh;

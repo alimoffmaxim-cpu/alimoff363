@@ -43,7 +43,7 @@ function sbPeriodTable_(sh, r, kind, dir) {
     const a = p.start(k);
     rows.push(['=' + p.label(a)].concat(sbMetrics_(r1 + k, a, p.end(a), dir)));
   }
-  sh.getRange(r1, 1, p.n, 9).setValues(rows);
+  sh.getRange(r1, 1, p.n, 9).setValues(sbLoc_(rows));
   sbBody_(sh, r1, r2, SB.FMT);
   sbHeat_(sh, 'H' + r1 + ':H' + r2);
   return { h: r + 1, r1: r1, r2: r2, next: r2 + 2 };
@@ -70,15 +70,15 @@ function sbPivot_(sh, r, title, kind, period, cabs, src) {
     if (trend) row.push(k ? '=IFERROR(' + T + rr + '/' + T + (rr - 1) + '-1,"")' : '');
     rows.push(row);
   }
-  sh.getRange(r1, 1, p.n, rows[0].length).setValues(rows);
+  sh.getRange(r1, 1, p.n, rows[0].length).setValues(sbLoc_(rows));
   const f = { subs: '#,##0', cost: '#,##0.0" ₽"', spend: '#,##0" ₽"' }[kind];
   sbBody_(sh, r1, r2, [null].concat(new Array(n + 1).fill(f), trend ? [SB.DELTA] : []));
   sh.getRange(r1, n + 2, p.n, 1).setFontWeight('bold');
   if (kind === 'cost') sbHeat_(sh, 'B' + r1 + ':' + last + r2);
   if (trend) {
     const tot = T + r1 + ':' + T + r2, F = sbCol_(n + 3);
-    sh.getRange(r, n + 1, 1, 3).setValues([['Тенденция:',
-      '=IFERROR(SLOPE(' + tot + ',SEQUENCE(' + p.n + '))/AVERAGE(' + tot + '),"")', 'в ' + (period === 'week' ? 'неделю' : 'месяц')]]);
+    sh.getRange(r, n + 1, 1, 3).setValues(sbLoc_([['Тенденция:',
+      '=IFERROR(SLOPE(' + tot + ',SEQUENCE(' + p.n + '))/AVERAGE(' + tot + '),"")', 'в ' + (period === 'week' ? 'неделю' : 'месяц')]]));
     sh.getRange(r, n + 1).setFontColor(SB.MUTED).setHorizontalAlignment('right');
     sh.getRange(r, n + 2).setNumberFormat('"▲ "0.0%;"▼ "0.0%;0%').setFontWeight('bold').setFontSize(11);
     sh.getRange(r, n + 3).setFontColor(SB.MUTED);

@@ -16,7 +16,7 @@ function sbSummary_(ss, cabs) {
     return ['=' + SB.SET + '!$A$' + c.row].concat(sbMetrics_(rr, '$J$7', '$K$7', '$A' + rr), ['=IFERROR(B' + rr + '/$B$' + tt + ',"")']);
   });
   rows.push(['Итого', sum('B'), sum('C'), sum('D'), d[0], d[1], sum('G'), d[2], d[3], '=IFERROR(B' + tt + '/$B$' + tt + ',"")']);
-  sh.getRange(t1, 1, n + 1, 10).setValues(rows);
+  sh.getRange(t1, 1, n + 1, 10).setValues(sbLoc_(rows));
   sbBody_(sh, t1, tt, SB.FMT.concat(['0%']), tt);
   r = tt + 2;
 
@@ -84,7 +84,7 @@ function sbDemoData_(sh, cabs) {
   });
   rows.sort(function (a, b) { return a[0] - b[0]; });
   sovaEnsureRows_(sh, rows.length + 1);
-  sh.getRange(2, 1, rows.length, 6).setValues(rows);
+  sh.getRange(2, 1, rows.length, 6).setValues(sbLoc_(rows));
   sh.getRange(2, 1, rows.length, 1).setNumberFormat('dd.MM.yyyy');
   sh.getRange(2, 3, rows.length, 1).setNumberFormat('#,##0.00');
 }

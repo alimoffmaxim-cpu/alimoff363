@@ -27,13 +27,13 @@ function sbSetup_(sh, tab, widths) {
 function sbBanner_(sh, title, subtitle) {
   sh.getRange(1, 1, 2, 39).setBackground(SB.NAVY);
   sh.setRowHeight(1, 44);
-  sh.getRange('A1').setValue(title).setFontSize(18).setFontWeight('bold').setFontColor('#ffffff').setVerticalAlignment('middle');
-  sh.getRange('A2').setValue(subtitle).setFontColor('#c9d1e3');
+  sh.getRange('A1').setValue(sbLocF_(title)).setFontSize(18).setFontWeight('bold').setFontColor('#ffffff').setVerticalAlignment('middle');
+  sh.getRange('A2').setValue(sbLocF_(subtitle)).setFontColor('#c9d1e3');
 }
 
 function sbTopInfo_(sh, dirFormula) {
-  sh.getRange('A3:E3').setValues([[dirFormula ? 'Направление' : 'Все направления', dirFormula || '', '', 'Данные по',
-    '=' + SB.SET + '!$F$2']]);
+  sh.getRange('A3:E3').setValues(sbLoc_([[dirFormula ? 'Направление' : 'Все направления', dirFormula || '', '', 'Данные по',
+    '=' + SB.SET + '!$F$2']]));
   sh.getRange('A3:D3').setFontColor(SB.MUTED);
   sh.getRange('B3').setFontColor(SB.INK).setFontWeight('bold');
   sh.getRange('E3').setFontWeight('bold').setNumberFormat('dd.MM.yyyy');
@@ -42,7 +42,7 @@ function sbTopInfo_(sh, dirFormula) {
 function sbSection_(sh, r, text) { sh.getRange(r, 1).setValue(text).setFontSize(12).setFontWeight('bold'); }
 
 function sbHeader_(sh, r, names) {
-  sh.getRange(r, 1, 1, names.length).setValues([names]).setBackground(SB.HEAD).setFontColor('#ffffff')
+  sh.getRange(r, 1, 1, names.length).setValues(sbLoc_([names])).setBackground(SB.HEAD).setFontColor('#ffffff')
     .setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle').setWrap(true);
 }
 
@@ -71,7 +71,7 @@ function sbUpDown_(sh, a1, good) {
   const first = a1.split(':')[0];
   [['>', '', SB.UP, SB.DOWN], ['<', '-', SB.DOWN, SB.UP]].forEach(function (o) {
     sbRule_(sh, SpreadsheetApp.newConditionalFormatRule().setRanges([sh.getRange(a1)])
-      .whenFormulaSatisfied('=AND(ISNUMBER(' + first + '),' + first + o[0] + o[1] + '0.005)')
+      .whenFormulaSatisfied(sbLocF_('=AND(ISNUMBER(' + first + '),' + first + o[0] + o[1] + '1/200)'))
       .setFontColor(good > 0 ? o[2] : o[3]).setBold(true));
   });
 }
@@ -81,11 +81,11 @@ function sbKpi_(sh, r, dir) {
   sbSection_(sh, r, 'Этот месяц против тех же дней прошлого');
   sbHeader_(sh, r + 1, ['Период'].concat(SB.COLS.slice(1), ['с', 'по']));
   const cur = r + 2, prev = r + 3, delta = r + 4;
-  sh.getRange(cur, 1, 3, 11).setValues([
+  sh.getRange(cur, 1, 3, 11).setValues(sbLoc_([
     ['Этот месяц'].concat(sbMetrics_(cur, '$J$' + cur, '$K$' + cur, dir), ['=DATE(YEAR($E$3),MONTH($E$3),1)', '=$E$3']),
     ['Прошлый, те же дни'].concat(sbMetrics_(prev, '$J$' + prev, '$K$' + prev, dir), ['=EDATE(J' + cur + ',-1)', '=EDATE(K' + cur + ',-1)']),
     ['Изменение'].concat('BCDEFGHI'.split('').map(function (L) { return '=IFERROR(' + L + cur + '/' + L + prev + '-1,"")'; }), ['', '']),
-  ]);
+  ]));
   sbBody_(sh, cur, delta, SB.FMT.concat(['dd.MM.yyyy', 'dd.MM.yyyy']));
   sh.getRange(cur, 1, 1, 11).setFontSize(14).setFontWeight('bold');
   sh.getRange(prev, 1, 1, 11).setFontColor(SB.MUTED);
@@ -95,3 +95,36 @@ function sbKpi_(sh, r, dir) {
   SB.GOOD.forEach(function (g, i) { if (g) sbUpDown_(sh, sbCol_(i + 1) + delta, g); });
   return delta + 2;
 }
+
+// ---------- Формулы под локаль таблицы ----------
+// В русской локали аргументы формул разделяются «;», а не «,». Формулы в коде пишутся
+// с запятыми и переводятся здесь; строки "…" и имена листов '…' не трогаются.
+
+let sbSemi_ = null;
+
+/** true, если таблица не понимает формулы с запятыми (проверка на временном листе). */
+function sbSemicolons_() {
+  if (sbSemi_ !== null) return sbSemi_;
+  const ss = SpreadsheetApp.getActive(), sh = ss.insertSheet('_sova_locale_check');
+  const cell = sh.getRange(1, 1).setFormula('=SUM(1,2)');
+  SpreadsheetApp.flush();
+  sbSemi_ = cell.getValue() !== 3;
+  ss.deleteSheet(sh);
+  return sbSemi_;
+}
+
+function sbLocF_(f) {
+  if (typeof f !== 'string' || f.charAt(0) !== '=' || !sbSemicolons_()) return f;
+  let out = '', quote = '', depth = 0;
+  for (let i = 0; i < f.length; i++) {
+    const ch = f[i];
+    if (quote) { if (ch === quote) quote = ''; out += ch; continue; }
+    if (ch === '"' || ch === "'") quote = ch;
+    if (ch === '{') depth++;
+    if (ch === '}') depth--;
+    out += ch === ',' ? (depth > 0 ? '\\' : ';') : ch;
+  }
+  return out;
+}
+
+function sbLoc_(rows) { return rows.map(function (r) { return r.map(sbLocF_); }); }

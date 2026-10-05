@@ -87,6 +87,7 @@ function sovaWriteData_(store) {
   if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 6).clearContent();
   sh.getRange(1, 1, 1, 6).setValues([SOVA_DATA_HEAD]).setFontWeight('bold');
   if (!rows.length) return;
+  sovaEnsureRows_(sh, rows.length + 1);
   // Дата — настоящая дата (по ней считают формулы отчёта), направление — текстом
   sh.getRange(2, 1, rows.length, 6).setValues(rows.map(function (r) {
     return [sovaParse_(r[0]), r[1], r[2], r[3], r[4], r[5]];

@@ -23,6 +23,7 @@ const SOVA = {
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('🦉 Сова')
+    .addItem('🧱 Создать / пересобрать отчёт', 'sovaBuildReport')
     .addItem('🔄 Загрузить новые данные из VK', 'menuUpdateAll')
     .addItem('⏰ Включить ежедневное обновление', 'setupSovaTrigger')
     .addSeparator()

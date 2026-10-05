@@ -25,34 +25,18 @@ function sovaCabinets_() {
   return cabs;
 }
 
-/** Лист настроек; при первом запуске создаётся с примером на 3 направления. */
+/** Лист настроек; если его нет — создаётся с примером на 3 направления (7_build.gs). */
 function sovaSettingsSheet_() {
   const ss = SpreadsheetApp.getActive();
-  let sh = ss.getSheetByName(SOVA.SETTINGS_SHEET);
-  if (sh) return sh;
-  sh = ss.insertSheet(SOVA.SETTINGS_SHEET);
-  const head = ['Направление (= название листа)', 'Подключение (заполняет скрипт)', 'Метрика подписок (необяз.)', 'Цвет (необяз.)'];
-  sh.getRange(1, 1, 1, 4).setValues([head]).setFontWeight('bold').setFontColor('#ffffff').setBackground('#1f2a44');
-  sh.getRange(2, 1, 3, 4).setValues([1, 2, 3].map(function (i) {
-    return ['Направление ' + i, '❌ не подключён', '', SOVA_DIR_COLORS[i - 1]];
-  }));
-  sh.getRange(9, 1, 6, 1).setValues([
-    ['Как заполнить:'],
-    ['• Направление — название, так будет называться лист отчёта (например, «Стоматология»). 1 строка = 1 кабинет VK.'],
-    ['• Затем меню «🦉 Сова → Подключить кабинет VK»: client_id и client_secret из ads.vk.com → Настройки → Доступ к API.'],
-    ['• Метрика подписок — оставьте пустой, если подписки считаются как обычно (' + SOVA.LEADS_METRIC + ').'],
-    ['• Направления перечисляются подряд, без пустых строк. Строка, начинающаяся с #, пропускается.'],
-    ['• Переименовали направление — подключите его кабинет заново.'],
-  ]);
-  sh.getRange(9, 1).setFontWeight('bold');
-  sh.getRange(10, 1, 5, 1).setFontColor('#6b7280');
-  sh.setColumnWidth(1, 260).setColumnWidth(2, 240).setColumnWidth(3, 200).setColumnWidth(4, 120);
-  sh.setFrozenRows(1);
-  sh.setTabColor('#9aa3b2');
-  return sh;
+  return ss.getSheetByName(SOVA.SETTINGS_SHEET) || sbBuildSettings_(ss);
 }
 
 /** Убирает символы, недопустимые в названии листа. */
 function sovaSheetName_(s) {
   return String(s || '').replace(/[\[\]\*\?\/\\:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 90);
+}
+
+/** В новом листе 1000 строк, а за год по нескольким кабинетам выходит больше. */
+function sovaEnsureRows_(sh, n) {
+  if (sh.getMaxRows() < n) sh.insertRowsAfter(sh.getMaxRows(), n - sh.getMaxRows());
 }

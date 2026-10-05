@@ -299,9 +299,10 @@ def direction_sheet(wb, i):
     period_inputs(ws)
     r = kpi_block(ws, 5, '$B$3', manual=True)
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
-    charts_heading(ws, f'📈 По дням, последние {N_DAYS}')
+    charts_heading(ws, f'📈 Подписки и расход по дням, последние {N_DAYS}')
     subs_charts(ws, d1, d2, (0, 0), 'дням')
-    cost_chart(ws, d1, d2, (0, 1), 'дням')
+    simple_chart(ws, 'col', 'Расход по дням, ₽ (пунктир — тренд)', 1, 2, d1, d2, SPEND, (0, 1), trend=True)
+    cost_chart(ws, d1, d2, (1, 0), 'дням')
     ws.freeze_panes = 'A4'
 
 
@@ -419,16 +420,21 @@ def summary_sheet(wb):
         h1, s1, s2, r = pivot(ws, r, f'🧭 Подписки по направлениям, по {pname}', period, 'subs')
         h2, c1, c2, r = pivot(ws, r, f'Цена подписки по направлениям, по {pname}', period, 'cost', None)
         h3, e1, e2, r = pivot(ws, r, f'Расход по направлениям, по {pname}', period, 'spend')
-        piv[period] = (h1, s1, s2, h2, c1, c2)
+        piv[period] = (h1, s1, s2, h2, c1, c2, e1, e2)
         fix_cost_refs(ws, c1, c2, s1, e1)
 
-    charts_heading(ws, '📈 Тенденция подписок по неделям и месяцам (завершённые периоды)')
+    charts_heading(ws, '📈 Подписки и расход по неделям и месяцам (завершённые периоды)')
     hw, w1, w2 = piv['week'][:3]
     hm, m1, m2 = piv['month'][:3]
+    ew1, ew2 = piv['week'][6:]
+    em1, em2 = piv['month'][6:]
+    # Слева подписки, справа расход за те же периоды — чтобы сравнивать динамику
     simple_chart(ws, 'col', 'Подписки по неделям — вся клиника (пунктир — тренд)', 1, 5, w1, w2, SUBS, (0, 0), trend=True)
-    simple_chart(ws, 'col', 'Подписки по месяцам — вся клиника (пунктир — тренд)', 1, 5, m1, m2, SUBS, (0, 1), trend=True)
-    multi_chart(ws, 'line', 'Подписки по неделям по направлениям', hw, w1, w2, 3, (1, 0))
-    multi_chart(ws, 'line', 'Подписки по месяцам по направлениям', hm, m1, m2, 3, (1, 1))
+    simple_chart(ws, 'col', 'Расход по неделям — вся клиника, ₽ (пунктир — тренд)', 1, 5, ew1, ew2, SPEND, (0, 1), trend=True)
+    simple_chart(ws, 'col', 'Подписки по месяцам — вся клиника (пунктир — тренд)', 1, 5, m1, m2, SUBS, (1, 0), trend=True)
+    simple_chart(ws, 'col', 'Расход по месяцам — вся клиника, ₽ (пунктир — тренд)', 1, 5, em1, em2, SPEND, (1, 1), trend=True)
+    multi_chart(ws, 'line', 'Подписки по неделям по направлениям', hw, w1, w2, 3, (2, 0))
+    multi_chart(ws, 'line', 'Подписки по месяцам по направлениям', hm, m1, m2, 3, (2, 1))
     ws.freeze_panes = 'A4'
 
 

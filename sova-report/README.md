@@ -23,12 +23,12 @@ CPC = расход / клики, цена подписки = расход / по
 ### 1. Таблица и скрипт
 
 1. Создайте пустую Google Таблицу (или откройте ту, что уже лежит на Диске).
-2. **Расширения → Apps Script**. Вставьте файлы по очереди в конец `Код.gs`: код разбит на части
-   примерно по 100 строк, потому что редактор может обрезать длинную вставку.
-   [`1_main.gs`](1_main.gs), [`2_settings.gs`](2_settings.gs), [`3_api.gs`](3_api.gs), [`4_sync.gs`](4_sync.gs),
-   [`5_debug.gs`](5_debug.gs), [`6_connect.gs`](6_connect.gs), [`7_build.gs`](7_build.gs),
-   [`8_build_blocks.gs`](8_build_blocks.gs), [`9_build_periods.gs`](9_build_periods.gs),
-   [`10_build_sheets.gs`](10_build_sheets.gs). Порядок важен. Сохраните.
+2. **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную
+   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 10 отдельных файлов
+   (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
+   Удобнее всего копировать с raw-страниц (Cmd+A → Cmd+C):
+   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs).
+   Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка) → часовой пояс `Europe/Moscow`.
 4. Обновите страницу таблицы — появится меню **🦉 Сова**.
 5. **🦉 Сова → Создать / пересобрать отчёт**. При первом запуске Google попросит разрешения для скрипта.

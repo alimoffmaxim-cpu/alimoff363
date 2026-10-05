@@ -8,10 +8,12 @@
 ## 1. Скрипт в таблице
 
 1. Создайте Google Таблицу → **Расширения → Apps Script**.
-2. Код разбит на 4 части, потому что редактор может обрезать длинную вставку.
-   Вставьте их по очереди в конец файла `Код.gs`:
-   [`1_main.gs`](1_main.gs), [`2_export.gs`](2_export.gs), [`3_api.gs`](3_api.gs),
-   [`4_debug.gs`](4_debug.gs). Сохраните (Cmd+S).
+2. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную вставку, и появляется
+   ошибка вида `SyntaxError: Unexpected identifier`. Создайте 4 отдельных файла
+   (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
+   Удобнее всего копировать с raw-страниц (Cmd+A → Cmd+C):
+   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/vk-ads-to-sheets/1_main.gs), [`2_export`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/vk-ads-to-sheets/2_export.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/vk-ads-to-sheets/3_api.gs), [`4_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/vk-ads-to-sheets/4_debug.gs).
+   Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка) → проверьте **часовой пояс** (например, `Europe/Moscow`).
 4. Обновите страницу таблицы — появится меню **VK Реклама**.
 

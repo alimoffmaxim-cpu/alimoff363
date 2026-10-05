@@ -4,8 +4,9 @@
 
 const SB = {
   SUMMARY: '🦉 Сводная',
-  D: "'" + SOVA.DATA_SHEET + "'",
-  SET: "'" + SOVA.SETTINGS_SHEET + "'",
+  // геттеры: SOVA объявлен в другом файле, а порядок загрузки файлов в Apps Script не гарантирован
+  get D() { return "'" + SOVA.DATA_SHEET + "'"; },
+  get SET() { return "'" + SOVA.SETTINGS_SHEET + "'"; },
   NAVY: '#1f2a44', HEAD: '#2f3e60', BAND: '#f4f6fa', LINE: '#dfe3eb', INK: '#1f2430', MUTED: '#6b7280',
   SUBS: '#1baf7a', COST: '#eb6834', UP: '#1a7f37', DOWN: '#c62828',
   COLS: ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CPC', 'Подписки', 'Цена подписки', 'CR в подписку'],

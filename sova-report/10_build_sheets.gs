@@ -1,13 +1,15 @@
 // ---------- Построение отчёта: листы «Сводная», направлений, графики и демо-данные ----------
 
-function sbSummary_(ss, cabs) {
+function sbSummary_(ss, cabs, period) {
   const sh = ss.insertSheet(SB.SUMMARY, 0), n = cabs.length;
   sbSetup_(sh, SB.NAVY, SB.WIDTHS);
   sbBanner_(sh, 'Сова · Сводная по всем направлениям', '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")');
   sbTopInfo_(sh, null);
-  let r = sbKpi_(sh, 5, null);   // строка «Этот месяц» — 7-я, её даты в J7:K7
+  sbPeriodInputs_(sh, period || []);
+  let r = sbKpi_(sh, 5, null, true);   // строка «Этот месяц» — 7-я, её даты в J7:K7
 
-  sbSection_(sh, r, '🏥 Направления за текущий месяц (те же даты, что выше)');
+  sh.getRange(r, 1).setValue(sbLocF_('="🏥 Направления за "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")&" (те же даты, что выше)"'))
+    .setFontSize(12).setFontWeight('bold');
   sbHeader_(sh, r + 1, ['Направление'].concat(SB.COLS.slice(1), ['Доля расхода']));
   const t1 = r + 2, tt = t1 + n, d = sbDerived_(tt);
   const sum = function (L) { return '=SUM(' + L + t1 + ':' + L + (tt - 1) + ')'; };

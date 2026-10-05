@@ -121,17 +121,26 @@ def heat(ws, rng):
         mid_color='FFFFFF', end_type='max', end_color='F8D7D5'))
 
 
-def kpi_block(ws, r, dir_ref):
-    """Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца."""
-    section(ws, r, 'Этот месяц против тех же дней прошлого')
+def kpi_block(ws, r, dir_ref, manual=False):
+    """Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца.
+
+    manual — на «Сводной»: период можно задать в H3 («с») и J3 («по»), тогда сравнение
+    идёт с предыдущим периодом той же длины.
+    """
+    M = 'OR(ISNUMBER($H$3),ISNUMBER($J$3))' if manual else 'FALSE'
+    section(ws, r, f'=IF({M},"Выбранный период против предыдущего той же длины","Этот месяц против тех же дней прошлого")'
+            if manual else 'Этот месяц против тех же дней прошлого')
     h = r + 1
     header(ws, h, ['Период'] + COLS[1:] + ['с', 'по'])
     cur, prev, delta = h + 1, h + 2, h + 3
-    ws[f'J{cur}'] = '=DATE(YEAR($E$3),MONTH($E$3),1)'
-    ws[f'K{cur}'] = '=$E$3'
-    ws[f'J{prev}'] = f'=EDATE(J{cur},-1)'
-    ws[f'K{prev}'] = f'=EDATE(K{cur},-1)'
-    ws[f'A{cur}'], ws[f'A{prev}'], ws[f'A{delta}'] = 'Этот месяц', 'Прошлый, те же дни', 'Изменение'
+    J, K = f'J{cur}', f'K{cur}'
+    ws[J] = f'=IF(ISNUMBER($H$3),$H$3,DATE(YEAR({K}),MONTH({K}),1))' if manual else '=DATE(YEAR($E$3),MONTH($E$3),1)'
+    ws[K] = '=IF(ISNUMBER($J$3),$J$3,$E$3)' if manual else '=$E$3'
+    ws[f'J{prev}'] = f'=IF({M},2*{J}-{K}-1,EDATE({J},-1))'
+    ws[f'K{prev}'] = f'=IF({M},{J}-1,EDATE({K},-1))'
+    ws[f'A{cur}'] = f'=IF({M},"Выбранный период","Этот месяц")' if manual else 'Этот месяц'
+    ws[f'A{prev}'] = f'=IF({M},"Предыдущий, той же длины","Прошлый, те же дни")' if manual else 'Прошлый, те же дни'
+    ws[f'A{delta}'] = 'Изменение'
     for rr in (cur, prev):
         metric_row(ws, rr, f'$J${rr}', f'$K${rr}', dir_ref)
     for c in range(2, 10):
@@ -357,15 +366,37 @@ def fix_cost_refs(ws, c1, c2, s1, e1):
             ws[f'{L}{c1 + k}'] = f'=IFERROR({L}{e1 + k}/{L}{s1 + k},"")'
 
 
+def period_inputs(ws):
+    """Поля ручного периода на «Сводной»: H3 — «с», J3 — «по»."""
+    from openpyxl.worksheet.datavalidation import DataValidation
+    ws['G3'], ws['I3'] = 'Период с', 'по'
+    for a in ('G3', 'I3'):
+        ws[a].font, ws[a].alignment = font(color=MUTED), Alignment(horizontal='right')
+    box = Side(style='thin', color='E0C46C')
+    dv = DataValidation(type='date', operator='greaterThan', formula1='1', allow_blank=True,
+                        promptTitle='Период', prompt='Дата. Пусто — текущий месяц.')
+    ws.add_data_validation(dv)
+    for a in ('H3', 'J3'):
+        c = ws[a]
+        c.fill, c.font, c.number_format = fill('FFF6D6'), font(bold=True), 'DD.MM.YYYY'
+        c.alignment, c.border = Alignment(horizontal='center'), Border(left=box, right=box, top=box, bottom=box)
+        dv.add(a)
+    ws['H4'] = ('=IF(AND(ISNUMBER(H3),ISNUMBER(J3),H3>J3),"⚠ Дата «с» позже даты «по»",'
+                'IF(OR(ISNUMBER(H3),ISNUMBER(J3)),"Сравнение — с предыдущим периодом той же длины. Очистите поля, чтобы вернуть текущий месяц.",'
+                '"Пусто — текущий месяц. Дату выбирают двойным щелчком."))')
+    ws['H4'].font = font(color=MUTED, size=9)
+
+
 def summary_sheet(wb):
     ws = wb.create_sheet('Сводная', 0)
     setup_sheet(ws, NAVY, [18] + [12] * 8 + [11, 11, 3])
     banner(ws, 'Сова · Сводная по всем направлениям',
            '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, None)
-    r = kpi_block(ws, 5, None)
+    period_inputs(ws)
+    r = kpi_block(ws, 5, None, manual=True)
 
-    section(ws, r, '🏥 Направления за текущий месяц (те же даты, что выше)')
+    section(ws, r, '="🏥 Направления за "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")&" (те же даты, что выше)"')
     header(ws, r + 1, ['Направление'] + COLS[1:] + ['Доля расхода'])
     t1 = r + 2
     for j in range(3):

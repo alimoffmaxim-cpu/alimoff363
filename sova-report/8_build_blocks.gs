@@ -76,14 +76,25 @@ function sbUpDown_(sh, a1, good) {
   });
 }
 
-/** Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца. */
-function sbKpi_(sh, r, dir) {
-  sbSection_(sh, r, 'Этот месяц против тех же дней прошлого');
+/**
+ * Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца.
+ * manual — на «Сводной»: период можно задать вручную в H3 («с») и J3 («по»), тогда сравнение
+ * идёт с предыдущим периодом той же длины.
+ */
+function sbKpi_(sh, r, dir, manual) {
+  const cur = r + 2, prev = r + 3, delta = r + 4, J = 'J' + cur, K = 'K' + cur;
+  const M = manual ? 'OR(ISNUMBER($H$3),ISNUMBER($J$3))' : 'FALSE';
+  sh.getRange(r, 1).setValue(sbLocF_(manual ? '=IF(' + M + ',"Выбранный период против предыдущего той же длины",' +
+    '"Этот месяц против тех же дней прошлого")' : 'Этот месяц против тех же дней прошлого')).setFontSize(12).setFontWeight('bold');
   sbHeader_(sh, r + 1, ['Период'].concat(SB.COLS.slice(1), ['с', 'по']));
-  const cur = r + 2, prev = r + 3, delta = r + 4;
+  const from = manual ? '=IF(ISNUMBER($H$3),$H$3,DATE(YEAR(' + K + '),MONTH(' + K + '),1))' : '=DATE(YEAR($E$3),MONTH($E$3),1)';
+  const to = manual ? '=IF(ISNUMBER($J$3),$J$3,$E$3)' : '=$E$3';
   sh.getRange(cur, 1, 3, 11).setValues(sbLoc_([
-    ['Этот месяц'].concat(sbMetrics_(cur, '$J$' + cur, '$K$' + cur, dir), ['=DATE(YEAR($E$3),MONTH($E$3),1)', '=$E$3']),
-    ['Прошлый, те же дни'].concat(sbMetrics_(prev, '$J$' + prev, '$K$' + prev, dir), ['=EDATE(J' + cur + ',-1)', '=EDATE(K' + cur + ',-1)']),
+    [manual ? '=IF(' + M + ',"Выбранный период","Этот месяц")' : 'Этот месяц']
+      .concat(sbMetrics_(cur, '$J$' + cur, '$K$' + cur, dir), [from, to]),
+    [manual ? '=IF(' + M + ',"Предыдущий, той же длины","Прошлый, те же дни")' : 'Прошлый, те же дни']
+      .concat(sbMetrics_(prev, '$J$' + prev, '$K$' + prev, dir),
+        ['=IF(' + M + ',2*' + J + '-' + K + '-1,EDATE(' + J + ',-1))', '=IF(' + M + ',' + J + '-1,EDATE(' + K + ',-1))']),
     ['Изменение'].concat('BCDEFGHI'.split('').map(function (L) { return '=IFERROR(' + L + cur + '/' + L + prev + '-1,"")'; }), ['', '']),
   ]));
   sbBody_(sh, cur, delta, SB.FMT.concat(['dd.MM.yyyy', 'dd.MM.yyyy']));
@@ -94,6 +105,22 @@ function sbKpi_(sh, r, dir) {
   sh.setRowHeight(cur, 34);
   SB.GOOD.forEach(function (g, i) { if (g) sbUpDown_(sh, sbCol_(i + 1) + delta, g); });
   return delta + 2;
+}
+
+/** Поля ручного периода на «Сводной»: H3 — «с», J3 — «по» (даты из календаря); period — прежние значения. */
+function sbPeriodInputs_(sh, period) {
+  sh.getRange('G3:J3').setValues([['Период с', period[0] || '', 'по', period[1] || '']]);
+  sh.getRange('G3:J3').setFontColor(SB.MUTED).setHorizontalAlignment('right');
+  const rule = SpreadsheetApp.newDataValidation().requireDate().setAllowInvalid(false)
+    .setHelpText('Дата: дважды щёлкните, чтобы выбрать в календаре. Пусто — текущий месяц.').build();
+  ['H3', 'J3'].forEach(function (a) {
+    sh.getRange(a).setBackground('#fff6d6').setFontColor(SB.INK).setFontWeight('bold').setHorizontalAlignment('center')
+      .setNumberFormat('dd.MM.yyyy').setDataValidation(rule)
+      .setBorder(true, true, true, true, null, null, '#e0c46c', SpreadsheetApp.BorderStyle.SOLID);
+  });
+  sh.getRange('H4').setValue(sbLocF_('=IF(AND(ISNUMBER(H3),ISNUMBER(J3),H3>J3),"⚠ Дата «с» позже даты «по»",' +
+    'IF(OR(ISNUMBER(H3),ISNUMBER(J3)),"Сравнение — с предыдущим периодом той же длины. Очистите поля, чтобы вернуть текущий месяц.",' +
+    '"Пусто — текущий месяц. Дату выбирают двойным щелчком."))')).setFontColor(SB.MUTED).setFontSize(9);
 }
 
 // ---------- Формулы под локаль таблицы ----------

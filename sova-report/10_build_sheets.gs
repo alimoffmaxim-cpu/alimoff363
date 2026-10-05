@@ -48,14 +48,14 @@ function sbTrends_(sh, cabs) {
     r = spend[pp[0]].next;
     subs[pp[0]] = s;
   });
-  // Слева подписки, справа расход за те же периоды — чтобы сравнивать динамику
+  // Графики в одну колонку справа от таблиц (видно без прокрутки вбок): под подписками — расход за те же периоды
   const w = subs.week, m = subs.month, colors = cabs.map(function (c) { return c.color; });
   sbChart_(sh, 'col', 'Подписки по неделям — вся клиника (линия — тренд)', w, [n + 2], [0, 0], [SB.SUBS], true);
-  sbChart_(sh, 'col', 'Расход по неделям — вся клиника, ₽ (линия — тренд)', spend.week, [n + 2], [0, 1], [SB.SPEND], true);
-  sbChart_(sh, 'col', 'Подписки по месяцам — вся клиника (линия — тренд)', m, [n + 2], [1, 0], [SB.SUBS], true);
-  sbChart_(sh, 'col', 'Расход по месяцам — вся клиника, ₽ (линия — тренд)', spend.month, [n + 2], [1, 1], [SB.SPEND], true);
-  sbChart_(sh, 'line', 'Подписки по неделям по направлениям', w, [2, n], [2, 0], colors);
-  sbChart_(sh, 'line', 'Подписки по месяцам по направлениям', m, [2, n], [2, 1], colors);
+  sbChart_(sh, 'col', 'Расход по неделям — вся клиника, ₽ (линия — тренд)', spend.week, [n + 2], [1, 0], [SB.SPEND], true);
+  sbChart_(sh, 'col', 'Подписки по месяцам — вся клиника (линия — тренд)', m, [n + 2], [2, 0], [SB.SUBS], true);
+  sbChart_(sh, 'col', 'Расход по месяцам — вся клиника, ₽ (линия — тренд)', spend.month, [n + 2], [3, 0], [SB.SPEND], true);
+  sbChart_(sh, 'line', 'Подписки по неделям по направлениям', w, [2, n], [4, 0], colors);
+  sbChart_(sh, 'line', 'Подписки по месяцам по направлениям', m, [2, n], [5, 0], colors);
 }
 
 function sbDirection_(ss, cab, index, period) {
@@ -74,7 +74,7 @@ function sbChartsHeading_(sh, text) { sh.getRange('M3').setValue(text).setFontSi
 
 /**
  * График по таблице t ({h, r2}): подписи — колонка A, значения — cols = [первая колонка, число колонок].
- * pos = [ряд, колонка] в сетке графиков 2 × 2 справа от таблиц.
+ * pos = [ряд, колонка] в сетке графиков справа от таблиц (сейчас всё в колонке 0).
  */
 function sbChart_(sh, kind, title, t, cols, pos, colors, trend) {
   const rows = t.r2 - t.h + 1;

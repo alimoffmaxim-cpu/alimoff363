@@ -305,8 +305,8 @@ def direction_sheet(wb, i):
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
     charts_heading(ws, '📈 Подписки и расход по дням за период выше')
     subs_charts(ws, d1, d2, (0, 0), 'дням')
-    simple_chart(ws, 'col', 'Расход по дням, ₽ (пунктир — тренд)', 1, 2, d1, d2, SPEND, (0, 1), trend=True)
-    cost_chart(ws, d1, d2, (1, 0), 'дням')
+    simple_chart(ws, 'col', 'Расход по дням, ₽ (пунктир — тренд)', 1, 2, d1, d2, SPEND, (1, 0), trend=True)
+    cost_chart(ws, d1, d2, (2, 0), 'дням')
     ws.freeze_panes = 'A4'
 
 
@@ -432,13 +432,13 @@ def summary_sheet(wb):
     hm, m1, m2 = piv['month'][:3]
     ew1, ew2 = piv['week'][6:]
     em1, em2 = piv['month'][6:]
-    # Слева подписки, справа расход за те же периоды — чтобы сравнивать динамику
+    # Графики в одну колонку справа от таблиц: под подписками — расход за те же периоды
     simple_chart(ws, 'col', 'Подписки по неделям — вся клиника (пунктир — тренд)', 1, 5, w1, w2, SUBS, (0, 0), trend=True)
-    simple_chart(ws, 'col', 'Расход по неделям — вся клиника, ₽ (пунктир — тренд)', 1, 5, ew1, ew2, SPEND, (0, 1), trend=True)
-    simple_chart(ws, 'col', 'Подписки по месяцам — вся клиника (пунктир — тренд)', 1, 5, m1, m2, SUBS, (1, 0), trend=True)
-    simple_chart(ws, 'col', 'Расход по месяцам — вся клиника, ₽ (пунктир — тренд)', 1, 5, em1, em2, SPEND, (1, 1), trend=True)
-    multi_chart(ws, 'line', 'Подписки по неделям по направлениям', hw, w1, w2, 3, (2, 0))
-    multi_chart(ws, 'line', 'Подписки по месяцам по направлениям', hm, m1, m2, 3, (2, 1))
+    simple_chart(ws, 'col', 'Расход по неделям — вся клиника, ₽ (пунктир — тренд)', 1, 5, ew1, ew2, SPEND, (1, 0), trend=True)
+    simple_chart(ws, 'col', 'Подписки по месяцам — вся клиника (пунктир — тренд)', 1, 5, m1, m2, SUBS, (2, 0), trend=True)
+    simple_chart(ws, 'col', 'Расход по месяцам — вся клиника, ₽ (пунктир — тренд)', 1, 5, em1, em2, SPEND, (3, 0), trend=True)
+    multi_chart(ws, 'line', 'Подписки по неделям по направлениям', hw, w1, w2, 3, (4, 0))
+    multi_chart(ws, 'line', 'Подписки по месяцам по направлениям', hm, m1, m2, 3, (5, 0))
     ws.freeze_panes = 'A4'
 
 

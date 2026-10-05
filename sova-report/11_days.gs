@@ -54,8 +54,8 @@ function sbDays_(sh) {
   sh.getCharts().forEach(function (c) { sh.removeChart(c); });
   const t = sbPeriodTable_(sh, r, 'day', '$B$3', n);
   sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [7], [0, 0], [SB.SUBS], true);
-  sbChart_(sh, 'col', 'Расход по дням, ₽ (линия — тренд)', t, [2], [0, 1], [SB.SPEND], true);
-  sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [8], [1, 0], [SB.COST]);
+  sbChart_(sh, 'col', 'Расход по дням, ₽ (линия — тренд)', t, [2], [1, 0], [SB.SPEND], true);
+  sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [8], [2, 0], [SB.COST]);
 }
 
 /** Даты периода, как их считают формулы J7:K7: «с» = H3 или 1-е число месяца «по», «по» = J3 или отчётная дата. */

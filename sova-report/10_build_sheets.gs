@@ -66,7 +66,7 @@ function sbDirection_(ss, cab, index, period) {
   sbPeriodInputs_(sh, period || []);
   sbKpi_(sh, 5, '$B$3', true);
   sbChartsHeading_(sh, '📈 Подписки и расход по дням за период выше');
-  sbDays_(sh);   // таблица по дням и графики — 11_days.gs
+  sbDirTables_(sh);   // таблицы по неделям и месяцам, по дням и графики — 11_days.gs
   sh.setFrozenRows(3);
 }
 

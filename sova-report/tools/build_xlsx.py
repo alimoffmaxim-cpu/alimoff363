@@ -165,7 +165,8 @@ def kpi_block(ws, r, dir_ref, manual=False):
     return delta + 2
 
 
-RU_MONTHS = 'CHOOSE(MONTH({x}),"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек")&" "&YEAR({x})'
+RU_MONTHS = ('CHOOSE(MONTH({x}),"Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь",'
+             '"Октябрь","Ноябрь","Декабрь")')
 RU_WEEKDAY = 'CHOOSE(WEEKDAY({x},2),"пн","вт","ср","чт","пт","сб","вс")'
 # Последний завершённый месяц / неделя: неполный текущий период не попадает в тренд
 LAST_MONTH = 'EDATE(DATE(YEAR($E$3),MONTH($E$3),1),-($E$3<EOMONTH($E$3,0)))'
@@ -294,6 +295,21 @@ def top_info(ws, dir_formula):
         ws[a].font = font(bold=True)
 
 
+def diff_row(ws, d, last, label):
+    """Строка «Разница с прошлой неделей / месяцем»: последний период к предыдущему."""
+    ws[f'A{d}'] = label
+    for c in range(2, 10):
+        L = col(c)
+        ws[f'{L}{d}'] = f'=IFERROR({L}{last}/{L}{last - 1}-1,"")'
+    for c in range(1, 10):
+        cell = ws.cell(d, c)
+        cell.font, cell.fill = font(bold=True), fill('E8ECF4')
+        cell.border = Border(top=Side(style='thin', color=NAVY), bottom=Side(style='thin', color=NAVY))
+        cell.alignment = Alignment(horizontal='left' if c == 1 else 'right')
+        if c > 1:
+            cell.number_format = '0.00%'
+
+
 def direction_sheet(wb, i):
     ws = wb.create_sheet(DIRS[i])
     setup_sheet(ws, DIR_COLORS[i], [18] + [12] * 8 + [11, 11, 3])
@@ -302,6 +318,10 @@ def direction_sheet(wb, i):
     top_info(ws, f'={SET}!$A${i + 2}')
     period_inputs(ws)
     r = kpi_block(ws, 5, '$B$3', manual=True)
+    for period, diff in (('week', 'Разница с прошлой неделей'), ('month', 'Разница с прошлым месяцем')):
+        p1, p2, r = period_table(ws, r, period, '$B$3')   # постоянные таблицы: не зависят от периода в H3:J3
+        diff_row(ws, p2 + 1, p2, diff)
+        r += 1
     d1, d2, r = period_table(ws, r, 'day', '$B$3')
     charts_heading(ws, '📈 Подписки и расход по дням за период выше')
     subs_charts(ws, d1, d2, (0, 0), 'дням')

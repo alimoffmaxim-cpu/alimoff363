@@ -1,7 +1,7 @@
-// ---------- Перестраиваемые части: дни на листах направлений, тенденция на «Сводной» ----------
-// Число строк зависит от периода (поля «Период с / по» в H3 и J3, пусто — текущий месяц),
-// поэтому таблицу и графики перестраивает скрипт: при сборке отчёта, после смены дат
-// в этих полях (onEdit) и после каждой загрузки данных.
+// ---------- Перестраиваемые части листов направлений и «Сводной» ----------
+// Лист направления с 11-й строки: таблица по неделям, по месяцам (постоянные — меняются только
+// после загрузки данных) и по дням выбранного периода (поля «Период с / по» в H3 и J3, пусто —
+// текущий месяц; перестраивается и при смене дат, onEdit). Число строк скрипт считает сам.
 
 /** Простой триггер: изменили «Период с / по» на листе направления — перестроить дни. */
 function onEdit(e) {
@@ -18,13 +18,13 @@ function sbIsDirection_(sh) {
 /** После загрузки данных: дни на листах направлений и тенденция на «Сводной». */
 function sbDaysAll_() {
   const ss = SpreadsheetApp.getActive(), summary = ss.getSheetByName(SB.SUMMARY);
-  ss.getSheets().forEach(function (sh) { if (sbIsDirection_(sh)) sbDays_(sh); });
+  ss.getSheets().forEach(function (sh) { if (sbIsDirection_(sh)) sbDirTables_(sh); });
   if (summary && summary.getRange('G3').getValue() === 'Период с') sbTrends_(summary, sovaCabinets_());
 }
 
 /**
- * Сколько завершённых недель и месяцев показать на «Сводной»: с первого периода, где есть расход,
- * показы, клики или подписки, до последнего завершённого (как SB_LAST_WEEK / SB_LAST_MONTH).
+ * Сколько завершённых недель и месяцев показать: с первого периода, где есть расход, показы, клики
+ * или подписки (но не раньше SOVA.TRENDS_FROM), до последнего завершённого (как SB_LAST_WEEK / SB_LAST_MONTH).
  */
 function sbTrendCounts_() {
   const sh = SpreadsheetApp.getActive().getSheetByName(SOVA.DATA_SHEET), R = sbReportDate_();
@@ -32,6 +32,8 @@ function sbTrendCounts_() {
   if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 6).getValues().forEach(function (x) {
     if (x[0] instanceof Date && (x[2] || x[3] || x[4] || x[5]) && (!first || x[0] < first)) first = x[0];
   });
+  const from = SOVA.TRENDS_FROM ? sovaParse_(SOVA.TRENDS_FROM) : null;   // не раньше этой недели
+  if (from && (!first || first < from)) first = from;
   if (!first) return { week: SB.WEEKS, month: SB.MONTHS };
   first = sbDay_(first);
   const wd = (R.getDay() + 6) % 7, lastWeek = new Date(R.getFullYear(), R.getMonth(), R.getDate() - wd - (wd < 6 ? 7 : 0));
@@ -43,14 +45,43 @@ function sbTrendCounts_() {
     month: clamp(lastMonth - firstMonth + 1, SB.MONTHS) };
 }
 
-/** Таблица «по дням» с 11-й строки и 3 графика: ровно дни периода из блока сверху (J7:K7). */
-function sbDays_(sh) {
-  const r = 11, p = sbPeriodDates_(sh), n = Math.min(Math.max(p.n, 1), SB.MAX_DAYS);
-  sovaEnsureRows_(sh, r + 2 + n);
+/** Постоянные таблицы по неделям и месяцам с 11-й строки (строка «Разница» — последний к предыдущему), затем дни. */
+function sbDirTables_(sh) {
+  const cnt = sbTrendCounts_();
+  sbClearFrom_(sh, 11);
+  let r = 11;
+  [['week', 'Разница с прошлой неделей'], ['month', 'Разница с прошлым месяцем']].forEach(function (pp) {
+    sovaEnsureRows_(sh, r + cnt[pp[0]] + 4);
+    const t = sbPeriodTable_(sh, r, pp[0], '$B$3', cnt[pp[0]]), d = t.r2 + 1;
+    sh.getRange(d, 1, 1, 9).setValues(sbLoc_([[pp[1]].concat('BCDEFGHI'.split('').map(function (L) {
+      return t.r2 > t.r1 ? '=IFERROR(' + L + t.r2 + '/' + L + (t.r2 - 1) + '-1,"")' : '—';
+    }))]));
+    sh.getRange(d, 1, 1, 9).setBackground('#e8ecf4').setFontWeight('bold').setHorizontalAlignment('right')
+      .setBorder(true, null, true, null, null, null, SB.NAVY, SpreadsheetApp.BorderStyle.SOLID);
+    sh.getRange(d, 1).setHorizontalAlignment('left');
+    sh.getRange(d, 2, 1, 8).setNumberFormat('0.00%');
+    SB.GOOD.forEach(function (g, i) { if (g) sbUpDown_(sh, sbCol_(i + 1) + d, g); });
+    r = d + 2;
+  });
+  sbDays_(sh, cnt);
+}
+
+/** Строка, с которой начинается таблица по дням: под таблицами по неделям и месяцам. */
+function sbDayRow_(cnt) { return 11 + (cnt.week + 4) + (cnt.month + 4); }
+
+/** Очищает лист с строки r вниз: значения, оформление, условное форматирование. */
+function sbClearFrom_(sh, r) {
   sh.getRange(r, 1, sh.getMaxRows() - r + 1, 12).clear()
     .setFontFamily('Arial').setFontSize(10).setFontColor(SB.INK);
   sh.setConditionalFormatRules(sh.getConditionalFormatRules()
     .filter(function (x) { return x.getRanges()[0].getRow() < r; }));
+}
+
+/** Таблица «по дням» под таблицами по неделям и месяцам и 3 графика: ровно дни периода из блока сверху (J7:K7). */
+function sbDays_(sh, cnt) {
+  const r = sbDayRow_(cnt || sbTrendCounts_()), p = sbPeriodDates_(sh), n = Math.min(Math.max(p.n, 1), SB.MAX_DAYS);
+  sovaEnsureRows_(sh, r + 2 + n);
+  sbClearFrom_(sh, r);
   sh.getCharts().forEach(function (c) { sh.removeChart(c); });
   const t = sbPeriodTable_(sh, r, 'day', '$B$3', n);
   sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [7], [0, 0], [SB.SUBS], true);

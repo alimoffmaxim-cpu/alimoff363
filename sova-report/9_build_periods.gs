@@ -21,7 +21,8 @@ function sbPeriod_(kind, n) {
     start: function (k) { return 'EDATE(' + SB_LAST_MONTH + ',' + (k - n + 1) + ')'; },
     end: function (a) { return 'EOMONTH(' + a + ',0)'; },
     label: function (a) {
-      return 'CHOOSE(MONTH(' + a + '),"янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек")&" "&YEAR(' + a + ')';
+      return 'CHOOSE(MONTH(' + a + '),"Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь",' +
+        '"Октябрь","Ноябрь","Декабрь")';   // не больше 12 месяцев подряд — названия не повторяются
     },
   };
   if (kind === 'week') return {

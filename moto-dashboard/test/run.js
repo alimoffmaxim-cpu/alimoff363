@@ -84,7 +84,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['clickSource_', 'jobDaily', 'ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['tildaSnippet_', 'clickSource_', 'jobDaily', 'ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -268,6 +268,44 @@ test('Метки клика: yclid → Яндекс, UTM в адресе важ�
   const facts = plain(t.buildFacts_({ ads: [], adsManual: [], amo: [], clients: [], visits: [], subs: [], pays: [],
     tilda: [{ 'Получена': D('2026-10-01'), 'ID заявки': 'old1', 'Все поля': 'pageurl=' + url, 'utm_source': '' }] }, p));
   assert.deepStrictEqual(facts.map(f => [f[1], f[2]]), [['заявка_сайт', 'Яндекс Директ']]);
+});
+
+test('Код для сайта: запоминает адрес с yclid и кладёт его в скрытые поля формы', () => {
+  const code = t.tildaSnippet_().replace(/^<script>\n|\n<\/script>$/g, '');
+  new vm.Script(code); // синтаксис
+  // Мини-страница: одна форма, куки, вход по рекламной ссылке
+  const inputs = [];
+  const form = { querySelector: sel => inputs.filter(i => sel.includes("'" + i.name + "'"))[0] || null,
+    appendChild: el => inputs.push(el) };
+  const handlers = {};
+  const doc = { cookie: '', referrer: 'https://yandex.ru/', querySelectorAll: () => [form],
+    createElement: () => ({}), addEventListener: (ev, fn) => { handlers[ev] = fn; } };
+  let jar = {};
+  Object.defineProperty(doc, 'cookie', {
+    get: () => Object.keys(jar).map(k => k + '=' + jar[k]).join('; '),
+    set: v => { const kv = v.split(';')[0]; const i = kv.indexOf('='); jar[kv.slice(0, i)] = kv.slice(i + 1); } });
+  const url = 'https://motocrossmoscow.ru/adult_school?yclid=321&ybaip=1';
+  const page = { document: doc, location: { href: url, search: '?yclid=321&ybaip=1', hostname: 'motocrossmoscow.ru' } };
+  vm.runInNewContext(code, page);
+  handlers.mousedown();
+  const v = n => (inputs.filter(i => i.name === n)[0] || {}).value;
+  assert.strictEqual(v('landing_page'), url);
+  assert.strictEqual(v('referrer'), 'https://yandex.ru/');
+  // Переход на другую страницу без меток: адрес входа сохраняется
+  page.location = { href: 'https://motocrossmoscow.ru/price', search: '', hostname: 'motocrossmoscow.ru' };
+  page.document.referrer = 'https://motocrossmoscow.ru/adult_school';
+  vm.runInNewContext(code, page);
+  handlers.submit();
+  assert.strictEqual(v('landing_page'), url);
+  assert.strictEqual(v('page_url'), 'https://motocrossmoscow.ru/price');
+  // Вебхук с этими полями → Яндекс
+  const r = plain(t.tildaRow_({ Name: 'Георгий', Phone: '+7 (983) 654-89-67', tranid: '1:2', formid: 'f',
+    landing_page: v('landing_page'), page_url: v('page_url'), referrer: v('referrer') }, new Date()));
+  assert.deepStrictEqual([r[3], r[5], r[7], r[8]], [url, '79836548967', 'yandex', 'cpc']);
+  assert.ok(r[12].endsWith('COOKIES=нет'));
+  // Только куки (скрытые поля не дошли): метка находится в закодированной куке
+  const c = plain(t.tildaRow_({ Phone: '1', COOKIES: 'mx_landing=' + encodeURIComponent(url) + '; _ym_uid=1' }, new Date()));
+  assert.deepStrictEqual([c[7], c[12].endsWith('COOKIES=есть')], ['yandex', true]);
 });
 
 test('mergeRows_: окно перезагрузки удаляет старые строки, ключ обновляет', () => {

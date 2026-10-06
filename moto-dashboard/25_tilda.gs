@@ -71,7 +71,8 @@ function tildaRow_(params, receivedAt) {
     return k ? String(params[k]) : '';
   };
   const utm = tildaUtm_(params);
-  const all = keys.filter(k => k !== 'COOKIES').map(k => k + '=' + params[k]).join('; ');
+  const all = keys.filter(k => k !== 'COOKIES').map(k => k + '=' + params[k])
+    .concat('COOKIES=' + (params.COOKIES || params.cookies ? 'есть' : 'нет')).join('; ');
   return [
     receivedAt,
     params.tranid || '',
@@ -108,16 +109,22 @@ function tildaUtm_(params) {
   // Нет меток — ищем UTM в адресе страницы и метки клика (yclid и т. п.) во всех полях
   if (!out.utm_source) {
     const text = [tildaPage_(params)].concat(Object.keys(params).filter(k => k !== 'key')
-      .map(k => k + '=' + params[k])).join(' ');
+      .map(k => k + '=' + decodeSafe_(params[k]))).join(' ');
     const found = clickSource_(text);
     Object.keys(out).forEach(k => { if (!out[k]) out[k] = found[k]; });
   }
   return out;
 }
 
+function decodeSafe_(v) {
+  try { return decodeURIComponent(String(v)); } catch (e) { return String(v); }
+}
+
 /** Адрес страницы, с которой пришла заявка (если Тильда его передала). */
 function tildaPage_(params) {
-  const own = params.pageurl || params.page || params.referer || params.url || params.URL || '';
+  // landing_page и page_url добавляет код для сайта (см. tildaSnippet_)
+  const own = params.landing_page || params.page_url || params.pageurl || params.page || params.referer ||
+    params.url || params.URL || '';
   if (own) return String(own);
   const k = Object.keys(params).filter(x => x !== 'COOKIES' && /^https?:\/\//i.test(String(params[x])))[0];
   return k ? String(params[k]) : '';
@@ -165,6 +172,38 @@ function menuTildaSecret_() {
   return secret;
 }
 
+/**
+ * Код для сайта (Настройки сайта → Ещё → HTML-код для вставки внутрь HEAD).
+ * Запоминает адрес входа по рекламной ссылке (UTM, yclid и т. п.) на 30 дней и добавляет
+ * в каждую форму скрытые поля landing_page, referrer, page_url — они приходят в вебхук.
+ */
+function tildaSnippet_() {
+  return [
+    '<script>',
+    '(function () {',
+    '  var DAYS = 30, ads = /[?&](utm_[a-z]+|yclid|ybaip|_openstat|gclid|fbclid|rb_clickid)=/i;',
+    '  function get(n) { var m = document.cookie.match("(?:^|; )" + n + "=([^;]*)"); return m ? decodeURIComponent(m[1]) : ""; }',
+    '  function set(n, v) { document.cookie = n + "=" + encodeURIComponent(v) + "; path=/; max-age=" + DAYS * 86400; }',
+    '  if (ads.test(location.search) || !get("mx_landing")) set("mx_landing", location.href);',
+    '  if (document.referrer && document.referrer.indexOf(location.hostname) < 0) set("mx_ref", document.referrer);',
+    '  function fill() {',
+    '    var vals = { landing_page: get("mx_landing"), referrer: get("mx_ref"), page_url: location.href };',
+    '    var forms = document.querySelectorAll("form");',
+    '    for (var i = 0; i < forms.length; i++) {',
+    '      for (var name in vals) {',
+    '        var el = forms[i].querySelector("input[name=\'" + name + "\']");',
+    '        if (!el) { el = document.createElement("input"); el.type = "hidden"; el.name = name; forms[i].appendChild(el); }',
+    '        el.value = vals[name];',
+    '      }',
+    '    }',
+    '  }',
+    '  document.addEventListener("DOMContentLoaded", fill);',
+    '  ["mousedown", "touchstart", "keydown", "submit"].forEach(function (ev) { document.addEventListener(ev, fill, true); });',
+    '})();',
+    '</script>',
+  ].join('\n');
+}
+
 /** Меню: создаёт секретный ключ и показывает адрес для Тильды. */
 function menuTilda() {
   const secret = menuTildaSecret_();
@@ -182,7 +221,12 @@ function menuTilda() {
     '<p>В Тильде: <b>Настройки сайта → Формы → Webhook</b> → вставьте адрес → «Добавить». ' +
     'Затем в настройках каждой формы на страницах отметьте этот Webhook.</p>' +
     '<p>Чтобы в заявках были UTM-метки, в Тильде включите передачу Cookies: ' +
-    'в настройках вебхука отметьте «Передавать Cookies».</p></div>'
-  ).setWidth(520).setHeight(360);
+    'в настройках вебхука отметьте «Передавать Cookies».</p>' +
+    '<p><b>Код для сайта</b> — чтобы в заявки попадал адрес входа с рекламными метками (yclid, UTM). ' +
+    'Вставьте его в Тильде: <b>Настройки сайта → Ещё → HTML-код для вставки внутрь HEAD</b>, ' +
+    'сохраните и <b>опубликуйте все страницы</b>.</p>' +
+    '<textarea style="width:100%;height:150px;font:11px monospace" onclick="this.select()">' +
+    tildaSnippet_().replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</textarea></div>'
+  ).setWidth(600).setHeight(560);
   SpreadsheetApp.getUi().showModalDialog(html, 'Подключение Тильды');
 }

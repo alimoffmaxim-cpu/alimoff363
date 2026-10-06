@@ -22,14 +22,14 @@ function sbPeriod_(kind, n) {
     end: function (a) { return 'EOMONTH(' + a + ',0)'; },
     label: function (a) {
       return 'CHOOSE(MONTH(' + a + '),"Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь",' +
-        '"Октябрь","Ноябрь","Декабрь")';   // не больше 12 месяцев подряд — названия не повторяются
+        '"Октябрь","Ноябрь","Декабрь")&" "&YEAR(' + a + ')';   // с годом: история хранится годами
     },
   };
   if (kind === 'week') return {
     title: '🗓 По завершённым неделям (' + n + ')', n: n, first: 'Неделя',
     start: function (k) { return '(' + SB_LAST_WEEK + '-7*' + (n - 1 - k) + ')'; },
     end: function (a) { return '(' + a + '+6)'; },
-    label: function (a) { return 'TEXT(' + a + ',"DD.MM")&"–"&TEXT(' + a + '+6,"DD.MM")'; },
+    label: function (a) { return 'TEXT(' + a + ',"DD.MM")&"–"&TEXT(' + a + '+6,"DD.MM.YYYY")'; },   // год — по концу недели
   };
   return {   // дни периода из блока сверху: с $J$7, n дней (n считает sbDays_)
     title: '="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', n: n, first: 'День',

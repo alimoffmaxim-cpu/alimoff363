@@ -166,7 +166,7 @@ def kpi_block(ws, r, dir_ref, manual=False):
 
 
 RU_MONTHS = ('CHOOSE(MONTH({x}),"Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь",'
-             '"Октябрь","Ноябрь","Декабрь")')
+             '"Октябрь","Ноябрь","Декабрь")&" "&YEAR({x})')
 RU_WEEKDAY = 'CHOOSE(WEEKDAY({x},2),"пн","вт","ср","чт","пт","сб","вс")'
 # Последний завершённый месяц / неделя: неполный текущий период не попадает в тренд
 LAST_MONTH = 'EDATE(DATE(YEAR($E$3),MONTH($E$3),1),-($E$3<EOMONTH($E$3,0)))'
@@ -178,7 +178,7 @@ PERIODS = {
               lambda a: f'EOMONTH({a},0)', lambda a: RU_MONTHS.format(x=a)),
     'week': ('🗓 По завершённым неделям (26)', N_WEEKS, 'Неделя',
              lambda k: f'({LAST_WEEK}-7*{N_WEEKS - 1 - k})',
-             lambda a: f'({a}+6)', lambda a: f'TEXT({a},"DD.MM")&"–"&TEXT({a}+6,"DD.MM")'),
+             lambda a: f'({a}+6)', lambda a: f'TEXT({a},"DD.MM")&"–"&TEXT({a}+6,"DD.MM.YYYY")'),
     # дни периода из блока сверху (J7:K7); строки после конца периода пустые
     'day': ('="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', N_DAYS, 'День',
             lambda k: f'($J$7+{k})', lambda a: a,

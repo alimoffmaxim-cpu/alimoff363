@@ -25,6 +25,7 @@ function sbDaysAll_() {
 /**
  * Сколько завершённых недель и месяцев показать: с первого периода, где есть расход, показы, клики
  * или подписки (но не раньше SOVA.TRENDS_FROM), до последнего завершённого (как SB_LAST_WEEK / SB_LAST_MONTH).
+ * Вся история — старые недели и месяцы не уходят (предохранитель — SB.MAX_WEEKS / MAX_MONTHS).
  */
 function sbTrendCounts_() {
   const sh = SpreadsheetApp.getActive().getSheetByName(SOVA.DATA_SHEET), R = sbReportDate_();
@@ -41,8 +42,8 @@ function sbTrendCounts_() {
   const eom = new Date(R.getFullYear(), R.getMonth() + 1, 0).getDate() === R.getDate();
   const lastMonth = R.getFullYear() * 12 + R.getMonth() - (eom ? 0 : 1), firstMonth = first.getFullYear() * 12 + first.getMonth();
   const clamp = function (v, max) { return Math.min(Math.max(v, 1), max); };
-  return { week: clamp(Math.round((lastWeek - firstMon) / (7 * SOVA_DAY_MS)) + 1, SB.WEEKS),
-    month: clamp(lastMonth - firstMonth + 1, SB.MONTHS) };
+  return { week: clamp(Math.round((lastWeek - firstMon) / (7 * SOVA_DAY_MS)) + 1, SB.MAX_WEEKS || 520),
+    month: clamp(lastMonth - firstMonth + 1, SB.MAX_MONTHS || 120) };
 }
 
 /** Постоянные таблицы по неделям и месяцам с 11-й строки (строка «Разница» — последний к предыдущему), затем дни. */

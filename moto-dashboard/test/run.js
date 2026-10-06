@@ -74,12 +74,17 @@ const ctx = {
   PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; }, setProperties: o => Object.assign(props, o), deleteProperty: k => delete props[k] }) },
   Charts: { ChartType: { COLUMN: 'COLUMN', LINE: 'LINE' } },
   Utilities: { sleep() {} },
+  ScriptApp: (() => {
+    const list = [];
+    const builder = fn => chain({ create: () => { list.push({ getHandlerFunction: () => fn }); } });
+    return { list, getProjectTriggers: () => list.slice(), deleteTrigger: t => list.splice(list.indexOf(t), 1), newTrigger: builder };
+  })(),
   Session: { getScriptTimeZone: () => 'Europe/Moscow' },
 };
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -151,6 +156,13 @@ test('Тильда: вебхук принимает форму и JSON, ключ
   const log = plain(t.readRows_('Лог')).map(r => r[2]).join('\n');
   assert.ok(/неверный ключ \(пришёл bad…, ожидается sekr…\)/.test(log), log);
   ss.sheets['raw_tilda'].clear();
+});
+
+test('ensureTriggers_: создаёт 4 ежедневных задачи один раз', () => {
+  ctx.ScriptApp.list.length = 0;
+  assert.strictEqual(t.ensureTriggers_(), 4);
+  assert.strictEqual(t.ensureTriggers_(), 0);
+  assert.deepStrictEqual(ctx.ScriptApp.list.map(x => x.getHandlerFunction()), ['jobAds', 'jobAmo', 'jobMk', 'jobFacts']);
 });
 
 test('subType_', () => {

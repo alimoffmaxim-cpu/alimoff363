@@ -33,6 +33,7 @@ function setupSheets() {
 
   buildSummaries_();
   buildDashboard_();
+  ensureTriggers_(); // ежедневное обновление включается само
 
   const ss = SpreadsheetApp.getActive();
   [SHEETS.dash, SHEETS.byChannel, SHEETS.byCampaign, SHEETS.byMonth, SHEETS.byDay,
@@ -185,7 +186,9 @@ function buildDashboard_() {
   const ch = "'" + SHEETS.byChannel + "'!";
 
   sh.getRange('A1').setValue('Школа мотокросса — сквозная аналитика').setFontWeight('bold').setFontSize(16);
-  setF_(sh.getRange('A2'), '=IFERROR("Последнее обновление: "&TEXT(MAX(\'' + SHEETS.log + '\'!A:A),"dd.mm.yyyy hh:mm"),"")')
+  const lastRun = 'MAX(\'' + SHEETS.log + '\'!A:A)';
+  setF_(sh.getRange('A2'), '=IFERROR(IF(NOW()-' + lastRun + '>26/24,"⚠ Данные не обновлялись больше суток: проверьте лист «Лог» и меню «Включить ежедневное обновление»",' +
+    '"Последнее обновление: "&TEXT(' + lastRun + ',"dd.mm.yyyy hh:mm")),"")')
     .setFontColor('#888888');
   sh.getRange('A3:A4').setValues([['Период с'], ['по']]).setFontWeight('bold');
   const setDate = (a1, v, def) => {

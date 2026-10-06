@@ -98,6 +98,7 @@ function promptVkToken() {
     VK_TOKEN_EXPIRES: String(Date.now() + DAY_MS),
     VK_MANUAL_TOKEN: '1',
   });
+  ensureTriggers_();
   menuAds();
 }
 

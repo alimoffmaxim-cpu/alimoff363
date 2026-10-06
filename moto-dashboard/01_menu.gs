@@ -81,15 +81,27 @@ function menuAdsFull() {
 }
 function menuFacts() { alert_(runJob_('Сводка', rebuildFacts)); }
 
-function setupTriggers() {
-  const jobs = ['jobAds', 'jobAmo', 'jobMk', 'jobFacts'];
-  ScriptApp.getProjectTriggers()
-    .filter(t => jobs.indexOf(t.getHandlerFunction()) >= 0)
-    .forEach(t => ScriptApp.deleteTrigger(t));
-  // Разные часы: каждая задача укладывается в лимит 6 минут, сводка собирается последней
-  jobs.forEach((fn, i) => {
+/**
+ * Создаёт недостающие ежедневные триггеры, существующие не трогает. Возвращает число созданных.
+ * Разные часы: каждая задача укладывается в лимит 6 минут, сводка собирается последней.
+ */
+function ensureTriggers_() {
+  const have = ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
+  let created = 0;
+  JOBS.forEach((fn, i) => {
+    if (have.indexOf(fn) >= 0) return;
     ScriptApp.newTrigger(fn).timeBased().everyDays(1).atHour((CFG.TRIGGER_HOUR + i) % 24).create();
+    created++;
   });
+  return created;
+}
+
+/** Меню: пересоздаёт триггеры и показывает расписание. */
+function setupTriggers() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => JOBS.indexOf(t.getHandlerFunction()) >= 0)
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  ensureTriggers_();
   alert_('Ежедневное обновление включено: реклама в ' + CFG.TRIGGER_HOUR + ':00, амоCRM, Мой Класс и сводка — каждый следующий час.');
 }
 
@@ -107,6 +119,7 @@ function promptProps_(title, fields) {
     const v = res.getResponseText().trim();
     if (v) props.setProperty(key, v);
   }
+  ensureTriggers_();
   return true;
 }
 

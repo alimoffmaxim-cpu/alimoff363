@@ -105,7 +105,13 @@ function buildFacts_(d, p) {
   (d.tilda || [])
     .slice()
     .sort((a, b) => (day_(a['Получена']) || 0) - (day_(b['Получена']) || 0))
-    .forEach(t => {
+    .forEach(row => {
+      // Старые заявки без UTM: метки из адреса страницы или метка клика (yclid → Яндекс Директ)
+      const t = Object.assign({}, row);
+      if (!t['utm_source']) {
+        const found = clickSource_(String(t['Страница'] || '') + ' ' + String(t['Все поля'] || ''));
+        Object.keys(found).forEach(k => { if (!t[k]) t[k] = found[k]; });
+      }
       const utmCampaign = String(t['utm_campaign'] || '');
       const camp = campaigns[lc_(utmCampaign)] || utmCampaign;
       const ch = matchRule_(p.rules, {

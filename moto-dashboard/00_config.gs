@@ -98,6 +98,8 @@ const DEFAULT_RULES = [
   ['utm_source', 'yandex', 'Яндекс Директ'],
   ['utm_source', 'avito', 'Авито'],
   ['utm_source', 'telegram', 'Telegram'],
+  ['utm_source', 'google', 'Google Ads'],
+  ['utm_source', 'facebook', 'Facebook / Instagram'],
   ['utm_source', 'tg', 'Telegram'],
   ['источник', 'макс', 'Макс'],
   ['источник', 'вк', 'VK Реклама'],
@@ -117,6 +119,17 @@ const DEFAULT_SUB_RULES = [
 ];
 
 const DAY_MS = 24 * 3600 * 1000;
+
+// Метки клика, которые рекламные системы сами добавляют к ссылке (если UTM-меток нет):
+// параметр → [utm_source, utm_medium]
+const CLICK_IDS = [
+  ['yclid', 'yandex', 'cpc'],     // Яндекс Директ
+  ['ybaip', 'yandex', 'cpc'],
+  ['_openstat', 'yandex', 'cpc'],
+  ['rb_clickid', 'vk', 'cpc'],    // VK Реклама
+  ['gclid', 'google', 'cpc'],     // Google Ads
+  ['fbclid', 'facebook', 'social'],
+];
 
 // Ежедневное обновление: одна задача по очереди выполняет шаги (функции из 01_menu)
 const DAILY_STEPS = ['jobAds', 'jobAmo', 'jobMk', 'jobFacts'];

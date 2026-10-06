@@ -76,7 +76,7 @@ function tildaRow_(params, receivedAt) {
     receivedAt,
     params.tranid || '',
     params.formname || params.formid || '',
-    params.pageurl || params.page || params.referer || '',
+    tildaPage_(params),
     find(/^(name|имя|fio|фио)$/i),
     normalizePhone_(find(/phone|телефон|tel/i)),
     find(/e-?mail|почта/i),
@@ -105,6 +105,42 @@ function tildaUtm_(params) {
     const own = Object.keys(params).filter(x => lc_(x) === k)[0];
     if (own && params[own]) out[k] = String(params[own]);
   });
+  // Нет меток — ищем UTM в адресе страницы и метки клика (yclid и т. п.) во всех полях
+  if (!out.utm_source) {
+    const text = [tildaPage_(params)].concat(Object.keys(params).filter(k => k !== 'key')
+      .map(k => k + '=' + params[k])).join(' ');
+    const found = clickSource_(text);
+    Object.keys(out).forEach(k => { if (!out[k]) out[k] = found[k]; });
+  }
+  return out;
+}
+
+/** Адрес страницы, с которой пришла заявка (если Тильда его передала). */
+function tildaPage_(params) {
+  const own = params.pageurl || params.page || params.referer || params.url || params.URL || '';
+  if (own) return String(own);
+  const k = Object.keys(params).filter(x => x !== 'COOKIES' && /^https?:\/\//i.test(String(params[x])))[0];
+  return k ? String(params[k]) : '';
+}
+
+/**
+ * Источник по тексту с адресом страницы: UTM-метки из адреса, а если их нет — метки клика,
+ * которые рекламные системы добавляют сами (yclid → yandex, gclid → google…, см. CLICK_IDS).
+ */
+function clickSource_(text) {
+  const out = { utm_source: '', utm_medium: '', utm_campaign: '', utm_content: '', utm_term: '' };
+  const s = String(text || '');
+  const re = /[?&]utm_(source|medium|campaign|content|term)=([^&#\s;]*)/gi;
+  for (let m; (m = re.exec(s));) {
+    const k = 'utm_' + m[1].toLowerCase();
+    if (!out[k]) {
+      try { out[k] = decodeURIComponent(m[2].replace(/\+/g, ' ')); } catch (e) { out[k] = m[2]; }
+    }
+  }
+  if (!out.utm_source) {
+    const hit = CLICK_IDS.filter(c => new RegExp('(^|[?&;\\s])' + c[0] + '=', 'i').test(s))[0];
+    if (hit) { out.utm_source = hit[1]; if (!out.utm_medium) out.utm_medium = hit[2]; }
+  }
   return out;
 }
 

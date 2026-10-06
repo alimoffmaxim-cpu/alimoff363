@@ -84,7 +84,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['jobDaily', 'ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['clickSource_', 'jobDaily', 'ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -252,6 +252,22 @@ test('buildFacts_: атрибуция first touch, фильтр статусов
   assert.strictEqual(sum(by('оплата'), 5), 22000);
   // Отсортировано по дате
   for (let i = 1; i < rows.length; i++) assert.ok(rows[i - 1][0] <= rows[i][0]);
+});
+
+test('Метки клика: yclid → Яндекс, UTM в адресе важнее, старые заявки получают канал', () => {
+  const url = 'https://motocrossmoscow.ru/adult_school?yclid=3218869478102663167&ybaip=1';
+  assert.deepStrictEqual([t.clickSource_(url).utm_source, t.clickSource_(url).utm_medium], ['yandex', 'cpc']);
+  assert.strictEqual(t.clickSource_('https://x.ru/?utm_source=vk&utm_campaign=a%20b&yclid=1').utm_source, 'vk');
+  assert.strictEqual(t.clickSource_('https://x.ru/?utm_source=vk&utm_campaign=a%20b').utm_campaign, 'a b');
+  assert.strictEqual(t.clickSource_('pageurl=https://x.ru/?gclid=Cj0; Phone=1').utm_source, 'google');
+  assert.strictEqual(t.clickSource_('https://x.ru/page?ref=myclid=1').utm_source, '');
+  // Вебхук: адрес страницы в отдельном поле, UTM нет
+  const r = plain(t.tildaRow_({ Phone: '89160000001', referer: url, tranid: 'y1' }, new Date()));
+  assert.deepStrictEqual([r[3], r[7], r[8]], [url, 'yandex', 'cpc']);
+  // Старая строка raw_tilda без UTM, адрес только в «Все поля»
+  const facts = plain(t.buildFacts_({ ads: [], adsManual: [], amo: [], clients: [], visits: [], subs: [], pays: [],
+    tilda: [{ 'Получена': D('2026-10-01'), 'ID заявки': 'old1', 'Все поля': 'pageurl=' + url, 'utm_source': '' }] }, p));
+  assert.deepStrictEqual(facts.map(f => [f[1], f[2]]), [['заявка_сайт', 'Яндекс Директ']]);
 });
 
 test('mergeRows_: окно перезагрузки удаляет старые строки, ключ обновляет', () => {

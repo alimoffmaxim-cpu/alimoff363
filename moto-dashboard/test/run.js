@@ -84,7 +84,7 @@ const ctx = {
 vm.createContext(ctx);
 const files = fs.readdirSync(dir).filter(f => f.endsWith('.gs')).sort();
 const src = files.map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n;\n');
-const exportsList = ['ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
+const exportsList = ['jobDaily', 'ensureTriggers_', 'doPost', 'tildaRow_', 'tildaUtm_', 'localizeFormula_', 'normalizePhone_', 'matchRule_', 'subType_', 'buildFacts_', 'params_', 'setupSheets', 'rebuildFacts',
   'mergeRows_', 'readRows_', 'chunks_', 'qs_', 'col_', 'window_', 'HEAD', 'SHEETS', 'METRICS', 'metricCol_', 'parseYandexTsv_'];
 vm.runInContext(src + '\n;globalThis.__t = {' + exportsList.join(',') + '};', ctx, { filename: 'bundle.gs' });
 const t = ctx.__t;
@@ -158,11 +158,13 @@ test('Тильда: вебхук принимает форму и JSON, ключ
   ss.sheets['raw_tilda'].clear();
 });
 
-test('ensureTriggers_: создаёт 4 ежедневных задачи один раз', () => {
-  ctx.ScriptApp.list.length = 0;
-  assert.strictEqual(t.ensureTriggers_(), 4);
+test('ensureTriggers_: один ежедневный триггер вместо четырёх старых', () => {
+  const L = ctx.ScriptApp.list;
+  L.length = 0;
+  ['jobAds', 'jobAmo', 'jobMk', 'jobFacts', 'onOpenOther'].forEach(fn => L.push({ getHandlerFunction: () => fn }));
+  assert.strictEqual(t.ensureTriggers_(), 1);
   assert.strictEqual(t.ensureTriggers_(), 0);
-  assert.deepStrictEqual(ctx.ScriptApp.list.map(x => x.getHandlerFunction()), ['jobAds', 'jobAmo', 'jobMk', 'jobFacts']);
+  assert.deepStrictEqual(L.map(x => x.getHandlerFunction()), ['onOpenOther', 'jobDaily']);
 });
 
 test('subType_', () => {
@@ -323,6 +325,10 @@ test('setupSheets + rebuildFacts на моке таблицы', () => {
   put('raw_mk_visits', t.HEAD.mkVisits, data.visits);
   put('raw_mk_subs', t.HEAD.mkSubs, data.subs);
   put('raw_mk_payments', t.HEAD.mkPays, data.pays);
+  // Ежедневная задача проходит все шаги (источники не подключены) и пересобирает сводку
+  t.jobDaily();
+  const steps = plain(t.readRows_('Лог')).map(r => r[1]);
+  ['Реклама', 'амоCRM', 'Мой Класс', 'Сводка'].forEach(x => assert.ok(steps.indexOf(x) >= 0, x + ' нет в Логе'));
   const msg = t.rebuildFacts();
   assert.ok(/лиды \(кабинет\) 4, заявки с сайта 0, лиды \(CRM\) 3/.test(msg), msg);
   console.log('     rebuildFacts →', msg);

@@ -10,8 +10,8 @@
  */
 
 const CFG = {
-  // Час первого ежедневного запуска; остальные задачи идут следом с шагом в час
-  TRIGGER_HOUR: 4,
+  // Час ежедневного обновления (по часовому поясу проекта)
+  TRIGGER_HOUR: 6,
   // Уровень статистики VK: 'campaigns' — группы объявлений, 'ad_plans' — кампании
   VK_LEVEL: 'campaigns',
   VK_API: 'https://ads.vk.com/api/v2',
@@ -118,8 +118,10 @@ const DEFAULT_SUB_RULES = [
 
 const DAY_MS = 24 * 3600 * 1000;
 
-// Ежедневные задачи (функции из 01_menu): реклама, амоCRM, Мой Класс, сводка
-const JOBS = ['jobAds', 'jobAmo', 'jobMk', 'jobFacts'];
+// Ежедневное обновление: одна задача по очереди выполняет шаги (функции из 01_menu)
+const DAILY_STEPS = ['jobAds', 'jobAmo', 'jobMk', 'jobFacts'];
+// Старые отдельные триггеры по шагам и вспомогательный триггер продолжения
+const JOB_TRIGGERS = ['jobDaily', 'jobDailyContinue'].concat(DAILY_STEPS);
 
 // ---------- Формулы сводок ----------
 // Все верхнеуровневые константы собраны в этом файле,

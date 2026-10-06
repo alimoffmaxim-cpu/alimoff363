@@ -36,6 +36,43 @@ function jobAmo() { return runJob_('амоCRM', updateAmo, true); }
 function jobMk() { return runJob_('Мой Класс', updateMk, true); }
 function jobFacts() { return runJob_('Сводка', rebuildFacts, true); }
 
+/**
+ * Ежедневное обновление одним запуском: реклама → амоCRM → Мой Класс → сводка.
+ * Ошибка одного шага не останавливает остальные. Если до лимита Apps Script (6 минут)
+ * остаётся мало времени, оставшиеся шаги продолжатся отдельным запуском через минуту.
+ */
+function jobDaily() { runDailyFrom_(0); }
+
+function jobDailyContinue() {
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'jobDailyContinue')
+    .forEach(t => ScriptApp.deleteTrigger(t));
+  runDailyFrom_(Number(prop_('DAILY_NEXT_STEP') || 0));
+}
+
+function runDailyFrom_(start) {
+  const props = PropertiesService.getScriptProperties();
+  const began = Date.now();
+  const errors = [];
+  const run = { jobAds: jobAds, jobAmo: jobAmo, jobMk: jobMk, jobFacts: jobFacts };
+  for (let i = start; i < DAILY_STEPS.length; i++) {
+    if (i > start && Date.now() - began > 4 * 60 * 1000) {
+      props.setProperty('DAILY_NEXT_STEP', String(i));
+      ScriptApp.newTrigger('jobDailyContinue').timeBased().after(60 * 1000).create();
+      log_('Обновление', 'продолжится через минуту с шага ' + DAILY_STEPS[i]);
+      return;
+    }
+    try {
+      run[DAILY_STEPS[i]]();
+    } catch (e) {
+      errors.push(DAILY_STEPS[i] + ': ' + e.message);
+    }
+  }
+  props.deleteProperty('DAILY_NEXT_STEP');
+  // Ошибка в конце — чтобы Google прислал письмо о сбое (подробности уже в «Логе»)
+  if (errors.length) throw new Error(errors.join('; '));
+}
+
 /** Выполняет задачу, пишет результат в «Лог». В триггере ошибка пробрасывается — Google пришлёт письмо. */
 function runJob_(name, fn, rethrow) {
   try {
@@ -82,27 +119,25 @@ function menuAdsFull() {
 function menuFacts() { alert_(runJob_('Сводка', rebuildFacts)); }
 
 /**
- * Создаёт недостающие ежедневные триггеры, существующие не трогает. Возвращает число созданных.
- * Разные часы: каждая задача укладывается в лимит 6 минут, сводка собирается последней.
+ * Включает ежедневное обновление: один триггер jobDaily. Старые отдельные триггеры по шагам
+ * удаляются. Если всё уже настроено, ничего не меняет. Возвращает число созданных триггеров.
  */
 function ensureTriggers_() {
-  const have = ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction());
-  let created = 0;
-  JOBS.forEach((fn, i) => {
-    if (have.indexOf(fn) >= 0) return;
-    ScriptApp.newTrigger(fn).timeBased().everyDays(1).atHour((CFG.TRIGGER_HOUR + i) % 24).create();
-    created++;
-  });
-  return created;
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.filter(t => DAILY_STEPS.indexOf(t.getHandlerFunction()) >= 0).forEach(t => ScriptApp.deleteTrigger(t));
+  if (triggers.some(t => t.getHandlerFunction() === 'jobDaily')) return 0;
+  ScriptApp.newTrigger('jobDaily').timeBased().everyDays(1).atHour(CFG.TRIGGER_HOUR).create();
+  return 1;
 }
 
 /** Меню: пересоздаёт триггеры и показывает расписание. */
 function setupTriggers() {
   ScriptApp.getProjectTriggers()
-    .filter(t => JOBS.indexOf(t.getHandlerFunction()) >= 0)
+    .filter(t => JOB_TRIGGERS.indexOf(t.getHandlerFunction()) >= 0)
     .forEach(t => ScriptApp.deleteTrigger(t));
   ensureTriggers_();
-  alert_('Ежедневное обновление включено: реклама в ' + CFG.TRIGGER_HOUR + ':00, амоCRM, Мой Класс и сводка — каждый следующий час.');
+  alert_('Ежедневное обновление включено: каждый день около ' + CFG.TRIGGER_HOUR + ':00 по очереди обновляются ' +
+    'реклама, амоCRM, Мой Класс и сводка.');
 }
 
 // ---------- Ввод ключей (хранятся в Свойствах скрипта, не в коде) ----------

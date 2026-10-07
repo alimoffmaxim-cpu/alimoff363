@@ -95,8 +95,12 @@
 
 /* hero */
 .aa-hero { padding-block: clamp(56px, 8vw, 112px) clamp(72px, 9vw, 120px); }
-.aa-hero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: center; }
-.aa-hero__text { display: grid; gap: 26px; justify-items: start; min-width: 0; }
+.aa-hero__grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px; align-items: stretch; }
+/* the eyebrow sits level with the top of the case card; title, lead and buttons stay centred in the rest */
+.aa-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: 26px; min-width: 0; }
+.aa-hero__text > .aa-chip { margin-top: 4px; margin-bottom: auto; }
+.aa-hero__text > .aa-hero__cta { margin-bottom: auto; }
+.aa-hero__side { align-self: center; }
 .aa-hero__cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px; }
 .aa-niches { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
 .aa-niches li { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--aa-line); font-size: 14px; color: var(--aa-muted); }

@@ -143,10 +143,6 @@
 .aa-feature__go { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: var(--aa-accent); color: var(--aa-on-accent); transition: transform .25s ease; }
 .aa-feature__go svg { width: 24px; height: 24px; }
 .aa-feature:hover .aa-feature__go { transform: rotate(45deg); }
-.aa-tg { margin-top: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px 24px; padding: 20px 24px; border-radius: 16px; background: var(--aa-card); }
-.aa-tg b { display: block; font-size: 18px; font-weight: 600; }
-.aa-tg span { font-size: 15px; color: var(--aa-muted); }
-.aa-tg .aa-btn { min-height: 46px; font-size: 15px; }
 
 /* numbers band */
 .aa-ribbon { background: var(--aa-dark); color: #fff; overflow: hidden; padding-block: 22px; border-bottom: 1px solid var(--aa-dark-line); }
@@ -640,9 +636,7 @@
           </div>
           <div class="aa-links">
             <a class="aa-link" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener"><span><small>Написать в Telegram</small><b>@alimoffmaxim</b></span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7m0 0H8m9 0v9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-            <a class="aa-link" href="https://t.me/alimov_pro" target="_blank" rel="noopener"><span><small>Канал в Telegram</small><b>@alimov_pro</b></span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7m0 0H8m9 0v9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
             <a class="aa-link" href="https://vk.com/alimovmaksim" target="_blank" rel="noopener"><span><small>ВКонтакте</small><b>vk.com/alimovmaksim</b></span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7m0 0H8m9 0v9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-            <a class="aa-link" href="https://www.instagram.com/alimowmaxim/" target="_blank" rel="noopener"><span><small>Instagram*</small><b>@alimowmaxim</b></span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17 17 7m0 0H8m9 0v9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
           </div>
         </div>
       </div>
@@ -787,7 +781,7 @@
 
   // reveal sections as they scroll in
   if ('IntersectionObserver' in window && !reduce) {
-    var rv = document.querySelectorAll('.aa-sec__head, .aa-approach, .aa-why > li, .aa-feature, .aa-tg, .aa-num__head, .aa-chart, .aa-panel, .aa-case, .aa-faq, .aa-contact, .aa-about, .aa-ab, .aa-did > li, .aa-hl, .aa-plan');
+    var rv = document.querySelectorAll('.aa-sec__head, .aa-approach, .aa-why > li, .aa-feature, .aa-num__head, .aa-chart, .aa-panel, .aa-case, .aa-faq, .aa-contact, .aa-about, .aa-ab, .aa-did > li, .aa-hl, .aa-plan');
     var vo = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;

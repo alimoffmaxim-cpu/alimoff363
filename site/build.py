@@ -29,7 +29,7 @@ BRAND = "Alimov Agency"
 MAIN_TITLE = "Реклама детских школ ВКонтакте — заявки от 135 ₽ | Alimov Agency"
 MAIN_DESC = ("Таргетированная реклама VK для детских онлайн-школ и сетей студий. "
              "37 784 заявки в 5 кейсах, цена заявки от 135 ₽, ROMI до 1600%. Обсудим вашу школу в Telegram.")
-SAME_AS = ["https://t.me/alimov_pro", "https://t.me/alimoffmaxim", "https://vk.com/alimovmaksim"]
+SAME_AS = ["https://t.me/alimoffmaxim", "https://vk.com/alimovmaksim"]
 
 
 def plain(text):

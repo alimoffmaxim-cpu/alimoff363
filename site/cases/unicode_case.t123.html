@@ -747,7 +747,7 @@
   var heroSec = document.querySelector('.aa-hero');
   if (heroData && panel && word && dots.length) {
     var items = JSON.parse(heroData.textContent);
-    var cur = 0, timer = null, paused = false, DUR = 5000;
+    var cur = 0, timer = null, paused = false, DUR = 3000;
     var show = function (i, animate) {
       cur = (i + items.length) % items.length;
       var it = items[cur];

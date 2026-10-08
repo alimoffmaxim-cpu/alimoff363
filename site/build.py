@@ -58,6 +58,7 @@ def ld(data):
 
 
 ORG = {"@type": "ProfessionalService", "@id": f"{SITE}#org", "name": BRAND, "url": SITE,
+       "legalName": "ИП Алимов Максим Александрович", "taxID": "561411013401",
        "description": "Таргетированная реклама ВКонтакте для детских онлайн-школ и сетей офлайн-студий.",
        "areaServed": {"@type": "Country", "name": "Россия"}, "sameAs": SAME_AS,
        "knowsAbout": ["таргетированная реклама ВКонтакте", "VK Ads", "реклама детских школ", "реклама онлайн-школ"]}

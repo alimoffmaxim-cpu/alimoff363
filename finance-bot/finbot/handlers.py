@@ -67,7 +67,22 @@ BTN_MONTH = "📅 Месяц"
 BTN_BALANCE = "💰 Остаток"
 BTN_BALANCE_OLD = "💰 Баланс"  # старая кнопка — может остаться в клавиатуре до /start
 BTN_LOCK = "🔒 Заблокировать"
-BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_MONTH, BTN_BALANCE, BTN_BALANCE_OLD, BTN_LOCK}
+BTN_START = "▶️ Старт"
+BUTTONS = {BTN_OUT, BTN_IN, BTN_FX, BTN_DASH, BTN_HISTORY, BTN_MONTH, BTN_BALANCE, BTN_BALANCE_OLD, BTN_LOCK, BTN_START}
+
+# Когда бот заблокирован, внизу чата — только одна кнопка «Старт»: нажал → бот спрашивает PIN.
+LOCK_KEYBOARD = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text=BTN_START)]], resize_keyboard=True,
+                                    is_persistent=True)
+
+
+async def show_lock_screen(bot, chat_id: int, janitor: Janitor) -> None:
+    """Экран блокировки: одно сообщение и кнопка «Старт» вместо меню. Остальное к этому моменту удалено."""
+    try:
+        sent = await bot.send_message(chat_id, "🔒 Бот заблокирован. Нажмите «▶️ Старт», чтобы войти.",
+                                      reply_markup=LOCK_KEYBOARD, disable_notification=True)
+    except Exception:  # noqa: BLE001 — владелец ещё не открывал бота
+        return
+    janitor.keep(sent)
 
 KEYBOARD = ReplyKeyboardMarkup(
     keyboard=[
@@ -171,7 +186,8 @@ class LockGate(BaseMiddleware):
             text = f"⛔ Слишком много неверных попыток. Попробуйте через {remaining // 60 + 1} мин."
         else:
             await state.set_state(PinUnlock.pin)
-            text = "🔒 Введите PIN. После разблокировки повторите действие."
+            pressed_start = isinstance(event, Message) and (event.text or "") in (BTN_START, "/start")
+            text = "🔒 Введите PIN." if pressed_start else "🔒 Введите PIN. После разблокировки повторите действие."
         self.janitor.later(await message.answer(text))
         return None
 
@@ -406,6 +422,7 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
             return
         if await vault.unlock(pin):
             await state.clear()
+            await janitor.purge()  # убираем экран блокировки и запрос PIN
             await reply(message, "🔓 Разблокировано.", reply_markup=KEYBOARD)
         elif vault.lockout_remaining():
             await reply(message, "⛔ Неверный PIN. Ввод заблокирован на время.")
@@ -439,8 +456,13 @@ def build_router(config: Config, storage: Storage, vault: Vault, janitor: Janito
         await state.clear()
         janitor.later(message)
         await janitor.purge()
-        sent = await message.answer("🔒 Заблокировано, переписка очищена.")
-        janitor.later(sent, delay=10)
+        await show_lock_screen(message.bot, message.chat.id, janitor)
+
+    @router.message(F.text == BTN_START)
+    async def btn_start_unlocked(message: Message, state: FSMContext) -> None:
+        # Сюда попадаем, только если бот уже разблокирован: просто возвращаем меню.
+        await state.clear()
+        await reply(message, "Меню 👇", reply_markup=KEYBOARD)
 
     @router.message(Command("changepin"))
     async def cmd_changepin(message: Message, state: FSMContext) -> None:

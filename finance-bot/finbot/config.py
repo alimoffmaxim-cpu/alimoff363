@@ -43,8 +43,8 @@ def load_config() -> Config:
         owner_id=int(_required("OWNER_ID")),
         master_key=load_master_key(_required("MASTER_KEY")),
         db_path=Path(os.environ.get("DB_PATH", "data/finance.db")),
-        session_minutes=int(os.environ.get("SESSION_MINUTES", "15")),
-        auto_delete_minutes=int(os.environ.get("AUTO_DELETE_MINUTES", "10")),
+        session_minutes=int(os.environ.get("SESSION_MINUTES", "1")),
+        auto_delete_minutes=int(os.environ.get("AUTO_DELETE_MINUTES", "1")),
         tz=ZoneInfo(os.environ.get("TIMEZONE", "Asia/Bangkok")),
         webapp_url=os.environ.get("WEBAPP_URL", "").strip(),
     )

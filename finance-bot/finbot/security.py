@@ -1,5 +1,6 @@
 """Доступ только владельцу и автоудаление сообщений из чата."""
 import asyncio
+import json
 import logging
 import time
 from collections.abc import Awaitable, Callable
@@ -60,36 +61,76 @@ class OwnerOnlyMiddleware(BaseMiddleware):
 
 
 class Janitor:
-    """Удаляет сообщения с финансовыми данными из переписки по таймеру и при блокировке."""
+    """Удаляет сообщения из переписки по таймеру и при блокировке.
 
-    def __init__(self, bot: Bot, delay_minutes: int):
+    Номера сообщений (только номера, без текста) сохраняются в базе, чтобы после
+    перезапуска бота всё, что не успели удалить, было удалено при старте.
+    """
+
+    def __init__(self, bot: Bot, delay_minutes: int, storage=None):
         self.bot = bot
         self.delay = delay_minutes * 60
-        self._tasks: dict[tuple[int, int], asyncio.Task] = {}
+        self._storage = storage
+        self._tasks: dict[tuple[int, int], asyncio.Task | None] = {}
+
+    # --- учёт сообщений ---
+    def _save(self) -> None:
+        if self._storage is not None:
+            self._storage.set_meta("janitor", json.dumps(sorted(self._tasks)).encode())
+
+    def _forget(self, key: tuple[int, int]) -> None:
+        task = self._tasks.pop(key, None)
+        if task is not None and task is not asyncio.current_task():
+            task.cancel()
 
     def later(self, *messages: Message | None, delay: float | None = None) -> None:
-        if self.delay <= 0 and delay is None:
-            return
+        """Удалить через delay секунд (по умолчанию AUTO_DELETE_MINUTES) и при блокировке."""
+        wait = self.delay if delay is None else delay
         for msg in messages:
             if msg is None:
                 continue
             key = (msg.chat.id, msg.message_id)
             if key not in self._tasks:
-                self._tasks[key] = asyncio.create_task(self._delete_after(key, self.delay if delay is None else delay))
+                self._tasks[key] = asyncio.create_task(self._delete_after(key, wait)) if wait > 0 else None
+        self._save()
+
+    def keep(self, msg: Message | None) -> None:
+        """Не удалять по таймеру, только при следующей очистке (экран блокировки)."""
+        if msg is not None:
+            self._tasks.setdefault((msg.chat.id, msg.message_id), None)
+            self._save()
 
     async def now(self, *messages: Message | None) -> None:
         for msg in messages:
             if msg is not None:
-                await self._delete((msg.chat.id, msg.message_id))
+                key = (msg.chat.id, msg.message_id)
+                self._forget(key)
+                await self._delete(key)
+        self._save()
 
     async def purge(self) -> None:
-        for key in list(self._tasks):
-            self._tasks.pop(key).cancel()
+        keys = list(self._tasks)
+        for key in keys:
+            self._forget(key)
+        self._save()
+        for key in keys:
             await self._delete(key)
+
+    async def restore(self) -> int:
+        """При старте: удалить сообщения, оставшиеся с прошлого запуска."""
+        if self._storage is None:
+            return 0
+        raw = self._storage.get_meta("janitor")
+        keys = [tuple(k) for k in json.loads(raw)] if raw else []
+        self._storage.set_meta("janitor", b"[]")
+        for key in keys:
+            await self._delete(key)
+        return len(keys)
 
     async def _delete_after(self, key: tuple[int, int], delay: float) -> None:
         await asyncio.sleep(delay)
         self._tasks.pop(key, None)
+        self._save()
         await self._delete(key)
 
     async def _delete(self, key: tuple[int, int]) -> None:

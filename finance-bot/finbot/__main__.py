@@ -11,13 +11,16 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from .crypto import generate_master_key
 
 
-async def autolock(vault, janitor) -> None:
-    """Блокирует бот и стирает переписку после SESSION_MINUTES бездействия."""
+async def autolock(vault, janitor, bot, owner_id: int) -> None:
+    """После SESSION_MINUTES бездействия: блокировка, очистка переписки, экран «Старт»."""
+    from .handlers import show_lock_screen
+
     while True:
-        await asyncio.sleep(15)
+        await asyncio.sleep(5)
         if vault.session_expired():
             vault.lock()
             await janitor.purge()
+            await show_lock_screen(bot, owner_id, janitor)
 
 
 async def run() -> None:
@@ -39,7 +42,7 @@ async def run() -> None:
             link_preview_is_disabled=True,
         ),
     )
-    janitor = Janitor(bot, config.auto_delete_minutes)
+    janitor = Janitor(bot, config.auto_delete_minutes, storage)
 
     dp = Dispatcher(storage=MemoryStorage())  # состояние только в памяти, на диск не пишется
     dp.update.outer_middleware(OwnerOnlyMiddleware(config.owner_id))
@@ -49,7 +52,13 @@ async def run() -> None:
     print(f"✅ Бот @{me.username} подключён к Telegram и ждёт сообщений.\n"
           f"   Отвечает только пользователю с id {config.owner_id}. Напишите боту /start.", flush=True)
 
-    watcher = asyncio.create_task(autolock(vault, janitor))
+    # После перезапуска бот заблокирован: дочищаем сообщения прошлого запуска и показываем «Старт».
+    from .handlers import show_lock_screen
+
+    await janitor.restore()
+    await show_lock_screen(bot, config.owner_id, janitor)
+
+    watcher = asyncio.create_task(autolock(vault, janitor, bot, config.owner_id))
     try:
         # Long polling: серверу не нужен открытый порт и публичный адрес.
         await dp.start_polling(bot, allowed_updates=["message", "callback_query"])

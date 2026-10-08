@@ -128,6 +128,8 @@ if [ ! -f "$ENV_FILE" ]; then
 else
     echo "Настройки уже есть — оставляю как есть."
     grep -q '^WEBAPP_URL=' "$ENV_FILE" || grep '^WEBAPP_URL=' "$APP/.env.example" >> "$ENV_FILE"
+    # Новые значения по умолчанию: блокировка и очистка через 1 минуту (меняем только старые умолчания).
+    sed -i 's/^SESSION_MINUTES=15$/SESSION_MINUTES=1/; s/^AUTO_DELETE_MINUTES=10$/AUTO_DELETE_MINUTES=1/' "$ENV_FILE"
 fi
 chown finbot:finbot "$ENV_FILE"
 chmod 600 "$ENV_FILE"

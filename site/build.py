@@ -58,7 +58,7 @@ def ld(data):
 
 
 ORG = {"@type": "ProfessionalService", "@id": f"{SITE}#org", "name": BRAND, "url": SITE,
-       "legalName": "ИП Алимов Максим Александрович", "taxID": "561411013401",
+       "legalName": "ИП Алимов Максим Александрович", "taxID": "561411013401", "email": "info@alimov.agency",
        "description": "Таргетированная реклама ВКонтакте для детских онлайн-школ и сетей офлайн-студий.",
        "areaServed": {"@type": "Country", "name": "Россия"}, "sameAs": SAME_AS,
        "knowsAbout": ["таргетированная реклама ВКонтакте", "VK Ads", "реклама детских школ", "реклама онлайн-школ"]}
@@ -597,6 +597,7 @@ preview_main = main
 for c in CASES:
     preview_main = preview_main.replace(f'href="{SITE}{c["slug"]}"', f'href="cases/{c["slug"]}.html"')
     preview_main = preview_main.replace(f'"href": "{SITE}{c["slug"]}"', f'"href": "cases/{c["slug"]}.html"')
+preview_main = preview_main.replace(f'href="{SITE}privacy"', 'href="privacy.html"')
 (here / "index.html").write_text(page(MAIN_TITLE, MAIN_DESC, preview_main, SITE, f"{SITE}og/main.png"), encoding="utf-8")
 print("site/index.html")
 
@@ -610,11 +611,69 @@ pub.mkdir(exist_ok=True)
 for c in CASES:
     (out / f"{c['slug']}.t123.html").write_text(case_fragment(c, SITE, lambda s: f"{SITE}{s}"), encoding="utf-8")
     (out / f"{c['slug']}.html").write_text(page(
-        case_title(c), case_desc(c), case_fragment(c, "../index.html", lambda s: f"{s}.html"),
+        case_title(c), case_desc(c), case_fragment(c, "../index.html", lambda s: f"{s}.html").replace(f'href="{SITE}privacy"', 'href="../privacy.html"'),
         f"{SITE}{c['slug']}", f"{SITE}og/{c['slug']}.png"), encoding="utf-8")
     rows.append((c["short"], f"/{c['slug']}", case_title(c), case_desc(c), f"og/{c['slug']}.png"))
     (pub / f"{c['slug']}.html").write_text(strip_drafts(case_fragment(c, SITE, lambda s: f"{SITE}{s}", publish=True)), encoding="utf-8")
     print(f"site/cases/{c['slug']}.t123.html, site/cases/{c['slug']}.html")
+
+# страница «Политика обработки персональных данных»: текст в privacy-content.html
+PRIVACY_TITLE = "Политика обработки персональных данных | Alimov Agency"
+PRIVACY_DESC = "Как ИП Алимов Максим Александрович (Alimov Agency) обрабатывает и защищает персональные данные посетителей сайта alimov.agency."
+PRIVACY_CSS = """<style>
+/* legal page: one readable column */
+.aa-legal { padding-block: clamp(36px, 5vw, 64px) clamp(56px, 7vw, 96px); }
+.aa-legal .aa-crumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: clamp(24px, 3vw, 40px); font-size: 14px; color: var(--aa-muted); }
+.aa-legal .aa-crumbs a { color: var(--aa-muted); text-decoration: none; }
+.aa-legal .aa-crumbs a:hover { color: var(--aa-ink); }
+.aa-legal .aa-crumbs [aria-current] { color: var(--aa-ink); font-weight: 600; }
+.aa-legal .aa-h1 { max-width: 16em; }
+.aa-legal__date { margin-top: 16px; color: var(--aa-muted); }
+.aa-legal__text { max-width: 46em; margin-top: clamp(32px, 4vw, 48px); padding: clamp(24px, 4vw, 48px); border-radius: var(--aa-r); background: var(--aa-card); display: grid; gap: 14px; }
+.aa-legal__text h2 { font-family: var(--aa-display); font-weight: 600; font-size: clamp(20px, 2vw, 24px); letter-spacing: -0.02em; margin-top: 18px; }
+.aa-legal__text h2:first-child { margin-top: 0; }
+.aa-legal__text p, .aa-legal__text li { color: #33333A; }
+.aa-legal__text ul { list-style: disc; padding-left: 22px; display: grid; gap: 8px; }
+.aa-legal__text a { color: var(--aa-accent-text); }
+.aa-legal + .aa-sec { padding-top: 0; }
+</style>"""
+privacy_text = (here / "privacy-content.html").read_text(encoding="utf-8")
+privacy_text = re.sub(r"<!--.*?-->\s*", "", privacy_text, flags=re.S)
+main_header = between(main, '<header class="aa-head"', "</header>")
+
+
+def privacy_fragment(home):
+    head = main_header.replace('href="#top"', f'href="{home}"')
+    for a in ("services", "cases", "how", "faq"):
+        head = head.replace(f'href="#{a}"', f'href="{home}#{a}"')
+    body = f"""<div class="aa" id="top">
+  <div class="aa-bg" aria-hidden="true"><i class="aa-blob aa-blob--1"></i><i class="aa-blob aa-blob--2"></i><i class="aa-blob aa-blob--3"></i></div>
+  {head}
+
+  <main>
+    <section class="aa-legal">
+      <div class="aa-wrap">
+        <nav class="aa-crumbs" aria-label="Хлебные крошки"><a href="{home}">Главная</a><span aria-hidden="true">/</span><span aria-current="page">Политика обработки персональных данных</span></nav>
+        <h1 class="aa-h1">Политика обработки персональных данных</h1>
+        <p class="aa-legal__date">Редакция от 8 октября 2026 года</p>
+        <article class="aa-legal__text">
+{privacy_text}
+        </article>
+      </div>
+    </section>
+
+    {contact.replace('href="#top"', f'href="{home}"', 1)}
+</div>"""
+    comment = f"<!--\n  Alimov Agency — политика обработки персональных данных.\n  Этот файл целиком вставляется в Tilda в блок T123 на странице {SITE}privacy.\n  Собран командой python3 site/build.py из site/privacy-content.html — правьте там.\n-->"
+    return "\n".join([comment, fonts, "", style, PRIVACY_CSS, "", body, "", script, ""])
+
+
+(pub / "privacy.html").write_text(strip_drafts(privacy_fragment(SITE)), encoding="utf-8")
+(here / "privacy.html").write_text(page(PRIVACY_TITLE, PRIVACY_DESC,
+    privacy_fragment("index.html").replace(f'href="{SITE}privacy"', 'href="privacy.html"'),
+    f"{SITE}privacy", f"{SITE}og/main.png"), encoding="utf-8")
+rows.append(("Политика обработки персональных данных", "/privacy", PRIVACY_TITLE, PRIVACY_DESC, "og/main.png"))
+print("site/privacy.html, site/publish/privacy.html")
 
 # таблица для настроек SEO в Tilda
 meta = ["# Заголовки и описания страниц для Tilda", "",

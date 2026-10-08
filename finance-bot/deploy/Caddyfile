@@ -1,0 +1,16 @@
+# Раздача страницы дашборда (мини-аппа) с вашего сервера вместо GitHub Pages.
+# Установщик подставляет __HOST__ (адрес вида 34-123-45-67.sslip.io) и __ROOT__ (папка webapp).
+# Журнала обращений нет: IP-адреса тех, кто открывает страницу, нигде не сохраняются.
+# Сертификат HTTPS Caddy получает и продлевает сам (Let's Encrypt).
+
+__HOST__ {
+	root * __ROOT__
+	file_server
+	header {
+		Cache-Control "no-store"
+		Content-Security-Policy "default-src 'none'; script-src 'self' https://telegram.org; style-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'"
+		Referrer-Policy "no-referrer"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}

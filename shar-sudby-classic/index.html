@@ -124,6 +124,7 @@
     color: #fff;
     text-wrap: balance;
     overflow-wrap: normal;
+    text-align: center;
     hyphens: none;
   }
   .reveal { animation: rise 900ms ease-out both; }
@@ -139,6 +140,17 @@
     40%, 60% { transform: translate(12px, -6px) rotate(6deg); }
   }
   .hint { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  .lang { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.85rem; }
+  #lang {
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #34375e;
+    background: #16182b;
+    color: var(--fg);
+    font: 600 0.85rem var(--body);
+    max-width: 100%;
+  }
+  #lang:focus-visible { outline: 2px solid var(--triangle); outline-offset: 2px; }
   #answer-text { min-height: 1.6em; margin: 0; font-family: var(--display); font-weight: 500; font-size: 1.1rem; }
   @media (prefers-reduced-motion: reduce) {
     .reveal, .shake { animation: none; }
@@ -146,44 +158,123 @@
 </style>
 
 <main>
-  <h1>Шар судьбы</h1>
-  <p class="sub">Задай вопрос, на который можно ответить «да» или «нет»</p>
+  <h1 id="title">Шар судьбы</h1>
+  <p class="sub" id="sub">Задай вопрос, на который можно ответить «да» или «нет»</p>
   <input id="q" type="text" placeholder="Например: сегодня всё получится?" autocomplete="off" maxlength="120">
   <button id="ball" type="button" aria-label="Потрясти шар">
     <div class="window" id="window"><div class="eight">8</div></div>
   </button>
   <p id="answer-text" aria-live="polite"></p>
-  <p class="hint">Тапни по шару или нажми Enter</p>
+  <p class="hint" id="hint">Тапни по шару или нажми Enter</p>
+  <label class="lang"><span aria-hidden="true">🌐</span><select id="lang" aria-label="Language"></select></label>
 </main>
 
 <script>
-  const answers = [
-    "Бесспорно",
-    "Предрешено",
-    "Никаких сомнений",
-    "Определённо да",
-    "Можешь быть уверен в этом",
-    "Мне кажется — «да»",
-    "Вероятнее всего",
-    "Хорошие перспективы",
-    "Знаки говорят — «да»",
-    "Да",
-    "Пока не ясно, попробуй снова",
-    "Спроси позже",
-    "Лучше не рассказывать",
-    "Сейчас нельзя предсказать",
-    "Сконцентрируйся и спроси опять",
-    "Даже не думай",
-    "Мой ответ — «нет»",
-    "По моим данным — «нет»",
-    "Перспективы не очень хорошие",
-    "Весьма сомнительно"
-  ];
+  // Each language: native name, [title, subtitle, placeholder, ball label, hint], and the 20 classic answers
+  // (10 yes, 5 non-committal, 5 no) separated by "|".
+  const L = {
+    en: ["English", ["Magic 8 Ball", "Ask a question that can be answered yes or no", "For example: will today go well?", "Shake the ball", "Tap the ball or press Enter"],
+      "It is certain|It is decidedly so|Without a doubt|Yes, definitely|You may rely on it|As I see it, yes|Most likely|Outlook good|Yes|Signs point to yes|Reply hazy, try again|Ask again later|Better not tell you now|Cannot predict now|Concentrate and ask again|Don't count on it|My reply is no|My sources say no|Outlook not so good|Very doubtful"],
+    ru: ["Русский", ["Шар судьбы", "Задай вопрос, на который можно ответить «да» или «нет»", "Например: сегодня всё получится?", "Потрясти шар", "Тапни по шару или нажми Enter"],
+      "Бесспорно|Предрешено|Никаких сомнений|Определённо да|Можешь быть уверен в этом|Мне кажется — «да»|Вероятнее всего|Хорошие перспективы|Знаки говорят — «да»|Да|Пока не ясно, попробуй снова|Спроси позже|Лучше не рассказывать|Сейчас нельзя предсказать|Сконцентрируйся и спроси опять|Даже не думай|Мой ответ — «нет»|По моим данным — «нет»|Перспективы не очень хорошие|Весьма сомнительно"],
+    uk: ["Українська", ["Куля долі", "Постав питання, на яке можна відповісти «так» чи «ні»", "Наприклад: сьогодні все вийде?", "Струснути кулю", "Торкнись кулі або натисни Enter"],
+      "Безперечно|Наперед вирішено|Жодних сумнівів|Безумовно так|Можеш бути певен у цьому|Як на мене — «так»|Найімовірніше|Гарні перспективи|Так|Знаки кажуть — «так»|Поки не ясно, спробуй ще|Спитай пізніше|Краще поки не казати|Зараз неможливо передбачити|Зосередься і спитай знову|Навіть не думай|Моя відповідь — «ні»|За моїми даними — «ні»|Перспективи не дуже|Дуже сумнівно"],
+    kk: ["Қазақша", ["Тағдыр шары", "«Иә» не «жоқ» деп жауап беруге болатын сұрақ қой", "Мысалы: бүгін бәрі сәтті бола ма?", "Шарды сілку", "Шарды бас немесе Enter пернесін бас"],
+      "Сөзсіз|Алдын ала шешілген|Ешқандай күмән жоқ|Әрине, иә|Бұған сенуге болады|Менің ойымша — иә|Әбден мүмкін|Болашағы жақсы|Иә|Белгілер «иә» дейді|Әзірге түсініксіз, қайта көр|Кейінірек сұра|Қазір айтпағаным жөн|Қазір болжау мүмкін емес|Ойыңды жинап, қайта сұра|Тіпті ойлама|Менің жауабым — жоқ|Менің деректерім бойынша — жоқ|Болашағы онша емес|Өте күмәнді"],
+    uz: ["Oʻzbekcha", ["Taqdir shari", "«Ha» yoki «yoʻq» deb javob berish mumkin boʻlgan savol ber", "Masalan: bugun hammasi yaxshi boʻladimi?", "Sharni silkitish", "Sharga bos yoki Enter tugmasini bos"],
+      "Shubhasiz|Oldindan hal qilingan|Hech qanday shubha yoʻq|Albatta ha|Bunga ishonsang boʻladi|Menimcha — ha|Ehtimoli katta|Istiqbol yaxshi|Ha|Belgilar «ha» deydi|Hozircha noaniq, yana urinib koʻr|Keyinroq soʻra|Hozir aytmaganim maʼqul|Hozir bashorat qilib boʻlmaydi|Diqqatingni jamla va yana soʻra|Umid qilma|Javobim — yoʻq|Maʼlumotlarimga koʻra — yoʻq|Istiqbol unchalik yaxshi emas|Juda shubhali"],
+    de: ["Deutsch", ["Magischer 8-Ball", "Stell eine Frage, die man mit Ja oder Nein beantworten kann", "Zum Beispiel: Wird heute alles klappen?", "Kugel schütteln", "Tippe auf die Kugel oder drücke Enter"],
+      "Es ist sicher|Es ist entschieden so|Ohne Zweifel|Ja, definitiv|Du kannst dich darauf verlassen|Wie ich es sehe, ja|Sehr wahrscheinlich|Die Aussichten sind gut|Ja|Die Zeichen deuten auf Ja|Antwort unklar, versuch es noch mal|Frag später noch mal|Das sage ich dir jetzt besser nicht|Kann ich jetzt nicht vorhersagen|Konzentrier dich und frag noch mal|Verlass dich nicht darauf|Meine Antwort ist nein|Meine Quellen sagen nein|Die Aussichten sind nicht so gut|Sehr zweifelhaft"],
+    fr: ["Français", ["Boule magique", "Pose une question à laquelle on peut répondre par oui ou non", "Par exemple : est-ce que tout ira bien aujourd'hui ?", "Secouer la boule", "Touche la boule ou appuie sur Entrée"],
+      "C'est certain|C'est décidément ainsi|Sans aucun doute|Oui, absolument|Tu peux compter dessus|D'après moi, oui|Très probablement|Les perspectives sont bonnes|Oui|Les signes disent oui|Réponse floue, réessaie|Redemande plus tard|Mieux vaut ne pas te le dire maintenant|Impossible de prédire maintenant|Concentre-toi et redemande|N'y compte pas|Ma réponse est non|Mes sources disent non|Les perspectives ne sont pas bonnes|Très douteux"],
+    es: ["Español", ["Bola mágica", "Haz una pregunta que se pueda responder con sí o no", "Por ejemplo: ¿hoy todo saldrá bien?", "Agitar la bola", "Toca la bola o pulsa Enter"],
+      "Es cierto|Es decididamente así|Sin duda|Sí, definitivamente|Puedes confiar en ello|Como yo lo veo, sí|Lo más probable|Buenas perspectivas|Sí|Las señales apuntan a que sí|Respuesta confusa, vuelve a intentarlo|Pregunta más tarde|Mejor no decírtelo ahora|No puedo predecirlo ahora|Concéntrate y vuelve a preguntar|No cuentes con ello|Mi respuesta es no|Mis fuentes dicen que no|Las perspectivas no son buenas|Muy dudoso"],
+    it: ["Italiano", ["Palla magica", "Fai una domanda a cui si può rispondere sì o no", "Per esempio: oggi andrà tutto bene?", "Agita la palla", "Tocca la palla o premi Invio"],
+      "È certo|È decisamente così|Senza alcun dubbio|Sì, sicuramente|Puoi contarci|Per come la vedo io, sì|Molto probabilmente|Le prospettive sono buone|Sì|I segni indicano di sì|Risposta confusa, riprova|Chiedi più tardi|Meglio non dirtelo ora|Non posso prevederlo ora|Concentrati e chiedi di nuovo|Non contarci|La mia risposta è no|Le mie fonti dicono di no|Le prospettive non sono buone|Molto dubbio"],
+    pt: ["Português", ["Bola mágica", "Faça uma pergunta que possa ser respondida com sim ou não", "Por exemplo: hoje vai dar tudo certo?", "Sacudir a bola", "Toque na bola ou pressione Enter"],
+      "É certo|Decididamente sim|Sem dúvida|Sim, com certeza|Pode contar com isso|Na minha opinião, sim|Muito provavelmente|As perspectivas são boas|Sim|Os sinais apontam que sim|Resposta nebulosa, tente de novo|Pergunte mais tarde|Melhor não te dizer agora|Não dá para prever agora|Concentre-se e pergunte de novo|Não conte com isso|Minha resposta é não|Minhas fontes dizem que não|As perspectivas não são boas|Muito duvidoso"],
+    pl: ["Polski", ["Magiczna kula", "Zadaj pytanie, na które można odpowiedzieć tak lub nie", "Na przykład: czy dziś wszystko się uda?", "Potrząśnij kulą", "Dotknij kuli lub naciśnij Enter"],
+      "To pewne|Zdecydowanie tak|Bez wątpienia|Tak, na pewno|Możesz na to liczyć|Moim zdaniem tak|Najprawdopodobniej|Perspektywy są dobre|Tak|Znaki wskazują, że tak|Odpowiedź niejasna, spróbuj ponownie|Zapytaj później|Lepiej ci teraz nie mówić|Nie mogę teraz przewidzieć|Skup się i zapytaj ponownie|Nie licz na to|Moja odpowiedź brzmi nie|Moje źródła mówią, że nie|Perspektywy nie są zbyt dobre|Bardzo wątpliwe"],
+    cs: ["Čeština", ["Magická koule", "Polož otázku, na kterou se dá odpovědět ano, nebo ne", "Například: vyjde dnes všechno?", "Zatřást koulí", "Klepni na kouli nebo stiskni Enter"],
+      "Je to jisté|Rozhodně ano|Bez pochyby|Ano, určitě|Můžeš se na to spolehnout|Jak to vidím, ano|Nejspíš ano|Vyhlídky jsou dobré|Ano|Znamení ukazují na ano|Odpověď je mlhavá, zkus to znovu|Zeptej se později|Raději ti to teď neřeknu|Teď to nelze předpovědět|Soustřeď se a zeptej se znovu|Nepočítej s tím|Moje odpověď je ne|Mé zdroje říkají ne|Vyhlídky nejsou moc dobré|Velmi pochybné"],
+    nl: ["Nederlands", ["Magische 8-bal", "Stel een vraag die je met ja of nee kunt beantwoorden", "Bijvoorbeeld: gaat vandaag alles goed?", "Schud de bal", "Tik op de bal of druk op Enter"],
+      "Het is zeker|Het is beslist zo|Zonder twijfel|Ja, absoluut|Je kunt erop rekenen|Zoals ik het zie, ja|Zeer waarschijnlijk|De vooruitzichten zijn goed|Ja|De tekenen wijzen op ja|Antwoord onduidelijk, probeer opnieuw|Vraag het later nog eens|Dat kan ik je nu beter niet vertellen|Kan het nu niet voorspellen|Concentreer je en vraag het opnieuw|Reken er niet op|Mijn antwoord is nee|Mijn bronnen zeggen nee|De vooruitzichten zijn niet zo goed|Zeer twijfelachtig"],
+    sv: ["Svenska", ["Magiska 8-bollen", "Ställ en fråga som kan besvaras med ja eller nej", "Till exempel: kommer allt att gå bra i dag?", "Skaka bollen", "Tryck på bollen eller på Enter"],
+      "Det är säkert|Det är definitivt så|Utan tvekan|Ja, absolut|Du kan lita på det|Som jag ser det, ja|Mycket troligt|Utsikterna är goda|Ja|Tecknen pekar på ja|Svaret är oklart, försök igen|Fråga igen senare|Bäst att inte säga det nu|Kan inte förutsäga det nu|Koncentrera dig och fråga igen|Räkna inte med det|Mitt svar är nej|Mina källor säger nej|Utsikterna är inte så goda|Mycket tveksamt"],
+    tr: ["Türkçe", ["Sihirli 8 topu", "Evet ya da hayır diye cevaplanabilecek bir soru sor", "Örneğin: bugün her şey yolunda gidecek mi?", "Topu salla", "Topa dokun ya da Enter'a bas"],
+      "Bu kesin|Kesinlikle öyle|Hiç şüphesiz|Evet, kesinlikle|Buna güvenebilirsin|Bence evet|Büyük ihtimalle|Gelecek iyi görünüyor|Evet|İşaretler evet diyor|Cevap belirsiz, tekrar dene|Sonra tekrar sor|Şimdi söylemesem daha iyi|Şu an tahmin edemem|Konsantre ol ve tekrar sor|Buna güvenme|Cevabım hayır|Kaynaklarım hayır diyor|Gelecek pek iyi görünmüyor|Çok şüpheli"],
+    el: ["Ελληνικά", ["Μαγική μπάλα", "Κάνε μια ερώτηση που απαντιέται με ναι ή όχι", "Για παράδειγμα: θα πάνε όλα καλά σήμερα;", "Κούνησε την μπάλα", "Πάτησε την μπάλα ή το Enter"],
+      "Είναι βέβαιο|Σίγουρα έτσι είναι|Χωρίς αμφιβολία|Ναι, οπωσδήποτε|Μπορείς να βασιστείς σε αυτό|Όπως το βλέπω, ναι|Πολύ πιθανό|Οι προοπτικές είναι καλές|Ναι|Τα σημάδια λένε ναι|Η απάντηση είναι θολή, ξαναδοκίμασε|Ρώτα αργότερα|Καλύτερα να μη σου πω τώρα|Δεν μπορώ να προβλέψω τώρα|Συγκεντρώσου και ρώτα ξανά|Μην το υπολογίζεις|Η απάντησή μου είναι όχι|Οι πηγές μου λένε όχι|Οι προοπτικές δεν είναι καλές|Πολύ αμφίβολο"],
+    ar: ["العربية", ["الكرة السحرية", "اطرح سؤالًا يمكن الإجابة عنه بنعم أو لا", "مثلًا: هل سيسير كل شيء على ما يرام اليوم؟", "هزّ الكرة", "اضغط على الكرة أو على Enter"],
+      "هذا مؤكد|بالتأكيد|بلا شك|نعم بالتأكيد|يمكنك الاعتماد على ذلك|كما أرى، نعم|على الأرجح|التوقعات جيدة|نعم|الإشارات تقول نعم|الإجابة غير واضحة، حاول مجددًا|اسأل لاحقًا|من الأفضل ألا أخبرك الآن|لا يمكنني التنبؤ الآن|ركّز واسأل مرة أخرى|لا تعتمد على ذلك|إجابتي لا|مصادري تقول لا|التوقعات ليست جيدة|مشكوك فيه جدًا"],
+    he: ["עברית", ["כדור הקסם", "שאל שאלה שאפשר לענות עליה בכן או לא", "לדוגמה: האם היום הכול יסתדר?", "נער את הכדור", "הקש על הכדור או לחץ Enter"],
+      "זה בטוח|בהחלט כך|ללא ספק|כן, בהחלט|אפשר לסמוך על זה|כפי שאני רואה, כן|סביר מאוד|התחזית טובה|כן|הסימנים מצביעים על כן|התשובה מעורפלת, נסה שוב|שאל מאוחר יותר|עדיף שלא אגיד לך עכשיו|אי אפשר לחזות עכשיו|התרכז ושאל שוב|אל תסמוך על זה|התשובה שלי היא לא|המקורות שלי אומרים לא|התחזית לא כל כך טובה|מפוקפק מאוד"],
+    hi: ["हिन्दी", ["जादुई गेंद", "ऐसा सवाल पूछो जिसका जवाब हाँ या नहीं में हो", "जैसे: क्या आज सब ठीक होगा?", "गेंद हिलाओ", "गेंद पर टैप करो या Enter दबाओ"],
+      "यह निश्चित है|निश्चित रूप से ऐसा ही है|बिना किसी संदेह के|हाँ, बिल्कुल|तुम इस पर भरोसा कर सकते हो|मेरे हिसाब से, हाँ|सबसे अधिक संभावना है|आसार अच्छे हैं|हाँ|संकेत हाँ की ओर हैं|जवाब धुंधला है, फिर से कोशिश करो|बाद में पूछो|अभी न बताना ही बेहतर है|अभी भविष्यवाणी नहीं कर सकता|ध्यान लगाओ और फिर से पूछो|इस पर भरोसा मत करो|मेरा जवाब है नहीं|मेरे सूत्र कहते हैं नहीं|आसार अच्छे नहीं हैं|बहुत संदिग्ध"],
+    zh: ["简体中文", ["神奇八号球", "问一个可以用“是”或“不是”回答的问题", "例如：今天一切会顺利吗？", "摇一摇", "点击球或按 Enter"],
+      "这是必然|肯定是的|毫无疑问|绝对是|你可以相信它|在我看来，是的|很有可能|前景很好|是的|种种迹象指向是的|回复模糊，再试一次|稍后再问|现在最好不告诉你|现在无法预测|集中精神再问一次|别指望了|我的回答是不|我的消息来源说不|前景不太好|非常可疑"],
+    "zh-TW": ["繁體中文", ["神奇八號球", "問一個可以用「是」或「不是」回答的問題", "例如：今天一切會順利嗎？", "搖一搖", "點擊球或按 Enter"],
+      "這是必然|肯定是的|毫無疑問|絕對是|你可以相信它|在我看來，是的|很有可能|前景很好|是的|種種跡象指向是的|回覆模糊，再試一次|稍後再問|現在最好不告訴你|現在無法預測|集中精神再問一次|別指望了|我的回答是不|我的消息來源說不|前景不太好|非常可疑"],
+    ja: ["日本語", ["マジック8ボール", "「はい」か「いいえ」で答えられる質問をしてください", "例：今日はうまくいく？", "ボールを振る", "ボールをタップするか Enter を押してください"],
+      "確かにそうです|間違いなくそうです|疑いの余地はありません|はい、絶対に|信頼していいでしょう|私の見る限り、はい|おそらくそうでしょう|見通しは良好です|はい|兆しは「はい」を示しています|答えがぼやけています。もう一度どうぞ|後でもう一度聞いてください|今は言わないほうがいいでしょう|今は予測できません|集中してもう一度聞いてください|期待しないでください|私の答えは「いいえ」です|私の情報筋は「いいえ」と言っています|見通しはあまり良くありません|とても疑わしいです"],
+    ko: ["한국어", ["매직 8볼", "예 또는 아니요로 답할 수 있는 질문을 하세요", "예: 오늘 다 잘될까?", "공 흔들기", "공을 누르거나 Enter를 누르세요"],
+      "확실합니다|분명히 그렇습니다|의심의 여지가 없습니다|네, 확실히요|믿어도 좋습니다|제가 보기엔 그렇습니다|아마도 그럴 겁니다|전망이 좋습니다|네|징조가 '네'를 가리킵니다|답이 흐릿합니다, 다시 해보세요|나중에 다시 물어보세요|지금은 말하지 않는 게 좋겠습니다|지금은 예측할 수 없습니다|집중해서 다시 물어보세요|기대하지 마세요|제 대답은 '아니요'입니다|제 정보통은 '아니요'라고 합니다|전망이 그다지 좋지 않습니다|매우 의심스럽습니다"],
+    id: ["Bahasa Indonesia", ["Bola ajaib", "Ajukan pertanyaan yang bisa dijawab ya atau tidak", "Misalnya: apakah hari ini semuanya lancar?", "Kocok bola", "Ketuk bola atau tekan Enter"],
+      "Sudah pasti|Memang begitu|Tanpa keraguan|Ya, tentu saja|Kamu bisa mengandalkannya|Menurutku, ya|Kemungkinan besar|Prospeknya bagus|Ya|Tanda-tanda menunjukkan ya|Jawaban kabur, coba lagi|Tanya lagi nanti|Lebih baik tidak kuberi tahu sekarang|Tidak bisa diramal sekarang|Fokus dan tanya lagi|Jangan berharap|Jawabanku tidak|Sumberku bilang tidak|Prospeknya kurang bagus|Sangat diragukan"],
+    vi: ["Tiếng Việt", ["Quả cầu tiên tri", "Hãy hỏi một câu có thể trả lời có hoặc không", "Ví dụ: hôm nay mọi việc có suôn sẻ không?", "Lắc quả cầu", "Chạm vào quả cầu hoặc nhấn Enter"],
+      "Chắc chắn rồi|Quả thật là vậy|Không còn nghi ngờ gì|Có, chắc chắn|Bạn có thể tin vào điều đó|Theo tôi thấy thì có|Rất có thể|Triển vọng tốt|Có|Các dấu hiệu nói có|Câu trả lời mơ hồ, thử lại đi|Hỏi lại sau nhé|Tốt hơn là chưa nói bây giờ|Bây giờ chưa thể đoán được|Tập trung và hỏi lại|Đừng trông chờ vào điều đó|Câu trả lời của tôi là không|Nguồn tin của tôi nói không|Triển vọng không tốt lắm|Rất đáng ngờ"],
+    th: ["ไทย", ["ลูกบอลวิเศษ", "ถามคำถามที่ตอบได้ว่าใช่หรือไม่ใช่", "เช่น วันนี้ทุกอย่างจะราบรื่นไหม", "เขย่าลูกบอล", "แตะลูกบอลหรือกด Enter"],
+      "แน่นอนอยู่แล้ว|เป็นเช่นนั้นแน่นอน|ไม่ต้องสงสัยเลย|ใช่ แน่นอน|เชื่อได้เลย|เท่าที่เห็น ใช่|น่าจะใช่|แนวโน้มดี|ใช่|สัญญาณบอกว่าใช่|คำตอบยังไม่ชัด ลองใหม่|ถามใหม่ทีหลัง|ตอนนี้ไม่บอกดีกว่า|ตอนนี้ทำนายไม่ได้|ตั้งสมาธิแล้วถามใหม่|อย่าหวังเลย|คำตอบของฉันคือไม่|แหล่งข่าวของฉันบอกว่าไม่|แนวโน้มไม่ค่อยดี|น่าสงสัยมาก"]
+  };
+  const RTL = ["ar", "he"];
+
   const ball = document.getElementById("ball");
   const win = document.getElementById("window");
   const text = document.getElementById("answer-text");
   const q = document.getElementById("q");
-  let last = -1, busy = false;
+  const select = document.getElementById("lang");
+  let answers = [], last = -1, busy = false;
+
+  // Language comes from a #xx link, then the viewer's own pick, then the browser's language list.
+  function match(tag) {
+    if (!tag) return null;
+    const t = tag.toLowerCase();
+    if (t.startsWith("zh")) return /-(tw|hk|mo|hant)/.test(t) ? "zh-TW" : "zh";
+    for (const k in L) if (k.toLowerCase() === t) return k;
+    const base = t.split("-")[0];
+    return L[base] ? base : null;
+  }
+  function detect() {
+    const fromHash = match(location.hash.slice(1));
+    if (fromHash) return fromHash;
+    try { const saved = match(localStorage.getItem("lang")); if (saved) return saved; } catch (e) {}
+    const list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+    for (const tag of list) { const m = match(tag); if (m) return m; }
+    return "en";
+  }
+
+  function apply(code) {
+    const [, ui, list] = L[code];
+    answers = list.split("|");
+    last = -1;
+    document.documentElement.lang = code;
+    document.documentElement.dir = RTL.includes(code) ? "rtl" : "ltr";
+    document.title = ui[0];
+    document.getElementById("title").textContent = ui[0];
+    document.getElementById("sub").textContent = ui[1];
+    q.placeholder = ui[2];
+    ball.setAttribute("aria-label", ui[3]);
+    document.getElementById("hint").textContent = ui[4];
+    select.value = code;
+    text.textContent = "";
+    win.innerHTML = '<div class="eight">8</div>';
+  }
+
+  for (const code in L) select.add(new Option(L[code][0], code));
+  select.addEventListener("change", () => {
+    try { localStorage.setItem("lang", select.value); } catch (e) {}
+    apply(select.value);
+  });
 
   function pick() {
     let i;
@@ -223,4 +314,6 @@
 
   ball.addEventListener("click", shake);
   q.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); shake(); } });
+  window.addEventListener("hashchange", () => { const m = match(location.hash.slice(1)); if (m) apply(m); });
+  apply(detect());
 </script>

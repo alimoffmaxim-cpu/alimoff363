@@ -97,19 +97,21 @@
     border-radius: 50%;
   }
   .tri {
-    width: 84%;
-    aspect-ratio: 1.15;
+    /* equilateral, pointing down; shifted so its centre sits in the middle of the window */
+    width: 80%;
+    aspect-ratio: 1.1547;
+    translate: 0 16.667%;
     background: var(--triangle);
-    clip-path: polygon(50% 100%, 0 6%, 100% 6%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
     display: grid;
     place-items: start center;
-    padding-top: 12%;
+    padding-top: 7%;
     box-sizing: border-box;
     filter: drop-shadow(0 0 10px rgba(60,90,255,.6));
   }
   .tri span {
-    width: 66%;
-    height: 40%;
+    width: 62%;
+    height: 38%;
     display: flex;
     align-items: center;
     justify-content: center;

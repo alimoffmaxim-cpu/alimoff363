@@ -77,7 +77,7 @@
   }
   #ball:focus-visible { outline: 3px solid var(--triangle); outline-offset: 6px; }
   .window {
-    width: 52%;
+    width: 60%;
     aspect-ratio: 1;
     border-radius: 50%;
     background: radial-gradient(circle at 50% 45%, #13246e 0%, var(--window) 60%, #040a26 100%);
@@ -97,26 +97,32 @@
     border-radius: 50%;
   }
   .tri {
-    width: 92%;
+    width: 84%;
     aspect-ratio: 1.15;
     background: var(--triangle);
-    clip-path: polygon(50% 100%, 0 8%, 100% 8%);
+    clip-path: polygon(50% 100%, 0 6%, 100% 6%);
     display: grid;
     place-items: start center;
-    padding-top: 16%;
+    padding-top: 12%;
     box-sizing: border-box;
     filter: drop-shadow(0 0 10px rgba(60,90,255,.6));
   }
   .tri span {
-    width: 62%;
+    width: 66%;
+    height: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
     font-family: var(--display);
     font-weight: 500;
-    font-size: clamp(0.62rem, 2.6vw, 0.82rem);
-    line-height: 1.2;
+    font-size: 12px;
+    line-height: 1.15;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
     color: #fff;
     text-wrap: balance;
+    overflow-wrap: normal;
+    hyphens: none;
   }
   .reveal { animation: rise 900ms ease-out both; }
   @keyframes rise {
@@ -169,6 +175,15 @@
     return answers[i];
   }
 
+  function fitText(el) {
+    let size = Math.max(8, Math.round(el.clientWidth / 6));
+    el.style.fontSize = size + "px";
+    while (size > 7 && (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight)) {
+      size -= 0.5;
+      el.style.fontSize = size + "px";
+    }
+  }
+
   function shake() {
     if (busy) return;
     busy = true;
@@ -181,7 +196,9 @@
     setTimeout(() => {
       const a = pick();
       win.innerHTML = '<div class="tri reveal"><span></span></div>';
-      win.querySelector("span").textContent = a;
+      const span = win.querySelector("span");
+      span.textContent = a;
+      fitText(span);
       text.textContent = a;
       busy = false;
     }, reduced ? 50 : 700);

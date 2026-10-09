@@ -166,6 +166,9 @@
 .aa-tab[aria-selected="true"] { background: #fff; color: var(--aa-ink); }
 .aa-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--aa-dark-line); border: 1px solid var(--aa-dark-line); border-radius: var(--aa-r); overflow: hidden; }
 .aa-panel[hidden] { display: none; }
+.aa-panel--ch { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.aa-panel--ch .aa-card { grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
+.aa-panel--ch .aa-card__ico { margin-bottom: 8px; }
 .aa-card { background: var(--aa-dark); padding: clamp(24px, 3vw, 32px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 18px; align-items: start; transition: background .2s; }
 .aa-card:hover { background: var(--aa-dark-card); }
 .aa-card__ico { grid-row: span 2; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--aa-dark-line); color: var(--aa-accent); font-family: var(--aa-display); font-weight: 600; font-size: 15px; }
@@ -341,6 +344,7 @@
 
 /* tablet */
 @media (max-width: 960px) {
+  .aa-panel--ch { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-hero__grid, .aa-contact, .aa-faq-grid { grid-template-columns: minmax(0, 1fr); }
   .aa-hero__text { padding-block: 0; }
   .aa-stack { max-width: 520px; }
@@ -365,7 +369,7 @@
   .aa-hero__cta .aa-btn { flex: 1 1 100%; }
   .aa-feature { grid-template-columns: minmax(0, 1fr); }
   .aa-feature__go { width: 52px; height: 52px; }
-  .aa-panel, .aa-cases { grid-template-columns: minmax(0, 1fr); }
+  .aa-panel, .aa-panel--ch, .aa-cases { grid-template-columns: minmax(0, 1fr); }
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
@@ -651,8 +655,8 @@
         <div class="aa-contact">
           <div class="aa-contact__text">
             <span class="aa-chip">Контакты</span>
-            <h2 class="aa-h2" id="aa-contact-title">Хотите так же? <mark class="aa-mark aa-mark--solid">Обсудим</mark> вашу школу</h2>
-            <p>Расскажите о школе, бюджете и допустимой цене заявки.</p>
+            <h2 class="aa-h2" id="aa-contact-title">Хотите так же? <mark class="aa-mark aa-mark--solid">Обсудим</mark> ваш проект</h2>
+            <p>Расскажите о бизнесе, бюджете и допустимой цене заявки.</p>
             <a class="aa-btn aa-btn--accent" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
@@ -754,7 +758,7 @@
     });
   }
 
-  // hero: the niche in the title and the case panel change together
+  // hero: the channel in the title and the case panel change on one timer
   var heroData = document.getElementById('aa-hero-data');
   var panel = document.querySelector('.aa-stack');
   var word = document.getElementById('aa-word');
@@ -762,10 +766,13 @@
   var heroSec = document.querySelector('.aa-hero');
   if (heroData && panel && word && dots.length) {
     var items = JSON.parse(heroData.textContent);
-    var cur = 0, timer = null, paused = false, DUR = 3000;
-    var show = function (i, animate) {
+    var words = JSON.parse(word.getAttribute('data-words') || '[]');
+    var cur = 0, wi = 0, timer = null, paused = false, DUR = 3000;
+    var show = function (i, animate, step) {
       cur = (i + items.length) % items.length;
       var it = items[cur];
+      if (step) wi = (wi + 1) % words.length;
+      var text = words.length ? words[wi] : it.word;
       dots.forEach(function (d, k) { d.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); });
       var fill = function () {
         panel.querySelectorAll('[data-k]').forEach(function (el) {
@@ -777,22 +784,25 @@
         if (animate) countUp(big);
         panel.classList.remove('is-swap');
       };
-      if (!animate) { word.textContent = it.word; fill(); return; }
-      word.classList.add('is-out');
+      if (!animate) { word.textContent = text; fill(); return; }
+      var swapWord = text !== word.textContent;
+      if (swapWord) word.classList.add('is-out');
       panel.classList.add('is-swap');
       setTimeout(function () {
-        word.textContent = it.word;
-        word.classList.remove('is-out');
-        word.classList.add('is-pre');
-        void word.offsetWidth;
-        word.classList.remove('is-pre');
+        if (swapWord) {
+          word.textContent = text;
+          word.classList.remove('is-out');
+          word.classList.add('is-pre');
+          void word.offsetWidth;
+          word.classList.remove('is-pre');
+        }
         fill();
       }, 320);
     };
     var schedule = function () {
       clearTimeout(timer);
       if (reduce || paused) return;
-      timer = setTimeout(function () { show(cur + 1, true); schedule(); }, DUR);
+      timer = setTimeout(function () { show(cur + 1, true, words.length > 0); schedule(); }, DUR);
     };
     heroSec.style.setProperty('--aa-dur', DUR + 'ms');
     dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k, true); schedule(); }); });

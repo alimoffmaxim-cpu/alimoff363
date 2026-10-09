@@ -26,9 +26,9 @@ START, END = "<!-- cases:start -->", "<!-- cases:end -->"
 
 # SEO: заголовки и описания страниц. Их же нужно вписать в настройки страниц Tilda (см. site/SEO.md).
 BRAND = "Alimov Agency"
-MAIN_TITLE = "Реклама детских школ ВКонтакте — заявки от 135 ₽ | Alimov Agency"
-MAIN_DESC = ("Таргетированная реклама VK для детских онлайн-школ и сетей студий. "
-             "37 784 заявки в 5 кейсах, цена заявки от 135 ₽, ROMI до 1600%. Обсудим вашу школу в Telegram.")
+MAIN_TITLE = "Реклама в VK, Яндекс Директе, Telegram и на Ozon | Alimov Agency"
+MAIN_DESC = ("Агентство интернет-рекламы: VK Реклама, Яндекс Директ, Telegram Ads и посевы, MAX, Ozon, Яндекс Карты. "
+             "37 784 заявки в кейсах, ROMI до 1600%.")
 SAME_AS = ["https://t.me/alimoffmaxim", "https://vk.com/alimovmaksim"]
 
 
@@ -59,9 +59,10 @@ def ld(data):
 
 ORG = {"@type": "ProfessionalService", "@id": f"{SITE}#org", "name": BRAND, "url": SITE,
        "legalName": "ИП Алимов Максим Александрович", "taxID": "561411013401", "email": "info@alimov.agency",
-       "description": "Таргетированная реклама ВКонтакте для детских онлайн-школ и сетей офлайн-студий.",
+       "description": "Агентство интернет-рекламы: VK Реклама, Яндекс Директ, Telegram Ads, посевы в Telegram, MAX, Ozon, Яндекс Бизнес и Карты.",
        "areaServed": {"@type": "Country", "name": "Россия"}, "sameAs": SAME_AS,
-       "knowsAbout": ["таргетированная реклама ВКонтакте", "VK Ads", "реклама детских школ", "реклама онлайн-школ"]}
+       "knowsAbout": ["таргетированная реклама ВКонтакте", "VK Реклама", "Яндекс Директ", "Telegram Ads", "посевы в Telegram",
+                      "реклама в MAX", "продвижение на Ozon", "Яндекс Бизнес", "реклама онлайн-школ"]}
 
 
 def between(text, start, end):
@@ -176,10 +177,10 @@ chart = f"""          <figure class="aa-chart">
           </figure>"""
 # первый экран: карточка кейса, которая меняется вместе с нишей в заголовке
 heroes = [c for c in CASES if c.get("hero")]
-order = {"genius_school": 0, "irbis_case": 1, "tetrica_case": 2, "uchi_case": 3}
+order = {"genius_school": 0, "irbis_case": 1, "tetrica_case": 2, "unicode_case": 3}
 heroes.sort(key=lambda c: order.get(c["slug"], 99))
 items = [{
-    "word": c["hero"]["word"], "label": f"Кейс · {c['client']}",
+    "label": f"{c['channel']} · {c['client']}",
     "badge": c["hero"]["badge"], "leads": num(c["leads"]), "count": c["leads"], "desc": c["hero"]["desc"],
     "cpl": f"{num(c['cpl'])} ₽", "row_label": c["hero"]["row"][0], "row_value": c["hero"]["row"][1],
     "budget": f"{num(c['budget'])} ₽", "href": f"{SITE}{c['slug']}",
@@ -222,10 +223,12 @@ for m in re.finditer(r'<details>\s*<summary[^>]*>(.*?)<i[^>]*></i></summary>\s*<
 schema = {"@context": "https://schema.org", "@graph": [
     ORG,
     {"@type": "WebSite", "@id": f"{SITE}#site", "url": SITE, "name": BRAND, "inLanguage": "ru", "publisher": {"@id": f"{SITE}#org"}},
-    {"@type": "Service", "name": "Таргетированная реклама ВКонтакте для детских школ", "serviceType": "Таргетированная реклама VK Ads",
+    {"@type": "Service", "name": "Настройка и ведение интернет-рекламы", "serviceType": "Интернет-реклама",
      "provider": {"@id": f"{SITE}#org"}, "areaServed": {"@type": "Country", "name": "Россия"},
-     "audience": {"@type": "Audience", "audienceType": "Детские онлайн-школы, сети детских студий и образовательные центры"}},
-    {"@type": "ItemList", "name": "Кейсы по рекламе детских школ", "itemListElement": [
+     "hasOfferCatalog": {"@type": "OfferCatalog", "name": "Рекламные каналы", "itemListElement": [
+         {"@type": "Offer", "itemOffered": {"@type": "Service", "name": n}} for n in
+         ["VK Реклама", "Яндекс Директ", "Telegram Ads", "Посевы в Telegram", "Реклама в MAX", "Продвижение на Ozon", "Яндекс Бизнес и Карты"]]}},
+    {"@type": "ItemList", "name": "Кейсы", "itemListElement": [
         {"@type": "ListItem", "position": i + 1, "url": f"{SITE}{c['slug']}", "name": plain(c["title"])} for i, c in enumerate(CASES)]},
     {"@type": "FAQPage", "mainEntity": faq},
 ]}

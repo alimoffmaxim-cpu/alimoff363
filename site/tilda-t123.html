@@ -168,6 +168,9 @@
 .aa-tab[aria-selected="true"] { background: #fff; color: var(--aa-ink); }
 .aa-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--aa-dark-line); border: 1px solid var(--aa-dark-line); border-radius: var(--aa-r); overflow: hidden; }
 .aa-panel[hidden] { display: none; }
+.aa-panel--ch { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.aa-panel--ch .aa-card { grid-template-columns: minmax(0, 1fr); gap: 10px; align-content: start; }
+.aa-panel--ch .aa-card__ico { margin-bottom: 8px; }
 .aa-card { background: var(--aa-dark); padding: clamp(24px, 3vw, 32px); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 18px; align-items: start; transition: background .2s; }
 .aa-card:hover { background: var(--aa-dark-card); }
 .aa-card__ico { grid-row: span 2; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--aa-dark-line); color: var(--aa-accent); font-family: var(--aa-display); font-weight: 600; font-size: 15px; }
@@ -343,6 +346,7 @@
 
 /* tablet */
 @media (max-width: 960px) {
+  .aa-panel--ch { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-hero__grid, .aa-contact, .aa-faq-grid { grid-template-columns: minmax(0, 1fr); }
   .aa-hero__text { padding-block: 0; }
   .aa-stack { max-width: 520px; }
@@ -367,7 +371,7 @@
   .aa-hero__cta .aa-btn { flex: 1 1 100%; }
   .aa-feature { grid-template-columns: minmax(0, 1fr); }
   .aa-feature__go { width: 52px; height: 52px; }
-  .aa-panel, .aa-cases { grid-template-columns: minmax(0, 1fr); }
+  .aa-panel, .aa-panel--ch, .aa-cases { grid-template-columns: minmax(0, 1fr); }
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
@@ -403,9 +407,9 @@
       <svg class="aa-rings aa-rings--hero" viewBox="-300 -300 600 600" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="1"><circle r="70"/><circle r="140"/><circle r="210"/><circle r="280"/><path d="M-300 0H-90M90 0H300M0 -300V-90M0 90V300" stroke-dasharray="2 7"/></g><circle class="aa-rings__spin" r="175" fill="none" stroke-width="1.5" stroke-dasharray="3 13"/><circle class="aa-rings__dot" r="4"/></svg>
       <div class="aa-wrap aa-hero__grid">
         <div class="aa-hero__text">
-          <span class="aa-chip">Таргетированная реклама ВКонтакте для детских школ</span>
-          <h1 class="aa-h1">Заявки для <span class="aa-rot" id="aa-word">детских школ</span></h1>
-          <p class="aa-lead">Качественные и недорогие заявки из VK Рекламы: от&nbsp;135&nbsp;₽ за&nbsp;заявку и&nbsp;<mark class="aa-mark">ROMI до&nbsp;1600%</mark>. Больше 37 тысяч заявок в пяти кейсах.</p>
+          <span class="aa-chip">Агентство интернет-рекламы</span>
+          <h1 class="aa-h1">Клиенты из <span class="aa-rot" id="aa-word" data-words='["VK Рекламы", "Яндекс Директа", "Telegram Ads", "посевов в Telegram", "MAX", "Ozon", "Яндекс Карт"]'>VK Рекламы</span></h1>
+          <p class="aa-lead">Настраиваем и ведём рекламу в VK Рекламе, Яндекс Директе, Telegram, MAX, на&nbsp;Ozon и&nbsp;Яндекс Картах. В&nbsp;кейсах — больше 37 тысяч заявок, от&nbsp;135&nbsp;₽ за&nbsp;заявку и&nbsp;<mark class="aa-mark">ROMI до&nbsp;1600%</mark>.</p>
           <div class="aa-hero__cta">
             <a class="aa-btn aa-btn--dark" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -418,7 +422,7 @@
         <div class="aa-hero__side">
           <div class="aa-stack">
             <div class="aa-sticker aa-sticker--main">
-              <small data-k="label">Кейс · Онлайн-школа Genius school</small>
+              <small data-k="label">VK Ads · Онлайн-школа Genius school</small>
               <p class="aa-seal" data-k="badge">Рекордный ROMI 1600%</p>
               <p class="aa-big" data-k="leads" data-count="12652">12 652</p>
               <small data-k="desc">заявки для онлайн-школы скорочтения, математики и программирования</small>
@@ -434,9 +438,9 @@
             <button class="aa-dot" type="button" aria-pressed="true">Genius school</button>
             <button class="aa-dot" type="button" aria-pressed="false">«Ирбис»</button>
             <button class="aa-dot" type="button" aria-pressed="false">«Тетрика»</button>
-            <button class="aa-dot" type="button" aria-pressed="false">«Учи.ру»</button>
+            <button class="aa-dot" type="button" aria-pressed="false">«Юникод»</button>
           </div>
-          <script type="application/json" id="aa-hero-data">[{"word": "онлайн-школ", "label": "Кейс · Онлайн-школа Genius school", "badge": "Рекордный ROMI 1600%", "leads": "12 652", "count": 12652, "desc": "заявки для онлайн-школы скорочтения, математики и программирования", "cpl": "135 ₽", "row_label": "Средний ROMI", "row_value": "800%", "budget": "1 704 393 ₽", "href": "https://alimov.agency/genius_school"}, {"word": "театральных студий", "label": "Кейс · Театральная студия «Ирбис»", "badge": "Самый большой бюджет — 5,6 млн ₽", "leads": "11 552", "count": 11552, "desc": "заявки для сети театральных студий: тест в 17 регионах и учебный год 2023–24", "cpl": "484 ₽", "row_label": "Креативов с видео", "row_value": "75%", "budget": "5 591 529 ₽", "href": "https://alimov.agency/irbis_case"}, {"word": "онлайн-репетиторов", "label": "Кейс · Онлайн-школа «Тетрика»", "badge": "−29% к цели по цене заявки", "leads": "8 143", "count": 8143, "desc": "заявки для онлайн-репетиторов, подготовки к школе и логопедов", "cpl": "567 ₽", "row_label": "Цель по цене заявки", "row_value": "до 800 ₽", "budget": "4 614 448 ₽", "href": "https://alimov.agency/tetrica_case"}, {"word": "IT-школ", "label": "Кейс · Школы программирования «Учи.ру»", "badge": "−48% к цели по цене заявки", "leads": "4 823", "count": 4823, "desc": "заявки для очных школ программирования для детей 7–15 лет", "cpl": "517 ₽", "row_label": "Цель по цене заявки", "row_value": "до 1000 ₽", "budget": "2 493 581 ₽", "href": "https://alimov.agency/uchi_case"}]</script>
+          <script type="application/json" id="aa-hero-data">[{"label": "VK Ads · Онлайн-школа Genius school", "badge": "Рекордный ROMI 1600%", "leads": "12 652", "count": 12652, "desc": "заявки для онлайн-школы скорочтения, математики и программирования", "cpl": "135 ₽", "row_label": "Средний ROMI", "row_value": "800%", "budget": "1 704 393 ₽", "href": "https://alimov.agency/genius_school"}, {"label": "VK Ads · Театральная студия «Ирбис»", "badge": "Самый большой бюджет — 5,6 млн ₽", "leads": "11 552", "count": 11552, "desc": "заявки для сети театральных студий: тест в 17 регионах и учебный год 2023–24", "cpl": "484 ₽", "row_label": "Креативов с видео", "row_value": "75%", "budget": "5 591 529 ₽", "href": "https://alimov.agency/irbis_case"}, {"label": "VK Ads · Онлайн-школа «Тетрика»", "badge": "−29% к цели по цене заявки", "leads": "8 143", "count": 8143, "desc": "заявки для онлайн-репетиторов, подготовки к школе и логопедов", "cpl": "567 ₽", "row_label": "Цель по цене заявки", "row_value": "до 800 ₽", "budget": "4 614 448 ₽", "href": "https://alimov.agency/tetrica_case"}, {"label": "VK Ads · Онлайн-школа «Юникод»", "badge": "Заявка вдвое дешевле цели", "leads": "614", "count": 614, "desc": "заявки для онлайн-школы программирования для детей 5–18 лет", "cpl": "257 ₽", "row_label": "Цель по цене заявки", "row_value": "до 500 ₽", "budget": "157 566 ₽", "href": "https://alimov.agency/unicode_case"}]</script>
         </div>
 <!-- hero:end -->
       </div>
@@ -450,9 +454,9 @@
         </div>
         <ul class="aa-why">
           <li>
-            <span class="aa-chip">аудитория</span>
-            <h3 class="aa-h3">Знаем, где искать родителей</h3>
-            <p>Мамы по всей России для онлайн-школ и в радиусе 1–3 км от филиала для офлайн-студий.</p>
+            <span class="aa-chip">каналы</span>
+            <h3 class="aa-h3">Подбираем каналы под бизнес</h3>
+            <p>Начинаем с площадок, где уже есть ваши клиенты, и добавляем новые, когда тест подтвердил цену заявки.</p>
           </li>
           <li>
             <span class="aa-chip">цена заявки</span>
@@ -462,7 +466,7 @@
           <li>
             <span class="aa-chip">масштаб</span>
             <h3 class="aa-h3">Ведём бюджеты от 80 тыс. до 5,6 млн ₽</h3>
-            <p>Начинаем с бюджета от 80&nbsp;000 ₽ и масштабируем до тысяч заявок за учебный год на всю сеть филиалов.</p>
+            <p>Начинаем с бюджета от 80&nbsp;000 ₽ и масштабируем то, что работает, — до тысяч заявок, как в кейсе «Ирбиса».</p>
           </li>
         </ul>
       </div>
@@ -493,7 +497,7 @@
           <div class="aa-num__head">
             <p class="aa-kicker">В цифрах</p>
             <p class="aa-huge" id="aa-num-title" data-count="37784">37&nbsp;784</p>
-            <p class="aa-huge__label">заявки для детских школ в пяти кейсах</p>
+            <p class="aa-huge__label">заявки в пяти кейсах</p>
             <ul class="aa-minis">
               <li><b>от 135 ₽</b><span>лучшая цена заявки</span></li>
               <li><b>до 1600%</b><span>рекордный ROMI</span></li>
@@ -517,27 +521,20 @@
 
       <section class="aa-sec aa-sec--flush" id="services" aria-labelledby="aa-services-title">
         <div class="aa-wrap">
-          <div class="aa-sec__row">
-            <div class="aa-sec__head">
-              <p class="aa-kicker">Услуги</p>
-              <h2 class="aa-h2" id="aa-services-title">Таргетированная реклама ВКонтакте</h2>
-            </div>
-            <div class="aa-seg" role="tablist" aria-label="Для кого">
-              <button class="aa-tab" type="button" role="tab" id="aa-tab-online" aria-controls="aa-panel-online" aria-selected="true">Онлайн-школам</button>
-              <button class="aa-tab" type="button" role="tab" id="aa-tab-offline" aria-controls="aa-panel-offline" aria-selected="false" tabindex="-1">Офлайн-студиям</button>
-            </div>
+          <div class="aa-sec__head">
+            <p class="aa-kicker">Услуги</p>
+            <h2 class="aa-h2" id="aa-services-title">Каналы, которые настраиваем</h2>
+            <p class="aa-muted">Ведём один канал или связку из нескольких — под задачу и бюджет</p>
           </div>
-          <div class="aa-panel" role="tabpanel" id="aa-panel-online" aria-labelledby="aa-tab-online">
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">VK</span><h3 class="aa-h3">VK Ads</h3><p>Запуск и ведение таргетированной рекламы ВКонтакте под цену заявки</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">РФ</span><h3 class="aa-h3">Аудитории</h3><p>Широкие сегменты: мамы со всей России</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">▶</span><h3 class="aa-h3">Креативы</h3><p>Видео и статичные изображения — от них зависят объём и цена заявок</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">%</span><h3 class="aa-h3">Офферы</h3><p>Пробное занятие, в том числе платное, как в кейсе Genius school</p></div>
-          </div>
-          <div class="aa-panel" role="tabpanel" id="aa-panel-offline" aria-labelledby="aa-tab-offline" hidden>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">VK</span><h3 class="aa-h3">VK Ads</h3><p>Реклама сразу на все филиалы сети, до 17 регионов в одном проекте</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">км</span><h3 class="aa-h3">Гео филиалов</h3><p>Мамы, которые живут в радиусе 1–3 км от филиала</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">A+</span><h3 class="aa-h3">Школы рядом</h3><p>Родители детей из школ, расположенных рядом с филиалом</p></div>
-            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">▶</span><h3 class="aa-h3">Креативы</h3><p>Видео и изображения, в 75% креативов — видео</p></div>
+          <div class="aa-panel aa-panel--ch">
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">VK</span><h3 class="aa-h3">VK Реклама</h3><p>Таргет ВКонтакте по интересам, гео и сообществам. Основной канал наших кейсов</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">Я</span><h3 class="aa-h3">Яндекс Директ</h3><p>Поиск и РСЯ: показываем рекламу тем, кто уже ищет ваш товар или услугу</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">TG</span><h3 class="aa-h3">Telegram Ads</h3><p>Официальная реклама в каналах Telegram по тематикам и конкретным каналам</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">@</span><h3 class="aa-h3">Посевы в Telegram</h3><p>Подбор каналов, закупка постов и учёт заявок с каждого размещения</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">M</span><h3 class="aa-h3">MAX</h3><p>Реклама в каналах и чатах мессенджера MAX</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">OZ</span><h3 class="aa-h3">Ozon</h3><p>Продвижение товаров внутри маркетплейса: оплата за заказ, за клик, вывод в топ</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">◎</span><h3 class="aa-h3">Яндекс Бизнес и Карты</h3><p>Реклама на Картах и в сервисах Яндекса для точек, салонов, студий и филиалов</p></div>
+            <div class="aa-card"><span class="aa-card__ico" aria-hidden="true">%</span><h3 class="aa-h3">Аналитика и отчёт</h3><p>Метрика, цели и Google Таблица с расходом, заявками и ценой заявки каждое утро</p></div>
           </div>
         </div>
       </section>
@@ -546,8 +543,8 @@
         <div class="aa-wrap">
           <div class="aa-sec__head">
             <p class="aa-kicker">Кейсы</p>
-            <h2 class="aa-h2" id="aa-cases-title">Кейсы по рекламе детских школ</h2>
-            <p class="aa-muted">Полоса на карточке — цена заявки относительно цели клиента</p>
+            <h2 class="aa-h2" id="aa-cases-title">Кейсы</h2>
+            <p class="aa-muted">Пока в основном VK Реклама для онлайн-школ и детских студий. Полоса на карточке — цена заявки относительно цели клиента</p>
           </div>
           <div class="aa-cases">
 <!-- cases:start -->
@@ -597,25 +594,25 @@
       <div class="aa-wrap">
         <div class="aa-sec__head">
           <p class="aa-kicker">Как мы работаем</p>
-          <h2 class="aa-h2" id="aa-how-title">Как привести заявки детской школе из&nbsp;ВКонтакте</h2>
-          <p class="aa-lead">Настраиваем и ведём таргетированную рекламу VK Ads для детских онлайн-школ, сетей офлайн-студий и образовательных центров по всей России. Главный показатель — цена заявки, которую клиент готов платить.</p>
+          <h2 class="aa-h2" id="aa-how-title">Как мы получаем заявки из&nbsp;рекламы</h2>
+          <p class="aa-lead">Настраиваем и ведём рекламу в VK Рекламе, Яндекс Директе, Telegram, MAX, на Ozon и Яндекс Картах для бизнеса по всей России. Главный показатель — цена заявки или заказа, которую вы готовы платить.</p>
         </div>
         <div class="aa-how">
           <article>
-            <h3 class="aa-h3">Реклама онлайн-школы</h3>
-            <p>Для онлайн-школ работают широкие аудитории: мамы со всей России. Заявки ведём на пробное занятие, в том числе платное. Так онлайн-школа Genius school получила 12&nbsp;652 заявки по 135&nbsp;₽ на курсы скорочтения, математики и программирования, а средний ROMI составил 800%.</p>
+            <h3 class="aa-h3">Подбираем каналы под задачу</h3>
+            <p>Таргет ВКонтакте и посевы в Telegram создают спрос, Яндекс Директ забирает тех, кто уже ищет, Ozon продаёт товар внутри маркетплейса, Яндекс Карты приводят людей, которые рядом с вашей точкой. Начинаем с одного-двух каналов и добавляем остальные, когда цена заявки подтверждена.</p>
           </article>
           <article>
-            <h3 class="aa-h3">Реклама детской студии с филиалами</h3>
-            <p>Офлайн-студиям нужны родители, которым удобно добираться до занятий. Поэтому кроме широких сегментов запускаем гиперлокальные: мам в радиусе 1–3&nbsp;км от филиала и родителей детей из ближайших школ. Для сети театральных студий «Ирбис» так вели рекламу сразу на 17 регионов.</p>
+            <h3 class="aa-h3">Аудитории и гео</h3>
+            <p>Онлайн-бизнесу подходит вся Россия, бизнесу с точками — люди, которым удобно до вас добраться. Для них запускаем гиперлокальные аудитории: в радиусе 1–3&nbsp;км от точки. Для сети театральных студий «Ирбис» так вели рекламу ВКонтакте сразу на 17 регионов и получили 11&nbsp;552 заявки.</p>
           </article>
           <article>
             <h3 class="aa-h3">Креативы, от которых зависит цена заявки</h3>
-            <p>Основной акцент делаем на креативы: от них зависят объём, качество и стоимость заявок. Используем видео и статичные изображения. В кейсе «Ирбиса» видео было в 75% креативов.</p>
+            <p>Основной акцент делаем на креативы: от них зависят объём, качество и стоимость заявок. Используем видео и статичные изображения. В кейсе «Ирбиса» видео было в 75% креативов, а онлайн-школа Genius school получила 12&nbsp;652 заявки по 135&nbsp;₽ со средним ROMI 800%.</p>
           </article>
           <article>
             <h3 class="aa-h3">Цена заявки ниже цели</h3>
-            <p>Перед запуском фиксируем, сколько школа готова платить за заявку, и держим цену ниже этой планки. В кейсах «Тетрики», «Учи.ру», «Юникода» и «Ирбиса» заявка вышла на 29–53% дешевле цели клиента. Цифры по расходу и заявкам каждое утро приходят в Google Таблицу.</p>
+            <p>Перед запуском фиксируем, сколько вы готовы платить за заявку, и держим цену ниже этой планки. В кейсах «Тетрики», «Учи.ру», «Юникода» и «Ирбиса» заявка вышла на 29–53% дешевле цели клиента. Цифры по расходу и заявкам каждое утро приходят в Google Таблицу.</p>
           </article>
         </div>
       </div>
@@ -626,28 +623,32 @@
       <div class="aa-wrap aa-faq-grid">
         <div class="aa-sec__head">
           <p class="aa-kicker">Частые вопросы</p>
-          <h2 class="aa-h2" id="aa-faq-title">Вопросы о рекламе детских школ</h2>
+          <h2 class="aa-h2" id="aa-faq-title">Вопросы о рекламе</h2>
         </div>
         <div class="aa-faq">
           <details>
-            <summary class="aa-h3">С какими школами вы работаете?<i aria-hidden="true"></i></summary>
-            <p>С детскими онлайн-школами и сетями офлайн-студий: программирование, скорочтение и математика, онлайн-репетиторы, театральные студии.</p>
+            <summary class="aa-h3">С каким бизнесом вы работаете?<i aria-hidden="true"></i></summary>
+            <p>С любым, кому нужны заявки или продажи из интернета: онлайн-сервисы и школы, бизнес с офлайн-точками, товары на маркетплейсах. Больше всего кейсов в образовании: онлайн-школы, детские студии, школы программирования.</p>
+          </details>
+          <details>
+            <summary class="aa-h3">Какие рекламные каналы вы настраиваете?<i aria-hidden="true"></i></summary>
+            <p>VK Рекламу, Яндекс Директ, Telegram Ads, посевы в Telegram-каналах, рекламу в MAX, продвижение на Ozon, Яндекс Бизнес и Яндекс Карты. Можно начать с одного канала и добавить остальные после теста.</p>
           </details>
           <details>
             <summary class="aa-h3">Какой нужен рекламный бюджет?<i aria-hidden="true"></i></summary>
             <p>Рекламный бюджет — от 80&nbsp;000 ₽. В наших кейсах бюджеты от 157 тыс. до 5,6 млн ₽. Под ваш бюджет и допустимую цену заявки посчитаем, сколько заявок можно получить.</p>
           </details>
           <details>
-            <summary class="aa-h3">Сколько стоит заявка для детской школы во ВКонтакте?<i aria-hidden="true"></i></summary>
-            <p>В наших кейсах средняя цена заявки от 135 ₽ (онлайн-школа Genius school) до 567 ₽ («Тетрика» и офлайн-филиалы «Ирбиса»). Цена зависит от ниши, оффера, географии и креативов, поэтому перед запуском договариваемся о допустимой цене заявки.</p>
+            <summary class="aa-h3">Сколько будет стоить заявка?<i aria-hidden="true"></i></summary>
+            <p>Цена зависит от ниши, канала, оффера, географии и креативов, поэтому перед запуском договариваемся о допустимой цене заявки. В наших кейсах во ВКонтакте средняя цена заявки от 135 ₽ (онлайн-школа Genius school) до 567 ₽ («Тетрика» и тест «Ирбиса»).</p>
           </details>
           <details>
-            <summary class="aa-h3">Подходит ли таргет ВКонтакте офлайн-студии?<i aria-hidden="true"></i></summary>
-            <p>Да. Для офлайн-студий настраиваем рекламу на мам, которые живут рядом с филиалом. Сеть театральных студий «Ирбис» на тесте получила 1&nbsp;919 заявок по 567 ₽ при цели 1200 ₽, а за учебный год 2023–24 — ещё 9&nbsp;633 заявки по 468 ₽.</p>
+            <summary class="aa-h3">Подходит ли реклама бизнесу с офлайн-точками?<i aria-hidden="true"></i></summary>
+            <p>Да. Настраиваем рекламу на людей, которые живут рядом с точкой, и продвигаем компанию на Яндекс Картах. Сеть театральных студий «Ирбис» на тесте получила 1&nbsp;919 заявок по 567 ₽ при цели 1200 ₽, а за учебный год 2023–24 — ещё 9&nbsp;633 заявки по 468 ₽.</p>
           </details>
           <details>
             <summary class="aa-h3">Вы работаете с моим городом?<i aria-hidden="true"></i></summary>
-            <p>Да. Онлайн-школам приводим заявки со всей России, офлайн-студиям — в городах, где есть филиалы. В кейсе «Ирбиса» реклама шла сразу на 17 регионов.</p>
+            <p>Да. Онлайн-бизнесу приводим клиентов со всей России, бизнесу с точками — в городах, где они есть. В кейсе «Ирбиса» реклама шла сразу на 17 регионов.</p>
           </details>
           <details>
             <summary class="aa-h3">Сколько стоят ваши услуги?<i aria-hidden="true"></i></summary>
@@ -670,8 +671,8 @@
         <div class="aa-contact">
           <div class="aa-contact__text">
             <span class="aa-chip">Контакты</span>
-            <h2 class="aa-h2" id="aa-contact-title">Хотите так же? <mark class="aa-mark aa-mark--solid">Обсудим</mark> вашу школу</h2>
-            <p>Расскажите о школе, бюджете и допустимой цене заявки.</p>
+            <h2 class="aa-h2" id="aa-contact-title">Хотите так же? <mark class="aa-mark aa-mark--solid">Обсудим</mark> ваш проект</h2>
+            <p>Расскажите о бизнесе, бюджете и допустимой цене заявки.</p>
             <a class="aa-btn aa-btn--accent" href="https://t.me/alimoffmaxim" target="_blank" rel="noopener">Нужны клиенты
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m0 0-6-6m6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
@@ -697,7 +698,7 @@
 </div>
 
 <!-- schema:start -->
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"ProfessionalService","@id":"https://alimov.agency/#org","name":"Alimov Agency","url":"https://alimov.agency/","legalName":"ИП Алимов Максим Александрович","taxID":"561411013401","email":"info@alimov.agency","description":"Таргетированная реклама ВКонтакте для детских онлайн-школ и сетей офлайн-студий.","areaServed":{"@type":"Country","name":"Россия"},"sameAs":["https://t.me/alimoffmaxim","https://vk.com/alimovmaksim"],"knowsAbout":["таргетированная реклама ВКонтакте","VK Ads","реклама детских школ","реклама онлайн-школ"]},{"@type":"WebSite","@id":"https://alimov.agency/#site","url":"https://alimov.agency/","name":"Alimov Agency","inLanguage":"ru","publisher":{"@id":"https://alimov.agency/#org"}},{"@type":"Service","name":"Таргетированная реклама ВКонтакте для детских школ","serviceType":"Таргетированная реклама VK Ads","provider":{"@id":"https://alimov.agency/#org"},"areaServed":{"@type":"Country","name":"Россия"},"audience":{"@type":"Audience","audienceType":"Детские онлайн-школы, сети детских студий и образовательные центры"}},{"@type":"ItemList","name":"Кейсы по рекламе детских школ","itemListElement":[{"@type":"ListItem","position":1,"url":"https://alimov.agency/irbis_case","name":"11 552 заявки для сети театральных студий «Ирбис»"},{"@type":"ListItem","position":2,"url":"https://alimov.agency/genius_school","name":"12 652 заявки по 135 ₽ для онлайн-школы Genius school"},{"@type":"ListItem","position":3,"url":"https://alimov.agency/tetrica_case","name":"8 143 заявки для онлайн-школы «Тетрика»"},{"@type":"ListItem","position":4,"url":"https://alimov.agency/uchi_case","name":"4 823 заявки для сети школ программирования «Учи.ру»"},{"@type":"ListItem","position":5,"url":"https://alimov.agency/unicode_case","name":"614 заявок по 257 ₽ для онлайн-школы программирования «Юникод»"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"С какими школами вы работаете?","acceptedAnswer":{"@type":"Answer","text":"С детскими онлайн-школами и сетями офлайн-студий: программирование, скорочтение и математика, онлайн-репетиторы, театральные студии."}},{"@type":"Question","name":"Какой нужен рекламный бюджет?","acceptedAnswer":{"@type":"Answer","text":"Рекламный бюджет — от 80 000 ₽. В наших кейсах бюджеты от 157 тыс. до 5,6 млн ₽. Под ваш бюджет и допустимую цену заявки посчитаем, сколько заявок можно получить."}},{"@type":"Question","name":"Сколько стоит заявка для детской школы во ВКонтакте?","acceptedAnswer":{"@type":"Answer","text":"В наших кейсах средняя цена заявки от 135 ₽ (онлайн-школа Genius school) до 567 ₽ («Тетрика» и офлайн-филиалы «Ирбиса»). Цена зависит от ниши, оффера, географии и креативов, поэтому перед запуском договариваемся о допустимой цене заявки."}},{"@type":"Question","name":"Подходит ли таргет ВКонтакте офлайн-студии?","acceptedAnswer":{"@type":"Answer","text":"Да. Для офлайн-студий настраиваем рекламу на мам, которые живут рядом с филиалом. Сеть театральных студий «Ирбис» на тесте получила 1 919 заявок по 567 ₽ при цели 1200 ₽, а за учебный год 2023–24 — ещё 9 633 заявки по 468 ₽."}},{"@type":"Question","name":"Вы работаете с моим городом?","acceptedAnswer":{"@type":"Answer","text":"Да. Онлайн-школам приводим заявки со всей России, офлайн-студиям — в городах, где есть филиалы. В кейсе «Ирбиса» реклама шла сразу на 17 регионов."}},{"@type":"Question","name":"Кому принадлежат рекламные кабинеты?","acceptedAnswer":{"@type":"Answer","text":"Вам. Кабинеты создаются на вашу компанию, мы работаем в них по доступу. Если решите прекратить работу, всё останется у вас."}},{"@type":"Question","name":"Как выглядит отчёт?","acceptedAnswer":{"@type":"Answer","text":"Это Google Таблица, которая обновляется каждое утро: показы, клики, расход, заявки и цена заявки по каждому кабинету, плюс итоги за вчера."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"ProfessionalService","@id":"https://alimov.agency/#org","name":"Alimov Agency","url":"https://alimov.agency/","legalName":"ИП Алимов Максим Александрович","taxID":"561411013401","email":"info@alimov.agency","description":"Агентство интернет-рекламы: VK Реклама, Яндекс Директ, Telegram Ads, посевы в Telegram, MAX, Ozon, Яндекс Бизнес и Карты.","areaServed":{"@type":"Country","name":"Россия"},"sameAs":["https://t.me/alimoffmaxim","https://vk.com/alimovmaksim"],"knowsAbout":["таргетированная реклама ВКонтакте","VK Реклама","Яндекс Директ","Telegram Ads","посевы в Telegram","реклама в MAX","продвижение на Ozon","Яндекс Бизнес","реклама онлайн-школ"]},{"@type":"WebSite","@id":"https://alimov.agency/#site","url":"https://alimov.agency/","name":"Alimov Agency","inLanguage":"ru","publisher":{"@id":"https://alimov.agency/#org"}},{"@type":"Service","name":"Настройка и ведение интернет-рекламы","serviceType":"Интернет-реклама","provider":{"@id":"https://alimov.agency/#org"},"areaServed":{"@type":"Country","name":"Россия"},"hasOfferCatalog":{"@type":"OfferCatalog","name":"Рекламные каналы","itemListElement":[{"@type":"Offer","itemOffered":{"@type":"Service","name":"VK Реклама"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Яндекс Директ"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Telegram Ads"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Посевы в Telegram"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Реклама в MAX"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Продвижение на Ozon"}},{"@type":"Offer","itemOffered":{"@type":"Service","name":"Яндекс Бизнес и Карты"}}]}},{"@type":"ItemList","name":"Кейсы","itemListElement":[{"@type":"ListItem","position":1,"url":"https://alimov.agency/irbis_case","name":"11 552 заявки для сети театральных студий «Ирбис»"},{"@type":"ListItem","position":2,"url":"https://alimov.agency/genius_school","name":"12 652 заявки по 135 ₽ для онлайн-школы Genius school"},{"@type":"ListItem","position":3,"url":"https://alimov.agency/tetrica_case","name":"8 143 заявки для онлайн-школы «Тетрика»"},{"@type":"ListItem","position":4,"url":"https://alimov.agency/uchi_case","name":"4 823 заявки для сети школ программирования «Учи.ру»"},{"@type":"ListItem","position":5,"url":"https://alimov.agency/unicode_case","name":"614 заявок по 257 ₽ для онлайн-школы программирования «Юникод»"}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"С каким бизнесом вы работаете?","acceptedAnswer":{"@type":"Answer","text":"С любым, кому нужны заявки или продажи из интернета: онлайн-сервисы и школы, бизнес с офлайн-точками, товары на маркетплейсах. Больше всего кейсов в образовании: онлайн-школы, детские студии, школы программирования."}},{"@type":"Question","name":"Какие рекламные каналы вы настраиваете?","acceptedAnswer":{"@type":"Answer","text":"VK Рекламу, Яндекс Директ, Telegram Ads, посевы в Telegram-каналах, рекламу в MAX, продвижение на Ozon, Яндекс Бизнес и Яндекс Карты. Можно начать с одного канала и добавить остальные после теста."}},{"@type":"Question","name":"Какой нужен рекламный бюджет?","acceptedAnswer":{"@type":"Answer","text":"Рекламный бюджет — от 80 000 ₽. В наших кейсах бюджеты от 157 тыс. до 5,6 млн ₽. Под ваш бюджет и допустимую цену заявки посчитаем, сколько заявок можно получить."}},{"@type":"Question","name":"Сколько будет стоить заявка?","acceptedAnswer":{"@type":"Answer","text":"Цена зависит от ниши, канала, оффера, географии и креативов, поэтому перед запуском договариваемся о допустимой цене заявки. В наших кейсах во ВКонтакте средняя цена заявки от 135 ₽ (онлайн-школа Genius school) до 567 ₽ («Тетрика» и тест «Ирбиса»)."}},{"@type":"Question","name":"Подходит ли реклама бизнесу с офлайн-точками?","acceptedAnswer":{"@type":"Answer","text":"Да. Настраиваем рекламу на людей, которые живут рядом с точкой, и продвигаем компанию на Яндекс Картах. Сеть театральных студий «Ирбис» на тесте получила 1 919 заявок по 567 ₽ при цели 1200 ₽, а за учебный год 2023–24 — ещё 9 633 заявки по 468 ₽."}},{"@type":"Question","name":"Вы работаете с моим городом?","acceptedAnswer":{"@type":"Answer","text":"Да. Онлайн-бизнесу приводим клиентов со всей России, бизнесу с точками — в городах, где они есть. В кейсе «Ирбиса» реклама шла сразу на 17 регионов."}},{"@type":"Question","name":"Кому принадлежат рекламные кабинеты?","acceptedAnswer":{"@type":"Answer","text":"Вам. Кабинеты создаются на вашу компанию, мы работаем в них по доступу. Если решите прекратить работу, всё останется у вас."}},{"@type":"Question","name":"Как выглядит отчёт?","acceptedAnswer":{"@type":"Answer","text":"Это Google Таблица, которая обновляется каждое утро: показы, клики, расход, заявки и цена заявки по каждому кабинету, плюс итоги за вчера."}}]}]}</script>
 <!-- schema:end -->
 
 <script>
@@ -775,7 +776,7 @@
     });
   }
 
-  // hero: the niche in the title and the case panel change together
+  // hero: the channel in the title and the case panel change on one timer
   var heroData = document.getElementById('aa-hero-data');
   var panel = document.querySelector('.aa-stack');
   var word = document.getElementById('aa-word');
@@ -783,10 +784,13 @@
   var heroSec = document.querySelector('.aa-hero');
   if (heroData && panel && word && dots.length) {
     var items = JSON.parse(heroData.textContent);
-    var cur = 0, timer = null, paused = false, DUR = 3000;
-    var show = function (i, animate) {
+    var words = JSON.parse(word.getAttribute('data-words') || '[]');
+    var cur = 0, wi = 0, timer = null, paused = false, DUR = 3000;
+    var show = function (i, animate, step) {
       cur = (i + items.length) % items.length;
       var it = items[cur];
+      if (step) wi = (wi + 1) % words.length;
+      var text = words.length ? words[wi] : it.word;
       dots.forEach(function (d, k) { d.setAttribute('aria-pressed', k === cur ? 'true' : 'false'); });
       var fill = function () {
         panel.querySelectorAll('[data-k]').forEach(function (el) {
@@ -798,22 +802,25 @@
         if (animate) countUp(big);
         panel.classList.remove('is-swap');
       };
-      if (!animate) { word.textContent = it.word; fill(); return; }
-      word.classList.add('is-out');
+      if (!animate) { word.textContent = text; fill(); return; }
+      var swapWord = text !== word.textContent;
+      if (swapWord) word.classList.add('is-out');
       panel.classList.add('is-swap');
       setTimeout(function () {
-        word.textContent = it.word;
-        word.classList.remove('is-out');
-        word.classList.add('is-pre');
-        void word.offsetWidth;
-        word.classList.remove('is-pre');
+        if (swapWord) {
+          word.textContent = text;
+          word.classList.remove('is-out');
+          word.classList.add('is-pre');
+          void word.offsetWidth;
+          word.classList.remove('is-pre');
+        }
         fill();
       }, 320);
     };
     var schedule = function () {
       clearTimeout(timer);
       if (reduce || paused) return;
-      timer = setTimeout(function () { show(cur + 1, true); schedule(); }, DUR);
+      timer = setTimeout(function () { show(cur + 1, true, words.length > 0); schedule(); }, DUR);
     };
     heroSec.style.setProperty('--aa-dur', DUR + 'ms');
     dots.forEach(function (d, k) { d.addEventListener('click', function () { show(k, true); schedule(); }); });

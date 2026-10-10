@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WordFlow</title>
+  <meta name="description" content="Карточки с интервальными повторениями для изучения английских слов">
+  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="WordFlow">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1 id="title">Учить</h1>
+    <button id="undo" class="icon-btn" hidden aria-label="Отменить последний ответ">↶</button>
+  </header>
+
+  <main id="view"></main>
+
+  <nav class="tabbar" aria-label="Разделы">
+    <button data-tab="study" class="active"><span class="ti">📖</span><span>Учить</span></button>
+    <button data-tab="decks"><span class="ti">🗂️</span><span>Колоды</span></button>
+    <button data-tab="stats"><span class="ti">📊</span><span>Статистика</span></button>
+    <button data-tab="settings"><span class="ti">⚙️</span><span>Настройки</span></button>
+  </nav>
+
+  <script type="module" src="js/app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>

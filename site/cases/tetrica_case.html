@@ -217,6 +217,23 @@
 .aa-case__more i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--aa-paper); transition: background .2s, color .2s; }
 .aa-case__more svg { width: 15px; height: 15px; }
 .aa-case:hover .aa-case__more i { background: var(--aa-accent); color: var(--aa-on-accent); }
+/* video reviews */
+.aa-reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.aa-review { margin: 0; display: grid; gap: 16px; align-content: start; }
+.aa-video { position: relative; display: block; width: 100%; aspect-ratio: 16 / 9; padding: 0; border: 1px solid var(--aa-dark-line); border-radius: var(--aa-r); overflow: hidden; background: var(--aa-dark-card); cursor: pointer; }
+.aa-video img, .aa-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; object-fit: cover; }
+.aa-video img { transition: transform .5s ease, opacity .3s; opacity: .85; }
+.aa-video:hover img { transform: scale(1.04); opacity: 1; }
+.aa-video__play { position: absolute; left: 16px; bottom: 16px; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; background: var(--aa-accent); color: var(--aa-on-accent); box-shadow: 0 10px 30px rgba(230, 0, 126, .45); transition: transform .25s; }
+.aa-video__play svg { width: 26px; height: 26px; margin-left: 3px; }
+.aa-video:hover .aa-video__play { transform: scale(1.08); }
+.aa-video:focus-visible { outline: 2px solid var(--aa-accent); outline-offset: 3px; }
+.aa-review figcaption { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.aa-review figcaption b { display: block; font-weight: 600; font-size: 17px; line-height: 1.25; color: #fff; }
+.aa-review figcaption small { display: block; margin-top: 4px; font-size: 14px; color: var(--aa-dark-muted); }
+.aa-review__case { flex: none; display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1px solid var(--aa-dark-line); border-radius: 999px; color: #fff; text-decoration: none; font-size: 14px; font-weight: 600; transition: background .2s, border-color .2s; }
+.aa-review__case svg { width: 14px; height: 14px; }
+.aa-review__case:hover { background: var(--aa-accent); border-color: var(--aa-accent); }
 .aa-note { margin-top: 20px; font-size: 12px; color: var(--aa-dark-muted); opacity: .8; }
 
 
@@ -368,6 +385,7 @@
 
 /* tablet */
 @media (max-width: 960px) {
+  .aa-reviews { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-panel--ch { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .aa-hero__grid, .aa-contact, .aa-faq-grid { grid-template-columns: minmax(0, 1fr); }
   .aa-hero__text { padding-block: 0; }
@@ -393,7 +411,7 @@
   .aa-hero__cta .aa-btn { flex: 1 1 100%; }
   .aa-feature { grid-template-columns: minmax(0, 1fr); }
   .aa-feature__go { width: 52px; height: 52px; }
-  .aa-panel, .aa-panel--ch, .aa-cases { grid-template-columns: minmax(0, 1fr); }
+  .aa-panel, .aa-panel--ch, .aa-cases, .aa-reviews { grid-template-columns: minmax(0, 1fr); }
   .aa-seg { width: 100%; }
   .aa-tab { flex: 1; padding-inline: 8px; }
   .aa-minis { grid-template-columns: minmax(0, 1fr); }
@@ -838,7 +856,7 @@
 
   // reveal sections as they scroll in
   if ('IntersectionObserver' in window && !reduce) {
-    var rv = document.querySelectorAll('.aa-sec__head, .aa-approach, .aa-why > li, .aa-feature, .aa-num__head, .aa-chart, .aa-panel, .aa-case, .aa-faq, .aa-contact, .aa-about, .aa-ab, .aa-did > li, .aa-hl, .aa-plan');
+    var rv = document.querySelectorAll('.aa-sec__head, .aa-approach, .aa-why > li, .aa-feature, .aa-num__head, .aa-chart, .aa-panel, .aa-case, .aa-review, .aa-faq, .aa-contact, .aa-about, .aa-ab, .aa-did > li, .aa-hl, .aa-plan');
     var vo = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
@@ -854,6 +872,21 @@
       vo.observe(el);
     });
   }
+
+  // video reviews: the YouTube player loads only after a click
+  document.querySelectorAll('.aa-video[data-yt]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube-nocookie.com/embed/' + btn.getAttribute('data-yt') + '?autoplay=1&rel=0';
+      f.title = btn.getAttribute('aria-label');
+      f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      f.allowFullscreen = true;
+      var box = document.createElement('div');
+      box.className = 'aa-video';
+      box.appendChild(f);
+      btn.parentNode.replaceChild(box, btn);
+    });
+  });
 
   // service tabs
   var tabs = Array.prototype.slice.call(document.querySelectorAll('.aa-tab'));

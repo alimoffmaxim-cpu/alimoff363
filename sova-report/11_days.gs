@@ -54,13 +54,13 @@ function sbDirTables_(sh) {
   [['week', 'Разница с прошлой неделей'], ['month', 'Разница с прошлым месяцем']].forEach(function (pp) {
     sovaEnsureRows_(sh, r + cnt[pp[0]] + 4);
     const t = sbPeriodTable_(sh, r, pp[0], '$B$3', cnt[pp[0]]), d = t.r2 + 1;
-    sh.getRange(d, 1, 1, 9).setValues(sbLoc_([[pp[1]].concat('BCDEFGHI'.split('').map(function (L) {
+    sh.getRange(d, 1, 1, 10).setValues(sbLoc_([[pp[1]].concat('BCDEFGHIJ'.split('').map(function (L) {
       return t.r2 > t.r1 ? '=IFERROR(' + L + t.r2 + '/' + L + (t.r2 - 1) + '-1,"")' : '—';
     }))]));
-    sh.getRange(d, 1, 1, 9).setBackground('#e8ecf4').setFontWeight('bold').setHorizontalAlignment('right')
+    sh.getRange(d, 1, 1, 10).setBackground('#e8ecf4').setFontWeight('bold').setHorizontalAlignment('right')
       .setBorder(true, null, true, null, null, null, SB.NAVY, SpreadsheetApp.BorderStyle.SOLID);
     sh.getRange(d, 1).setHorizontalAlignment('left');
-    sh.getRange(d, 2, 1, 8).setNumberFormat('0.00%');
+    sh.getRange(d, 2, 1, 9).setNumberFormat('0.00%');
     SB.GOOD.forEach(function (g, i) { if (g) sbUpDown_(sh, sbCol_(i + 1) + d, g); });
     r = d + 2;
   });
@@ -78,19 +78,19 @@ function sbClearFrom_(sh, r) {
     .filter(function (x) { return x.getRanges()[0].getRow() < r; }));
 }
 
-/** Таблица «по дням» под таблицами по неделям и месяцам и 3 графика: ровно дни периода из блока сверху (J7:K7). */
+/** Таблица «по дням» под таблицами по неделям и месяцам и 3 графика: ровно дни периода из блока сверху (K7:L7). */
 function sbDays_(sh, cnt) {
   const r = sbDayRow_(cnt || sbTrendCounts_()), p = sbPeriodDates_(sh), n = Math.min(Math.max(p.n, 1), SB.MAX_DAYS);
   sovaEnsureRows_(sh, r + 2 + n);
   sbClearFrom_(sh, r);
   sh.getCharts().forEach(function (c) { sh.removeChart(c); });
   const t = sbPeriodTable_(sh, r, 'day', '$B$3', n);
-  sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [7], [0, 0], [SB.SUBS], true);
+  sbChart_(sh, 'col', 'Подписки по дням (линия — тренд)', t, [8], [0, 0], [SB.SUBS], true);
   sbChart_(sh, 'col', 'Расход по дням, ₽ (линия — тренд)', t, [2], [1, 0], [SB.SPEND], true);
-  sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [8], [2, 0], [SB.COST]);
+  sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [9], [2, 0], [SB.COST]);
 }
 
-/** Даты периода, как их считают формулы J7:K7: «с» = H3 или 1-е число месяца «по», «по» = J3 или отчётная дата. */
+/** Даты периода, как их считают формулы K7:L7: «с» = H3 или 1-е число месяца «по», «по» = J3 или отчётная дата. */
 function sbPeriodDates_(sh) {
   const v = sh.getRange('H3:J3').getValues()[0];
   const to = v[2] instanceof Date ? sbDay_(v[2]) : sbReportDate_();

@@ -5,17 +5,20 @@ function sbSumifs_(src, frm, to, dir) {
     (dir ? ',' + SB.D + '!$B:$B,' + dir : '') + ')';
 }
 
-/** CTR, CPC, цена подписки, CR для строки r (колонки E, F, H, I). */
+/** CTR, CPC, цена подписки, CR для строки r (колонки F, G, I, J). */
 function sbDerived_(r) {
-  return ['=IFERROR(D' + r + '/C' + r + ',"")', '=IFERROR(B' + r + '/D' + r + ',"")',
-    '=IFERROR(B' + r + '/G' + r + ',"")', '=IFERROR(G' + r + '/D' + r + ',"")'];
+  return ['=IFERROR(E' + r + '/D' + r + ',"")', '=IFERROR(B' + r + '/E' + r + ',"")',
+    '=IFERROR(B' + r + '/H' + r + ',"")', '=IFERROR(H' + r + '/E' + r + ',"")'];
 }
 
-/** B..I строки r: расход, показы, клики, CTR, CPC, подписки, цена подписки, CR за период [frm; to]. */
+/** B..J строки r: расход, расход с НДС, показы, клики, CTR, CPC, подписки, цена подписки, CR за период [frm; to]. */
 function sbMetrics_(r, frm, to, dir) {
   const s = function (c) { return '=' + sbSumifs_(c, frm, to, dir); }, d = sbDerived_(r);
-  return [s('C'), s('D'), s('E'), d[0], d[1], s('F'), d[2], d[3]];
+  return [s('C'), sbVat_(r), s('D'), s('E'), d[0], d[1], s('F'), d[2], d[3]];
 }
+
+/** Расход с НДС: целыми числами, без десятичной точки (иначе формула зависит от локали). */
+function sbVat_(r) { return '=B' + r + '*(100+' + SOVA.VAT_PERCENT + ')/100'; }
 
 function sbSetup_(sh, tab, widths) {
   if (sh.getMaxColumns() < 40) sh.insertColumnsAfter(sh.getMaxColumns(), 40 - sh.getMaxColumns());
@@ -82,26 +85,26 @@ function sbUpDown_(sh, a1, good) {
  * идёт с предыдущим периодом той же длины.
  */
 function sbKpi_(sh, r, dir, manual) {
-  const cur = r + 2, prev = r + 3, delta = r + 4, J = 'J' + cur, K = 'K' + cur;
+  const cur = r + 2, prev = r + 3, delta = r + 4, J = 'K' + cur, K = 'L' + cur;   // даты «с» и «по» — K и L
   const M = manual ? 'OR(ISNUMBER($H$3),ISNUMBER($J$3))' : 'FALSE';
   sh.getRange(r, 1).setValue(sbLocF_(manual ? '=IF(' + M + ',"Выбранный период против предыдущего той же длины",' +
     '"Этот месяц против тех же дней прошлого")' : 'Этот месяц против тех же дней прошлого')).setFontSize(12).setFontWeight('bold');
   sbHeader_(sh, r + 1, ['Период'].concat(SB.COLS.slice(1), ['с', 'по']));
   const from = manual ? '=IF(ISNUMBER($H$3),$H$3,DATE(YEAR(' + K + '),MONTH(' + K + '),1))' : '=DATE(YEAR($E$3),MONTH($E$3),1)';
   const to = manual ? '=IF(ISNUMBER($J$3),$J$3,$E$3)' : '=$E$3';
-  sh.getRange(cur, 1, 3, 11).setValues(sbLoc_([
+  sh.getRange(cur, 1, 3, 12).setValues(sbLoc_([
     [manual ? '=IF(' + M + ',"Выбранный период","Этот месяц")' : 'Этот месяц']
-      .concat(sbMetrics_(cur, '$J$' + cur, '$K$' + cur, dir), [from, to]),
+      .concat(sbMetrics_(cur, '$K$' + cur, '$L$' + cur, dir), [from, to]),
     [manual ? '=IF(' + M + ',"Предыдущий, той же длины","Прошлый, те же дни")' : 'Прошлый, те же дни']
-      .concat(sbMetrics_(prev, '$J$' + prev, '$K$' + prev, dir),
+      .concat(sbMetrics_(prev, '$K$' + prev, '$L$' + prev, dir),
         ['=IF(' + M + ',2*' + J + '-' + K + '-1,EDATE(' + J + ',-1))', '=IF(' + M + ',' + J + '-1,EDATE(' + K + ',-1))']),
-    ['Изменение'].concat('BCDEFGHI'.split('').map(function (L) { return '=IFERROR(' + L + cur + '/' + L + prev + '-1,"")'; }), ['', '']),
+    ['Изменение'].concat('BCDEFGHIJ'.split('').map(function (L) { return '=IFERROR(' + L + cur + '/' + L + prev + '-1,"")'; }), ['', '']),
   ]));
   sbBody_(sh, cur, delta, SB.FMT.concat(['dd.MM.yyyy', 'dd.MM.yyyy']));
-  sh.getRange(cur, 1, 1, 11).setFontSize(14).setFontWeight('bold');
-  sh.getRange(prev, 1, 1, 11).setFontColor(SB.MUTED);
-  sh.getRange(delta, 1, 1, 11).setFontWeight('bold').setFontColor(SB.MUTED);
-  sh.getRange(delta, 2, 1, 8).setNumberFormat(SB.DELTA);
+  sh.getRange(cur, 1, 1, 12).setFontSize(14).setFontWeight('bold');
+  sh.getRange(prev, 1, 1, 12).setFontColor(SB.MUTED);
+  sh.getRange(delta, 1, 1, 12).setFontWeight('bold').setFontColor(SB.MUTED);
+  sh.getRange(delta, 2, 1, 9).setNumberFormat(SB.DELTA);
   sh.setRowHeight(cur, 34);
   SB.GOOD.forEach(function (g, i) { if (g) sbUpDown_(sh, sbCol_(i + 1) + delta, g); });
   return delta + 2;

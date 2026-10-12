@@ -6,19 +6,19 @@ function sbSummary_(ss, cabs, period) {
   sbBanner_(sh, 'Сова · Сводная по всем направлениям', '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")');
   sbTopInfo_(sh, null);
   sbPeriodInputs_(sh, period || []);
-  let r = sbKpi_(sh, 5, null, true);   // строка «Этот месяц» — 7-я, её даты в J7:K7
+  let r = sbKpi_(sh, 5, null, true);   // строка «Этот месяц» — 7-я, её даты в K7:L7
 
-  sh.getRange(r, 1).setValue(sbLocF_('="🏥 Направления за "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")&" (те же даты, что выше)"'))
+  sh.getRange(r, 1).setValue(sbLocF_('="🏥 Направления за "&TEXT($K$7,"DD.MM.YYYY")&" — "&TEXT($L$7,"DD.MM.YYYY")&" (те же даты, что выше)"'))
     .setFontSize(12).setFontWeight('bold');
   sbHeader_(sh, r + 1, ['Направление'].concat(SB.COLS.slice(1), ['Доля расхода']));
   const t1 = r + 2, tt = t1 + n, d = sbDerived_(tt);
   const sum = function (L) { return '=SUM(' + L + t1 + ':' + L + (tt - 1) + ')'; };
   const rows = cabs.map(function (c, j) {
     const rr = t1 + j;
-    return ['=' + SB.SET + '!$A$' + c.row].concat(sbMetrics_(rr, '$J$7', '$K$7', '$A' + rr), ['=IFERROR(B' + rr + '/$B$' + tt + ',"")']);
+    return ['=' + SB.SET + '!$A$' + c.row].concat(sbMetrics_(rr, '$K$7', '$L$7', '$A' + rr), ['=IFERROR(B' + rr + '/$B$' + tt + ',"")']);
   });
-  rows.push(['Итого', sum('B'), sum('C'), sum('D'), d[0], d[1], sum('G'), d[2], d[3], '=IFERROR(B' + tt + '/$B$' + tt + ',"")']);
-  sh.getRange(t1, 1, n + 1, 10).setValues(sbLoc_(rows));
+  rows.push(['Итого', sum('B'), sum('C'), sum('D'), sum('E'), d[0], d[1], sum('H'), d[2], d[3], '=IFERROR(B' + tt + '/$B$' + tt + ',"")']);
+  sh.getRange(t1, 1, n + 1, 11).setValues(sbLoc_(rows));
   sbBody_(sh, t1, tt, SB.FMT.concat(['0%']), tt);
   sbChartsHeading_(sh, '📈 Подписки и расход по неделям и месяцам (завершённые периоды)');
   sbTrends_(sh, cabs);   // со строки tt + 2 = 15 + число направлений
@@ -70,7 +70,7 @@ function sbDirection_(ss, cab, index, period) {
   sh.setFrozenRows(3);
 }
 
-function sbChartsHeading_(sh, text) { sh.getRange('M3').setValue(text).setFontSize(12).setFontWeight('bold'); }
+function sbChartsHeading_(sh, text) { sh.getRange('N3').setValue(text).setFontSize(12).setFontWeight('bold'); }
 
 /**
  * График по таблице t ({h, r2}): подписи — колонка A, значения — cols = [первая колонка, число колонок].
@@ -80,7 +80,7 @@ function sbChart_(sh, kind, title, t, cols, pos, colors, trend) {
   const rows = t.r2 - t.h + 1;
   let b = sh.newChart().setChartType(kind === 'line' ? Charts.ChartType.LINE : Charts.ChartType.COLUMN)
     .addRange(sh.getRange(t.h, 1, rows, 1)).addRange(sh.getRange(t.h, cols[0], rows, cols[1] || 1))
-    .setNumHeaders(1).setPosition(4 + pos[0] * 15, pos[1] ? 22 : 13, 0, 0)
+    .setNumHeaders(1).setPosition(4 + pos[0] * 15, pos[1] ? 23 : 14, 0, 0)
     .setOption('title', title).setOption('width', 560).setOption('height', 290).setOption('colors', colors)
     .setOption('legend', { position: colors.length > 1 ? 'bottom' : 'none' });
   if (trend) b = b.setOption('trendlines', { 0: { type: 'linear', color: SB.NAVY, lineWidth: 2, opacity: 0.8 } });

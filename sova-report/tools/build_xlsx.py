@@ -23,10 +23,12 @@ DIRS = ['Направление 1', 'Направление 2', 'Направл�
 FONT = 'Arial'
 D = "'Данные'"
 SET = "'⚙ Настройки'"
-COLS = ['Период', 'Расход', 'Показы', 'Клики', 'CTR', 'CPC', 'Подписки', 'Цена подписки', 'CR в подписку']
-FMT = [None, '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0.0" ₽"', '0.0%']
+VAT_PERCENT = 22  # НДС для колонки «Расход с НДС» (как SOVA.VAT_PERCENT в скрипте)
+# B расход, C расход с НДС, D показы, E клики, F CTR, G CPC, H подписки, I цена подписки, J CR; в блоке периода K, L — даты
+COLS = ['Период', 'Расход', 'Расход с НДС', 'Показы', 'Клики', 'CTR', 'CPC', 'Подписки', 'Цена подписки', 'CR в подписку']
+FMT = [None, '#,##0" ₽"', '#,##0" ₽"', '#,##0', '#,##0', '0.00%', '#,##0.0" ₽"', '#,##0', '#,##0.0" ₽"', '0.0%']
 DELTA_FMT = '"▲ "0%;"▼ "0%;0%'
-GOOD = [0, 0, 1, 1, 1, -1, 1, -1, 1]  # +1 — хорошо, когда растёт; −1 — когда падает
+GOOD = [0, 0, 0, 1, 1, 1, -1, 1, -1, 1]  # +1 — хорошо, когда растёт; −1 — когда падает
 N_MONTHS, N_WEEKS, N_DAYS = 12, 26, 92  # N_DAYS — строк под дни периода (в скрипте их ровно столько, сколько дней)
 
 thin = Side(style='thin', color=LINE)
@@ -56,19 +58,20 @@ def sumifs(src, frm, to, dir_ref):
 
 
 def metric_row(ws, r, frm, to, dir_ref):
-    """B..I: расход, показы, клики, CTR, CPC, подписки, цена подписки, CR за период [frm; to]."""
+    """B..J: расход, расход с НДС, показы, клики, CTR, CPC, подписки, цена подписки, CR за период [frm; to]."""
     ws[f'B{r}'] = '=' + sumifs('C', frm, to, dir_ref)
-    ws[f'C{r}'] = '=' + sumifs('D', frm, to, dir_ref)
-    ws[f'D{r}'] = '=' + sumifs('E', frm, to, dir_ref)
-    ws[f'G{r}'] = '=' + sumifs('F', frm, to, dir_ref)
+    ws[f'D{r}'] = '=' + sumifs('D', frm, to, dir_ref)
+    ws[f'E{r}'] = '=' + sumifs('E', frm, to, dir_ref)
+    ws[f'H{r}'] = '=' + sumifs('F', frm, to, dir_ref)
     derived_row(ws, r)
 
 
 def derived_row(ws, r):
-    ws[f'E{r}'] = f'=IFERROR(D{r}/C{r},"")'
-    ws[f'F{r}'] = f'=IFERROR(B{r}/D{r},"")'
-    ws[f'H{r}'] = f'=IFERROR(B{r}/G{r},"")'
-    ws[f'I{r}'] = f'=IFERROR(G{r}/D{r},"")'
+    ws[f'C{r}'] = f'=B{r}*(100+{VAT_PERCENT})/100'
+    ws[f'F{r}'] = f'=IFERROR(E{r}/D{r},"")'
+    ws[f'G{r}'] = f'=IFERROR(B{r}/E{r},"")'
+    ws[f'I{r}'] = f'=IFERROR(B{r}/H{r},"")'
+    ws[f'J{r}'] = f'=IFERROR(H{r}/E{r},"")'
 
 
 # ---------- оформление ----------
@@ -133,27 +136,27 @@ def kpi_block(ws, r, dir_ref, manual=False):
     h = r + 1
     header(ws, h, ['Период'] + COLS[1:] + ['с', 'по'])
     cur, prev, delta = h + 1, h + 2, h + 3
-    J, K = f'J{cur}', f'K{cur}'
+    J, K = f'K{cur}', f'L{cur}'  # даты «с» и «по»
     ws[J] = f'=IF(ISNUMBER($H$3),$H$3,DATE(YEAR({K}),MONTH({K}),1))' if manual else '=DATE(YEAR($E$3),MONTH($E$3),1)'
     ws[K] = '=IF(ISNUMBER($J$3),$J$3,$E$3)' if manual else '=$E$3'
-    ws[f'J{prev}'] = f'=IF({M},2*{J}-{K}-1,EDATE({J},-1))'
-    ws[f'K{prev}'] = f'=IF({M},{J}-1,EDATE({K},-1))'
+    ws[f'K{prev}'] = f'=IF({M},2*{J}-{K}-1,EDATE({J},-1))'
+    ws[f'L{prev}'] = f'=IF({M},{J}-1,EDATE({K},-1))'
     ws[f'A{cur}'] = f'=IF({M},"Выбранный период","Этот месяц")' if manual else 'Этот месяц'
     ws[f'A{prev}'] = f'=IF({M},"Предыдущий, той же длины","Прошлый, те же дни")' if manual else 'Прошлый, те же дни'
     ws[f'A{delta}'] = 'Изменение'
     for rr in (cur, prev):
-        metric_row(ws, rr, f'$J${rr}', f'$K${rr}', dir_ref)
-    for c in range(2, 10):
+        metric_row(ws, rr, f'$K${rr}', f'$L${rr}', dir_ref)
+    for c in range(2, 11):
         L = col(c)
         ws[f'{L}{delta}'] = f'=IFERROR({L}{cur}/{L}{prev}-1,"")'
-    style_body(ws, cur, delta, 11, FMT + ['DD.MM.YYYY', 'DD.MM.YYYY'])
-    for c in range(1, 12):
+    style_body(ws, cur, delta, 12, FMT + ['DD.MM.YYYY', 'DD.MM.YYYY'])
+    for c in range(1, 13):
         ws.cell(cur, c).font = font(size=14, bold=True)
         ws.cell(prev, c).font = font(color=MUTED)
         ws.cell(delta, c).font = font(bold=True, color=MUTED)
-        ws.cell(delta, c).number_format = DELTA_FMT if 1 < c < 10 else 'General'
+        ws.cell(delta, c).number_format = DELTA_FMT if 1 < c < 11 else 'General'
     ws.row_dimensions[cur].height = 26
-    for c in range(2, 10):
+    for c in range(2, 11):
         if not GOOD[c - 1]:
             continue
         ref = f'{col(c)}{delta}'
@@ -180,8 +183,8 @@ PERIODS = {
              lambda k: f'({LAST_WEEK}-7*{N_WEEKS - 1 - k})',
              lambda a: f'({a}+6)', lambda a: f'TEXT({a},"DD.MM")&"–"&TEXT({a}+6,"DD.MM.YYYY")'),
     # дни периода из блока сверху (J7:K7); строки после конца периода пустые
-    'day': ('="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', N_DAYS, 'День',
-            lambda k: f'($J$7+{k})', lambda a: a,
+    'day': ('="📆 По дням: "&TEXT($K$7,"DD.MM.YYYY")&" — "&TEXT($L$7,"DD.MM.YYYY")', N_DAYS, 'День',
+            lambda k: f'($K$7+{k})', lambda a: a,
             lambda a: f'TEXT({a},"DD.MM")&" "&' + RU_WEEKDAY.format(x=a)),
 }
 
@@ -197,17 +200,17 @@ def period_table(ws, r, period, dir_ref):
         ws[f'A{rr}'] = '=' + label(a)
         metric_row(ws, rr, a, end(a), dir_ref)
         if period == 'day':
-            for L in 'ABCDEFGHI':
-                ws[f'{L}{rr}'] = f'=IF({a}>$K$7,"",{ws[f"{L}{rr}"].value[1:]})'
+            for L in 'ABCDEFGHIJ':
+                ws[f'{L}{rr}'] = f'=IF({a}>$L$7,"",{ws[f"{L}{rr}"].value[1:]})'
     r2 = r1 + n - 1
-    style_body(ws, r1, r2, 9, FMT)
-    heat(ws, f'H{r1}:H{r2}')
+    style_body(ws, r1, r2, 10, FMT)
+    heat(ws, f'I{r1}:I{r2}')
     return r1, r2, r2 + 2
 
 
 # ---------- графики ----------
 
-CHART_COLS = ['M', 'V']
+CHART_COLS = ['N', 'W']
 
 
 def place(ws, chart, grid_row, grid_col, top=4):
@@ -258,16 +261,16 @@ def simple_chart(ws, kind, title, cats_col, val_col, r1, r2, color, cell, fmt='#
 
 
 def subs_charts(ws, r1, r2, cell, name):
-    simple_chart(ws, 'col', f'Подписки по {name} (пунктир — тренд)', 1, 7, r1, r2, SUBS, cell, trend=True)
+    simple_chart(ws, 'col', f'Подписки по {name} (пунктир — тренд)', 1, 8, r1, r2, SUBS, cell, trend=True)
 
 
 def cost_chart(ws, r1, r2, cell, name):
-    simple_chart(ws, 'line', f'Цена подписки по {name}, ₽', 1, 8, r1, r2, COST, cell)
+    simple_chart(ws, 'line', f'Цена подписки по {name}, ₽', 1, 9, r1, r2, COST, cell)
 
 
 def charts_heading(ws, text):
-    ws['M3'] = text
-    ws['M3'].font = font(size=12, bold=True)
+    ws['N3'] = text
+    ws['N3'].font = font(size=12, bold=True)
 
 
 def multi_chart(ws, kind, title, r_head, r1, r2, ncols, cell, stacked=False, fmt='#,##0'):
@@ -298,10 +301,10 @@ def top_info(ws, dir_formula):
 def diff_row(ws, d, last, label):
     """Строка «Разница с прошлой неделей / месяцем»: последний период к предыдущему."""
     ws[f'A{d}'] = label
-    for c in range(2, 10):
+    for c in range(2, 11):
         L = col(c)
         ws[f'{L}{d}'] = f'=IFERROR({L}{last}/{L}{last - 1}-1,"")'
-    for c in range(1, 10):
+    for c in range(1, 11):
         cell = ws.cell(d, c)
         cell.font, cell.fill = font(bold=True), fill('E8ECF4')
         cell.border = Border(top=Side(style='thin', color=NAVY), bottom=Side(style='thin', color=NAVY))
@@ -312,7 +315,7 @@ def diff_row(ws, d, last, label):
 
 def direction_sheet(wb, i):
     ws = wb.create_sheet(DIRS[i])
-    setup_sheet(ws, DIR_COLORS[i], [18] + [12] * 8 + [11, 11, 3])
+    setup_sheet(ws, DIR_COLORS[i], [18] + [12] * 9 + [11, 11, 3])
     banner(ws, '="Сова · "&$B$3',
            '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, f'={SET}!$A${i + 2}')
@@ -415,28 +418,28 @@ def period_inputs(ws):
 
 def summary_sheet(wb):
     ws = wb.create_sheet('Сводная', 0)
-    setup_sheet(ws, NAVY, [18] + [12] * 8 + [11, 11, 3])
+    setup_sheet(ws, NAVY, [18] + [12] * 9 + [11, 11, 3])
     banner(ws, 'Сова · Сводная по всем направлениям',
            '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")')
     top_info(ws, None)
     period_inputs(ws)
     r = kpi_block(ws, 5, None, manual=True)
 
-    section(ws, r, '="🏥 Направления за "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")&" (те же даты, что выше)"')
+    section(ws, r, '="🏥 Направления за "&TEXT($K$7,"DD.MM.YYYY")&" — "&TEXT($L$7,"DD.MM.YYYY")&" (те же даты, что выше)"')
     header(ws, r + 1, ['Направление'] + COLS[1:] + ['Доля расхода'])
     t1 = r + 2
     for j in range(3):
         rr = t1 + j
         ws[f'A{rr}'] = f'={SET}!$A${j + 2}'
-        metric_row(ws, rr, '$J$7', '$K$7', f'$A{rr}')
+        metric_row(ws, rr, '$K$7', '$L$7', f'$A{rr}')
     tt = t1 + 3
     ws[f'A{tt}'] = 'Итого'
-    for L in 'BCDG':
+    for L in 'BDEH':
         ws[f'{L}{tt}'] = f'=SUM({L}{t1}:{L}{tt - 1})'
     derived_row(ws, tt)
     for rr in range(t1, tt + 1):
-        ws[f'J{rr}'] = f'=IFERROR(B{rr}/$B${tt},"")'
-    style_body(ws, t1, tt, 10, FMT + ['0%'], tt)
+        ws[f'K{rr}'] = f'=IFERROR(B{rr}/$B${tt},"")'
+    style_body(ws, t1, tt, 11, FMT + ['0%'], tt)
     r = tt + 2
 
     piv = {}

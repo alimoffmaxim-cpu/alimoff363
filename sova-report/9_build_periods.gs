@@ -31,9 +31,9 @@ function sbPeriod_(kind, n) {
     end: function (a) { return '(' + a + '+6)'; },
     label: function (a) { return 'TEXT(' + a + ',"DD.MM")&"–"&TEXT(' + a + '+6,"DD.MM.YYYY")'; },   // год — по концу недели
   };
-  return {   // дни периода из блока сверху: с $J$7, n дней (n считает sbDays_)
-    title: '="📆 По дням: "&TEXT($J$7,"DD.MM.YYYY")&" — "&TEXT($K$7,"DD.MM.YYYY")', n: n, first: 'День',
-    start: function (k) { return '($J$7+' + k + ')'; },
+  return {   // дни периода из блока сверху: с $K$7, n дней (n считает sbDays_)
+    title: '="📆 По дням: "&TEXT($K$7,"DD.MM.YYYY")&" — "&TEXT($L$7,"DD.MM.YYYY")', n: n, first: 'День',
+    start: function (k) { return '($K$7+' + k + ')'; },
     end: function (a) { return a; },
     label: function (a) { return 'TEXT(' + a + ',"DD.MM")&" "&CHOOSE(WEEKDAY(' + a + ',2),"пн","вт","ср","чт","пт","сб","вс")'; },
   };
@@ -49,9 +49,9 @@ function sbPeriodTable_(sh, r, kind, dir, n) {
     const a = p.start(k);
     rows.push(['=' + p.label(a)].concat(sbMetrics_(r1 + k, a, p.end(a), dir)));
   }
-  sh.getRange(r1, 1, p.n, 9).setValues(sbLoc_(rows));
+  sh.getRange(r1, 1, p.n, 10).setValues(sbLoc_(rows));
   sbBody_(sh, r1, r2, SB.FMT);
-  sbHeat_(sh, 'H' + r1 + ':H' + r2);
+  sbHeat_(sh, 'I' + r1 + ':I' + r2);   // цена подписки
   return { h: r + 1, r1: r1, r2: r2, next: r2 + 2 };
 }
 

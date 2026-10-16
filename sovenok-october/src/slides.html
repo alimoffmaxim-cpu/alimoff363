@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Совенок — октябрь без простуд</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #E06A7C;
+    --pink-deep: #C24E66;
+    --pink-soft: #FCE4E7;
+    --cream: #FFF6EC;
+    --paper: #FFFFFF;
+    --ink: #33181F;
+    --ink-soft: #6B4A51;
+    --pumpkin: #E8792A;
+    --pumpkin-soft: #FFE6CF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #ccc; font-family: 'Nunito', sans-serif; color: var(--ink); }
+  .slide {
+    width: 1280px; height: 1600px; position: relative; overflow: hidden;
+    background: var(--cream); margin: 0 auto 40px;
+  }
+  .display { font-family: 'Unbounded', sans-serif; letter-spacing: -0.02em; line-height: 1.04; }
+  .accent { color: var(--pink); }
+  .accent-o { color: var(--pumpkin); }
+
+  .photo { position: absolute; left: 0; top: 0; width: 1280px; height: 1600px;
+    background: url(photo-clean.jpg) no-repeat 0 0 / 1280px 1600px; }
+
+  .badge { position: absolute; top: 48px; right: 48px; width: 168px; height: 168px; border-radius: 50%;
+    background: var(--cream); display: grid; place-items: center;
+    box-shadow: 0 12px 40px rgba(51,24,31,.25); z-index: 3; }
+  .badge img { width: 96px; }
+
+  .chip { display: inline-flex; align-items: center; gap: 14px; padding: 16px 30px; border-radius: 999px;
+    background: var(--pink); color: #fff; font-weight: 900; font-size: 28px; letter-spacing: .01em; }
+  .chip::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: #fff; }
+  .chip.soft { background: var(--pink-soft); color: var(--pink-deep); }
+  .chip.soft::before { background: var(--pink); }
+
+  .panel { position: absolute; left: 0; right: 0; bottom: 0; background: var(--cream);
+    border-radius: 72px 72px 0 0; padding: 72px 88px 80px; display: flex; flex-direction: column; z-index: 2; }
+
+  .brand { display: flex; align-items: center; gap: 18px; font-weight: 800; font-size: 28px; color: var(--ink-soft); }
+  .brand img { width: 46px; }
+
+  /* листья */
+  .leaf { position: absolute; z-index: 3; }
+
+  /* ---------- 1. обложка ---------- */
+  #s1 .panel { top: 900px; padding-bottom: 64px; }
+  #s1 h1 { font-size: 96px; font-weight: 800; margin: 36px 0 30px; }
+  #s1 .sub { font-size: 38px; line-height: 1.3; font-weight: 700; color: var(--ink-soft); max-width: 900px; }
+  #s1 .sub b { color: var(--ink); font-weight: 900; }
+  #s1 .foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+  .swipe { display: flex; align-items: center; gap: 20px; font-family: 'Unbounded'; font-weight: 700; font-size: 24px;
+    letter-spacing: .08em; color: var(--pink); text-transform: uppercase; }
+  .swipe span { width: 84px; height: 84px; border-radius: 50%; background: var(--pink); color: #fff;
+    display: grid; place-items: center; font-size: 40px; letter-spacing: 0; }
+
+  /* ---------- 2. советы ---------- */
+  #s2 { padding: 72px 88px 64px; display: flex; flex-direction: column; }
+  #s2 .blob1 { position: absolute; width: 560px; height: 560px; border-radius: 50%; background: var(--pumpkin-soft); top: -250px; right: -200px; }
+  #s2 .blob2 { position: absolute; width: 420px; height: 420px; border-radius: 50%; background: var(--pink-soft); bottom: -240px; left: -180px; }
+  #s2 .head { position: relative; display: flex; justify-content: space-between; align-items: flex-start; }
+  #s2 h2 { font-size: 84px; font-weight: 800; margin-top: 34px; }
+  #s2 .kid { width: 210px; height: 210px; border-radius: 50%; flex: none;
+    background: url(photo-clean.jpg) no-repeat -215px -275px / 640px 800px;
+    border: 10px solid #fff; box-shadow: 0 14px 40px rgba(51,24,31,.18); margin-top: 10px; }
+  #s2 .list { position: relative; margin-top: 52px; display: flex; flex-direction: column; gap: 22px; flex: 1; }
+  .tip { flex: 1; background: var(--paper); border-radius: 36px; padding: 0 44px 0 34px; display: flex; align-items: center; gap: 36px;
+    box-shadow: 0 10px 30px rgba(120,60,40,.08); }
+  .tip .n { flex: none; width: 104px; height: 104px; border-radius: 30px; background: var(--pink); color: #fff;
+    display: grid; place-items: center; font-family: 'Unbounded'; font-weight: 800; font-size: 54px; }
+  .tip:nth-child(even) .n { background: var(--pumpkin); }
+  .tip h3 { font-family: 'Unbounded'; font-weight: 700; font-size: 38px; letter-spacing: -0.015em; line-height: 1.15; }
+  .tip p { font-size: 31px; line-height: 1.3; font-weight: 700; color: var(--ink-soft); margin-top: 8px; }
+  .tip p b { color: var(--ink); font-weight: 900; }
+  .tip p b.accent-o { color: var(--pumpkin); }
+  #s2 .foot { position: relative; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; }
+
+  /* ---------- 3. запись ---------- */
+  #s3 .photo { background-position: 0 -40px; }
+  #s3 .panel { top: 800px; }
+  #s3 h2 { font-size: 100px; font-weight: 800; margin: 40px 0 36px; }
+  #s3 .sub { font-size: 40px; line-height: 1.32; font-weight: 700; color: var(--ink-soft); }
+  #s3 .sub b { color: var(--ink); font-weight: 900; }
+  .cta { margin-top: auto; display: flex; align-items: center; justify-content: space-between; height: 132px;
+    border-radius: 999px; background: var(--pink); padding: 0 24px 0 60px; color: #fff;
+    font-family: 'Unbounded'; font-weight: 700; font-size: 40px; box-shadow: 0 18px 40px rgba(224,106,124,.35); }
+  .cta span { width: 92px; height: 92px; border-radius: 50%; background: #fff; color: var(--pink); display: grid; place-items: center; font-size: 44px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="leaf" viewBox="0 0 100 100">
+      <path d="M50 4 L58 26 L76 14 L72 36 L96 34 L80 52 L92 62 L66 66 L70 86 L52 72 L50 96 L48 72 L30 86 L34 66 L8 62 L20 52 L4 34 L28 36 L24 14 L42 26 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- 1. Обложка -->
+<section class="slide" id="s1">
+  <div class="photo"></div>
+  <div class="badge"><img src="logo.png" alt=""></div>
+  <svg class="leaf" style="left:1010px; top:830px; width:120px; height:120px; color:var(--pumpkin); transform:rotate(18deg)"><use href="#leaf"/></svg>
+  <svg class="leaf" style="left:1130px; top:790px; width:70px; height:70px; color:#F2B33D; transform:rotate(-24deg)"><use href="#leaf"/></svg>
+  <div class="panel">
+    <div><span class="chip">Советы педиатра</span></div>
+    <h1 class="display">Как пережить октябрь<br><span class="accent">без простуд?</span></h1>
+    <p class="sub">Советы от врача-педиатра <b>детской клиники Совенок</b></p>
+    <div class="foot">
+      <div></div>
+      <div class="swipe">Листайте <span>→</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Советы -->
+<section class="slide" id="s2">
+  <div class="blob1"></div><div class="blob2"></div>
+  <div class="head">
+    <div>
+      <span class="chip soft">Детская клиника Совенок</span>
+      <h2 class="display"><span class="accent">5 советов</span><br>от педиатра</h2>
+    </div>
+    <div class="kid"></div>
+  </div>
+  <div class="list">
+    <div class="tip"><div class="n">1</div><div><h3>Не кутайте!</h3><p><b>Вспотел на прогулке = замерз.</b> Одевайте ребенка слоями.</p></div></div>
+    <div class="tip"><div class="n">2</div><div><h3>Увлажняйте воздух</h3><p><b>Сухие слизистые</b> = открытые ворота для вирусов.</p></div></div>
+    <div class="tip"><div class="n">3</div><div><h3>Сбалансированное питание</h3><p>Сезонные продукты богаты <b>витаминами</b>.</p></div></div>
+    <div class="tip"><div class="n">4</div><div><h3>Сон 10 часов</h3><p>Недосып снижает защиту организма <b class="accent-o">на 30%</b>.</p></div></div>
+    <div class="tip"><div class="n">5</div><div><h3>Гуляйте в любую погоду</h3><p><b>Движение и свежий воздух</b> творят чудеса.</p></div></div>
+  </div>
+  <div class="foot">
+    <div class="brand"><img src="logo.png" alt="">Детская клиника Совенок</div>
+    <div class="swipe">Листайте <span>→</span></div>
+  </div>
+</section>
+
+<!-- 3. Запись -->
+<section class="slide" id="s3">
+  <div class="photo"></div>
+  <div class="badge"><img src="logo.png" alt=""></div>
+  <svg class="leaf" style="left:150px; top:740px; width:110px; height:110px; color:var(--pumpkin); transform:rotate(-16deg)"><use href="#leaf"/></svg>
+  <svg class="leaf" style="left:70px; top:700px; width:64px; height:64px; color:#F2B33D; transform:rotate(30deg)"><use href="#leaf"/></svg>
+  <div class="panel">
+    <div><span class="chip">Детская клиника Совенок</span></div>
+    <h2 class="display">Остались <span class="accent">вопросы?</span></h2>
+    <p class="sub">Запишитесь на прием к нашему педиатру — <b>составим индивидуальный план укрепления иммунитета!</b></p>
+    <div class="cta">Записаться на прием <span>→</span></div>
+  </div>
+</section>
+
+</body>
+</html>

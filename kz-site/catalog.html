@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каталог новостроек — Ключ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Unbounded:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="catalog">
+  <main>
+    <section class="page-head">
+      <div class="container">
+        <div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><span>Новостройки</span></div>
+        <h1 id="catalog-title">Новостройки</h1>
+      </div>
+    </section>
+
+    <div class="container catalog">
+      <aside class="filters" id="filters" aria-label="Фильтры">
+        <div class="filters__head"><h3>Параметры</h3><button class="filters__reset" type="button" id="reset">Сбросить</button></div>
+        <form id="filter-form">
+          <div class="field"><label for="f-q">Поиск</label><input class="input" id="f-q" name="q" placeholder="Название ЖК или метро"></div>
+          <div class="field"><span class="field__label">Комнатность</span><div class="seg seg--full" id="f-rooms"></div></div>
+          <div class="field"><span class="field__label">Цена, млн ₸</span>
+            <div class="range"><input class="input" id="f-pmin" name="pmin" type="number" min="0" step="0.5" placeholder="от" aria-label="Цена от"><input class="input" id="f-pmax" name="pmax" type="number" min="0" step="0.5" placeholder="до" aria-label="Цена до"></div>
+          </div>
+          <div class="field"><span class="field__label">Локация</span><div class="seg seg--full" data-seg="location"></div></div>
+          <div class="field"><span class="field__label">Класс жилья</span><div class="seg seg--full" data-seg="cls"></div></div>
+          <div class="field"><span class="field__label">Срок сдачи</span><div class="seg seg--full" data-seg="year"></div></div>
+          <div class="field"><label for="f-dev">Застройщик</label><select class="select" id="f-dev" name="developer"></select></div>
+          <div class="field"><label for="f-type">Тип недвижимости</label><select class="select" id="f-type" name="type"></select></div>
+          <div class="field"><span class="field__label">Отделка</span><div class="seg seg--full" data-seg="finish"></div></div>
+          <div class="field"><span class="field__label">Тип дома</span><div class="seg seg--full" data-seg="building"></div></div>
+          <div class="field"><span class="field__label">Стадия</span><div class="seg seg--full" data-seg="stage"></div></div>
+          <div class="field"><span class="field__label">Транспорт</span><div class="seg seg--full" data-seg="transport"></div></div>
+          <div class="field">
+            <label class="check" for="f-parking"><input type="checkbox" id="f-parking" name="parking" value="1"> Подземный паркинг</label>
+            <label class="check" for="f-closed"><input type="checkbox" id="f-closed" name="closed" value="1"> Закрытая территория</label>
+            <label class="check" for="f-prime"><input type="checkbox" id="f-prime" name="prime" value="1"> <span id="f-prime-label"></span></label>
+          </div>
+          <button class="btn btn--gold btn--block filters-toggle" type="button" id="filters-close">Показать объекты <span class="arr">→</span></button>
+        </form>
+      </aside>
+
+      <div class="catalog__main">
+        <div class="toolbar">
+          <div class="toolbar__count"><strong id="count-n"></strong><span class="mono muted" id="count-l"></span> <span class="mono gold" id="active-geo"></span></div>
+          <div class="toolbar__right">
+            <button class="btn btn--ghost btn--sm filters-toggle" type="button" id="filters-open">Фильтры</button>
+            <select class="select" id="sort" aria-label="Сортировка">
+              <option value="">Сначала новые</option>
+              <option value="price-asc">Сначала дешевле</option>
+              <option value="price-desc">Сначала дороже</option>
+              <option value="year">По сроку сдачи</option>
+            </select>
+            <div class="view-toggle" role="group" aria-label="Вид">
+              <button type="button" data-view="grid" class="is-active" aria-label="Сеткой"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect width="6" height="6"/><rect x="8" width="6" height="6"/><rect y="8" width="6" height="6"/><rect x="8" y="8" width="6" height="6"/></svg></button>
+              <button type="button" data-view="list" aria-label="Списком"><svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><rect width="14" height="3"/><rect y="5.5" width="14" height="3"/><rect y="11" width="14" height="3"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid--3 results" id="results"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/pages/catalog-page.js"></script>
+</body>
+</html>

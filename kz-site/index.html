@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ключ — новостройки Алматы и Астаны</title>
+  <meta name="description" content="Каталог новостроек Алматы и Астаны: квартиры от застройщиков, цены в тенге, сроки сдачи, новости рынка.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Unbounded:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="home">
+  <main>
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__text">
+          <div>
+            <div class="label" style="margin-bottom:36px" id="hero-label"><b>●</b> Каталог новостроек</div>
+            <h1>
+              <span class="ln"><span>Дома,</span></span>
+              <span class="ln"><span>в которых</span></span>
+              <span class="ln"><span><em>хочется жить</em></span></span>
+            </h1>
+            <p class="hero__lead" style="margin-top:28px">Проекты от проверенных застройщиков с актуальными ценами, планировками и сроками сдачи.</p>
+          </div>
+          <div class="hero__stats" id="stats"></div>
+        </div>
+        <div class="feature" id="feature"></div>
+      </div>
+    </section>
+
+    <div class="container">
+      <form class="search" action="catalog.html" id="hero-search">
+        <div class="field">
+          <span class="field__label">Комнатность</span>
+          <div class="seg" id="hero-rooms"></div>
+        </div>
+        <div class="field">
+          <label for="pmin">Цена от, млн ₸</label>
+          <input class="input" id="pmin" name="pmin" type="number" min="0" step="0.5" placeholder="20">
+        </div>
+        <div class="field">
+          <label for="pmax">Цена до, млн ₸</label>
+          <input class="input" id="pmax" name="pmax" type="number" min="0" step="0.5" placeholder="90">
+        </div>
+        <button class="btn btn--gold" type="submit" id="hero-submit">Найти <span class="arr">→</span></button>
+      </form>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="label" id="new-count"></div>
+          <div class="section-head__side"><h2>Новые объекты</h2><a class="link-arrow" href="catalog.html">Весь каталог →</a></div>
+        </div>
+        <div class="mosaic" id="new-objects"></div>
+      </div>
+    </section>
+
+    <section class="section rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Быстрый поиск</div>
+          <div class="section-head__side"><h2>Готовые подборки</h2></div>
+        </div>
+        <div class="picks" id="quick"></div>
+      </div>
+    </section>
+
+    <section class="section rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Журнал</div>
+          <div class="section-head__side"><h2>Новости и статьи</h2><a class="link-arrow" href="news.html">Все материалы →</a></div>
+        </div>
+        <div class="journal" id="home-news"></div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="cta">
+        <div>
+          <div class="label" style="margin-bottom:24px"><b>●</b> Бесплатная консультация</div>
+          <h2>Подберём квартиру под ваш бюджет за 15 минут</h2>
+          <p class="muted" style="margin-top:20px;max-width:440px">Эксперт расскажет о скидках, рассрочке и ипотечных программах застройщиков.</p>
+        </div>
+        <form data-lead="Получить подборку" novalidate></form>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Индекс</div>
+          <div class="section-head__side"><h2>Новостройки по районам</h2></div>
+        </div>
+        <div class="geo-tabs" role="tablist" id="geo-tabs"></div>
+        <div class="geo-list" id="geo-list"></div>
+      </div>
+    </section>
+
+    <section class="section--tight rule">
+      <div class="container section-head" style="margin:0;align-items:start">
+        <div class="label">О проекте</div>
+        <div class="prose">
+          <p>«Ключ» — независимый каталог новостроек Алматы и Астаны. Мы собираем информацию о жилых комплексах напрямую у застройщиков, регулярно обновляем цены и наличие квартир, публикуем новости рынка и экспертные материалы.</p>
+          <p>Ищите квартиры по комнатности, цене, сроку сдачи, классу жилья, отделке и транспортной доступности. Сравнивайте проекты и оставляйте заявку: специалист поможет с выбором и оформлением ипотеки.</p>
+          <p id="about-city"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/pages/home.js"></script>
+</body>
+</html>

@@ -19,6 +19,7 @@
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --container: 1240px;
+  color-scheme: dark;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -271,7 +272,7 @@ p { margin: 0; }
 .article .cover { position: relative; aspect-ratio: 16/8; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 36px; }
 
 /* ===== Анимация появления ===== */
-.reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+.reveal { transform: translateY(14px); transition: transform .7s ease; }
 .reveal.is-visible { opacity: 1; transform: none; }
 
 /* ===== Адаптив ===== */
@@ -324,5 +325,5 @@ p { margin: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
-  .reveal { opacity: 1; transform: none; }
+  .reveal { transform: none; }
 }

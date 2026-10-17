@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Каталог новостроек — Ключ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body data-page="catalog">
+  <main>
+    <section class="page-head">
+      <div class="container">
+        <div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><span>Новостройки</span></div>
+        <h1 id="catalog-title">Новостройки Москвы и Подмосковья</h1>
+      </div>
+    </section>
+
+    <div class="container catalog">
+      <aside class="filters" id="filters" aria-label="Фильтры">
+        <h3>Фильтры <button class="filters__reset" type="button" id="reset">Сбросить</button></h3>
+        <form id="filter-form" style="display:grid;gap:22px">
+          <div class="field"><span class="field__label">Поиск</span><input class="input" name="q" placeholder="Название ЖК или метро"></div>
+          <div class="field"><span class="field__label">Комнатность</span><div class="rooms" id="f-rooms"></div></div>
+          <div class="field"><span class="field__label">Цена, млн ₽</span>
+            <div class="range"><input class="input" name="pmin" type="number" min="0" step="0.5" placeholder="от"><input class="input" name="pmax" type="number" min="0" step="0.5" placeholder="до"></div>
+          </div>
+          <div class="field"><label for="f-location">Локация</label><select class="select" id="f-location" name="location"></select></div>
+          <div class="field"><label for="f-dev">Застройщик</label><select class="select" id="f-dev" name="developer"></select></div>
+          <div class="field"><label for="f-year">Срок сдачи</label><select class="select" id="f-year" name="year"></select></div>
+          <div class="field"><label for="f-cls">Класс жилья</label><select class="select" id="f-cls" name="cls"></select></div>
+          <div class="field"><label for="f-type">Тип недвижимости</label><select class="select" id="f-type" name="type"></select></div>
+          <div class="field"><label for="f-building">Тип дома</label><select class="select" id="f-building" name="building"></select></div>
+          <div class="field"><label for="f-finish">Отделка</label><select class="select" id="f-finish" name="finish"></select></div>
+          <div class="field"><label for="f-stage">Стадия строительства</label><select class="select" id="f-stage" name="stage"></select></div>
+          <div class="field"><label for="f-transport">Транспорт</label><select class="select" id="f-transport" name="transport"></select></div>
+          <div class="field">
+            <label class="check"><input type="checkbox" name="parking" value="1"> Подземный паркинг</label>
+            <label class="check"><input type="checkbox" name="closed" value="1"> Закрытая территория</label>
+            <label class="check"><input type="checkbox" name="mkad" value="1"> Внутри МКАД</label>
+          </div>
+          <button class="btn btn--gold filters-toggle" type="button" id="filters-close">Показать</button>
+        </form>
+      </aside>
+
+      <div>
+        <div class="toolbar">
+          <div><strong id="count"></strong> <span class="muted" id="active-geo"></span></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn--ghost btn--sm filters-toggle" type="button" id="filters-open">Фильтры</button>
+            <select class="select" id="sort" aria-label="Сортировка">
+              <option value="">Сначала новые</option>
+              <option value="price-asc">Сначала дешевле</option>
+              <option value="price-desc">Сначала дороже</option>
+              <option value="year">По сроку сдачи</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid--2" id="results"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/pages/catalog-page.js"></script>
+</body>
+</html>

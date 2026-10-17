@@ -3,6 +3,7 @@
   const D = window.DATA;
   const L = D.labels;
   const PHONE = '+7 (495) 120-45-67';
+  const TEL = PHONE.replace(/[^\d+]/g, '');
 
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -13,55 +14,43 @@
       return Math.round(v).toLocaleString('ru-RU') + ' ₽';
     },
     perM2(v) { return v ? 'от ' + Math.round(v / 1000).toLocaleString('ru-RU') + ' тыс. ₽/м²' : 'Цена по запросу'; },
-    term(c) { return c.stage === 'finishing' && c.year === 2026 ? `Сдача ${c.quarter} кв. ${c.year}` : `Срок сдачи ${c.quarter} квартал ${c.year}`; },
+    quarter(c) { return `${c.year}·Q${c.quarter}`; },
+    term(c) { return `Срок сдачи ${c.quarter} кв. ${c.year}`; },
     date(s) { return new Date(s).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }); },
+    dateShort(s) { return new Date(s).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }); },
     plural(n, forms) { const a = Math.abs(n) % 100, b = a % 10; return forms[a > 10 && a < 20 ? 2 : b > 1 && b < 5 ? 1 : b === 1 ? 0 : 2]; }
   };
 
-  // Генеративная «архитектурная» иллюстрация: силуэт зданий с окнами.
-  function placeholder(hue, seed, variant) {
-    const r = (n) => { const x = Math.sin(seed * 97 + n * 13.7) * 10000; return x - Math.floor(x); };
-    let rects = '';
-    let x = 0, i = 0;
-    while (x < 400) {
-      const w = 34 + r(i) * 50;
-      const h = 70 + r(i + 50) * (variant === 'low' ? 60 : 210);
-      const y = 300 - h;
-      const shade = 8 + r(i + 9) * 10;
-      rects += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="hsl(${hue} 20% ${shade}%)"/>`;
-      for (let wy = y + 10; wy < 290; wy += 14) {
-        for (let wx = x + 6; wx < x + w - 8; wx += 10) {
-          if (r(wx * wy) > 0.62) rects += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="4" height="6" fill="hsl(40 80% ${60 + r(wx + wy) * 25}%)" opacity="${(0.35 + r(wy) * 0.6).toFixed(2)}"/>`;
-        }
-      }
-      x += w + 2 + r(i + 3) * 6;
-      i++;
-    }
-    return `<div class="ph" style="--h:${hue}"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${rects}</svg></div>`;
+  // Фото с общим тонированием. size: 's' — карточки, '' — крупные кадры.
+  function photo(name, alt, size, eager) {
+    const src = `assets/img/${name}${size === 's' ? '-s' : ''}.jpg`;
+    return `<div class="media"><img src="${src}" alt="${esc(alt || '')}" ${eager ? '' : 'loading="lazy"'} decoding="async"></div>`;
   }
 
   const devById = (id) => D.developers.find((d) => d.id === id);
 
   function complexCard(c) {
     const dev = devById(c.developer);
-    const place = c.metro ? `<span><i class="metro-dot"></i>${esc(c.metro)}${c.metroMinutes ? ' · ' + c.metroMinutes + ' мин' : ''}</span>` : `<span>${esc(c.area)}</span>`;
+    const spec = [
+      c.metro ? `м. ${esc(c.metro)} ${c.metroMinutes}′` : esc(c.area),
+      `${c.floors} эт.`,
+      L.finish[c.finish]
+    ];
     return `
       <a class="card reveal" href="complex.html?id=${c.id}">
-        <div class="card__media">
-          ${placeholder(c.hue, c.name.length + c.floors, c.type === 'townhouse' || c.type === 'house' ? 'low' : '')}
-          <div class="card__badges">
-            ${c.isNew ? '<span class="badge badge--gold">Новинка</span>' : ''}
-            <span class="badge">${L.cls[c.cls]}</span>
-          </div>
+        <div class="media-wrap">
+          ${photo(c.photos[0], 'ЖК ' + c.name, 's')}
+          <span class="tag tag--tl">${c.code}</span>
+          <span class="tag tag--tr ${c.isNew ? 'tag--gold' : ''}">${c.isNew ? 'Новинка' : fmt.quarter(c)}</span>
+          <span class="vf"></span>
         </div>
         <div class="card__body">
-          <div class="card__term">${fmt.term(c)}</div>
-          <h3 class="card__title">${esc(c.name)}</h3>
+          <div class="card__row"><h3 class="card__title">${esc(c.name)}</h3><span class="card__cls mono">${L.cls[c.cls]}</span></div>
           <div class="card__dev">${esc(dev.name)}</div>
-          <div class="card__meta">${place}<span>${L.location[c.location]}</span></div>
+          <div class="card__spec mono">${spec.map((s) => `<span>${s}</span>`).join('')}</div>
           <div class="card__price">
             <strong>${fmt.perM2(c.pricePerM2)}</strong>
-            <small>${c.minPrice ? 'от ' + fmt.money(c.minPrice) : ''}</small>
+            <small>${c.minPrice ? 'от ' + fmt.money(c.minPrice) : fmt.quarter(c)}</small>
           </div>
         </div>
       </a>`;
@@ -70,10 +59,19 @@
   function newsCard(a, feature) {
     return `
       <a class="news-card reveal ${feature ? 'news-card--feature' : ''}" href="article.html?id=${a.id}">
-        ${feature ? placeholder(220, a.title.length, '') : ''}
-        <div class="news-card__top"><span class="news-card__tag">${esc(a.tag)}</span><span>${fmt.date(a.date)}</span></div>
+        ${photo(a.photo, '', feature ? '' : 's')}
+        <div class="news-card__top mono"><span class="news-card__tag">${esc(a.tag)}</span><span>${fmt.dateShort(a.date)}</span></div>
         <h3>${esc(a.title)}</h3>
         <p>${esc(a.lead)}</p>
+      </a>`;
+  }
+
+  function newsRow(a) {
+    return `
+      <a class="news-row reveal" href="article.html?id=${a.id}">
+        <div class="news-row__meta mono"><span>${fmt.dateShort(a.date)}</span><b>${esc(a.tag)}</b></div>
+        <div><h3>${esc(a.title)}</h3><p>${esc(a.lead)}</p></div>
+        <span class="news-row__arr">→</span>
       </a>`;
   }
 
@@ -87,37 +85,36 @@
       ['developers', 'developers.html', 'Застройщики']
     ];
     const nav = links.map(([k, href, t]) => `<a href="${href}" class="${page === k ? 'is-active' : ''}">${t}</a>`).join('');
+    const grid = document.createElement('div');
+    grid.className = 'gridlines';
+    grid.setAttribute('aria-hidden', 'true');
     const el = document.createElement('header');
     el.className = 'header';
     el.innerHTML = `
       <div class="container header__inner">
-        <a class="logo" href="index.html" aria-label="Ключ — на главную">
-          <span class="logo__mark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8" cy="8" r="5"/><path d="M11.5 11.5 21 21M17 17l2-2M15 19l2-2"/></svg></span>
-          <span>Ключ<span class="dot">.</span></span>
-        </a>
-        <div class="city-switch" role="group" aria-label="Город">
-          <button class="is-active" type="button">Москва</button><button type="button">СПб</button>
-        </div>
+        <a class="logo" href="index.html" aria-label="Ключ — на главную">Ключ<span class="dot">/</span></a>
         <nav class="nav" aria-label="Основное меню">${nav}</nav>
-        <a class="header__phone" href="tel:${PHONE.replace(/[^\d+]/g, '')}">${PHONE}</a>
-        <button class="btn btn--gold btn--sm" type="button" data-callback>Заказать звонок</button>
+        <div class="header__contact">
+          <a href="tel:${TEL}">${PHONE}</a>
+          <span class="city" role="group" aria-label="Город"><button class="is-active" type="button">Москва</button> / <button type="button">СПб</button></span>
+        </div>
+        <button class="btn btn--sm" type="button" data-callback>Звонок <span class="arr">→</span></button>
         <button class="burger" type="button" aria-label="Меню" aria-expanded="false"><span></span></button>
       </div>
       <nav class="mobile-nav" aria-label="Мобильное меню">
         ${nav}
-        <a href="tel:${PHONE.replace(/[^\d+]/g, '')}">${PHONE}</a>
-        <button class="btn btn--gold" type="button" data-callback>Заказать звонок</button>
+        <a href="tel:${TEL}">${PHONE}</a>
+        <button class="btn btn--gold" type="button" data-callback>Заказать звонок <span class="arr">→</span></button>
       </nav>`;
     document.body.prepend(el);
+    document.body.prepend(grid);
     const burger = el.querySelector('.burger');
     const mnav = el.querySelector('.mobile-nav');
     burger.addEventListener('click', () => {
       const open = mnav.classList.toggle('is-open');
       burger.setAttribute('aria-expanded', open);
     });
-    el.querySelectorAll('.city-switch button').forEach((b, idx) => b.addEventListener('click', () => {
-      if (idx === 1) { toast('Каталог Санкт-Петербурга скоро появится'); return; }
-    }));
+    el.querySelectorAll('.city button')[1].addEventListener('click', () => toast('Каталог Санкт-Петербурга скоро появится'));
   }
 
   function footer() {
@@ -127,9 +124,12 @@
       <div class="container">
         <div class="footer__grid">
           <div>
-            <a class="logo" href="index.html">Ключ<span class="dot">.</span></a>
-            <p class="muted" style="margin-top:16px;max-width:320px;font-size:15px">Каталог новостроек Москвы и Подмосковья: проверенные застройщики, актуальные цены и аналитика рынка.</p>
-            <p style="margin-top:20px"><a class="gold" href="mailto:adv@klyuch.example">adv@klyuch.example</a><br><span class="muted" style="font-size:14px">Реклама и сотрудничество</span></p>
+            <p class="muted" style="max-width:360px">Каталог новостроек Москвы и Подмосковья. Проверенные застройщики, актуальные цены и аналитика рынка.</p>
+            <p style="margin-top:28px;display:grid;gap:6px">
+              <span class="label">Реклама и сотрудничество</span>
+              <a class="gold" href="mailto:adv@klyuch.example">adv@klyuch.example</a>
+              <span>${PHONE}</span>
+            </p>
           </div>
           <div><h4>Каталог</h4><ul>
             <li><a href="catalog.html">Все новостройки</a></li>
@@ -148,12 +148,13 @@
             <li><a href="about.html">О проекте</a></li>
             <li><a href="about.html#ads">Реклама</a></li>
             <li><a href="about.html#contacts">Контакты</a></li>
-            <li><a href="about.html#terms">Пользовательское соглашение</a></li>
+            <li><a href="about.html#terms">Соглашение</a></li>
           </ul></div>
         </div>
-        <div class="footer__bottom">
-          <span>© 2026 Ключ. Все права защищены. Демо-проект, данные вымышлены.</span>
-          <span>Информация на сайте не является публичной офертой</span>
+        <div class="footer__mark" aria-hidden="true">КЛЮЧ<span>/</span></div>
+        <div class="footer__bottom mono">
+          <span>© 2026 Ключ · Демо-проект, данные вымышлены</span>
+          <span>55.7558°N 37.6173°E</span>
         </div>
       </div>`;
     document.body.append(el);
@@ -161,11 +162,11 @@
 
   function leadForm(btnText) {
     return `
-      <input class="input" name="name" placeholder="Ваше имя" autocomplete="name" required>
-      <input class="input" name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required>
+      <div class="field"><label>Имя</label><input class="input" name="name" placeholder="Как к вам обращаться" autocomplete="name" required></div>
+      <div class="field"><label>Телефон</label><input class="input" name="phone" type="tel" placeholder="+7 (___) ___-__-__" autocomplete="tel" required></div>
       <div class="form-error" aria-live="polite"></div>
-      <button class="btn btn--gold btn--block" type="submit">${btnText || 'Отправить заявку'}</button>
-      <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a class="gold" href="about.html#terms">условиями обработки данных</a>.</p>`;
+      <button class="btn btn--gold btn--block" type="submit">${btnText || 'Отправить заявку'} <span class="arr">→</span></button>
+      <p class="form-note">Нажимая кнопку, вы соглашаетесь с <a href="about.html#terms">условиями обработки данных</a>.</p>`;
   }
 
   function phoneMask(input) {
@@ -184,10 +185,16 @@
     });
   }
 
+  let formSeq = 0;
   function bindLeadForm(form, onSuccess) {
     const phone = form.querySelector('[name=phone]');
     const name = form.querySelector('[name=name]');
     const err = form.querySelector('.form-error');
+    const n = ++formSeq;
+    [name, phone].forEach((el) => {
+      el.id = `lead-${n}-${el.name}`;
+      el.closest('.field').querySelector('label').htmlFor = el.id;
+    });
     phoneMask(phone);
     form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -201,7 +208,7 @@
   }
 
   function successHtml(n) {
-    return `<div class="success"><div class="success__icon">✓</div><h3>Спасибо, ${esc(n)}!</h3><p class="muted">Заявка принята. Эксперт перезвонит вам в течение 15 минут в рабочее время.</p></div>`;
+    return `<div class="success"><div class="success__icon">✓</div><h3>Спасибо, ${esc(n)}</h3><p class="muted">Заявка принята. Эксперт перезвонит в течение 15 минут в рабочее время.</p></div>`;
   }
 
   let modal;
@@ -220,8 +227,9 @@
       <div class="modal__box">
         <button class="modal__close" type="button" aria-label="Закрыть">×</button>
         <div class="modal__content">
+          <div class="label" style="margin-bottom:16px"><b>●</b> Ответим за 15 минут</div>
           <h3>${esc(title || 'Заказать звонок')}</h3>
-          <p class="muted">${esc(subtitle || 'Оставьте контакты — подберём квартиру под ваш бюджет и расскажем об актуальных акциях.')}</p>
+          <p class="muted">${esc(subtitle || 'Подберём квартиру под ваш бюджет и расскажем об актуальных скидках застройщиков.')}</p>
           <form novalidate>${leadForm()}</form>
         </div>
       </div>`;
@@ -240,7 +248,8 @@
   function toast(text) {
     const t = document.createElement('div');
     t.textContent = text;
-    t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--gold);padding:12px 20px;border-radius:999px;z-index:200;font-size:14px;max-width:calc(100% - 32px);text-align:center';
+    t.className = 'mono';
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--bg-2);border:1px solid var(--gold);padding:14px 20px;z-index:200;max-width:calc(100% - 32px);text-align:center;color:var(--text)';
     document.body.append(t);
     setTimeout(() => t.remove(), 2600);
   }
@@ -271,5 +280,5 @@
     reveal();
   });
 
-  window.UI = { esc, fmt, placeholder, complexCard, newsCard, devById, openModal, reveal, params, leadForm, bindLeadForm, successHtml, toast };
+  window.UI = { esc, fmt, photo, complexCard, newsCard, newsRow, devById, openModal, reveal, params, leadForm, bindLeadForm, successHtml, toast };
 })();

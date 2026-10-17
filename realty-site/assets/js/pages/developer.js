@@ -3,7 +3,7 @@ window.initPage = function () {
   const app = document.getElementById('app');
   const d = UI.devById(UI.params().get('id'));
   if (!d) {
-    app.innerHTML = `<div class="container section"><div class="empty"><h3>Застройщик не найден</h3><a class="btn btn--gold" style="margin-top:20px" href="developers.html">Все застройщики</a></div></div>`;
+    app.innerHTML = `<div class="container section"><div class="empty"><h3>Застройщик не найден</h3><a class="btn btn--gold" style="margin-top:28px" href="developers.html">Все застройщики <span class="arr">→</span></a></div></div>`;
     return;
   }
   document.title = `${d.name} — Ключ`;
@@ -12,16 +12,16 @@ window.initPage = function () {
     <section class="page-head">
       <div class="container">
         <div class="breadcrumbs"><a href="index.html">Главная</a><span>/</span><a href="developers.html">Застройщики</a><span>/</span><span>${UI.esc(d.name)}</span></div>
-        <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+        <div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">
           <span class="dev-logo" style="width:96px;height:96px;font-size:36px">${d.name[0]}</span>
-          <div><h1>${UI.esc(d.name)}</h1><p class="muted" style="margin-top:8px">На рынке с ${d.founded} года · ${d.projects} ${UI.fmt.plural(d.projects, ['проект', 'проекта', 'проектов'])} в каталоге</p></div>
+          <div><h1>${UI.esc(d.name)}</h1><p class="mono muted" style="margin-top:14px">С ${d.founded} года · ${d.projects} ${UI.fmt.plural(d.projects, ['проект', 'проекта', 'проектов'])} в каталоге</p></div>
         </div>
-        <p class="prose" style="margin-top:24px;max-width:760px;color:var(--text-2);font-size:17px">${UI.esc(d.about)}</p>
+        <div class="prose" style="margin-top:32px"><p>${UI.esc(d.about)}</p></div>
       </div>
     </section>
     <section class="section--tight">
       <div class="container">
-        <h2 class="block-title" style="margin-top:0">Проекты застройщика</h2>
+        <div class="section-head"><div class="label"><b>${String(list.length).padStart(2, '0')}</b> в продаже</div><div class="section-head__side"><h2>Проекты застройщика</h2></div></div>
         <div class="grid grid--3">${list.map(UI.complexCard).join('')}</div>
       </div>
     </section>`;

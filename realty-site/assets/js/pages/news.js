@@ -13,7 +13,7 @@ window.initPage = function () {
     <section class="section--tight">
       <div class="container">
         <div class="geo-tabs" role="tablist" id="tabs">${tabs.map(([k, t]) => `<button class="tab" type="button" role="tab" data-k="${k}">${t}</button>`).join('')}</div>
-        <div class="grid grid--3" id="list"></div>
+        <div class="news-grid" id="list"></div>
       </div>
     </section>`;
 

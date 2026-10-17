@@ -8,15 +8,31 @@ window.initPage = function () {
   const opts = (sel, entries, any) => {
     document.getElementById(sel).innerHTML = `<option value="">${any}</option>` + entries.map(([v, t]) => `<option value="${v}">${UI.esc(t)}</option>`).join('');
   };
-  opts('f-location', Object.entries(L.location), 'Любая');
   opts('f-dev', D.developers.map((d) => [d.id, d.name]), 'Все застройщики');
-  opts('f-year', [2026, 2027, 2028, 2029].map((y) => [y, `${y} год`]), 'Любой');
-  opts('f-cls', Object.entries(L.cls), 'Любой');
   opts('f-type', Object.entries(L.type), 'Любой');
-  opts('f-building', Object.entries(L.building), 'Любой');
-  opts('f-finish', Object.entries(L.finish), 'Любая');
-  opts('f-stage', Object.entries(L.stage), 'Любая');
-  opts('f-transport', Object.entries(L.transport), 'Любой');
+
+  // Сегментированные переключатели: «Все» + варианты
+  const short = {
+    location: { moscow: 'Москва', newmoscow: 'Н. Москва', mo: 'МО' },
+    building: { 'monolith-brick': 'Мон.-кирп.', monolith: 'Монолит', panel: 'Панель' },
+    stage: { foundation: 'Котлован', frame: 'Каркас', finishing: 'Отделка' },
+    finish: { none: 'Без', whitebox: 'White box', full: 'Чистовая' }
+  };
+  const segs = {
+    location: Object.keys(L.location),
+    cls: Object.keys(L.cls),
+    year: ['2026', '2027', '2028', '2029'],
+    finish: Object.keys(L.finish),
+    building: Object.keys(L.building),
+    stage: Object.keys(L.stage),
+    transport: Object.keys(L.transport)
+  };
+  form.querySelectorAll('[data-seg]').forEach((box) => {
+    const name = box.dataset.seg;
+    const label = (v) => (short[name] && short[name][v]) || (L[name] && L[name][v]) || v;
+    box.innerHTML = ['', ...segs[name]].map((v, i) =>
+      `<input type="radio" name="${name}" id="f-${name}-${i}" value="${v}"><label for="f-${name}-${i}">${v ? UI.esc(label(v)) : 'Все'}</label>`).join('');
+  });
   document.getElementById('f-rooms').innerHTML = [0, 1, 2, 3, 4, 5].map((r) =>
     `<input type="checkbox" id="fr${r}" value="${r}" data-room><label for="fr${r}">${r === 0 ? 'Ст' : r === 5 ? '5+' : r}</label>`).join('');
 
@@ -27,6 +43,7 @@ window.initPage = function () {
     const p = UI.params();
     form.querySelectorAll('[name]').forEach((el) => {
       if (el.type === 'checkbox') el.checked = !!p.get(el.name);
+      else if (el.type === 'radio') el.checked = (p.get(el.name) || '') === el.value;
       else el.value = p.get(el.name) || '';
     });
     const rooms = (p.get('rooms') || '').split(',');
@@ -39,7 +56,7 @@ window.initPage = function () {
     const p = new URLSearchParams();
     geoKeys.forEach((k) => { if (cur.get(k)) p.set(k, cur.get(k)); });
     form.querySelectorAll('[name]').forEach((el) => {
-      if (el.type === 'checkbox') { if (el.checked) p.set(el.name, '1'); }
+      if (el.type === 'checkbox' || el.type === 'radio') { if (el.checked && el.value) p.set(el.name, el.type === 'checkbox' ? '1' : el.value); }
       else if (el.value) p.set(el.name, el.value);
     });
     const rooms = [...form.querySelectorAll('[data-room]:checked')].map((i) => i.value);
@@ -52,19 +69,20 @@ window.initPage = function () {
     const p = UI.params();
     const list = window.Catalog.sort(window.Catalog.filter(p), p.get('sort'));
     const n = list.length;
-    document.getElementById('count').textContent = `Найдено ${n} ${UI.fmt.plural(n, ['объект', 'объекта', 'объектов'])}`;
+    document.getElementById('count-n').textContent = n;
+    document.getElementById('count-l').textContent = UI.fmt.plural(n, ['объект', 'объекта', 'объектов']);
     const geo = geoKeys.map((k) => p.get(k) && (k === 'metro' ? 'м. ' : '') + p.get(k) + (k === 'highway' ? ' шоссе' : '')).filter(Boolean)[0];
-    document.getElementById('active-geo').innerHTML = geo ? `· ${UI.esc(geo)} <a class="gold" href="#" id="clear-geo">×</a>` : '';
+    document.getElementById('active-geo').innerHTML = geo ? `· ${UI.esc(geo)} <a href="#" id="clear-geo" aria-label="Убрать район">×</a>` : '';
     const loc = p.get('location') ? L.location[p.get('location')] : geo;
     document.getElementById('catalog-title').textContent = loc ? `Новостройки: ${loc}` : 'Новостройки Москвы и Подмосковья';
 
     results.innerHTML = n ? list.map(UI.complexCard).join('') : `
       <div class="empty" style="grid-column:1/-1">
         <h3>Ничего не нашлось</h3>
-        <p>Попробуйте изменить параметры поиска или оставьте заявку — подберём варианты вручную.</p>
-        <div style="margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <p>Измените параметры поиска или оставьте заявку, и эксперт подберёт варианты вручную.</p>
+        <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
           <button class="btn btn--ghost" type="button" id="empty-reset">Сбросить фильтры</button>
-          <button class="btn btn--gold" type="button" data-callback>Подобрать с экспертом</button>
+          <button class="btn btn--gold" type="button" data-callback>Подобрать с экспертом <span class="arr">→</span></button>
         </div>
       </div>`;
     UI.reveal(results);
@@ -99,6 +117,18 @@ window.initPage = function () {
   });
   document.getElementById('filters-open').addEventListener('click', () => filters.classList.add('is-open'));
   document.getElementById('filters-close').addEventListener('click', () => filters.classList.remove('is-open'));
+
+  // Вид: сетка или список (запоминаем в браузере)
+  const viewBtns = document.querySelectorAll('[data-view]');
+  function setView(v) {
+    results.classList.toggle('is-list', v === 'list');
+    viewBtns.forEach((b) => b.classList.toggle('is-active', b.dataset.view === v));
+    try { localStorage.setItem('klyuch-view', v); } catch (e) { /* хранилище недоступно */ }
+  }
+  viewBtns.forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  let saved = 'grid';
+  try { saved = localStorage.getItem('klyuch-view') || 'grid'; } catch (e) { /* хранилище недоступно */ }
+  setView(saved);
 
   fromUrl();
   render();

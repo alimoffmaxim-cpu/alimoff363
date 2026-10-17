@@ -7,104 +7,106 @@
   <meta name="description" content="Каталог новостроек Москвы и Московской области: квартиры от застройщиков, цены, сроки сдачи, новости рынка.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Onest:wght@400;500;600&family=Unbounded:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body data-page="home">
   <main>
     <section class="hero">
-      <svg class="hero__skyline" viewBox="0 0 800 420" fill="none" aria-hidden="true">
-        <g stroke="#c9a86a" stroke-width="1" opacity=".7">
-          <path d="M40 420V250h60v170M100 420V180h50v240M150 420V300h40v120M190 420V120l40-30 40 30v300M270 420V220h70v200M340 420V60h20l10-40 10 40h20v360M400 420V160h80v260M480 420V260h50v160M530 420V100h60v320M590 420V210h50v210M640 420V280h70v140M710 420V170h50v250"/>
-          <path d="M350 100h40M350 140h40M350 180h40M350 220h40M350 260h40M350 300h40M350 340h40M200 160h60M200 200h60M200 240h60M200 280h60M540 140h40M540 180h40M540 220h40M540 260h40M540 300h40M410 200h60M410 240h60M410 280h60M410 320h60"/>
-        </g>
-      </svg>
-      <div class="container">
-        <span class="eyebrow">Москва и Московская область</span>
-        <h1>Новостройки, в которых <em>хочется жить</em></h1>
-        <p class="hero__lead">Более 1 200 проектов от проверенных застройщиков. Актуальные цены, планировки и сроки сдачи — в одном каталоге.</p>
-
-        <form class="search" action="catalog.html" id="hero-search">
-          <div class="field">
-            <span class="field__label">Комнатность</span>
-            <div class="rooms" id="hero-rooms"></div>
-          </div>
-          <div class="field">
-            <label for="pmin">Цена от, млн ₽</label>
-            <input class="input" id="pmin" name="pmin" type="number" min="0" step="0.5" placeholder="5">
-          </div>
-          <div class="field">
-            <label for="pmax">Цена до, млн ₽</label>
-            <input class="input" id="pmax" name="pmax" type="number" min="0" step="0.5" placeholder="30">
-          </div>
-          <button class="btn btn--gold" type="submit" id="hero-submit">Найти</button>
-        </form>
-      </div>
-    </section>
-
-    <section class="section--tight">
-      <div class="container">
-        <div class="stats reveal" id="stats"></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-head">
-          <div><span class="eyebrow">Свежие предложения</span><h2>Новые объекты</h2></div>
-          <a class="link-arrow" href="catalog.html">Весь каталог →</a>
-        </div>
-        <div class="grid grid--3" id="new-objects"></div>
-      </div>
-    </section>
-
-    <section class="section" style="background:var(--bg-2)">
-      <div class="container">
-        <div class="section-head">
-          <div><span class="eyebrow">Быстрый поиск</span><h2>Готовые подборки</h2></div>
-        </div>
-        <div id="quick"></div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="container">
-        <div class="section-head">
-          <div><span class="eyebrow">Журнал</span><h2>Новости и статьи</h2></div>
-          <a class="link-arrow" href="news.html">Все материалы →</a>
-        </div>
-        <div class="grid grid--3" id="home-news"></div>
-      </div>
-    </section>
-
-    <section class="section--tight">
-      <div class="container">
-        <div class="cta reveal">
+      <div class="container hero__grid">
+        <div class="hero__text">
           <div>
-            <span class="eyebrow">Бесплатная консультация</span>
-            <h2>Подберём квартиру под ваш бюджет за 15 минут</h2>
-            <p class="muted" style="margin-top:14px">Эксперт расскажет о скидках, рассрочке и ипотечных программах застройщиков.</p>
+            <div class="label" style="margin-bottom:36px"><b>●</b> Каталог новостроек · Москва и МО</div>
+            <h1>
+              <span class="ln"><span>Дома,</span></span>
+              <span class="ln"><span>в которых</span></span>
+              <span class="ln"><span><em>хочется жить</em></span></span>
+            </h1>
+            <p class="hero__lead" style="margin-top:28px">Проекты от проверенных застройщиков с актуальными ценами, планировками и сроками сдачи.</p>
           </div>
-          <form data-lead="Получить подборку" novalidate></form>
+          <div class="hero__stats" id="stats"></div>
         </div>
+        <div class="feature" id="feature"></div>
       </div>
     </section>
+
+    <div class="container">
+      <form class="search" action="catalog.html" id="hero-search">
+        <div class="field">
+          <span class="field__label">Комнатность</span>
+          <div class="seg" id="hero-rooms"></div>
+        </div>
+        <div class="field">
+          <label for="pmin">Цена от, млн ₽</label>
+          <input class="input" id="pmin" name="pmin" type="number" min="0" step="0.5" placeholder="5">
+        </div>
+        <div class="field">
+          <label for="pmax">Цена до, млн ₽</label>
+          <input class="input" id="pmax" name="pmax" type="number" min="0" step="0.5" placeholder="30">
+        </div>
+        <button class="btn btn--gold" type="submit" id="hero-submit">Найти <span class="arr">→</span></button>
+      </form>
+    </div>
 
     <section class="section">
       <div class="container">
         <div class="section-head">
-          <div><span class="eyebrow">Навигация</span><h2>Новостройки по районам</h2></div>
+          <div class="label" id="new-count"></div>
+          <div class="section-head__side"><h2>Новые объекты</h2><a class="link-arrow" href="catalog.html">Весь каталог →</a></div>
+        </div>
+        <div class="mosaic" id="new-objects"></div>
+      </div>
+    </section>
+
+    <section class="section rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Быстрый поиск</div>
+          <div class="section-head__side"><h2>Готовые подборки</h2></div>
+        </div>
+        <div class="picks" id="quick"></div>
+      </div>
+    </section>
+
+    <section class="section rule">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Журнал</div>
+          <div class="section-head__side"><h2>Новости и статьи</h2><a class="link-arrow" href="news.html">Все материалы →</a></div>
+        </div>
+        <div class="journal" id="home-news"></div>
+      </div>
+    </section>
+
+    <div class="container">
+      <div class="cta">
+        <div>
+          <div class="label" style="margin-bottom:24px"><b>●</b> Бесплатная консультация</div>
+          <h2>Подберём квартиру под ваш бюджет за 15 минут</h2>
+          <p class="muted" style="margin-top:20px;max-width:440px">Эксперт расскажет о скидках, рассрочке и ипотечных программах застройщиков.</p>
+        </div>
+        <form data-lead="Получить подборку" novalidate></form>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div class="label">Индекс</div>
+          <div class="section-head__side"><h2>Новостройки по районам</h2></div>
         </div>
         <div class="geo-tabs" role="tablist" id="geo-tabs"></div>
         <div class="geo-list" id="geo-list"></div>
       </div>
     </section>
 
-    <section class="section--tight">
-      <div class="container prose" style="max-width:860px">
-        <h2 style="font-size:30px;margin-bottom:18px">О проекте</h2>
-        <p>«Ключ» — независимый каталог новостроек Москвы и Подмосковья. Мы собираем информацию о жилых комплексах напрямую у застройщиков, регулярно обновляем цены и наличие квартир, публикуем новости рынка и экспертные материалы.</p>
-        <p>Ищите квартиры по комнатности, цене, сроку сдачи, классу жилья, отделке и транспортной доступности. Сравнивайте проекты и оставляйте заявку — специалист поможет с выбором и оформлением ипотеки.</p>
+    <section class="section--tight rule">
+      <div class="container section-head" style="margin:0;align-items:start">
+        <div class="label">О проекте</div>
+        <div class="prose">
+          <p>«Ключ» — независимый каталог новостроек Москвы и Подмосковья. Мы собираем информацию о жилых комплексах напрямую у застройщиков, регулярно обновляем цены и наличие квартир, публикуем новости рынка и экспертные материалы.</p>
+          <p>Ищите квартиры по комнатности, цене, сроку сдачи, классу жилья, отделке и транспортной доступности. Сравнивайте проекты и оставляйте заявку: специалист поможет с выбором и оформлением ипотеки.</p>
+        </div>
       </div>
     </section>
   </main>

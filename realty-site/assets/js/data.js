@@ -64,8 +64,21 @@ window.DATA = (function () {
       return { rooms, areaFrom, priceFrom: ppm ? Math.round(areaFrom * ppm * 1000 * (1 + rnd(i + k) * 0.05)) : 0, count: 3 + Math.round(rnd(i * 7 + k) * 40) };
     });
     const minPrice = layouts.reduce((m, l) => (l.priceFrom && (!m || l.priceFrom < m) ? l.priceFrom : m), 0);
+    const low = type === 'townhouse' || type === 'house';
+    const pad = (n) => String(n).padStart(2, '0');
+    const main = low ? 'house-' + pad(type === 'townhouse' ? 1 : 2) : 'ext-' + pad((i % 12) + 1);
+    const second = low ? 'house-' + pad(type === 'townhouse' ? 3 : 4) : 'ext-' + pad(((i + 5) % 12) + 1);
+    const photos = [main, second, 'int-' + pad((i % 7) + 1), 'int-' + pad(((i + 3) % 7) + 1)];
+    // Координаты: центр Москвы ± смещение, область — дальше от центра
+    const spread = location === 'moscow' ? 0.12 : location === 'newmoscow' ? 0.2 : 0.35;
+    const lat = 55.7558 + (rnd(i * 11) - 0.5) * spread * 1.4;
+    const lng = 37.6173 + (rnd(i * 17) - 0.5) * spread * 2.2;
     return {
-      id, name, developer, location, area, metro, highway, cls, quarter, year, building, finish, parking, closed, transport, stage, hue, floors, type,
+      id, name, developer,
+      code: id.replace(/[^a-z]/g, '').slice(0, 3).toUpperCase() + '-' + pad(i + 1),
+      coords: `${lat.toFixed(3)}°N ${lng.toFixed(3)}°E`,
+      energy: { premium: 'A+', business: 'A', comfort: 'B+', econom: 'B' }[cls],
+      photos, location, area, metro, highway, cls, quarter, year, building, finish, parking, closed, transport, stage, hue, floors, type,
       pricePerM2: ppm * 1000,
       minPrice,
       layouts,
@@ -110,6 +123,9 @@ window.DATA = (function () {
     type: { flat: 'Квартиры', apartments: 'Апартаменты', townhouse: 'Таунхаусы', house: 'Дома' },
     rooms: { 0: 'Студия', 1: '1-комн.', 2: '2-комн.', 3: '3-комн.', 4: '4-комн.', 5: '5+ комн.' }
   };
+
+  const articlePhotos = ['ext-08', 'ext-11', 'int-03', 'int-06', 'ext-05', 'ext-02', 'ext-10', 'int-02', 'int-05', 'ext-12'];
+  articles.forEach((a, i) => { a.photo = articlePhotos[i % articlePhotos.length]; });
 
   return { developers, complexes, articles, articleBody, labels, districts, metros, highways, cities };
 })();

@@ -86,6 +86,13 @@
 #gm .gm-track-sec{background:radial-gradient(60% 60% at 50% 40%,#1a1f28,var(--bg))}
 #gm .gm-track{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}
 #gm .gm-track svg{width:100%;height:auto}
+#gm .gm-track-viz{min-width:0}
+#gm .gm-profile{margin-top:8px}
+#gm .gm-profile svg{display:block;width:100%;height:auto}
+#gm .gm-steps{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;counter-reset:s}
+#gm .gm-steps li{position:relative;text-align:center;font-size:13px;font-weight:800;padding:9px 4px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--muted);transition:background .3s,color .3s}
+#gm .gm-steps li:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--line);font-size:12px}
+#gm .gm-steps li.gm-on{background:var(--accent);color:var(--accent-ink)}
 #gm .gm-track-legend{display:grid;gap:14px}
 #gm .gm-track-legend .gm-card{padding:20px 22px;display:flex;gap:16px;align-items:center}
 #gm .gm-track-legend b{font:900 28px Unbounded,Arial,sans-serif;color:var(--accent);min-width:70px}
@@ -311,30 +318,60 @@
       <h2 class="gm-reveal">Два уровня —<br><span class="gm-accent">двойной драйв</span></h2>
       <p class="gm-sub gm-reveal">Трасса идёт в два яруса: круг по нижнему уровню, подъём наверх, вираж на втором уровне и спуск обратно. Каждый заезд проходит по всей трассе.</p>
       <div class="gm-track">
-        <svg viewBox="0 0 640 420" class="gm-reveal" role="img" aria-label="Схема двухуровневого картодрома">
-          <!-- нижний уровень -->
-          <path d="M40 300 L320 180 L600 300 L320 420 Z" fill="#171a21" stroke="#2a2f3a" stroke-width="2"/>
-          <path id="gm-lap1" d="M150 300 Q320 222 490 300 Q320 378 150 300 Z" fill="none" stroke="#2b303b" stroke-width="34" stroke-linejoin="round"/>
-          <use href="#gm-lap1" fill="none" stroke="#f3f4f6" stroke-width="2" stroke-dasharray="10 12" opacity=".4"/>
-          <!-- опоры -->
-          <path d="M200 260 V170 M440 260 V170 M320 300 V214" stroke="#3a404d" stroke-width="6"/>
-          <!-- верхний уровень -->
-          <path d="M100 150 L320 55 L540 150 L320 245 Z" fill="#1d222b" stroke="#ffd400" stroke-opacity=".5" stroke-width="2"/>
-          <path id="gm-lap2" d="M190 150 Q320 92 450 150 Q320 208 190 150 Z" fill="none" stroke="#2b303b" stroke-width="30"/>
-          <use href="#gm-lap2" fill="none" stroke="#ffd400" stroke-width="2" stroke-dasharray="10 12" opacity=".6"/>
-          <!-- рампа -->
-          <path d="M470 196 L560 262 L590 248 L500 182 Z" fill="url(#gm-g-hot)" opacity=".85"/>
-          <path d="M486 200 L572 262" stroke="#0d0f13" stroke-width="2" stroke-dasharray="6 6"/>
-          <!-- райдеры: один круг проходит оба уровня — низ, подъём по рампе, верх, спуск -->
-          <path id="gm-route" d="M150 300 Q320 378 490 300 L560 255 L450 150 Q320 92 190 150 Q320 208 450 150 L560 255 L490 300 Q320 222 150 300 Z" fill="none"/>
-          <circle r="9" fill="#ff5a1f"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
-          <circle r="9" fill="#f3f4f6"><animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
-          <circle r="9" fill="#ffd400"><animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
+        <div class="gm-track-viz gm-reveal">
+        <svg viewBox="0 0 720 490" class="gm-track-map" role="img" aria-label="Схема трассы: нижний уровень, подъём по рампе, верхний уровень и спуск — один круг">
+          <defs>
+            <filter id="gm-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="5"/></filter>
+            <linearGradient id="gm-ramp" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3a404d"/><stop offset="1" stop-color="#1d222b"/></linearGradient>
+          </defs>
+          <!-- нижний уровень: плита -->
+          <path d="M70 372 L360 482 L650 372 L650 360 L360 470 L70 360 Z" fill="#101318"/>
+          <path d="M70 360 L360 250 L650 360 L360 470 Z" fill="#171a21" stroke="#2a2f3a" stroke-width="2"/>
+          <!-- опоры второго уровня -->
+          <g fill="#2b303b"><rect x="273" y="196" width="14" height="118"/><rect x="433" y="196" width="14" height="118"/><rect x="353" y="262" width="14" height="44"/></g>
+          <g fill="#000" opacity=".35"><ellipse cx="280" cy="316" rx="16" ry="5"/><ellipse cx="440" cy="316" rx="16" ry="5"/><ellipse cx="360" cy="308" rx="16" ry="5"/></g>
+          <!-- верхний уровень: плита с торцами -->
+          <path d="M120 155 L360 252 L360 268 L120 171 Z" fill="#232833"/>
+          <path d="M360 252 L600 155 L600 171 L360 268 Z" fill="#1b1f27"/>
+          <path d="M120 155 L360 48 L600 155 L360 252 Z" fill="#1d222b" stroke="#ffd400" stroke-opacity=".55" stroke-width="2"/>
+          <!-- рампы: боковые стенки показывают высоту подъёма -->
+          <path d="M507 176 L507 334 L600 372 Z" fill="url(#gm-ramp)" opacity=".9"/>
+          <path d="M213 176 L213 334 L120 372 Z" fill="url(#gm-ramp)" opacity=".9"/>
+          <path d="M507 334 L600 372 M213 334 L120 372" stroke="#000" stroke-opacity=".35" stroke-width="10"/>
+          <!-- дорога: один путь через оба уровня -->
+          <path id="gm-route" d="M120 372 C170 462 550 462 600 372 L507 176 C550 112 420 86 360 92 C300 86 170 112 213 176 Z" fill="none"/>
+          <use href="#gm-route" stroke="#ff3d1f" stroke-width="40" stroke-linejoin="round"/>
+          <use href="#gm-route" stroke="#f3f4f6" stroke-width="40" stroke-dasharray="12 12" stroke-linejoin="round"/>
+          <use href="#gm-route" stroke="#2b303b" stroke-width="30" stroke-linejoin="round"/>
+          <use href="#gm-route" stroke="#ffd400" stroke-opacity=".35" stroke-width="2" stroke-dasharray="10 12"/>
+          <!-- участки трассы (для расчёта длины, не рисуются) -->
+          <g fill="none" stroke="none">
+            <path id="gm-seg1" d="M120 372 C170 462 550 462 600 372"/>
+            <path id="gm-seg2" d="M600 372 L507 176"/>
+            <path id="gm-seg3" d="M507 176 C550 112 420 86 360 92 C300 86 170 112 213 176"/>
+            <path id="gm-seg4" d="M213 176 L120 372"/>
+          </g>
+          <g id="gm-chevrons" fill="#ffd400" opacity=".9"></g>
           <!-- финиш -->
-          <g transform="translate(300 260)"><rect width="40" height="16" fill="#fff"/><path d="M0 0h8v8H0zM16 0h8v8h-8zM32 0h8v8h-8zM8 8h8v8H8zM24 8h8v8h-8z" fill="#0d0f13"/></g>
-          <text x="560" y="330" fill="#a3a9b6" font-family="Manrope,Arial" font-size="15" font-weight="800">1 УРОВЕНЬ</text>
-          <text x="470" y="92" fill="#ffd400" font-family="Manrope,Arial" font-size="15" font-weight="800">2 УРОВЕНЬ</text>
+          <g transform="translate(340 432)"><rect width="40" height="16" fill="#fff"/><path d="M0 0h8v8H0zM16 0h8v8h-8zM32 0h8v8h-8zM8 8h8v8H8zM24 8h8v8h-8z" fill="#0d0f13"/></g>
+          <g id="gm-riders"></g>
+          <g font-family="Manrope,Arial,sans-serif" font-weight="800" font-size="16">
+            <text x="560" y="452" fill="#a3a9b6">1 УРОВЕНЬ</text>
+            <text x="540" y="70" fill="#ffd400">2 УРОВЕНЬ</text>
+            <text x="618" y="290" fill="#f3f4f6">ПОДЪЁМ ↑</text>
+            <text x="102" y="290" fill="#f3f4f6" text-anchor="end">СПУСК ↓</text>
+          </g>
         </svg>
+        <div class="gm-profile">
+          <svg viewBox="0 0 640 86" aria-hidden="true">
+            <path id="gm-prof-area" fill="#ffd400" fill-opacity=".1"/>
+            <path id="gm-prof-line" fill="none" stroke="#ffd400" stroke-width="3" stroke-linejoin="round"/>
+            <circle id="gm-prof-dot" r="7" fill="#ff5a1f" stroke="#0d0f13" stroke-width="2" cx="20" cy="66"/>
+            <text x="20" y="82" fill="#a3a9b6" font-family="Manrope,Arial,sans-serif" font-size="12" font-weight="800">ВЫСОТА ПО КРУГУ</text>
+          </svg>
+          <ol class="gm-steps" id="gm-steps"><li>1 уровень</li><li>Подъём</li><li>2 уровень</li><li>Спуск</li></ol>
+        </div>
+        </div>
         <div class="gm-track-legend">
           <div class="gm-card gm-reveal"><b>2</b><div><h3>уровня трассы</h3><p>Подъём, верхний ярус и спуск в одном круге</p></div></div>
           <div class="gm-card gm-reveal"><b>0</b><div><h3>луж и грязи</h3><p>Закрытое помещение — едем в любую погоду</p></div></div>
@@ -679,6 +716,79 @@
 
   $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);
   if (CONFIG.ADDRESS !== 'Зеленоград, картодром') $('gm-address').textContent = CONFIG.ADDRESS;
+
+  /* ---------- Схема трассы: райдеры едут по одному кругу через оба уровня ---------- */
+  (function () {
+    var route = $('gm-route');
+    if (!route || !route.getTotalLength) return;
+    var NS = 'http://www.w3.org/2000/svg', total = route.getTotalLength();
+    var lens = [1, 2, 3, 4].map(function (i) { return $('gm-seg' + i).getTotalLength(); });
+    var sum = lens.reduce(function (a, b) { return a + b; }, 0);
+    var bounds = [], acc = 0;
+    lens.forEach(function (l) { acc += l / sum; bounds.push(acc); });
+    function seg(t) { for (var i = 0; i < 4; i++) if (t < bounds[i]) return i; return 3; }
+    function el(tag, attrs, parent) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      parent.appendChild(e); return e;
+    }
+
+    // шевроны направления вдоль всей трассы
+    var chev = $('gm-chevrons');
+    for (var c = 0; c < 18; c++) {
+      var d = (c + 0.5) / 18 * total, p = route.getPointAtLength(d), q = route.getPointAtLength(Math.min(total, d + 1));
+      var a = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+      el('path', { d: 'M-4 -6 L4 0 L-4 6', fill: 'none', stroke: '#ffd400', 'stroke-width': 3, 'stroke-linecap': 'round',
+        transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') rotate(' + a.toFixed(1) + ')' }, chev);
+    }
+
+    // профиль высоты: низ, подъём, верх, спуск
+    var X0 = 20, W = 600, LOW = 66, HIGH = 18;
+    var px = [X0, X0 + W * bounds[0], X0 + W * bounds[1], X0 + W * bounds[2], X0 + W];
+    var py = [LOW, LOW, HIGH, HIGH, LOW];
+    var line = 'M' + px.map(function (x, i) { return x.toFixed(1) + ' ' + py[i]; }).join(' L');
+    $('gm-prof-line').setAttribute('d', line);
+    $('gm-prof-area').setAttribute('d', line + ' L' + (X0 + W) + ' 72 L' + X0 + ' 72 Z');
+    function profY(t) {
+      var i = seg(t), t0 = i ? bounds[i - 1] : 0, f = (t - t0) / (bounds[i] - t0);
+      return py[i] + (py[i + 1] - py[i]) * f;
+    }
+
+    var colors = ['#ff5a1f', '#f3f4f6', '#ffd400'], riders = [];
+    colors.forEach(function (col, i) {
+      var g = el('g', {}, $('gm-riders')), trail = [];
+      for (var k = 3; k >= 1; k--) trail.push(el('circle', { r: 3 + k * 1.5, fill: col, opacity: (0.6 - k * 0.15).toFixed(2) }, g));
+      var glow = el('circle', { r: 16, fill: col, opacity: .35, filter: 'url(#gm-glow)' }, g);
+      var dot = el('circle', { r: 9, fill: col, stroke: '#0d0f13', 'stroke-width': 2 }, g);
+      riders.push({ off: i / colors.length, trail: trail, glow: glow, dot: dot });
+    });
+    var steps = $('gm-steps').children, dotP = $('gm-prof-dot'), cur = -1;
+
+    function place(c, t) {
+      var p = route.getPointAtLength(((t % 1) + 1) % 1 * total);
+      c.setAttribute('cx', p.x.toFixed(1)); c.setAttribute('cy', p.y.toFixed(1));
+    }
+    function draw(time) {
+      var base = time / 11000;
+      riders.forEach(function (r) {
+        var t = (base + r.off) % 1;
+        place(r.dot, t); place(r.glow, t);
+        r.trail.forEach(function (c, k) { place(c, t - (3 - k) * 0.008); });
+      });
+      var lead = (base + riders[0].off) % 1, s = seg(lead);
+      dotP.setAttribute('cx', (X0 + W * lead).toFixed(1)); dotP.setAttribute('cy', profY(lead).toFixed(1));
+      if (s !== cur) { if (cur >= 0) steps[cur].classList.remove('gm-on'); steps[s].classList.add('gm-on'); cur = s; }
+    }
+
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    draw(still ? 0.15 * 11000 : 0);
+    if (still) return;
+    var running = false, raf;
+    function loop(ts) { draw(ts); raf = requestAnimationFrame(loop); }
+    function setRun(on) { if (on === running) return; running = on; if (on) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf); }
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { setRun(es[0].isIntersecting); }).observe(route.ownerSVGElement);
+    else setRun(true);
+  })();
 
   /* ---------- Анимации при прокрутке и липкая кнопка ---------- */
   var reveal = root.querySelectorAll('.gm-reveal');

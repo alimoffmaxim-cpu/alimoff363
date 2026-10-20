@@ -309,7 +309,7 @@
     <div class="gm-wrap">
       <div class="gm-kicker gm-reveal">Площадка</div>
       <h2 class="gm-reveal">Два уровня —<br><span class="gm-accent">двойной драйв</span></h2>
-      <p class="gm-sub gm-reveal">Нижний уровень — для первых кругов и отработки техники. Верхний — с подъёмом и спуском для тех, кто уже уверенно едет.</p>
+      <p class="gm-sub gm-reveal">Трасса идёт в два яруса: круг по нижнему уровню, подъём наверх, вираж на втором уровне и спуск обратно. Каждый заезд проходит по всей трассе.</p>
       <div class="gm-track">
         <svg viewBox="0 0 640 420" class="gm-reveal" role="img" aria-label="Схема двухуровневого картодрома">
           <!-- нижний уровень -->
@@ -325,17 +325,18 @@
           <!-- рампа -->
           <path d="M470 196 L560 262 L590 248 L500 182 Z" fill="url(#gm-g-hot)" opacity=".85"/>
           <path d="M486 200 L572 262" stroke="#0d0f13" stroke-width="2" stroke-dasharray="6 6"/>
-          <!-- райдеры -->
-          <circle r="9" fill="#ff5a1f"><animateMotion dur="5s" repeatCount="indefinite"><mpath href="#gm-lap1"/></animateMotion></circle>
-          <circle r="9" fill="#f3f4f6"><animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite"><mpath href="#gm-lap1"/></animateMotion></circle>
-          <circle r="9" fill="#ffd400"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#gm-lap2"/></animateMotion></circle>
+          <!-- райдеры: один круг проходит оба уровня — низ, подъём по рампе, верх, спуск -->
+          <path id="gm-route" d="M150 300 Q320 378 490 300 L560 255 L450 150 Q320 92 190 150 Q320 208 450 150 L560 255 L490 300 Q320 222 150 300 Z" fill="none"/>
+          <circle r="9" fill="#ff5a1f"><animateMotion dur="9s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
+          <circle r="9" fill="#f3f4f6"><animateMotion dur="9s" begin="-3s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
+          <circle r="9" fill="#ffd400"><animateMotion dur="9s" begin="-6s" repeatCount="indefinite"><mpath href="#gm-route"/></animateMotion></circle>
           <!-- финиш -->
           <g transform="translate(300 260)"><rect width="40" height="16" fill="#fff"/><path d="M0 0h8v8H0zM16 0h8v8h-8zM32 0h8v8h-8zM8 8h8v8H8zM24 8h8v8h-8z" fill="#0d0f13"/></g>
           <text x="560" y="330" fill="#a3a9b6" font-family="Manrope,Arial" font-size="15" font-weight="800">1 УРОВЕНЬ</text>
           <text x="470" y="92" fill="#ffd400" font-family="Manrope,Arial" font-size="15" font-weight="800">2 УРОВЕНЬ</text>
         </svg>
         <div class="gm-track-legend">
-          <div class="gm-card gm-reveal"><b>2</b><div><h3>уровня трассы</h3><p>Новичок → уверенный райдер</p></div></div>
+          <div class="gm-card gm-reveal"><b>2</b><div><h3>уровня трассы</h3><p>Подъём, верхний ярус и спуск в одном круге</p></div></div>
           <div class="gm-card gm-reveal"><b>0</b><div><h3>луж и грязи</h3><p>Закрытое помещение — едем в любую погоду</p></div></div>
           <div class="gm-card gm-reveal"><b>1:1</b><div><h3>тренер рядом</h3><p>Контроль на каждом круге</p></div></div>
         </div>
@@ -361,7 +362,7 @@
           <div class="gm-display">65</div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
-          <p>Скорость, виражи и верхний уровень трассы. Подготовка к соревнованиям.</p>
+          <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
           <svg viewBox="0 0 420 300" width="330"><use href="#gm-bike"/></svg>
         </div>
       </div>
@@ -660,7 +661,7 @@
   // Галерея: без фото показываем заглушки, чтобы было видно, сколько кадров нужно
   var gal = $('gm-gallery'), lb = $('gm-lightbox');
   var shots = M.gallery && M.gallery.length ? M.gallery : null;
-  var hints = ['Ребёнок на трассе', 'Старт заезда', 'Тренер и ученик', 'Верхний уровень', 'Мотоциклы 50 и 65', 'Эмоции после заезда'];
+  var hints = ['Ребёнок на трассе', 'Старт заезда', 'Тренер и ученик', 'Второй уровень трассы', 'Мотоциклы 50 и 65', 'Эмоции после заезда'];
   (shots || hints).forEach(function (s, i) {
     var f = document.createElement('figure'); f.className = 'gm-reveal';
     if (shots) {

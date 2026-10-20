@@ -2,58 +2,150 @@
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
   Вставляется целиком в один блок T123 («HTML-код»). Инструкция — README.md.
   Всё, что нужно заполнить перед публикацией, помечено TODO.
+  Фото и видео подключаются ссылками в CONFIG.MEDIA (в самом конце файла).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@600;800;900&display=swap" rel="stylesheet">
 
 <style>
-#gm{--bg:#0f1115;--card:#181b22;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#c8ff2e;--accent-ink:#0f1115;--err:#ff6b6b;
-  background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif;font-size:17px;line-height:1.5;overflow:hidden}
+#gm{--bg:#0d0f13;--card:#171a21;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#c8ff2e;--accent-ink:#0d0f13;--hot:#ff5a1f;--err:#ff6b6b;
+  background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif;font-size:17px;line-height:1.5;overflow:hidden;position:relative}
 #gm *{box-sizing:border-box;margin:0;padding:0}
 #gm a{color:inherit}
-#gm .gm-wrap{max-width:1120px;margin:0 auto;padding:0 16px}
-#gm section{padding:72px 0}
-#gm h1{font-size:clamp(32px,6vw,60px);line-height:1.05;font-weight:800;letter-spacing:-.02em}
-#gm h2{font-size:clamp(26px,4vw,40px);line-height:1.1;font-weight:800;margin-bottom:28px}
+#gm img{display:block;max-width:100%}
+#gm .gm-wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+#gm section{padding:88px 0;position:relative}
+#gm h1,#gm h2,#gm .gm-display{font-family:Unbounded,Manrope,Arial,sans-serif;font-weight:900;letter-spacing:-.02em;text-transform:uppercase}
+#gm h1{font-size:clamp(34px,6.4vw,78px);line-height:.98}
+#gm h2{font-size:clamp(26px,4.2vw,48px);line-height:1.02;margin-bottom:12px}
 #gm h3{font-size:20px;font-weight:800;margin-bottom:8px}
 #gm p{color:var(--muted)}
+#gm .gm-sub{font-size:19px;max-width:640px;margin-bottom:40px}
 #gm .gm-accent{color:var(--accent)}
-#gm .gm-btn{display:inline-block;background:var(--accent);color:var(--accent-ink);font:800 18px Manrope,Arial,sans-serif;border:0;border-radius:14px;padding:18px 32px;cursor:pointer;text-decoration:none;transition:transform .15s}
-#gm .gm-btn:hover{transform:translateY(-2px)}
+#gm .gm-kicker{display:inline-flex;align-items:center;gap:8px;font:800 13px Manrope,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+#gm .gm-kicker::before{content:"";width:28px;height:3px;background:var(--accent);transform:skewX(-20deg)}
+#gm .gm-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:var(--accent-ink);font:800 18px Manrope,Arial,sans-serif;border:0;border-radius:14px;padding:18px 32px;cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 30px -10px rgba(200,255,46,.6)}
+#gm .gm-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(200,255,46,.8)}
 #gm .gm-btn:disabled{opacity:.6;cursor:wait;transform:none}
-#gm .gm-btn--ghost{background:transparent;color:var(--text);border:2px solid var(--line)}
+#gm .gm-btn--ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid rgba(255,255,255,.18);box-shadow:none;backdrop-filter:blur(6px)}
 
-/* Hero */
-#gm .gm-hero{position:relative;padding:96px 0 80px;background:
-  radial-gradient(60% 80% at 85% 20%,rgba(200,255,46,.18),transparent 70%),var(--bg)}
-#gm .gm-hero::after{content:"";position:absolute;right:0;top:0;bottom:0;width:48px;opacity:.15;
-  background:repeating-conic-gradient(#fff 0 25%,transparent 0 50%) 0 0/24px 24px}
-#gm .gm-badge{display:inline-block;border:1px solid var(--accent);color:var(--accent);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600;margin-bottom:20px}
-#gm .gm-lead{font-size:20px;max-width:620px;margin:20px 0 32px}
+/* ---------- Первый экран ---------- */
+#gm .gm-hero{min-height:min(92vh,860px);display:flex;align-items:center;padding:110px 0 90px;isolation:isolate}
+#gm .gm-hero-media{position:absolute;inset:0;z-index:-2;overflow:hidden}
+#gm .gm-hero-media img,#gm .gm-hero-media video{width:100%;height:100%;object-fit:cover}
+#gm .gm-hero-shade{position:absolute;inset:0;z-index:-1;background:
+  linear-gradient(90deg,rgba(13,15,19,.96) 0%,rgba(13,15,19,.75) 45%,rgba(13,15,19,.2) 100%),
+  linear-gradient(0deg,var(--bg) 0%,transparent 30%)}
+#gm .gm-hero--art .gm-hero-shade{background:
+  radial-gradient(55% 70% at 78% 45%,rgba(200,255,46,.22),transparent 70%),
+  radial-gradient(40% 50% at 95% 90%,rgba(255,90,31,.18),transparent 70%)}
+#gm .gm-hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;width:100%}
+#gm .gm-hero-art{position:relative}
+#gm .gm-hero:not(.gm-hero--art) .gm-hero-art{display:none}
+#gm .gm-hero:not(.gm-hero--art) .gm-hero-grid{grid-template-columns:1fr}
+#gm .gm-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,255,46,.12);border:1px solid rgba(200,255,46,.5);color:var(--accent);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:800;margin-bottom:24px}
+#gm .gm-badge i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:gm-pulse 1.6s infinite}
+#gm .gm-lead{font-size:20px;max-width:560px;margin:24px 0 36px;color:#c9ced8}
 #gm .gm-actions{display:flex;flex-wrap:wrap;gap:12px}
-#gm .gm-facts{display:flex;flex-wrap:wrap;gap:12px 32px;margin-top:40px;font-weight:600}
-#gm .gm-facts b{display:block;font-size:28px;color:var(--accent)}
+#gm .gm-facts{display:grid;grid-template-columns:repeat(4,auto);gap:12px 36px;margin-top:48px;justify-content:start}
+#gm .gm-facts div{font-size:14px;color:var(--muted);font-weight:600}
+#gm .gm-facts b{display:block;font:900 30px Unbounded,Arial,sans-serif;color:var(--text)}
+#gm .gm-moto{width:100%;height:auto;filter:drop-shadow(0 30px 40px rgba(0,0,0,.5))}
+#gm .gm-moto .gm-wheel{transform-box:fill-box;transform-origin:center;animation:gm-spin .9s linear infinite}
+#gm .gm-moto .gm-body{animation:gm-bob .45s ease-in-out infinite alternate}
+#gm .gm-speed line{stroke:var(--accent);stroke-width:4;stroke-linecap:round;opacity:.0;animation:gm-speed 1.2s linear infinite}
+#gm .gm-speed line:nth-child(2){animation-delay:.3s}#gm .gm-speed line:nth-child(3){animation-delay:.6s}#gm .gm-speed line:nth-child(4){animation-delay:.9s}
+#gm .gm-flag{position:absolute;top:0;right:0;width:56px;height:100%;opacity:.12;z-index:-1;
+  background:repeating-conic-gradient(#fff 0 25%,transparent 0 50%) 0 0/28px 28px}
 
-/* Cards */
-#gm .gm-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-#gm .gm-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px}
-#gm .gm-ico{font-size:32px;margin-bottom:12px}
-#gm .gm-card--hl{border-color:var(--accent)}
-#gm .gm-price{font-size:34px;font-weight:800;color:var(--text);margin:8px 0}
+/* ---------- Бегущая строка ---------- */
+#gm .gm-marquee{background:var(--accent);color:var(--accent-ink);transform:rotate(-2deg) scale(1.04);margin:-8px 0 0;padding:16px 0;overflow:hidden;position:relative;z-index:2;box-shadow:0 20px 40px -20px rgba(0,0,0,.6)}
+#gm .gm-marquee div{display:flex;gap:40px;width:max-content;animation:gm-marquee 28s linear infinite;font:900 22px Unbounded,Arial,sans-serif;text-transform:uppercase;white-space:nowrap}
+#gm .gm-marquee span::after{content:"🏁";margin-left:40px}
+
+/* ---------- Карточки ---------- */
+#gm .gm-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+#gm .gm-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;position:relative;overflow:hidden}
+#gm .gm-card--hl{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+#gm .gm-feature{min-height:300px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .25s,border-color .25s}
+#gm .gm-feature:hover{transform:translateY(-6px);border-color:var(--accent)}
+#gm .gm-feature .gm-num{position:absolute;top:18px;right:22px;font:900 64px Unbounded,Arial,sans-serif;color:rgba(255,255,255,.05);line-height:1}
+#gm .gm-feature svg{width:72px;height:72px;margin-bottom:auto}
+#gm .gm-feature--photo{color:#fff}
+#gm .gm-feature--photo .gm-bgimg{position:absolute;inset:0;z-index:0}
+#gm .gm-feature--photo .gm-bgimg img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+#gm .gm-feature--photo:hover .gm-bgimg img{transform:scale(1.06)}
+#gm .gm-feature--photo::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(13,15,19,.95) 15%,rgba(13,15,19,.1) 70%);z-index:0}
+#gm .gm-feature > *{position:relative;z-index:1}
+#gm .gm-feature--photo p{color:#d4d8e0}
 #gm ul.gm-list{list-style:none}
-#gm ul.gm-list li{padding:8px 0 8px 28px;position:relative;color:var(--muted)}
-#gm ul.gm-list li::before{content:"✓";position:absolute;left:0;color:var(--accent);font-weight:800}
+#gm ul.gm-list li{padding:8px 0 8px 30px;position:relative;color:var(--muted)}
+#gm ul.gm-list li::before{content:"";position:absolute;left:0;top:13px;width:16px;height:10px;background:var(--accent);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%,30% 50%)}
 
-/* Schedule */
-#gm .gm-sched{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-#gm .gm-day{font-size:28px;font-weight:800}
-#gm .gm-note{margin-top:20px}
+/* ---------- Трасса ---------- */
+#gm .gm-track-sec{background:radial-gradient(60% 60% at 50% 40%,#1a1f28,var(--bg))}
+#gm .gm-track{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}
+#gm .gm-track svg{width:100%;height:auto}
+#gm .gm-track-legend{display:grid;gap:14px}
+#gm .gm-track-legend .gm-card{padding:20px 22px;display:flex;gap:16px;align-items:center}
+#gm .gm-track-legend b{font:900 28px Unbounded,Arial,sans-serif;color:var(--accent);min-width:70px}
+
+/* ---------- Классы ---------- */
+#gm .gm-classes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#gm .gm-class{padding:32px 32px 0;display:flex;flex-direction:column}
+#gm .gm-class .gm-display{font-size:96px;line-height:1;color:transparent;-webkit-text-stroke:2px var(--accent)}
+#gm .gm-class .gm-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+#gm .gm-class .gm-tags span{background:rgba(255,255,255,.06);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+#gm .gm-class svg{margin-top:auto;align-self:flex-end;height:auto}
+
+/* ---------- Видео ---------- */
+#gm .gm-video{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#000;border:1px solid var(--line)}
+#gm .gm-video iframe,#gm .gm-video video,#gm .gm-video img,#gm .gm-video svg.gm-poster{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+#gm .gm-play{position:absolute;inset:0;margin:auto;width:108px;height:108px;border-radius:50%;border:0;background:var(--accent);cursor:pointer;display:grid;place-items:center;box-shadow:0 0 0 0 rgba(200,255,46,.6);animation:gm-ring 2s infinite;z-index:2}
+#gm .gm-play::before{content:"";margin-left:8px;border-style:solid;border-width:18px 0 18px 30px;border-color:transparent transparent transparent var(--accent-ink)}
+#gm .gm-play:disabled{animation:none;opacity:.35;cursor:default}
+#gm .gm-video-cap{position:absolute;left:24px;bottom:20px;z-index:2;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+
+#gm .gm-reels{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+#gm .gm-reel{position:relative;aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+#gm .gm-reel video{width:100%;height:100%;object-fit:cover}
+#gm .gm-reel span{position:absolute;left:12px;top:12px;background:rgba(13,15,19,.7);backdrop-filter:blur(6px);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:800}
+#gm .gm-reel span::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--hot);margin-right:6px;vertical-align:1px;animation:gm-pulse 1.2s infinite}
+#gm .gm-video[hidden]{display:none}
+
+/* ---------- Галерея ---------- */
+#gm .gm-gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:12px}
+#gm .gm-gallery figure{position:relative;border-radius:20px;overflow:hidden;background:var(--card);cursor:zoom-in;border:1px solid var(--line)}
+#gm .gm-gallery figure:first-child{grid-column:span 2;grid-row:span 2}
+#gm .gm-gallery figure:nth-child(8){grid-column:span 2}
+#gm .gm-gallery img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+#gm .gm-gallery figure:hover img{transform:scale(1.06)}
+#gm .gm-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:28px 16px 14px;font-weight:600;font-size:14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent)}
+#gm .gm-ph{cursor:default!important;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:14px;font-weight:600;
+  background:repeating-linear-gradient(135deg,#171a21 0 18px,#1b1f27 18px 36px)!important}
+#gm .gm-ph svg{width:44px;height:44px;margin:0 auto 8px;opacity:.6}
+#gm .gm-lightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+#gm .gm-lightbox.gm-open{display:flex}
+#gm .gm-lightbox img{max-height:90vh;border-radius:12px}
+
+/* ---------- Расписание, цены ---------- */
+#gm .gm-day{font:900 34px Unbounded,Arial,sans-serif;text-transform:uppercase}
+#gm .gm-time{font:800 22px Manrope,Arial,sans-serif;color:var(--accent);margin-top:6px}
+#gm .gm-sched .gm-card::after{content:"";position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;opacity:.07;background:repeating-conic-gradient(#fff 0 25%,transparent 0 50%) 0 0/20px 20px;transform:rotate(15deg)}
 #gm .gm-phone{font-size:24px;font-weight:800;text-decoration:none;color:var(--accent)}
+#gm .gm-price{font:900 36px Unbounded,Arial,sans-serif;color:var(--text);margin:10px 0}
+#gm .gm-card--hl .gm-ribbon{position:absolute;top:18px;right:-34px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800;padding:6px 40px;transform:rotate(35deg)}
+#gm .gm-gear{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+#gm .gm-gear svg{width:56px;height:56px;margin-bottom:14px}
 
-/* Form */
-#gm .gm-form-sec{background:linear-gradient(180deg,var(--bg),#141820)}
-#gm .gm-form-box{display:grid;gap:40px;grid-template-columns:1fr 1fr;align-items:start}
-#gm form{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:32px;display:grid;gap:16px}
+/* ---------- Форма ---------- */
+#gm .gm-form-sec{isolation:isolate}
+#gm .gm-form-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+#gm .gm-form-bg img{width:100%;height:100%;object-fit:cover;opacity:.25}
+#gm .gm-form-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 80% at 20% 30%,rgba(200,255,46,.16),transparent 70%),linear-gradient(180deg,var(--bg),rgba(13,15,19,.7) 40%,var(--bg))}
+#gm .gm-form-box{display:grid;gap:48px;grid-template-columns:1fr 1fr;align-items:center}
+#gm .gm-perks{margin-top:24px}
+#gm form{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:28px;padding:32px;display:grid;gap:16px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
 #gm label{display:grid;gap:6px;font-size:14px;font-weight:600;color:var(--muted)}
 #gm input,#gm select{width:100%;font:16px Manrope,Arial,sans-serif;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;outline:none}
 #gm input:focus,#gm select:focus{border-color:var(--accent)}
@@ -68,126 +160,312 @@
 #gm .gm-consent input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
 #gm .gm-hp{position:absolute;left:-9999px}
 #gm .gm-err{color:var(--err);font-size:14px;min-height:1em}
-#gm .gm-done{display:none;text-align:center;padding:48px 24px}
-#gm .gm-done .gm-ico{font-size:56px}
+#gm .gm-done{display:none;text-align:center;padding:56px 24px}
+#gm .gm-done svg{width:80px;height:80px;margin:0 auto 16px}
 
-/* Map + FAQ */
-#gm .gm-map{display:grid;gap:24px;grid-template-columns:1fr 1.4fr;align-items:stretch}
-#gm .gm-map iframe{width:100%;min-height:340px;height:100%;border:0;border-radius:20px;background:var(--card)}
-#gm details{border-bottom:1px solid var(--line);padding:18px 0}
-#gm summary{cursor:pointer;font-weight:800;font-size:18px;list-style:none}
+/* ---------- Карта, FAQ, подвал ---------- */
+#gm .gm-map{display:grid;gap:16px;grid-template-columns:1fr 1.5fr;align-items:stretch}
+#gm .gm-map iframe{width:100%;min-height:360px;height:100%;border:0;border-radius:24px;background:var(--card)}
+#gm details{border-bottom:1px solid var(--line);padding:20px 0}
+#gm summary{cursor:pointer;font-weight:800;font-size:18px;list-style:none;padding-right:36px;position:relative}
 #gm summary::-webkit-details-marker{display:none}
-#gm summary::after{content:"+";float:right;color:var(--accent)}
-#gm details[open] summary::after{content:"−"}
+#gm summary::after{content:"+";position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(200,255,46,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
+#gm details[open] summary::after{transform:rotate(45deg)}
 #gm details p{margin-top:10px}
-#gm .gm-foot{padding:32px 0 48px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+#gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
 
-@media (max-width:820px){
-  #gm section{padding:56px 0}
-  #gm .gm-hero{padding:64px 0 56px}
-  #gm .gm-hero::after{display:none}
-  #gm .gm-form-box,#gm .gm-map{grid-template-columns:1fr}
+/* ---------- Липкая кнопка на телефоне ---------- */
+#gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
+#gm .gm-sticky.gm-show{transform:none}
+#gm .gm-sticky .gm-btn{width:100%}
+
+/* ---------- Анимации ---------- */
+#gm .gm-reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
+#gm .gm-reveal.gm-in{opacity:1;transform:none}
+@keyframes gm-spin{to{transform:rotate(360deg)}}
+@keyframes gm-bob{to{transform:translateY(-4px)}}
+@keyframes gm-speed{0%{opacity:0;transform:translateX(40px)}30%{opacity:.9}100%{opacity:0;transform:translateX(-120px)}}
+@keyframes gm-marquee{to{transform:translateX(-50%)}}
+@keyframes gm-pulse{50%{opacity:.3}}
+@keyframes gm-ring{0%{box-shadow:0 0 0 0 rgba(200,255,46,.55)}100%{box-shadow:0 0 0 34px rgba(200,255,46,0)}}
+@media (prefers-reduced-motion:reduce){
+  #gm *,#gm *::before{animation:none!important}
+  #gm .gm-reveal{opacity:1;transform:none;transition:none}
+}
+
+@media (max-width:900px){
+  #gm section{padding:64px 0}
+  #gm .gm-hero{min-height:auto;padding:72px 0 64px}
+  #gm .gm-hero-grid,#gm .gm-track,#gm .gm-form-box,#gm .gm-map,#gm .gm-classes{grid-template-columns:1fr}
+  #gm .gm-hero-art{order:-1;max-width:420px;margin:0 auto -12px}
+  #gm .gm-flag{display:none}
+  #gm .gm-facts{grid-template-columns:repeat(2,auto)}
+  #gm .gm-reels{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
+  #gm .gm-reel{flex:0 0 62%;scroll-snap-align:center}
+  #gm .gm-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:160px}
   #gm form{padding:24px 18px}
-  #gm .gm-btn{width:100%;text-align:center}
+  #gm .gm-actions .gm-btn{width:100%}
+  #gm .gm-class .gm-display{font-size:72px}
+  #gm .gm-sticky{display:block}
 }
 </style>
 
 <div id="gm">
 
-  <!-- 1. Первый экран -->
-  <section class="gm-hero">
-    <div class="gm-wrap">
-      <span class="gm-badge">📍 Новая локация · Зеленоград</span>
-      <h1>Расширяем горизонты:<br><span class="gm-accent">электромотоциклы</span> для детей 4–10 лет</h1>
-      <p class="gm-lead">Тренировки на закрытом двухуровневом картодроме — тепло, сухо и безопасно в любую погоду. Классы 50 и 65.</p>
-      <div class="gm-actions">
-        <a class="gm-btn" href="#gm-form">Записаться на тренировку</a>
-        <a class="gm-btn gm-btn--ghost" href="tel:+79152779121">+7 915 277-91-21</a>
+  <!-- Повторно используемая графика -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="gm-g-acc" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#e4ff8a"/><stop offset="1" stop-color="#9fdb00"/></linearGradient>
+      <linearGradient id="gm-g-hot" x1="0" x2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff3d1f"/></linearGradient>
+      <!-- Детский электромотоцикл с райдером -->
+      <symbol id="gm-bike" viewBox="0 0 420 300">
+        <g class="gm-body">
+          <path d="M60 150 L140 136 L150 152 L78 166 Z" fill="url(#gm-g-hot)"/>
+          <path d="M96 238 L182 196" stroke="#2b303b" stroke-width="16" stroke-linecap="round"/>
+          <rect x="150" y="160" width="100" height="46" rx="12" fill="#2b303b"/>
+          <rect x="160" y="168" width="80" height="30" rx="7" fill="url(#gm-g-acc)"/>
+          <path d="M205 172 l-14 14 h11 l-6 10 l16 -16 h-11 z" fill="#0d0f13"/>
+          <path d="M118 140 Q180 124 248 132 L254 150 L124 156 Z" fill="#f3f4f6"/>
+          <path d="M240 150 L292 110 L300 120 L262 172 Z" fill="url(#gm-g-hot)"/>
+          <path d="M322 238 L284 112" stroke="#c9ced8" stroke-width="13" stroke-linecap="round"/>
+          <path d="M296 176 L360 162 L352 178 Z" fill="url(#gm-g-hot)"/>
+          <path d="M270 100 L304 92" stroke="#f3f4f6" stroke-width="8" stroke-linecap="round"/>
+          <!-- райдер -->
+          <path d="M196 132 L232 156 L214 196" fill="none" stroke="#2b303b" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M212 194 h20" stroke="#0d0f13" stroke-width="12" stroke-linecap="round"/>
+          <path d="M240 76 Q214 96 198 134" stroke="url(#gm-g-acc)" stroke-width="30" stroke-linecap="round" fill="none"/>
+          <path d="M238 92 L282 98" stroke="url(#gm-g-acc)" stroke-width="13" stroke-linecap="round"/>
+          <circle cx="256" cy="56" r="30" fill="#f3f4f6"/>
+          <path d="M252 30 Q290 34 292 62 L262 62 Z" fill="url(#gm-g-hot)"/>
+          <path d="M268 54 Q290 52 290 70 Q276 76 266 70 Z" fill="#0d0f13"/>
+          <path d="M282 46 L312 50" stroke="#f3f4f6" stroke-width="7" stroke-linecap="round"/>
+        </g>
+        <g class="gm-wheel"><circle cx="96" cy="238" r="46" fill="none" stroke="#1d2129" stroke-width="16"/><circle cx="96" cy="238" r="46" fill="none" stroke="#3a404d" stroke-width="4" stroke-dasharray="6 9"/><path d="M96 200 V276 M58 238 H134 M69 211 L123 265 M123 211 L69 265" stroke="#8a919f" stroke-width="3"/><circle cx="96" cy="238" r="9" fill="#c8ff2e"/></g>
+        <g class="gm-wheel"><circle cx="322" cy="238" r="46" fill="none" stroke="#1d2129" stroke-width="16"/><circle cx="322" cy="238" r="46" fill="none" stroke="#3a404d" stroke-width="4" stroke-dasharray="6 9"/><path d="M322 200 V276 M284 238 H360 M295 211 L349 265 M349 211 L295 265" stroke="#8a919f" stroke-width="3"/><circle cx="322" cy="238" r="9" fill="#c8ff2e"/></g>
+      </symbol>
+      <symbol id="gm-cam" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    </defs>
+  </svg>
+
+  <!-- 1. Первый экран. Фон: CONFIG.MEDIA.heroVideo / heroImage, без них — иллюстрация -->
+  <section class="gm-hero gm-hero--art" id="gm-hero">
+    <div class="gm-hero-media" id="gm-hero-media"></div>
+    <div class="gm-hero-shade"></div>
+    <div class="gm-flag"></div>
+    <div class="gm-wrap gm-hero-grid">
+      <div>
+        <span class="gm-badge"><i></i>Новая локация · Зеленоград</span>
+        <h1>Расширяем<br>горизонты <span class="gm-accent">😜✌</span><br><span class="gm-accent">электро&shy;мото</span> для детей <span style="white-space:nowrap">4–10 лет</span></h1>
+        <p class="gm-lead">Тренировки на закрытом двухуровневом картодроме: тепло, сухо и безопасно в любую погоду. Мотоциклы классов 50 и 65.</p>
+        <div class="gm-actions">
+          <a class="gm-btn" href="#gm-form">Записаться на тренировку →</a>
+          <a class="gm-btn gm-btn--ghost" href="tel:+79152779121">📞 +7 915 277-91-21</a>
+        </div>
+        <div class="gm-facts">
+          <div><b>4–10</b>лет</div>
+          <div><b>50·65</b>классы</div>
+          <div><b>2</b>уровня трассы</div>
+          <div><b>ср·сб</b>09:00–11:00</div>
+        </div>
       </div>
-      <div class="gm-facts">
-        <div><b>4–10</b>лет</div>
-        <div><b>50 / 65</b>классы</div>
-        <div><b>2</b>уровня трассы</div>
-        <div><b>ср · сб</b>09:00–11:00</div>
+      <div class="gm-hero-art" aria-hidden="true">
+        <svg class="gm-speed" viewBox="0 0 420 300" style="position:absolute;inset:0;width:100%;height:100%"><line x1="10" y1="120" x2="70" y2="120"/><line x1="0" y1="170" x2="90" y2="170"/><line x1="20" y1="215" x2="60" y2="215"/><line x1="5" y1="260" x2="80" y2="260"/></svg>
+        <svg class="gm-moto" viewBox="0 0 420 300"><use href="#gm-bike"/></svg>
       </div>
     </div>
   </section>
 
-  <!-- 2. Преимущества -->
+  <div class="gm-marquee" aria-hidden="true"><div>
+    <span>Электромотоциклы</span><span>Зеленоград</span><span>Дети 4–10 лет</span><span>Класс 50</span><span>Класс 65</span><span>В любую погоду</span><span>Двухуровневый картодром</span>
+    <span>Электромотоциклы</span><span>Зеленоград</span><span>Дети 4–10 лет</span><span>Класс 50</span><span>Класс 65</span><span>В любую погоду</span><span>Двухуровневый картодром</span>
+  </div></div>
+
+  <!-- 2. Преимущества. Фото в карточках: CONFIG.MEDIA.features -->
   <section>
     <div class="gm-wrap">
-      <h2>Почему здесь</h2>
-      <div class="gm-grid">
-        <div class="gm-card"><div class="gm-ico">🏁</div><h3>Закрытый картодром</h3><p>Двухуровневая трасса под крышей: подъёмы, спуски и повороты, как на настоящих соревнованиях.</p></div>
-        <div class="gm-card"><div class="gm-ico">⚡</div><h3>Электромотоциклы</h3><p>Тихие, без выхлопа и с плавной тягой — идеальный старт для самых маленьких.</p></div>
-        <div class="gm-card"><div class="gm-ico">🌧</div><h3>В любую погоду</h3><p>Дождь и холод больше не отменяют тренировки — занимаемся круглый год.</p></div>
-        <div class="gm-card"><div class="gm-ico">👨‍🏫</div><h3>Опытные тренеры</h3><p>Ставим технику с первого занятия и следим за безопасностью каждого райдера.</p></div>
+      <div class="gm-kicker gm-reveal">Почему здесь</div>
+      <h2 class="gm-reveal">Мотоспорт, который<br>не отменяет дождь</h2>
+      <p class="gm-sub gm-reveal">Новая площадка, где ребёнок за пару занятий начинает уверенно ехать сам.</p>
+      <div class="gm-grid" id="gm-features">
+        <div class="gm-card gm-feature gm-reveal"><span class="gm-num">01</span>
+          <svg viewBox="0 0 72 72"><path d="M8 52 L36 38 L64 52 L36 66 Z" fill="#2b303b"/><path d="M8 34 L36 20 L64 34 L36 48 Z" fill="url(#gm-g-acc)"/><path d="M22 41 L22 59 M50 41 L50 59" stroke="#c8ff2e" stroke-width="3"/><path d="M28 10 v14 M28 10 h14 l-4 4 4 4 h-14" fill="#ff5a1f" stroke="#ff5a1f" stroke-width="2"/></svg>
+          <h3>Закрытый двухуровневый картодром</h3><p>Подъёмы, спуски и виражи под крышей — как на настоящей гонке.</p></div>
+        <div class="gm-card gm-feature gm-reveal"><span class="gm-num">02</span>
+          <svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" fill="url(#gm-g-acc)"/><path d="M40 12 L22 40 h12 l-4 20 L50 30 H38 Z" fill="#0d0f13"/></svg>
+          <h3>Электромотоциклы</h3><p>Тихие, без выхлопа и с плавной тягой — идеальный старт для малышей.</p></div>
+        <div class="gm-card gm-feature gm-reveal"><span class="gm-num">03</span>
+          <svg viewBox="0 0 72 72"><path d="M18 44 a14 14 0 0 1 4-27 a18 18 0 0 1 34 6 a11 11 0 0 1-2 21 Z" fill="#c9ced8"/><path d="M8 40 L36 26 L64 40" fill="none" stroke="#c8ff2e" stroke-width="5" stroke-linejoin="round"/><path d="M24 54 l-3 8 M36 54 l-3 8 M48 54 l-3 8" stroke="#6aa8ff" stroke-width="3" stroke-linecap="round"/></svg>
+          <h3>В любую погоду</h3><p>Ливень и холод больше не срывают тренировки — занимаемся круглый год.</p></div>
+        <div class="gm-card gm-feature gm-reveal"><span class="gm-num">04</span>
+          <svg viewBox="0 0 72 72"><circle cx="36" cy="24" r="14" fill="#f3f4f6"/><path d="M26 18 Q36 6 48 18 Z" fill="url(#gm-g-hot)"/><path d="M12 66 Q14 42 36 42 Q58 42 60 66 Z" fill="url(#gm-g-acc)"/><path d="M50 50 l6 6 10-12" fill="none" stroke="#0d0f13" stroke-width="4" stroke-linecap="round"/></svg>
+          <h3>Опытные тренеры</h3><p>Ставим технику с первого занятия и следим за безопасностью каждого райдера.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 3. Для кого -->
+  <!-- 3. Трасса: анимированная схема -->
+  <section class="gm-track-sec">
+    <div class="gm-wrap">
+      <div class="gm-kicker gm-reveal">Площадка</div>
+      <h2 class="gm-reveal">Два уровня —<br><span class="gm-accent">двойной драйв</span></h2>
+      <p class="gm-sub gm-reveal">Нижний уровень — для первых кругов и отработки техники. Верхний — с подъёмом и спуском для тех, кто уже уверенно едет.</p>
+      <div class="gm-track">
+        <svg viewBox="0 0 640 420" class="gm-reveal" role="img" aria-label="Схема двухуровневого картодрома">
+          <!-- нижний уровень -->
+          <path d="M40 300 L320 180 L600 300 L320 420 Z" fill="#171a21" stroke="#2a2f3a" stroke-width="2"/>
+          <path id="gm-lap1" d="M150 300 Q320 222 490 300 Q320 378 150 300 Z" fill="none" stroke="#2b303b" stroke-width="34" stroke-linejoin="round"/>
+          <use href="#gm-lap1" fill="none" stroke="#f3f4f6" stroke-width="2" stroke-dasharray="10 12" opacity=".4"/>
+          <!-- опоры -->
+          <path d="M200 260 V170 M440 260 V170 M320 300 V214" stroke="#3a404d" stroke-width="6"/>
+          <!-- верхний уровень -->
+          <path d="M100 150 L320 55 L540 150 L320 245 Z" fill="#1d222b" stroke="#c8ff2e" stroke-opacity=".5" stroke-width="2"/>
+          <path id="gm-lap2" d="M190 150 Q320 92 450 150 Q320 208 190 150 Z" fill="none" stroke="#2b303b" stroke-width="30"/>
+          <use href="#gm-lap2" fill="none" stroke="#c8ff2e" stroke-width="2" stroke-dasharray="10 12" opacity=".6"/>
+          <!-- рампа -->
+          <path d="M470 196 L560 262 L590 248 L500 182 Z" fill="url(#gm-g-hot)" opacity=".85"/>
+          <path d="M486 200 L572 262" stroke="#0d0f13" stroke-width="2" stroke-dasharray="6 6"/>
+          <!-- райдеры -->
+          <circle r="9" fill="#ff5a1f"><animateMotion dur="5s" repeatCount="indefinite"><mpath href="#gm-lap1"/></animateMotion></circle>
+          <circle r="9" fill="#f3f4f6"><animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite"><mpath href="#gm-lap1"/></animateMotion></circle>
+          <circle r="9" fill="#c8ff2e"><animateMotion dur="4s" repeatCount="indefinite"><mpath href="#gm-lap2"/></animateMotion></circle>
+          <!-- финиш -->
+          <g transform="translate(300 260)"><rect width="40" height="16" fill="#fff"/><path d="M0 0h8v8H0zM16 0h8v8h-8zM32 0h8v8h-8zM8 8h8v8H8zM24 8h8v8h-8z" fill="#0d0f13"/></g>
+          <text x="560" y="330" fill="#a3a9b6" font-family="Manrope,Arial" font-size="15" font-weight="800">1 УРОВЕНЬ</text>
+          <text x="470" y="92" fill="#c8ff2e" font-family="Manrope,Arial" font-size="15" font-weight="800">2 УРОВЕНЬ</text>
+        </svg>
+        <div class="gm-track-legend">
+          <div class="gm-card gm-reveal"><b>2</b><div><h3>уровня трассы</h3><p>Новичок → уверенный райдер</p></div></div>
+          <div class="gm-card gm-reveal"><b>0</b><div><h3>луж и грязи</h3><p>Закрытое помещение — едем в любую погоду</p></div></div>
+          <div class="gm-card gm-reveal"><b>1:1</b><div><h3>тренер рядом</h3><p>Контроль на каждом круге</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Классы 50 и 65 -->
   <section>
     <div class="gm-wrap">
-      <h2>Для кого</h2>
-      <div class="gm-grid">
-        <div class="gm-card gm-card--hl"><h3>Дети 4–10 лет</h3>
-          <ul class="gm-list"><li>С нуля — даже если ребёнок ни разу не садился на мотоцикл</li><li>Класс 50 и класс 65 — по возрасту и росту</li><li>Развивают координацию, реакцию и уверенность</li></ul></div>
-        <div class="gm-card"><h3>Опытные спортсмены</h3>
+      <div class="gm-kicker gm-reveal">Мотоциклы</div>
+      <h2 class="gm-reveal">Класс 50 и класс 65</h2>
+      <p class="gm-sub gm-reveal">Подберём мотоцикл по возрасту, росту и опыту ребёнка.</p>
+      <div class="gm-classes">
+        <div class="gm-card gm-class gm-reveal">
+          <div class="gm-display">50</div>
+          <h3>Для старта</h3>
+          <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
+          <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
+          <svg viewBox="0 0 420 300" width="260"><use href="#gm-bike"/></svg>
+        </div>
+        <div class="gm-card gm-card--hl gm-class gm-reveal">
+          <div class="gm-display">65</div>
+          <h3>Для уверенных</h3>
+          <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
+          <p>Скорость, виражи и верхний уровень трассы. Подготовка к соревнованиям.</p>
+          <svg viewBox="0 0 420 300" width="330"><use href="#gm-bike"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Видео: CONFIG.MEDIA.video -->
+  <section id="gm-video-sec">
+    <div class="gm-wrap">
+      <div class="gm-kicker gm-reveal">Смотрите сами</div>
+      <h2 class="gm-reveal">Как проходит тренировка</h2>
+      <p class="gm-sub gm-reveal">Минута с картодрома — и всё станет понятно.</p>
+      <div class="gm-reels" id="gm-reels"></div>
+      <div class="gm-video gm-reveal" id="gm-video">
+        <svg class="gm-poster" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="1600" height="900" fill="#12151b"/>
+          <circle cx="1200" cy="300" r="500" fill="#c8ff2e" opacity=".08"/>
+          <path d="M0 760 Q400 640 800 720 T1600 660 V900 H0Z" fill="#171a21"/>
+          <svg x="760" y="250" width="760" height="543" viewBox="0 0 420 300"><use href="#gm-bike"/></svg>
+        </svg>
+        <button class="gm-play" type="button" aria-label="Смотреть видео"></button>
+        <div class="gm-video-cap" id="gm-video-cap">Видео с тренировки</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Галерея: CONFIG.MEDIA.gallery -->
+  <section>
+    <div class="gm-wrap">
+      <div class="gm-kicker gm-reveal">Фото</div>
+      <h2 class="gm-reveal">Наши райдеры</h2>
+      <p class="gm-sub gm-reveal">Эмоции, первые победы и новые друзья.</p>
+      <div class="gm-gallery" id="gm-gallery"></div>
+    </div>
+  </section>
+
+  <!-- 7. Для кого + расписание -->
+  <section>
+    <div class="gm-wrap">
+      <div class="gm-kicker gm-reveal">Для кого</div>
+      <h2 class="gm-reveal">Начать можно с нуля</h2>
+      <div class="gm-grid" style="margin-top:32px">
+        <div class="gm-card gm-card--hl gm-reveal"><h3>👶 Дети 4–10 лет</h3>
+          <ul class="gm-list"><li>Даже если ребёнок ни разу не садился на мотоцикл</li><li>Класс 50 и класс 65 — по возрасту и росту</li><li>Развивают координацию, реакцию и уверенность</li></ul></div>
+        <div class="gm-card gm-reveal"><h3>🏆 Опытные спортсмены</h3>
           <ul class="gm-list"><li>Тренировки в дни непогоды, когда трассы закрыты</li><li>Отработка техники на технической трассе</li><li>Поддержание формы между сезонами</li></ul></div>
       </div>
-    </div>
-  </section>
 
-  <!-- 4. Расписание -->
-  <section>
-    <div class="gm-wrap">
-      <h2>Расписание</h2>
-      <div class="gm-sched">
-        <div class="gm-card"><div class="gm-day">Среда</div><p>09:00 – 11:00</p></div>
-        <div class="gm-card"><div class="gm-day">Суббота</div><p>09:00 – 11:00</p></div>
-        <div class="gm-card"><p>Расписание предварительное — уточняйте у администратора:</p><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></div>
+      <h2 class="gm-reveal" style="margin-top:88px">Расписание</h2>
+      <div class="gm-grid gm-sched" style="margin-top:24px">
+        <div class="gm-card gm-reveal"><div class="gm-day">Среда</div><div class="gm-time">09:00 – 11:00</div></div>
+        <div class="gm-card gm-reveal"><div class="gm-day">Суббота</div><div class="gm-time">09:00 – 11:00</div></div>
+        <div class="gm-card gm-reveal"><p>Расписание предварительное — уточняйте у администратора:</p><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></div>
       </div>
     </div>
   </section>
 
-  <!-- 5. Стоимость. TODO: подставить цены и состав абонементов -->
+  <!-- 8. Стоимость. TODO: подставить цены и состав абонементов -->
   <section>
     <div class="gm-wrap">
-      <h2>Стоимость</h2>
-      <div class="gm-grid">
-        <div class="gm-card"><h3>Разовое занятие</h3><div class="gm-price">0 000 ₽</div><p>Отличный способ попробовать</p></div>
-        <div class="gm-card gm-card--hl"><h3>Абонемент 4 занятия</h3><div class="gm-price">0 000 ₽</div><p>Тренировка раз в неделю</p></div>
-        <div class="gm-card"><h3>Абонемент 8 занятий</h3><div class="gm-price">0 000 ₽</div><p>Для быстрого прогресса</p></div>
+      <div class="gm-kicker gm-reveal">Цены</div>
+      <h2 class="gm-reveal">Стоимость</h2>
+      <div class="gm-grid" style="margin-top:32px">
+        <div class="gm-card gm-reveal"><h3>Разовое занятие</h3><div class="gm-price">0 000 ₽</div><p>Отличный способ попробовать</p></div>
+        <div class="gm-card gm-card--hl gm-reveal"><span class="gm-ribbon">Хит</span><h3>Абонемент 4 занятия</h3><div class="gm-price">0 000 ₽</div><p>Тренировка раз в неделю</p></div>
+        <div class="gm-card gm-reveal"><h3>Абонемент 8 занятий</h3><div class="gm-price">0 000 ₽</div><p>Для быстрого прогресса</p></div>
       </div>
     </div>
   </section>
 
-  <!-- 6. Экипировка. TODO: проверить, что выдаём, а что берут с собой -->
+  <!-- 9. Экипировка. TODO: проверить, что выдаём, а что берут с собой -->
   <section>
     <div class="gm-wrap">
-      <h2>Экипировка и безопасность</h2>
-      <div class="gm-grid">
-        <div class="gm-card"><h3>Выдаём на месте</h3>
+      <div class="gm-kicker gm-reveal">Безопасность</div>
+      <h2 class="gm-reveal">Экипировка</h2>
+      <div class="gm-gear" style="margin-top:32px">
+        <div class="gm-card gm-reveal">
+          <svg viewBox="0 0 56 56"><path d="M8 34 Q8 10 30 10 Q50 10 50 32 L50 40 L30 40 Q26 30 14 34 Z" fill="url(#gm-g-hot)"/><path d="M32 22 Q46 22 48 34 L34 34 Z" fill="#0d0f13"/><path d="M8 40 h42" stroke="#c8ff2e" stroke-width="4" stroke-linecap="round"/></svg>
+          <h3>Выдаём на месте</h3>
           <ul class="gm-list"><li>Электромотоцикл класса 50 или 65</li><li>Шлем</li><li>Защита: черепаха, наколенники, налокотники</li></ul></div>
-        <div class="gm-card"><h3>Взять с собой</h3>
-          <ul class="gm-list"><li>Удобную спортивную одежду с длинными рукавами</li><li>Закрытую обувь, лучше высокую</li><li>Перчатки и воду</li></ul></div>
-        <div class="gm-card"><h3>Безопасность</h3>
-          <ul class="gm-list"><li>Закрытая трасса без постороннего транспорта</li><li>Тренер рядом на каждом занятии</li><li>Скорость мотоцикла ограничивается под уровень ребёнка</li></ul></div>
+        <div class="gm-card gm-reveal">
+          <svg viewBox="0 0 56 56"><path d="M14 8 h28 l8 12 -8 4 v24 H14 V24 l-8-4 Z" fill="#c9ced8"/><path d="M22 8 Q28 16 34 8" fill="none" stroke="#0d0f13" stroke-width="3"/><path d="M14 30 h28" stroke="url(#gm-g-acc)" stroke-width="6"/></svg>
+          <h3>Взять с собой</h3>
+          <ul class="gm-list"><li>Спортивную одежду с длинными рукавами</li><li>Закрытую обувь, лучше высокую</li><li>Перчатки и воду</li></ul></div>
+        <div class="gm-card gm-reveal">
+          <svg viewBox="0 0 56 56"><path d="M28 4 L48 12 V28 Q48 44 28 52 Q8 44 8 28 V12 Z" fill="url(#gm-g-acc)"/><path d="M19 28 l7 7 12-14" fill="none" stroke="#0d0f13" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h3>Безопасность</h3>
+          <ul class="gm-list"><li>Закрытая трасса без постороннего транспорта</li><li>Тренер рядом на каждом занятии</li><li>Мощность мотоцикла — под уровень ребёнка</li></ul></div>
       </div>
     </div>
   </section>
 
-  <!-- 7. Лид-форма -->
+  <!-- 10. Лид-форма. Фон: CONFIG.MEDIA.formBg -->
   <section class="gm-form-sec" id="gm-form">
+    <div class="gm-form-bg" id="gm-form-bg"></div>
     <div class="gm-wrap gm-form-box">
-      <div>
-        <h2>Запишите ребёнка на тренировку</h2>
+      <div class="gm-reveal">
+        <div class="gm-kicker">Запись</div>
+        <h2>Запишите ребёнка<br>на <span class="gm-accent">тренировку</span></h2>
         <p>Оставьте заявку — администратор перезвонит, подберёт группу и класс мотоцикла и ответит на все вопросы.</p>
-        <p class="gm-note">Удобнее позвонить? <a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
+        <ul class="gm-list gm-perks"><li>Перезвоним в течение дня</li><li>Подберём удобное время</li><li>Расскажем, что взять с собой</li></ul>
+        <p style="margin-top:20px">Удобнее позвонить? <a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
       </div>
 
-      <div>
+      <div class="gm-reveal">
         <form id="gm-lead" novalidate>
           <label>Имя родителя
             <input name="name" autocomplete="name" placeholder="Как к вам обращаться" required maxlength="80"></label>
@@ -213,10 +491,10 @@
             <!-- TODO: ссылка на политику обработки персональных данных -->
             <span>Согласен(на) на обработку персональных данных в соответствии с <a href="#" target="_blank" rel="noopener">политикой конфиденциальности</a></span></label>
           <div class="gm-err" role="alert"></div>
-          <button class="gm-btn" type="submit">Отправить заявку</button>
+          <button class="gm-btn" type="submit">Отправить заявку →</button>
         </form>
         <div class="gm-done gm-card" role="status">
-          <div class="gm-ico">🏁</div>
+          <svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="38" fill="url(#gm-g-acc)"/><path d="M24 41 l11 11 22-24" fill="none" stroke="#0d0f13" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <h3>Спасибо! Заявка принята</h3>
           <p>Администратор перезвонит вам в ближайшее время.</p>
         </div>
@@ -224,20 +502,21 @@
     </div>
   </section>
 
-  <!-- 8. Адрес и FAQ. TODO: точный адрес картодрома -->
+  <!-- 11. Адрес и FAQ. TODO: точный адрес картодрома -->
   <section>
     <div class="gm-wrap">
-      <h2>Как добраться</h2>
-      <div class="gm-map">
-        <div class="gm-card">
-          <h3>Зеленоград</h3>
+      <div class="gm-kicker gm-reveal">Адрес</div>
+      <h2 class="gm-reveal">Как добраться</h2>
+      <div class="gm-map" style="margin-top:32px">
+        <div class="gm-card gm-reveal">
+          <h3>📍 Зеленоград</h3>
           <p id="gm-address">Адрес картодрома уточняйте у администратора</p>
-          <p class="gm-note"><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
+          <p style="margin-top:20px"><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
         </div>
-        <iframe id="gm-mapframe" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
+        <iframe id="gm-mapframe" class="gm-reveal" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
       </div>
 
-      <h2 style="margin-top:72px">Частые вопросы</h2>
+      <h2 class="gm-reveal" style="margin-top:88px">Частые вопросы</h2>
       <details><summary>Ребёнок ни разу не ездил на мотоцикле — подойдёт?</summary>
         <p>Да. Занятия начинаются с азов: посадка, газ и тормоз, баланс. Тренер подберёт мотоцикл по росту и возрасту.</p></details>
       <details><summary>Чем отличаются классы 50 и 65?</summary>
@@ -250,6 +529,9 @@
   </section>
 
   <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград · <a href="tel:+79152779121">+7 915 277-91-21</a></div></div>
+
+  <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#gm-form">Записаться на тренировку →</a></div>
+  <div class="gm-lightbox" id="gm-lightbox"><img alt=""></div>
 </div>
 
 <script>
@@ -260,20 +542,163 @@
     // TODO: номер счётчика Яндекс.Метрики (если счётчик подключён в настройках Тильды)
     METRIKA_ID: 0,
     GOAL: 'lead_form_submit',
-    // TODO: точный адрес — он же используется для карты
-    ADDRESS: 'Зеленоград, картодром',
-    PHONE: '+7 915 277-91-21'
+    // TODO: проверить адрес — он же используется для карты
+    ADDRESS: 'Картинг-центр ZelenoKART, ТРЦ «Зеленопарк», Ржавки, Зеленоград',
+    PHONE: '+7 915 277-91-21',
+
+    // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
+    // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
+    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@7c6fdf2f67ff/gluhov-moto-landing/media/',
+    MEDIA: {
+      heroVideo: 'hero.mp4',      // .mp4 без звука, крутится фоном на первом экране
+      heroImage: 'track-top.jpg', // обложка, пока грузится видео
+      // короткие вертикальные ролики с трассы: { src, poster, caption }
+      reels: [
+        { src: 'reel-1.mp4', poster: 'reel-1.jpg', caption: 'Класс 50' },
+        { src: 'reel-2.mp4', poster: 'reel-2.jpg', caption: 'Вираж' },
+        { src: 'reel-3.mp4', poster: 'reel-3.jpg', caption: 'Финишная прямая' },
+        { src: 'reel-4.mp4', poster: 'reel-4.jpg', caption: 'Первые круги' }
+      ],
+      video: '',       // длинный ролик: ссылка ВК Видео, Rutube, YouTube или .mp4 (необязательно)
+      videoPoster: '', // обложка длинного ролика
+      formBg: 'kids-bikes.jpg',
+      // фото в карточках «Почему здесь» по порядку: трасса, мотоцикл, погода, тренер
+      features: ['track-top.jpg', 'bikes.jpg', 'rider-blue.jpg', ''],
+      // галерея: { src, caption }
+      gallery: [
+        { src: 'rider-yellow.jpg', caption: 'На трассе' },
+        { src: 'kids-bikes.jpg', caption: 'Наши райдеры' },
+        { src: 'kids-walk.jpg', caption: 'Идём на старт' },
+        { src: 'rider-red.jpg', caption: 'Вираж' },
+        { src: 'kids-smile.jpg', caption: 'После заезда' },
+        { src: 'podium.jpg', caption: 'Пьедестал ZelenoKART' },
+        { src: 'bikes-banner.jpg', caption: 'Мотоциклы 50 и 65' },
+        { src: 'kids-bikes-2.jpg', caption: 'Готовы к старту' }
+      ]
+    }
   };
 
+  var M = CONFIG.MEDIA;
   var root = document.getElementById('gm');
-  var form = document.getElementById('gm-lead');
+  function $(id) { return document.getElementById(id); }
+  function url(s) { return !s || /^(https?:)?\/\//.test(s) ? s : CONFIG.MEDIA_BASE + s; }
+  function img(src, alt) { var i = new Image(); i.loading = 'lazy'; i.src = url(src); i.alt = alt || ''; return i; }
+
+  /* ---------- Медиа ---------- */
+  var hero = $('gm-hero'), heroMedia = $('gm-hero-media');
+  if (M.heroVideo) {
+    var v = document.createElement('video');
+    v.src = url(M.heroVideo); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); if (M.heroImage) v.poster = url(M.heroImage);
+    heroMedia.appendChild(v); hero.classList.remove('gm-hero--art');
+  } else if (M.heroImage) {
+    heroMedia.appendChild(img(M.heroImage, '')); hero.classList.remove('gm-hero--art');
+  }
+
+  if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));
+
+  var cards = $('gm-features').children;
+  (M.features || []).forEach(function (src, i) {
+    if (!src || !cards[i]) return;
+    var bg = document.createElement('div'); bg.className = 'gm-bgimg'; bg.appendChild(img(src, ''));
+    cards[i].insertBefore(bg, cards[i].firstChild);
+    cards[i].classList.add('gm-feature--photo');
+  });
+
+  // Видео: превращаем обычную ссылку в адрес плеера
+  function embedUrl(url) {
+    var m;
+    if ((m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/)))
+      return 'https://www.youtube.com/embed/' + m[1] + '?autoplay=1&rel=0';
+    if ((m = url.match(/rutube\.ru\/(?:video|shorts|play\/embed)\/([\w]+)/)))
+      return 'https://rutube.ru/play/embed/' + m[1] + '?autoplay=1';
+    if (/video_ext\.php/.test(url)) return url + (url.indexOf('autoplay') < 0 ? '&autoplay=1' : '');
+    if ((m = url.match(/(?:vk\.com|vkvideo\.ru)\/(?:.*[?&]z=)?video(-?\d+)_(\d+)/)))
+      return 'https://vk.com/video_ext.php?oid=' + m[1] + '&id=' + m[2] + '&hd=2&autoplay=1';
+    return '';
+  }
+  var vbox = $('gm-video'), play = vbox.querySelector('.gm-play');
+  if (M.videoPoster) { vbox.querySelector('.gm-poster').remove(); vbox.insertBefore(img(M.videoPoster, ''), vbox.firstChild); }
+  // Ролики с трассы: играют без звука, только пока видны на экране
+  var reels = $('gm-reels');
+  (M.reels || []).forEach(function (r) {
+    var box = document.createElement('div'); box.className = 'gm-reel gm-reveal';
+    var v = document.createElement('video');
+    v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute('playsinline', '');
+    v.preload = 'none'; v.poster = url(r.poster); v.dataset.src = url(r.src);
+    box.appendChild(v);
+    if (r.caption) { var s = document.createElement('span'); s.textContent = r.caption; box.appendChild(s); }
+    reels.appendChild(box);
+  });
+  if ('IntersectionObserver' in window) {
+    var vio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(function () {}); }
+        else v.pause();
+      });
+    }, { threshold: .4 });
+    reels.querySelectorAll('video').forEach(function (v) { vio.observe(v); });
+  }
+
+  if (!M.video) {
+    if (M.reels && M.reels.length) vbox.hidden = true;
+    else { play.disabled = true; $('gm-video-cap').textContent = 'Видео с тренировки — скоро'; }
+  }
+  play.addEventListener('click', function () {
+    var src = embedUrl(M.video), el;
+    if (src) {
+      el = document.createElement('iframe'); el.src = src;
+      el.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture'; el.allowFullscreen = true;
+    } else {
+      el = document.createElement('video'); el.src = url(M.video); el.controls = true; el.autoplay = true; el.playsInline = true;
+    }
+    vbox.innerHTML = ''; vbox.appendChild(el);
+  });
+
+  // Галерея: без фото показываем заглушки, чтобы было видно, сколько кадров нужно
+  var gal = $('gm-gallery'), lb = $('gm-lightbox');
+  var shots = M.gallery && M.gallery.length ? M.gallery : null;
+  var hints = ['Ребёнок на трассе', 'Старт заезда', 'Тренер и ученик', 'Верхний уровень', 'Мотоциклы 50 и 65', 'Эмоции после заезда'];
+  (shots || hints).forEach(function (s, i) {
+    var f = document.createElement('figure'); f.className = 'gm-reveal';
+    if (shots) {
+      var src = typeof s === 'string' ? s : s.src, cap = typeof s === 'string' ? '' : (s.caption || '');
+      f.appendChild(img(src, cap));
+      if (cap) { var c = document.createElement('figcaption'); c.textContent = cap; f.appendChild(c); }
+      f.addEventListener('click', function () { lb.firstChild.src = url(src); lb.classList.add('gm-open'); });
+    } else {
+      f.classList.add('gm-ph');
+      f.innerHTML = '<div><svg><use href="#gm-cam"/></svg>' + s + '</div>';
+    }
+    gal.appendChild(f);
+  });
+  lb.addEventListener('click', function () { lb.classList.remove('gm-open'); });
+
+  $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);
+  if (CONFIG.ADDRESS !== 'Зеленоград, картодром') $('gm-address').textContent = CONFIG.ADDRESS;
+
+  /* ---------- Анимации при прокрутке и липкая кнопка ---------- */
+  var reveal = root.querySelectorAll('.gm-reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('gm-in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    reveal.forEach(function (el) { io.observe(el); });
+
+    var sticky = $('gm-sticky'), heroOut = false, formIn = false;
+    function upd() { sticky.classList.toggle('gm-show', heroOut && !formIn); }
+    new IntersectionObserver(function (es) { heroOut = !es[0].isIntersecting; upd(); }).observe(hero);
+    new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe($('gm-form'));
+  } else {
+    reveal.forEach(function (el) { el.classList.add('gm-in'); });
+  }
+
+  /* ---------- Форма ---------- */
+  var form = $('gm-lead');
   var err = form.querySelector('.gm-err');
   var done = root.querySelector('.gm-done');
   var btn = form.querySelector('button');
-
-  document.getElementById('gm-mapframe').src =
-    'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);
-  if (CONFIG.ADDRESS !== 'Зеленоград, картодром') document.getElementById('gm-address').textContent = CONFIG.ADDRESS;
 
   // Маска телефона: +7 (XXX) XXX-XX-XX
   var phone = form.elements.phone;
@@ -333,7 +758,7 @@
       .catch(function () {
         err.textContent = 'Не удалось отправить заявку. Позвоните нам: ' + CONFIG.PHONE;
         btn.disabled = false;
-        btn.textContent = 'Отправить заявку';
+        btn.textContent = 'Отправить заявку →';
       });
   });
 })();

@@ -180,8 +180,9 @@
 #gm .gm-sticky .gm-btn{width:100%}
 
 /* ---------- Анимации ---------- */
-#gm .gm-reveal{opacity:0;transform:translateY(40px);transition:opacity .7s ease,transform .7s ease}
-#gm .gm-reveal.gm-in{opacity:1;transform:none}
+/* прячем только то, что при загрузке было ниже первого экрана */
+#gm .gm-reveal{transition:opacity .7s ease,transform .7s ease}
+#gm .gm-reveal.gm-pre{opacity:0;transform:translateY(40px)}
 @keyframes gm-spin{to{transform:rotate(360deg)}}
 @keyframes gm-bob{to{transform:translateY(-4px)}}
 @keyframes gm-speed{0%{opacity:0;transform:translateX(40px)}30%{opacity:.9}100%{opacity:0;transform:translateX(-120px)}}
@@ -190,7 +191,7 @@
 @keyframes gm-ring{0%{box-shadow:0 0 0 0 rgba(200,255,46,.55)}100%{box-shadow:0 0 0 34px rgba(200,255,46,0)}}
 @media (prefers-reduced-motion:reduce){
   #gm *,#gm *::before{animation:none!important}
-  #gm .gm-reveal{opacity:1;transform:none;transition:none}
+  #gm .gm-reveal.gm-pre{opacity:1;transform:none;transition:none}
 }
 
 @media (max-width:900px){
@@ -682,16 +683,17 @@
   var reveal = root.querySelectorAll('.gm-reveal');
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('gm-in'); io.unobserve(e.target); } });
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove('gm-pre'); io.unobserve(e.target); } });
     }, { rootMargin: '0px 0px -8% 0px' });
-    reveal.forEach(function (el) { io.observe(el); });
+    reveal.forEach(function (el) {
+      if (el.getBoundingClientRect().top > window.innerHeight) el.classList.add('gm-pre');
+      io.observe(el);
+    });
 
     var sticky = $('gm-sticky'), heroOut = false, formIn = false;
     function upd() { sticky.classList.toggle('gm-show', heroOut && !formIn); }
     new IntersectionObserver(function (es) { heroOut = !es[0].isIntersecting; upd(); }).observe(hero);
     new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe($('gm-form'));
-  } else {
-    reveal.forEach(function (el) { el.classList.add('gm-in'); });
   }
 
   /* ---------- Форма ---------- */

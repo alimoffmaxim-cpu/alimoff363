@@ -87,12 +87,17 @@
 #gm .gm-track{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}
 #gm .gm-track svg{width:100%;height:auto}
 #gm .gm-track-viz{min-width:0}
-#gm .gm-profile{margin-top:8px}
-#gm .gm-profile svg{display:block;width:100%;height:auto}
-#gm .gm-steps{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;counter-reset:s}
-#gm .gm-steps li{position:relative;text-align:center;font-size:13px;font-weight:800;padding:9px 4px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--muted);transition:background .3s,color .3s}
-#gm .gm-steps li:not(:last-child)::after{content:"→";position:absolute;right:-8px;top:50%;transform:translateY(-50%);color:var(--line);font-size:12px}
-#gm .gm-steps li.gm-on{background:var(--accent);color:var(--accent-ink)}
+#gm .gm-3d{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:24px;overflow:hidden;cursor:grab;touch-action:pan-y;
+  background:radial-gradient(70% 70% at 50% 45%,#1c212b,#0d0f13)}
+#gm .gm-3d:active{cursor:grabbing}
+#gm .gm-3d canvas{display:block;width:100%;height:100%}
+#gm .gm-3d-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap;
+  font:800 13px Manrope,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;
+  background:rgba(13,15,19,.78);color:var(--text);border:1px solid rgba(255,255,255,.14)}
+#gm .gm-3d-label--hl{color:var(--accent);border-color:rgba(255,212,0,.5)}
+#gm .gm-3d-hint{position:absolute;right:14px;bottom:12px;font-size:12px;font-weight:600;color:var(--muted);pointer-events:none}
+#gm .gm-track-viz.gm-has3d .gm-track-map{display:none}
+@media (max-width:600px){#gm .gm-3d{aspect-ratio:1/1}#gm .gm-3d-label{font-size:11px;padding:4px 9px}#gm .gm-3d-hint{font-size:11px}}
 #gm .gm-track-legend{display:grid;gap:14px}
 #gm .gm-track-legend .gm-card{padding:20px 22px;display:flex;gap:16px;align-items:center}
 #gm .gm-track-legend b{font:900 28px Unbounded,Arial,sans-serif;color:var(--accent);min-width:70px}
@@ -319,6 +324,7 @@
       <p class="gm-sub gm-reveal">Трасса идёт в два яруса: круг по нижнему уровню, подъём наверх, вираж на втором уровне и спуск обратно. Каждый заезд проходит по всей трассе.</p>
       <div class="gm-track">
         <div class="gm-track-viz gm-reveal">
+        <div class="gm-3d" id="gm-3d" hidden><span class="gm-3d-hint">↔ Потяните, чтобы повернуть</span></div>
         <svg viewBox="0 0 720 490" class="gm-track-map" role="img" aria-label="Схема трассы: нижний уровень, подъём по рампе, верхний уровень и спуск — один круг">
           <defs>
             <filter id="gm-glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="5"/></filter>
@@ -362,15 +368,6 @@
             <text x="102" y="290" fill="#f3f4f6" text-anchor="end">СПУСК ↓</text>
           </g>
         </svg>
-        <div class="gm-profile">
-          <svg viewBox="0 0 640 86" aria-hidden="true">
-            <path id="gm-prof-area" fill="#ffd400" fill-opacity=".1"/>
-            <path id="gm-prof-line" fill="none" stroke="#ffd400" stroke-width="3" stroke-linejoin="round"/>
-            <circle id="gm-prof-dot" r="7" fill="#ff5a1f" stroke="#0d0f13" stroke-width="2" cx="20" cy="66"/>
-            <text x="20" y="82" fill="#a3a9b6" font-family="Manrope,Arial,sans-serif" font-size="12" font-weight="800">ВЫСОТА ПО КРУГУ</text>
-          </svg>
-          <ol class="gm-steps" id="gm-steps"><li>1 уровень</li><li>Подъём</li><li>2 уровень</li><li>Спуск</li></ol>
-        </div>
         </div>
         <div class="gm-track-legend">
           <div class="gm-card gm-reveal"><b>2</b><div><h3>уровня трассы</h3><p>Подъём, верхний ярус и спуск в одном круге</p></div></div>
@@ -717,23 +714,16 @@
   $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);
   if (CONFIG.ADDRESS !== 'Зеленоград, картодром') $('gm-address').textContent = CONFIG.ADDRESS;
 
-  /* ---------- Схема трассы: райдеры едут по одному кругу через оба уровня ---------- */
+  /* ---------- Схема трассы (SVG, запасной вариант): райдеры едут по одному кругу ---------- */
   (function () {
     var route = $('gm-route');
     if (!route || !route.getTotalLength) return;
     var NS = 'http://www.w3.org/2000/svg', total = route.getTotalLength();
-    var lens = [1, 2, 3, 4].map(function (i) { return $('gm-seg' + i).getTotalLength(); });
-    var sum = lens.reduce(function (a, b) { return a + b; }, 0);
-    var bounds = [], acc = 0;
-    lens.forEach(function (l) { acc += l / sum; bounds.push(acc); });
-    function seg(t) { for (var i = 0; i < 4; i++) if (t < bounds[i]) return i; return 3; }
     function el(tag, attrs, parent) {
       var e = document.createElementNS(NS, tag);
       for (var k in attrs) e.setAttribute(k, attrs[k]);
       parent.appendChild(e); return e;
     }
-
-    // шевроны направления вдоль всей трассы
     var chev = $('gm-chevrons');
     for (var c = 0; c < 18; c++) {
       var d = (c + 0.5) / 18 * total, p = route.getPointAtLength(d), q = route.getPointAtLength(Math.min(total, d + 1));
@@ -741,53 +731,200 @@
       el('path', { d: 'M-4 -6 L4 0 L-4 6', fill: 'none', stroke: '#ffd400', 'stroke-width': 3, 'stroke-linecap': 'round',
         transform: 'translate(' + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ') rotate(' + a.toFixed(1) + ')' }, chev);
     }
-
-    // профиль высоты: низ, подъём, верх, спуск
-    var X0 = 20, W = 600, LOW = 66, HIGH = 18;
-    var px = [X0, X0 + W * bounds[0], X0 + W * bounds[1], X0 + W * bounds[2], X0 + W];
-    var py = [LOW, LOW, HIGH, HIGH, LOW];
-    var line = 'M' + px.map(function (x, i) { return x.toFixed(1) + ' ' + py[i]; }).join(' L');
-    $('gm-prof-line').setAttribute('d', line);
-    $('gm-prof-area').setAttribute('d', line + ' L' + (X0 + W) + ' 72 L' + X0 + ' 72 Z');
-    function profY(t) {
-      var i = seg(t), t0 = i ? bounds[i - 1] : 0, f = (t - t0) / (bounds[i] - t0);
-      return py[i] + (py[i + 1] - py[i]) * f;
-    }
-
-    var colors = ['#ff5a1f', '#f3f4f6', '#ffd400'], riders = [];
-    colors.forEach(function (col, i) {
-      var g = el('g', {}, $('gm-riders')), trail = [];
-      for (var k = 3; k >= 1; k--) trail.push(el('circle', { r: 3 + k * 1.5, fill: col, opacity: (0.6 - k * 0.15).toFixed(2) }, g));
-      var glow = el('circle', { r: 16, fill: col, opacity: .35, filter: 'url(#gm-glow)' }, g);
-      var dot = el('circle', { r: 9, fill: col, stroke: '#0d0f13', 'stroke-width': 2 }, g);
-      riders.push({ off: i / colors.length, trail: trail, glow: glow, dot: dot });
+    ['#ff5a1f', '#f3f4f6', '#ffd400'].forEach(function (col, i) {
+      var dot = el('circle', { r: 9, fill: col, stroke: '#0d0f13', 'stroke-width': 2 }, $('gm-riders'));
+      var m = el('animateMotion', { dur: '11s', begin: (-i * 11 / 3).toFixed(2) + 's', repeatCount: 'indefinite' }, dot);
+      el('mpath', { href: '#gm-route' }, m);
     });
-    var steps = $('gm-steps').children, dotP = $('gm-prof-dot'), cur = -1;
+  })();
 
-    function place(c, t) {
-      var p = route.getPointAtLength(((t % 1) + 1) % 1 * total);
-      c.setAttribute('cx', p.x.toFixed(1)); c.setAttribute('cy', p.y.toFixed(1));
-    }
-    function draw(time) {
-      var base = time / 11000;
-      riders.forEach(function (r) {
-        var t = (base + r.off) % 1;
-        place(r.dot, t); place(r.glow, t);
-        r.trail.forEach(function (c, k) { place(c, t - (3 - k) * 0.008); });
-      });
-      var lead = (base + riders[0].off) % 1, s = seg(lead);
-      dotP.setAttribute('cx', (X0 + W * lead).toFixed(1)); dotP.setAttribute('cy', profY(lead).toFixed(1));
-      if (s !== cur) { if (cur >= 0) steps[cur].classList.remove('gm-on'); steps[s].classList.add('gm-on'); cur = s; }
-    }
-
+  /* ---------- Трасса в 3D (three.js). Без WebGL остаётся SVG-схема ---------- */
+  (function () {
+    var box = $('gm-3d'), viz = box && box.parentNode;
+    if (!box || !window.IntersectionObserver) return;
+    var THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
     var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    draw(still ? 0.15 * 11000 : 0);
-    if (still) return;
-    var running = false, raf;
-    function loop(ts) { draw(ts); raf = requestAnimationFrame(loop); }
-    function setRun(on) { if (on === running) return; running = on; if (on) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf); }
-    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { setRun(es[0].isIntersecting); }).observe(route.ownerSVGElement);
-    else setRun(true);
+
+    var lazy = new IntersectionObserver(function (es) {
+      if (!es[0].isIntersecting) return;
+      lazy.disconnect();
+      if (window.THREE) return init();
+      var s = document.createElement('script');
+      s.src = THREE_URL; s.onload = init;
+      document.head.appendChild(s);
+    }, { rootMargin: '400px 0px' });
+    lazy.observe(viz);
+
+    function init() {
+      var T = window.THREE, renderer;
+      try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { return; }
+      if (!renderer.getContext()) return;
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = T.PCFSoftShadowMap;
+      box.insertBefore(renderer.domElement, box.firstChild);
+      box.hidden = false;
+      viz.classList.add('gm-has3d');
+
+      var scene = new T.Scene();
+      scene.fog = new T.Fog(0x0d0f13, 40, 75);
+      var camera = new T.PerspectiveCamera(34, 4 / 3, 0.1, 200);
+      scene.add(new T.HemisphereLight(0xdfe6ff, 0x1a1408, 0.75));
+      var sun = new T.DirectionalLight(0xffffff, 0.85);
+      sun.position.set(-10, 22, 14); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      var sc = sun.shadow.camera; sc.left = -18; sc.right = 18; sc.top = 18; sc.bottom = -18; sc.near = 1; sc.far = 60;
+      sun.shadow.bias = -0.001;
+      scene.add(sun);
+
+      function mat(c, o) { o = o || {}; o.color = c; return new T.MeshStandardMaterial(o); }
+      function boxMesh(w, h, d, x, y, z, m) {
+        var b = new T.Mesh(new T.BoxGeometry(w, h, d), m);
+        b.position.set(x, y, z); b.castShadow = b.receiveShadow = true; scene.add(b); return b;
+      }
+      function neon(w, h, d, x, y, z, c) {
+        var n = new T.Mesh(new T.BoxGeometry(w, h, d), new T.MeshBasicMaterial({ color: c }));
+        n.position.set(x, y, z); scene.add(n);
+      }
+
+      // площадки: нижний уровень, верхний уровень на опорах и площадки у рамп
+      var floor = mat(0x1d2129, { roughness: .95 }), deck = mat(0x2a2f3a, { roughness: .9 }), conc = mat(0x3a404d, { roughness: .8 });
+      boxMesh(28, 0.4, 18, 0, -0.2, 0.3, floor);
+      boxMesh(16, 0.4, 8, 0, 3.0, -2.5, deck);
+      boxMesh(4.2, 0.4, 3.6, 10.1, 3.0, -5.3, deck);
+      boxMesh(4.2, 0.4, 3.6, -10.1, 3.0, -5.3, deck);
+      [[-6, -6], [6, -6], [-6, 0.8], [6, 0.8], [0, 0.8], [0, -6], [10.6, -6.4], [-10.6, -6.4]].forEach(function (p) {
+        var col = new T.Mesh(new T.CylinderGeometry(0.28, 0.28, 2.8, 12), conc);
+        col.position.set(p[0], 1.4, p[1]); col.castShadow = true; scene.add(col);
+      });
+      // неон по краям второго уровня, как на картодроме
+      neon(16, 0.08, 0.08, 0, 3.24, 1.5, 0x39ff88);
+      neon(0.08, 0.08, 8, -8, 3.24, -2.5, 0xff2e63);
+      neon(0.08, 0.08, 8, 8, 3.24, -2.5, 0xff2e63);
+      neon(28, 0.06, 0.06, 0, 0.03, 9.2, 0x39ff88);
+
+      // трасса: одна замкнутая кривая через оба уровня
+      var L = 0.06, H = 3.26;
+      var pts = [[-10.6, L, 2.6], [-8, L, 6.2], [0, L, 7.3], [8, L, 6.2], [10.6, L, 2.6], [10.6, 1.66, -1.1], [10.6, H, -4.6],
+        [9.2, H, -6.4], [6, H, -5.7], [4.2, H, -1.4], [0, H, 0.3], [-4.2, H, -1.4], [-6, H, -5.7], [-9.2, H, -6.4],
+        [-10.6, H, -4.6], [-10.6, 1.66, -1.1]].map(function (p) { return new T.Vector3(p[0], p[1], p[2]); });
+      var curve = new T.CatmullRomCurve3(pts, true, 'centripetal');
+      var N = 600, ps = curve.getSpacedPoints(N), up = new T.Vector3(0, 1, 0);
+      var sides = ps.map(function (p, i) {
+        var t = ps[(i + 1) % N].clone().sub(ps[(i - 1 + N) % N]);
+        return new T.Vector3().crossVectors(t, up).normalize();
+      });
+      function ribbon(w0, w1, colorAt) {
+        var pos = [], col = [], c = new T.Color();
+        for (var i = 0; i < N; i++) {
+          var j = (i + 1) % N;
+          var a0 = ps[i].clone().addScaledVector(sides[i], w0), a1 = ps[i].clone().addScaledVector(sides[i], w1);
+          var b0 = ps[j].clone().addScaledVector(sides[j], w0), b1 = ps[j].clone().addScaledVector(sides[j], w1);
+          [a0, b0, a1, a1, b0, b1].forEach(function (v) { pos.push(v.x, Math.max(v.y, L) + 0.01, v.z); });
+          c.setHex(colorAt(i)); for (var k = 0; k < 6; k++) col.push(c.r, c.g, c.b);
+        }
+        var g = new T.BufferGeometry();
+        g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+        g.setAttribute('color', new T.Float32BufferAttribute(col, 3));
+        g.computeVertexNormals();
+        var m = new T.Mesh(g, new T.MeshStandardMaterial({ vertexColors: true, roughness: .7, side: T.DoubleSide }));
+        m.receiveShadow = true; m.castShadow = true; scene.add(m); return m;
+      }
+      var RW = 1.25;
+      ribbon(-RW, RW, function () { return 0x343a46; });
+      ribbon(RW, RW + 0.32, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; });
+      ribbon(-RW - 0.32, -RW, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; });
+      ribbon(-0.06, 0.06, function (i) { return (i >> 3) % 2 ? 0x343a46 : 0xffd400; });
+
+      // стенки под рампами — видно, что дорога поднимается
+      var wpos = [];
+      for (var i = 0; i < N; i++) {
+        var j = (i + 1) % N, p = ps[i], q = ps[j];
+        if (p.y < 0.25 || q.y < 0.25 || Math.abs(p.x) < 9.2) continue;
+        [RW + 0.32, -RW - 0.32].forEach(function (w) {
+          var a = p.clone().addScaledVector(sides[i], w), b = q.clone().addScaledVector(sides[j], w);
+          wpos.push(a.x, a.y, a.z, b.x, b.y, b.z, a.x, 0, a.z, a.x, 0, a.z, b.x, b.y, b.z, b.x, 0, b.z);
+        });
+      }
+      var wg = new T.BufferGeometry();
+      wg.setAttribute('position', new T.Float32BufferAttribute(wpos, 3)); wg.computeVertexNormals();
+      var walls = new T.Mesh(wg, mat(0x262b35, { roughness: .9, side: T.DoubleSide }));
+      walls.castShadow = walls.receiveShadow = true; scene.add(walls);
+
+      // финиш
+      var cv = document.createElement('canvas'); cv.width = 64; cv.height = 16;
+      var cx = cv.getContext('2d');
+      for (var u = 0; u < 8; u++) for (var v = 0; v < 2; v++) { cx.fillStyle = (u + v) % 2 ? '#111' : '#fff'; cx.fillRect(u * 8, v * 8, 8, 8); }
+      var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) }));
+      fin.rotation.x = -Math.PI / 2; fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
+
+      // райдеры
+      var riders = [0xff5a1f, 0xf3f4f6, 0xffd400].map(function (c, i) {
+        var g = new T.Group(), m = mat(c, { roughness: .5 }), dark = mat(0x111318);
+        var body = new T.Mesh(new T.BoxGeometry(0.34, 0.3, 1.0), m); body.position.y = 0.45; g.add(body);
+        var rider = new T.Mesh(new T.BoxGeometry(0.3, 0.45, 0.32), mat(0x2b303b)); rider.position.set(0, 0.8, -0.1); g.add(rider);
+        var helm = new T.Mesh(new T.SphereGeometry(0.2, 16, 12), m); helm.position.set(0, 1.12, 0.02); g.add(helm);
+        [-0.42, 0.42].forEach(function (z) {
+          var w = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.12, 16), dark);
+          w.rotation.z = Math.PI / 2; w.position.set(0, 0.24, z); g.add(w);
+        });
+        g.traverse(function (o) { o.castShadow = true; });
+        g.scale.setScalar(1.25); scene.add(g);
+        return { g: g, off: i / 3 };
+      });
+      function placeRiders(t) {
+        riders.forEach(function (r) {
+          var u = (t + r.off) % 1, p = curve.getPointAt(u), q = curve.getPointAt((u + 0.002) % 1);
+          r.g.position.set(p.x, Math.max(p.y, L), p.z); r.g.lookAt(q.x, Math.max(q.y, L), q.z);
+        });
+      }
+
+      // подписи, привязанные к точкам сцены
+      var labels = [['1 уровень', 0, 0.4, 9.6, 0], ['2 уровень', 0, 3.6, -4.2, 1], ['Подъём ↑', 13.3, 1.9, -1.1, 0], ['Спуск ↓', -13.3, 1.9, -1.1, 0]]
+        .map(function (l) {
+          var d = document.createElement('div'); d.className = 'gm-3d-label' + (l[4] ? ' gm-3d-label--hl' : '');
+          d.textContent = l[0]; box.appendChild(d);
+          return { el: d, v: new T.Vector3(l[1], l[2], l[3]) };
+        });
+      var tmp = new T.Vector3();
+
+      // камера под углом, медленно покачивается; можно повернуть пальцем/мышью
+      var W = 1, Hh = 1, drag = 0, dragging = false, lastX = 0, target = new T.Vector3(0, 1.3, 0);
+      function resize() {
+        W = box.clientWidth; Hh = box.clientHeight;
+        renderer.setSize(W, Hh, false); camera.aspect = W / Hh;
+        camera.position.length() || 0;
+        camera.updateProjectionMatrix();
+      }
+      if (window.ResizeObserver) new ResizeObserver(function () { resize(); render(lastT); }).observe(box); else resize();
+      box.addEventListener('pointerdown', function (e) { dragging = true; lastX = e.clientX; });
+      window.addEventListener('pointermove', function (e) { if (!dragging) return; drag += (e.clientX - lastX) * 0.008; lastX = e.clientX; if (still) render(lastT); });
+      window.addEventListener('pointerup', function () { dragging = false; });
+
+      var lastT = 0.12;
+      function render(t) {
+        var az = 0.5 + drag + (still ? 0 : Math.sin(t * 0.6) * 0.25), el = 0.62, R = W / Hh < 1.1 ? 54 : 44;
+        camera.position.set(Math.sin(az) * Math.cos(el) * R, Math.sin(el) * R, Math.cos(az) * Math.cos(el) * R);
+        camera.lookAt(target);
+        placeRiders(still ? 0.12 : t / 12);
+        renderer.render(scene, camera);
+        labels.forEach(function (l) {
+          tmp.copy(l.v).project(camera);
+          var hw = l.el.offsetWidth / 2 + 6, x = Math.min(W - hw, Math.max(hw, (tmp.x + 1) / 2 * W));
+          l.el.style.transform = 'translate(' + x.toFixed(0) + 'px,' + ((1 - tmp.y) / 2 * Hh).toFixed(0) + 'px) translate(-50%,-50%)';
+        });
+      }
+      resize(); render(0);
+      if (still) return;
+
+      var running = false, raf, t0 = performance.now();
+      function loop(now) { lastT = (now - t0) / 1000; render(lastT); raf = requestAnimationFrame(loop); }
+      new IntersectionObserver(function (es) {
+        var on = es[0].isIntersecting;
+        if (on === running) return; running = on;
+        if (on) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf);
+      }).observe(box);
+    }
   })();
 
   /* ---------- Анимации при прокрутке и липкая кнопка ---------- */

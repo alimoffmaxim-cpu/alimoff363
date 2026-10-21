@@ -109,6 +109,7 @@
 #gm .gm-class .gm-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 #gm .gm-class .gm-tags span{background:rgba(255,255,255,.06);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
 #gm .gm-class svg{margin-top:auto;align-self:flex-end;height:auto}
+#gm .gm-class-bike{margin-top:auto;align-self:flex-end;height:auto;max-width:100%}
 
 /* ---------- Видео ---------- */
 #gm .gm-video{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#000;border:1px solid var(--line)}
@@ -506,14 +507,14 @@
           <h3>Для старта</h3>
           <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
           <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
-          <svg viewBox="0 0 420 300" width="280" role="img" aria-label="Ребёнок на мотоцикле класса 50" style="--gm-bike:#e8312a;--gm-jersey:#ffd400;--gm-helmet:#1e5bff"><use href="#gm-bike"/><text x="168" y="161" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#111">3</text></svg>
+          <img data-media="bike-50.png" width="300" alt="Мотоцикл класса 50" class="gm-class-bike">
         </div>
         <div class="gm-card gm-card--hl gm-class gm-reveal">
           <div class="gm-display">65</div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
           <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
-          <svg viewBox="0 0 420 300" width="340" role="img" aria-label="Ребёнок на мотоцикле класса 65" style="--gm-bike:#1e5bff;--gm-jersey:#ffd400;--gm-helmet:#e8312a"><use href="#gm-bike"/><text x="168" y="161" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="22" fill="#111">57</text></svg>
+          <img data-media="bike-65.png" width="360" alt="Мотоцикл класса 65" class="gm-class-bike">
         </div>
       </div>
     </div>
@@ -700,7 +701,7 @@
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
     // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
-    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@71ed2ef271fc/gluhov-moto-landing/media/',
+    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@803dcd87a172/gluhov-moto-landing/media/',
     MEDIA: {
       heroVideo: 'hero.mp4',      // .mp4 без звука, крутится фоном на первом экране (горизонтальный, для компьютера)
       heroImage: 'hero.jpg',      // обложка, пока грузится видео
@@ -752,6 +753,7 @@
   }
 
   if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));
+  root.querySelectorAll('img[data-media]').forEach(function (el) { el.src = url(el.getAttribute('data-media')); });
 
   var cards = $('gm-features').children;
   (M.features || []).forEach(function (src, i) {

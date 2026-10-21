@@ -109,6 +109,10 @@
 #gm .gm-class .gm-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 #gm .gm-class .gm-tags span{background:rgba(255,255,255,.06);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
 #gm .gm-class svg{margin-top:auto;align-self:flex-end;height:auto}
+#gm .gm-class-photo{position:relative;margin:24px -32px 0;margin-top:auto;aspect-ratio:16/10;max-width:none;overflow:hidden}
+#gm .gm-class > p{margin-bottom:24px}
+#gm .gm-class-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 62%}
+#gm .gm-class-photo::before{content:"";position:absolute;inset:0 0 auto;height:40%;background:linear-gradient(var(--card),transparent);z-index:1}
 
 /* ---------- Видео ---------- */
 #gm .gm-video{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#000;border:1px solid var(--line)}
@@ -390,14 +394,14 @@
           <h3>Для старта</h3>
           <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
           <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
-          <svg viewBox="0 0 420 300" width="260"><use href="#gm-bike"/></svg>
+          <svg viewBox="0 0 420 300" width="260" data-class-photo="0"><use href="#gm-bike"/></svg>
         </div>
         <div class="gm-card gm-card--hl gm-class gm-reveal">
           <div class="gm-display">65</div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
           <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
-          <svg viewBox="0 0 420 300" width="330"><use href="#gm-bike"/></svg>
+          <svg viewBox="0 0 420 300" width="330" data-class-photo="1"><use href="#gm-bike"/></svg>
         </div>
       </div>
     </div>
@@ -600,6 +604,8 @@
       video: '',       // длинный ролик: ссылка ВК Видео, Rutube, YouTube или .mp4 (необязательно)
       videoPoster: '', // обложка длинного ролика
       formBg: 'kids-bikes.jpg',
+      // фото в карточках «Класс 50» и «Класс 65» (без них — иллюстрация)
+      classes: ['rider-yellow.jpg', 'rider-red.jpg'],
       // фото в карточках «Почему здесь» по порядку: трасса, мотоцикл, погода, тренер
       features: ['track-top.jpg', 'bikes.jpg', 'rider-blue.jpg', ''],
       // галерея: { src, caption }
@@ -636,6 +642,14 @@
   }
 
   if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));
+
+  root.querySelectorAll('[data-class-photo]').forEach(function (svg) {
+    var src = (M.classes || [])[svg.getAttribute('data-class-photo')];
+    if (!src) return;
+    var box = document.createElement('div'); box.className = 'gm-class-photo';
+    box.appendChild(img(src, 'Ребёнок на мотоцикле на трассе ZelenoKART'));
+    svg.parentNode.replaceChild(box, svg);
+  });
 
   var cards = $('gm-features').children;
   (M.features || []).forEach(function (src, i) {

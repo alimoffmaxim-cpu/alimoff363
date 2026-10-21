@@ -230,31 +230,90 @@
     <defs>
       <linearGradient id="gm-g-acc" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffe766"/><stop offset="1" stop-color="#ffbf00"/></linearGradient>
       <linearGradient id="gm-g-hot" x1="0" x2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff3d1f"/></linearGradient>
-      <!-- Детский электромотоцикл с райдером -->
-      <symbol id="gm-bike" viewBox="0 0 420 300">
-        <g class="gm-body">
-          <path d="M60 150 L140 136 L150 152 L78 166 Z" fill="url(#gm-g-hot)"/>
-          <path d="M96 238 L182 196" stroke="#2b303b" stroke-width="16" stroke-linecap="round"/>
-          <rect x="150" y="160" width="100" height="46" rx="12" fill="#2b303b"/>
-          <rect x="160" y="168" width="80" height="30" rx="7" fill="url(#gm-g-acc)"/>
-          <path d="M205 172 l-14 14 h11 l-6 10 l16 -16 h-11 z" fill="#0d0f13"/>
-          <path d="M118 140 Q180 124 248 132 L254 150 L124 156 Z" fill="#f3f4f6"/>
-          <path d="M240 150 L292 110 L300 120 L262 172 Z" fill="url(#gm-g-hot)"/>
-          <path d="M322 238 L284 112" stroke="#c9ced8" stroke-width="13" stroke-linecap="round"/>
-          <path d="M296 176 L360 162 L352 178 Z" fill="url(#gm-g-hot)"/>
-          <path d="M270 100 L304 92" stroke="#f3f4f6" stroke-width="8" stroke-linecap="round"/>
-          <!-- райдер -->
-          <path d="M196 132 L232 156 L214 196" fill="none" stroke="#2b303b" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M212 194 h20" stroke="#0d0f13" stroke-width="12" stroke-linecap="round"/>
-          <path d="M240 76 Q214 96 198 134" stroke="url(#gm-g-acc)" stroke-width="30" stroke-linecap="round" fill="none"/>
-          <path d="M238 92 L282 98" stroke="url(#gm-g-acc)" stroke-width="13" stroke-linecap="round"/>
-          <circle cx="256" cy="56" r="30" fill="#f3f4f6"/>
-          <path d="M252 30 Q290 34 292 62 L262 62 Z" fill="url(#gm-g-hot)"/>
-          <path d="M268 54 Q290 52 290 70 Q276 76 266 70 Z" fill="#0d0f13"/>
-          <path d="M282 46 L312 50" stroke="#f3f4f6" stroke-width="7" stroke-linecap="round"/>
+      <!-- Детский кроссовый электромотоцикл с райдером. Цвета задаются переменными на <svg>:
+           --gm-bike (пластик), --gm-jersey (джерси), --gm-helmet (шлем) -->
+      <linearGradient id="gm-rg-shade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+      <linearGradient id="gm-rg-metal" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e9edf2"/><stop offset=".5" stop-color="#9aa3b0"/><stop offset="1" stop-color="#5d6470"/></linearGradient>
+      <linearGradient id="gm-rg-gold" x1="0" x2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".5" stop-color="#e2a400"/><stop offset="1" stop-color="#ffd35a"/></linearGradient>
+      <linearGradient id="gm-rg-visor" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#6aa8ff"/><stop offset=".45" stop-color="#1b2a44"/><stop offset="1" stop-color="#0a0d14"/></linearGradient>
+      <symbol id="gm-wheel" viewBox="-62 -62 124 124">
+        <circle r="53" fill="none" stroke="#2e333c" stroke-width="15"/>
+        <circle r="59" fill="none" stroke="#3b414c" stroke-width="5" stroke-dasharray="5 4.2"/>
+        <circle r="60.5" fill="none" stroke="#565d6a" stroke-width="1"/>
+        <circle r="47" fill="none" stroke="#1d2027" stroke-width="2"/>
+        <path d="M-40-36 A53 53 0 0 1 22-48" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="4" stroke-linecap="round"/>
+        <circle r="43" fill="none" stroke="url(#gm-rg-metal)" stroke-width="5"/>
+        <g stroke="#b9c0cc" stroke-width="1.6">
+          <path d="M0-41V41M-41 0H41M-29-29L29 29M29-29L-29 29M-15.7-37.9L15.7 37.9M15.7-37.9L-15.7 37.9M-37.9-15.7L37.9 15.7M37.9-15.7L-37.9 15.7"/>
         </g>
-        <g class="gm-wheel"><circle cx="96" cy="238" r="46" fill="none" stroke="#1d2129" stroke-width="16"/><circle cx="96" cy="238" r="46" fill="none" stroke="#3a404d" stroke-width="4" stroke-dasharray="6 9"/><path d="M96 200 V276 M58 238 H134 M69 211 L123 265 M123 211 L69 265" stroke="#8a919f" stroke-width="3"/><circle cx="96" cy="238" r="9" fill="#ffd400"/></g>
-        <g class="gm-wheel"><circle cx="322" cy="238" r="46" fill="none" stroke="#1d2129" stroke-width="16"/><circle cx="322" cy="238" r="46" fill="none" stroke="#3a404d" stroke-width="4" stroke-dasharray="6 9"/><path d="M322 200 V276 M284 238 H360 M295 211 L349 265 M349 211 L295 265" stroke="#8a919f" stroke-width="3"/><circle cx="322" cy="238" r="9" fill="#ffd400"/></g>
+        <circle r="19" fill="none" stroke="#c9ced8" stroke-width="5" stroke-dasharray="3 3"/>
+        <circle r="10" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="2"/>
+        <circle r="3.5" fill="#2b303b"/>
+      </symbol>
+      <symbol id="gm-bike" viewBox="0 0 420 300">
+        <g class="gm-wheel"><use href="#gm-wheel" x="44" y="170" width="124" height="124"/></g>
+        <g class="gm-wheel"><use href="#gm-wheel" x="262" y="170" width="124" height="124"/></g>
+        <g class="gm-body">
+          <!-- маятник, амортизатор, рама -->
+          <path d="M104 228 L205 196 L211 208 L110 238 Z" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="1.5"/>
+          <path d="M184 140 L196 200" stroke="#2b303b" stroke-width="7" stroke-linecap="round"/>
+          <path d="M181 150 l12 -3 M182 157 l12 -3 M183 164 l12 -3 M184 171 l12 -3 M185 178 l12 -3 M187 185 l12 -3" stroke="url(#gm-rg-gold)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M282 112 L234 204 M282 112 L172 126 L198 206" fill="none" stroke="#23262e" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- электромотор и батарея -->
+          <rect x="196" y="146" width="78" height="56" rx="10" fill="#20242c" stroke="#3a404d" stroke-width="2"/>
+          <rect x="204" y="154" width="62" height="40" rx="6" fill="#2b303b"/>
+          <path d="M240 158 l-16 19 h11 l-6 14 l19 -21 h-11 l6 -12 z" fill="#ffd400"/>
+          <circle cx="214" cy="206" r="15" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="2"/>
+          <circle cx="214" cy="206" r="6" fill="#2b303b"/>
+          <path d="M214 206 L100 232" stroke="#16181d" stroke-width="3" stroke-dasharray="3 2"/>
+          <!-- вилка -->
+          <path d="M286 98 L307 178" stroke="url(#gm-rg-gold)" stroke-width="9" stroke-linecap="round"/>
+          <path d="M305 170 L324 232" stroke="#1d2027" stroke-width="15" stroke-linecap="round"/>
+          <rect x="276" y="92" width="26" height="12" rx="3" fill="#2b303b" transform="rotate(15 289 98)"/>
+          <!-- руль -->
+          <path d="M282 92 L272 78 L306 72" fill="none" stroke="#2b303b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M296 73 L312 70" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+          <!-- пластик: заднее крыло, боковина, номер, сиденье, обтекатель, переднее крыло -->
+          <path d="M146 126 L40 96 L36 104 L58 116 L150 146 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M146 126 L40 96 L36 104 L58 116 L150 146 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M132 132 L186 128 L196 168 L150 176 Q134 160 132 132 Z" fill="#f3f4f6" stroke="#c9ced8" stroke-width="1.5"/>
+          <path d="M128 120 Q190 104 252 112 L256 122 Q190 118 132 132 Z" fill="#15171c"/>
+          <path d="M132 118 Q190 103 250 110" fill="none" stroke="#3a404d" stroke-width="2"/>
+          <path d="M226 116 Q260 106 286 112 L276 158 Q248 166 222 150 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M226 116 Q260 106 286 112 L276 158 Q248 166 222 150 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M236 128 Q256 124 272 128" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+          <path d="M292 150 Q330 136 378 146 L376 154 Q334 146 296 160 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M292 150 Q330 136 378 146 L376 154 Q334 146 296 160 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M290 100 L312 96 L320 140 L300 146 Z" fill="#f3f4f6" stroke="#c9ced8" stroke-width="1.5"/>
+          <!-- райдер: ноги -->
+          <path d="M176 110 L232 144 L214 176" fill="none" stroke="#4a5263" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M180 104 L228 134" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="6" stroke-linecap="round"/>
+          <path d="M184 118 L226 144" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-opacity=".8" stroke-width="3"/>
+          <path d="M222 134 Q242 136 242 152 Q240 166 226 166 Q216 156 222 134 Z" fill="#20242c" stroke="#5d6470" stroke-width="2"/>
+          <path d="M202 168 L228 166 L232 176 L240 196 L198 202 Q196 186 202 168 Z" fill="#f3f4f6" stroke="#9aa3b0" stroke-width="1.5"/>
+          <path d="M196 202 L242 196" stroke="#16181d" stroke-width="6" stroke-linecap="round"/>
+          <path d="M204 176 l24 -2 M203 185 l28 -3 M202 193 l32 -4" stroke="#9aa3b0" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- торс в джерси и защита -->
+          <path d="M170 112 Q178 70 222 56 L244 74 Q214 92 200 122 Z" style="fill:var(--gm-jersey,#ffd400)"/>
+          <path d="M170 112 Q178 70 222 56 L244 74 Q214 92 200 122 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M186 104 Q192 80 214 66" fill="none" stroke="#15171c" stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/>
+          <path d="M176 110 Q182 90 196 80" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>
+          <path d="M214 60 Q224 54 236 58 L240 68 Q228 64 218 70 Z" fill="#15171c"/>
+          <!-- рука -->
+          <path d="M226 66 L258 84 L292 74" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M226 66 L258 84 L292 74" fill="none" stroke="#000" stroke-opacity=".15" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/>
+          <circle cx="294" cy="73" r="8.5" fill="#15171c"/>
+          <!-- шлем: оболочка, подбородок, козырёк, очки -->
+          <path d="M214 40 Q214 6 248 4 Q280 4 286 34 L296 54 Q290 66 272 66 L248 66 Q224 64 216 52 Z" style="fill:var(--gm-helmet,#1e5bff)"/>
+          <path d="M214 40 Q214 6 248 4 Q280 4 286 34 L296 54 Q290 66 272 66 L248 66 Q224 64 216 52 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M226 18 Q240 8 258 10" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/>
+          <path d="M250 8 L304 20 L300 30 L262 24 Z" fill="#f3f4f6"/>
+          <path d="M250 8 L304 20 L300 30 L262 24 Z" style="fill:var(--gm-bike,#e8312a)" opacity=".85"/>
+          <path d="M218 30 L262 30" stroke="#15171c" stroke-width="7" stroke-linecap="round"/>
+          <rect x="258" y="24" width="32" height="18" rx="8" fill="url(#gm-rg-visor)" stroke="#15171c" stroke-width="3"/>
+          <path d="M264 29 l9 -1" stroke="#fff" stroke-opacity=".8" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M272 48 L296 54 Q292 62 280 62 Z" fill="#15171c" opacity=".55"/>
+        </g>
       </symbol>
       <symbol id="gm-cam" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
     </defs>
@@ -390,14 +449,14 @@
           <h3>Для старта</h3>
           <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
           <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
-          <svg viewBox="0 0 420 300" width="260"><use href="#gm-bike"/></svg>
+          <svg viewBox="0 0 420 300" width="280" role="img" aria-label="Ребёнок на мотоцикле класса 50" style="--gm-bike:#e8312a;--gm-jersey:#ffd400;--gm-helmet:#1e5bff"><use href="#gm-bike"/><text x="164" y="162" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#111">3</text></svg>
         </div>
         <div class="gm-card gm-card--hl gm-class gm-reveal">
           <div class="gm-display">65</div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
           <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
-          <svg viewBox="0 0 420 300" width="330"><use href="#gm-bike"/></svg>
+          <svg viewBox="0 0 420 300" width="340" role="img" aria-label="Ребёнок на мотоцикле класса 65" style="--gm-bike:#1e5bff;--gm-jersey:#ffd400;--gm-helmet:#e8312a"><use href="#gm-bike"/><text x="164" y="162" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="22" fill="#111">57</text></svg>
         </div>
       </div>
     </div>

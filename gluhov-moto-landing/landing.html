@@ -1022,7 +1022,7 @@
 
       var lastT = 0.12;
       function render(t) {
-        var az = 0.5 + drag + (still ? 0 : Math.sin(t * 0.6) * 0.25), el = 0.62, R = W / Hh < 1.1 ? 54 : 44;
+        var az = 0.66 + drag, el = 0.62, R = W / Hh < 1.1 ? 54 : 44;
         camera.position.set(Math.sin(az) * Math.cos(el) * R, Math.sin(el) * R, Math.cos(az) * Math.cos(el) * R);
         camera.lookAt(target);
         placeRiders(still ? 0.12 : t / 12);

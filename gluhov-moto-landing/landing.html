@@ -862,7 +862,7 @@
       var cx = cv.getContext('2d');
       for (var u = 0; u < 8; u++) for (var v = 0; v < 2; v++) { cx.fillStyle = (u + v) % 2 ? '#111' : '#fff'; cx.fillRect(u * 8, v * 8, 8, 8); }
       var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) }));
-      fin.rotation.x = -Math.PI / 2; fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
+      fin.rotation.set(-Math.PI / 2, 0, Math.PI / 2); fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
 
       // райдеры: детский электрокросс + ребёнок в мотоэкипировке (цвета — как на фото с трассы)
       var Y = new T.Vector3(0, 1, 0);

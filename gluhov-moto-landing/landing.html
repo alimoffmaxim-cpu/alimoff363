@@ -790,17 +790,19 @@
       // площадки: нижний уровень, верхний уровень на опорах и площадки у рамп
       var floor = mat(0x1d2129, { roughness: .95 }), deck = mat(0x2a2f3a, { roughness: .9 }), conc = mat(0x3a404d, { roughness: .8 });
       boxMesh(28, 0.4, 18, 0, -0.2, 0.3, floor);
-      boxMesh(16, 0.4, 8, 0, 3.0, -2.5, deck);
-      boxMesh(4.2, 0.4, 3.6, 10.1, 3.0, -5.3, deck);
-      boxMesh(4.2, 0.4, 3.6, -10.1, 3.0, -5.3, deck);
+      // второй уровень — одна плита: центр + площадки у рамп, без щелей на пути дороги
+      var TOP = 3.2, outline = [[-8, 1.5], [8, 1.5], [8, -4.6], [12.2, -4.6], [12.2, -7.6], [-12.2, -7.6], [-12.2, -4.6], [-8, -4.6]];
+      var shape = new T.Shape(outline.map(function (p) { return new T.Vector2(p[0], -p[1]); }));
+      var slab = new T.Mesh(new T.ExtrudeGeometry(shape, { depth: 0.4, bevelEnabled: false }), deck);
+      slab.rotation.x = -Math.PI / 2; slab.position.y = TOP - 0.4; slab.castShadow = slab.receiveShadow = true; scene.add(slab);
+      function onUpper(x, z) { return z <= 1.5 && z >= -7.6 && (Math.abs(x) <= 8 || (Math.abs(x) <= 12.2 && z <= -4.6)); }
       [[-6, -6], [6, -6], [-6, 0.8], [6, 0.8], [0, 0.8], [0, -6], [10.6, -6.4], [-10.6, -6.4]].forEach(function (p) {
         var col = new T.Mesh(new T.CylinderGeometry(0.28, 0.28, 2.8, 12), conc);
         col.position.set(p[0], 1.4, p[1]); col.castShadow = true; scene.add(col);
       });
       // неон по краям второго уровня, как на картодроме
       neon(16, 0.08, 0.08, 0, 3.24, 1.5, 0x39ff88);
-      neon(0.08, 0.08, 8, -8, 3.24, -2.5, 0xff2e63);
-      neon(0.08, 0.08, 8, 8, 3.24, -2.5, 0xff2e63);
+      neon(24.4, 0.08, 0.08, 0, 3.24, -7.6, 0xff2e63);
       neon(28, 0.06, 0.06, 0, 0.03, 9.2, 0x39ff88);
 
       // трасса: одна замкнутая кривая через оба уровня
@@ -809,32 +811,35 @@
         [9.2, H, -6.4], [6, H, -5.7], [4.2, H, -1.4], [0, H, 0.3], [-4.2, H, -1.4], [-6, H, -5.7], [-9.2, H, -6.4],
         [-10.6, H, -4.6], [-10.6, 1.66, -1.1]].map(function (p) { return new T.Vector3(p[0], p[1], p[2]); });
       var curve = new T.CatmullRomCurve3(pts, true, 'centripetal');
+      // высота поверхности: над плитой второго уровня дорога не может уйти внутрь неё
+      function surf(x, y, z) { return onUpper(x, z) ? Math.max(y, TOP + 0.03) : Math.max(y, L); }
       var N = 600, ps = curve.getSpacedPoints(N), up = new T.Vector3(0, 1, 0);
       var sides = ps.map(function (p, i) {
         var t = ps[(i + 1) % N].clone().sub(ps[(i - 1 + N) % N]);
         return new T.Vector3().crossVectors(t, up).normalize();
       });
-      function ribbon(w0, w1, colorAt) {
+      function ribbon(w0, w1, colorAt, lift) {
         var pos = [], col = [], c = new T.Color();
         for (var i = 0; i < N; i++) {
           var j = (i + 1) % N;
           var a0 = ps[i].clone().addScaledVector(sides[i], w0), a1 = ps[i].clone().addScaledVector(sides[i], w1);
           var b0 = ps[j].clone().addScaledVector(sides[j], w0), b1 = ps[j].clone().addScaledVector(sides[j], w1);
-          [a0, b0, a1, a1, b0, b1].forEach(function (v) { pos.push(v.x, Math.max(v.y, L) + 0.01, v.z); });
+          [a0, b0, a1, a1, b0, b1].forEach(function (v) { pos.push(v.x, surf(v.x, v.y, v.z) + 0.01 + (lift || 0), v.z); });
           c.setHex(colorAt(i)); for (var k = 0; k < 6; k++) col.push(c.r, c.g, c.b);
         }
         var g = new T.BufferGeometry();
         g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
         g.setAttribute('color', new T.Float32BufferAttribute(col, 3));
         g.computeVertexNormals();
-        var m = new T.Mesh(g, new T.MeshStandardMaterial({ vertexColors: true, roughness: .7, side: T.DoubleSide }));
+        var m = new T.Mesh(g, new T.MeshStandardMaterial({ vertexColors: true, roughness: .7, side: T.DoubleSide,
+          polygonOffset: !!lift, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }));
         m.receiveShadow = true; m.castShadow = true; scene.add(m); return m;
       }
       var RW = 1.25;
       ribbon(-RW, RW, function () { return 0x343a46; });
-      ribbon(RW, RW + 0.32, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; });
-      ribbon(-RW - 0.32, -RW, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; });
-      ribbon(-0.06, 0.06, function (i) { return (i >> 3) % 2 ? 0x343a46 : 0xffd400; });
+      ribbon(RW, RW + 0.32, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
+      ribbon(-RW - 0.32, -RW, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
+      ribbon(-0.06, 0.06, function (i) { return (i >> 3) % 2 ? 0x343a46 : 0xffd400; }, 0.008);
 
       // стенки под рампами — видно, что дорога поднимается
       var wpos = [];
@@ -843,7 +848,8 @@
         if (p.y < 0.25 || q.y < 0.25 || Math.abs(p.x) < 9.2) continue;
         [RW + 0.32, -RW - 0.32].forEach(function (w) {
           var a = p.clone().addScaledVector(sides[i], w), b = q.clone().addScaledVector(sides[j], w);
-          wpos.push(a.x, a.y, a.z, b.x, b.y, b.z, a.x, 0, a.z, a.x, 0, a.z, b.x, b.y, b.z, b.x, 0, b.z);
+          var ay = surf(a.x, a.y, a.z), by = surf(b.x, b.y, b.z);
+          wpos.push(a.x, ay, a.z, b.x, by, b.z, a.x, 0, a.z, a.x, 0, a.z, b.x, by, b.z, b.x, 0, b.z);
         });
       }
       var wg = new T.BufferGeometry();
@@ -979,7 +985,7 @@
       function placeRiders(t) {
         riders.forEach(function (r, i) {
           var u = (t + r.off) % 1, p = curve.getPointAt(u), q = curve.getPointAt((u + 0.002) % 1);
-          r.g.position.set(p.x, Math.max(p.y, L), p.z); r.g.lookAt(q.x, Math.max(q.y, L), q.z);
+          r.g.position.set(p.x, surf(p.x, p.y, p.z), p.z); r.g.lookAt(q.x, surf(q.x, q.y, q.z), q.z);
           // крен внутрь виража: по изменению направления в плоскости
           flat.copy(curve.getTangentAt(u)).setY(0).normalize();
           flat2.copy(curve.getTangentAt((u + 0.015) % 1)).setY(0).normalize();

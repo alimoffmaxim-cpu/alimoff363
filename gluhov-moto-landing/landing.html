@@ -584,10 +584,12 @@
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
     // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
-    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@7c6fdf2f67ff/gluhov-moto-landing/media/',
+    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@71ed2ef271fc/gluhov-moto-landing/media/',
     MEDIA: {
-      heroVideo: 'hero.mp4',      // .mp4 без звука, крутится фоном на первом экране
-      heroImage: 'track-top.jpg', // обложка, пока грузится видео
+      heroVideo: 'hero.mp4',      // .mp4 без звука, крутится фоном на первом экране (горизонтальный, для компьютера)
+      heroImage: 'hero.jpg',      // обложка, пока грузится видео
+      heroVideoMobile: 'hero-m.mp4', // вертикальная версия для телефона
+      heroImageMobile: 'hero-m.jpg',
       // короткие вертикальные ролики с трассы: { src, poster, caption }
       reels: [
         { src: 'reel-1.mp4', poster: 'reel-1.jpg', caption: 'Класс 50' },
@@ -622,13 +624,15 @@
 
   /* ---------- Медиа ---------- */
   var hero = $('gm-hero'), heroMedia = $('gm-hero-media');
-  if (M.heroVideo) {
+  var mob = window.matchMedia && matchMedia('(max-width: 900px)').matches;
+  var heroV = mob && M.heroVideoMobile || M.heroVideo, heroI = mob && M.heroImageMobile || M.heroImage;
+  if (heroV) {
     var v = document.createElement('video');
-    v.src = url(M.heroVideo); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
-    v.setAttribute('playsinline', ''); if (M.heroImage) v.poster = url(M.heroImage);
+    v.src = url(heroV); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); if (heroI) v.poster = url(heroI);
     heroMedia.appendChild(v); hero.classList.remove('gm-hero--art');
-  } else if (M.heroImage) {
-    heroMedia.appendChild(img(M.heroImage, '')); hero.classList.remove('gm-hero--art');
+  } else if (heroI) {
+    heroMedia.appendChild(img(heroI, '')); hero.classList.remove('gm-hero--art');
   }
 
   if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));

@@ -839,10 +839,7 @@
       ribbon(-RW, RW, function () { return 0x343a46; });
       ribbon(RW, RW + 0.32, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
       ribbon(-RW - 0.32, -RW, function (i) { return (i >> 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
-      ribbon(-0.06, 0.06, function (i) {   // осевая; на финишной черте не рисуется
-        var p = ps[i]; if (Math.abs(p.x) < 0.6 && p.z > 6.5) return 0x343a46;
-        return (i >> 3) % 2 ? 0x343a46 : 0xffd400;
-      }, 0.008);
+      ribbon(-0.06, 0.06, function (i) { return (i >> 3) % 2 ? 0x343a46 : 0xffd400; }, 0.008);
 
       // стенки под рампами — видно, что дорога поднимается
       var wpos = [];
@@ -864,10 +861,8 @@
       var cv = document.createElement('canvas'); cv.width = 64; cv.height = 16;
       var cx = cv.getContext('2d');
       for (var u = 0; u < 8; u++) for (var v = 0; v < 2; v++) { cx.fillStyle = (u + v) % 2 ? '#111' : '#fff'; cx.fillRect(u * 8, v * 8, 8, 8); }
-      var ftex = new T.CanvasTexture(cv); ftex.magFilter = T.NearestFilter;
-      var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.62), new T.MeshBasicMaterial({ map: ftex, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }));
-      // поперёк дороги: в этой точке трасса идёт вдоль оси x, линия — вдоль z, от поребрика до поребрика
-      fin.rotation.set(-Math.PI / 2, 0, Math.PI / 2); fin.position.set(0, L + 0.06, 7.3); scene.add(fin);
+      var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) }));
+      fin.rotation.x = -Math.PI / 2; fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
 
       // райдеры: детский электрокросс + ребёнок в мотоэкипировке (цвета — как на фото с трассы)
       var Y = new T.Vector3(0, 1, 0);

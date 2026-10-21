@@ -232,87 +232,144 @@
       <linearGradient id="gm-g-hot" x1="0" x2="1"><stop offset="0" stop-color="#ff8a3d"/><stop offset="1" stop-color="#ff3d1f"/></linearGradient>
       <!-- Детский кроссовый электромотоцикл с райдером. Цвета задаются переменными на <svg>:
            --gm-bike (пластик), --gm-jersey (джерси), --gm-helmet (шлем) -->
-      <linearGradient id="gm-rg-shade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
-      <linearGradient id="gm-rg-metal" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e9edf2"/><stop offset=".5" stop-color="#9aa3b0"/><stop offset="1" stop-color="#5d6470"/></linearGradient>
-      <linearGradient id="gm-rg-gold" x1="0" x2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".5" stop-color="#e2a400"/><stop offset="1" stop-color="#ffd35a"/></linearGradient>
-      <linearGradient id="gm-rg-visor" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#6aa8ff"/><stop offset=".45" stop-color="#1b2a44"/><stop offset="1" stop-color="#0a0d14"/></linearGradient>
-      <symbol id="gm-wheel" viewBox="-62 -62 124 124">
-        <circle r="53" fill="none" stroke="#2e333c" stroke-width="15"/>
-        <circle r="59" fill="none" stroke="#3b414c" stroke-width="5" stroke-dasharray="5 4.2"/>
-        <circle r="60.5" fill="none" stroke="#565d6a" stroke-width="1"/>
-        <circle r="47" fill="none" stroke="#1d2027" stroke-width="2"/>
-        <path d="M-40-36 A53 53 0 0 1 22-48" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="4" stroke-linecap="round"/>
-        <circle r="43" fill="none" stroke="url(#gm-rg-metal)" stroke-width="5"/>
-        <g stroke="#b9c0cc" stroke-width="1.6">
-          <path d="M0-41V41M-41 0H41M-29-29L29 29M29-29L-29 29M-15.7-37.9L15.7 37.9M15.7-37.9L-15.7 37.9M-37.9-15.7L37.9 15.7M37.9-15.7L-37.9 15.7"/>
+      <linearGradient id="gm-rg-shade" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".4"/></linearGradient>
+      <linearGradient id="gm-rg-side" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".3"/><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".2"/></linearGradient>
+      <linearGradient id="gm-rg-metal" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f1f4f8"/><stop offset=".45" stop-color="#a7afbb"/><stop offset="1" stop-color="#596070"/></linearGradient>
+      <linearGradient id="gm-rg-gold" x1="0" x2="1"><stop offset="0" stop-color="#8a5a00"/><stop offset=".35" stop-color="#ffd76a"/><stop offset=".6" stop-color="#e0a000"/><stop offset="1" stop-color="#7a4f00"/></linearGradient>
+      <linearGradient id="gm-rg-dark" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3e4450"/><stop offset="1" stop-color="#15171c"/></linearGradient>
+      <linearGradient id="gm-rg-boot" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b8bec9"/></linearGradient>
+      <linearGradient id="gm-rg-lens" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset=".35" stop-color="#ff7a1a"/><stop offset=".7" stop-color="#7a1fa2"/><stop offset="1" stop-color="#1b2a44"/></linearGradient>
+      <radialGradient id="gm-rg-tire"><stop offset=".7" stop-color="#3a3f49"/><stop offset=".86" stop-color="#2a2e36"/><stop offset="1" stop-color="#16181d"/></radialGradient>
+      <radialGradient id="gm-rg-shadow"><stop offset="0" stop-color="#000" stop-opacity=".55"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+
+      <symbol id="gm-wheel" viewBox="-64 -64 128 128">
+        <circle r="55" fill="url(#gm-rg-tire)"/>
+        <circle r="58" fill="none" stroke="#2a2e36" stroke-width="6" stroke-dasharray="5.5 4"/>
+        <circle r="60.5" fill="none" stroke="#4a505c" stroke-width="1" stroke-dasharray="5.5 4"/>
+        <path d="M-44-33 A55 55 0 0 1 20-51" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="3" stroke-linecap="round"/>
+        <circle r="42" fill="#0f1115"/>
+        <circle r="41" fill="none" stroke="url(#gm-rg-metal)" stroke-width="5"/>
+        <circle r="38" fill="none" stroke="#3a404d" stroke-width="1"/>
+        <g stroke="#c9ced8" stroke-width="1.2" stroke-linecap="round">
+          <path d="M-7 0L38 -10M7 0L-38 10M0 -7L10 38M0 7L-10 -38M-5 -5L33 20M5 5L-33 -20M5 -5L-20 33M-5 5L20 -33M-7 2L30 -26M7 -2L-30 26M2 7L-26 -30M-2 -7L26 30"/>
         </g>
-        <circle r="19" fill="none" stroke="#c9ced8" stroke-width="5" stroke-dasharray="3 3"/>
-        <circle r="10" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="2"/>
+        <circle r="10" fill="url(#gm-rg-metal)" stroke="#2b303b" stroke-width="2"/>
         <circle r="3.5" fill="#2b303b"/>
       </symbol>
+
       <symbol id="gm-bike" viewBox="0 0 420 300">
-        <g class="gm-wheel"><use href="#gm-wheel" x="44" y="170" width="124" height="124"/></g>
-        <g class="gm-wheel"><use href="#gm-wheel" x="262" y="170" width="124" height="124"/></g>
+        <ellipse cx="210" cy="291" rx="185" ry="8" fill="url(#gm-rg-shadow)"/>
+        <g class="gm-wheel"><use href="#gm-wheel" x="34" y="172" width="128" height="128"/></g>
+        <g class="gm-wheel"><use href="#gm-wheel" x="254" y="172" width="128" height="128"/></g>
         <g class="gm-body">
-          <!-- маятник, амортизатор, рама -->
-          <path d="M104 228 L205 196 L211 208 L110 238 Z" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="1.5"/>
-          <path d="M184 140 L196 200" stroke="#2b303b" stroke-width="7" stroke-linecap="round"/>
-          <path d="M181 150 l12 -3 M182 157 l12 -3 M183 164 l12 -3 M184 171 l12 -3 M185 178 l12 -3 M187 185 l12 -3" stroke="url(#gm-rg-gold)" stroke-width="5" stroke-linecap="round"/>
-          <path d="M282 112 L234 204 M282 112 L172 126 L198 206" fill="none" stroke="#23262e" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
-          <!-- электромотор и батарея -->
-          <rect x="196" y="146" width="78" height="56" rx="10" fill="#20242c" stroke="#3a404d" stroke-width="2"/>
-          <rect x="204" y="154" width="62" height="40" rx="6" fill="#2b303b"/>
-          <path d="M240 158 l-16 19 h11 l-6 14 l19 -21 h-11 l6 -12 z" fill="#ffd400"/>
-          <circle cx="214" cy="206" r="15" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="2"/>
-          <circle cx="214" cy="206" r="6" fill="#2b303b"/>
-          <path d="M214 206 L100 232" stroke="#16181d" stroke-width="3" stroke-dasharray="3 2"/>
+          <!-- тормоза и звезда -->
+          <circle cx="98" cy="236" r="22" fill="none" stroke="#7d8593" stroke-width="3" stroke-dasharray="2.5 2"/>
+          <circle cx="318" cy="236" r="21" fill="none" stroke="#c9ced8" stroke-width="5" stroke-dasharray="4 2.5"/>
+          <path d="M300 218 q8 -8 18 -6 l-3 9 q-6 -1 -10 4 z" fill="url(#gm-rg-gold)" stroke="#5a3d00" stroke-width="1"/>
+          <!-- цепь -->
+          <path d="M212 201 L98 214 M212 226 L98 258" stroke="#3a3f49" stroke-width="3.2" stroke-dasharray="2.4 1.2"/>
+          <!-- дальняя нога и рука райдера (в тени, за мотоциклом) -->
+          <path d="M182 104 L240 132 L226 176" fill="none" stroke="#2a2f3a" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M226 60 L258 80 L286 70" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M226 60 L258 80 L286 70" fill="none" stroke="#000" stroke-opacity=".45" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="288" cy="69" r="7" fill="#15171c"/>
+          <!-- маятник -->
+          <path d="M96 230 L206 198 Q214 200 214 210 L102 244 Q92 240 96 230 Z" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="1.5"/>
+          <path d="M106 233 L204 205" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/>
+          <circle cx="98" cy="236" r="6" fill="#2b303b"/>
+          <!-- амортизатор -->
+          <path d="M176 128 L192 200" stroke="url(#gm-rg-metal)" stroke-width="6" stroke-linecap="round"/>
+          <g stroke="url(#gm-rg-gold)" stroke-width="4.5" stroke-linecap="round">
+            <path d="M172 140 l13 -4 M173 147 l13 -4 M175 154 l13 -4 M176 161 l13 -4 M178 168 l13 -4 M179 175 l13 -4 M181 182 l13 -4"/>
+          </g>
+          <!-- рама -->
+          <path d="M291 104 L296 140" stroke="url(#gm-rg-dark)" stroke-width="13" stroke-linecap="round"/>
+          <path d="M294 138 L244 210 L204 214" fill="none" stroke="#23262e" stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M290 112 L176 124 L190 204" fill="none" stroke="#23262e" stroke-width="8" stroke-linejoin="round"/>
+          <!-- батарея и мотор -->
+          <path d="M200 142 L270 136 Q278 136 278 144 L276 196 Q276 204 268 204 L206 206 Q198 206 198 198 Z" fill="url(#gm-rg-dark)" stroke="#4a505c" stroke-width="1.5"/>
+          <path d="M206 152 L268 147 M206 162 L268 157 M206 172 L268 167 M206 182 L268 177 M206 192 L268 187" stroke="#4a505c" stroke-width="1.2"/>
+          <rect x="226" y="154" width="30" height="30" rx="6" fill="#ffd400"/>
+          <path d="M243 157 l-11 14 h8 l-4 11 l13 -15 h-8 l4 -10 z" fill="#15171c"/>
+          <circle cx="212" cy="213" r="17" fill="url(#gm-rg-metal)" stroke="#2b303b" stroke-width="2"/>
+          <circle cx="212" cy="213" r="11" fill="none" stroke="#596070" stroke-width="2" stroke-dasharray="3 2"/>
+          <circle cx="212" cy="213" r="5" fill="#2b303b"/>
           <!-- вилка -->
-          <path d="M286 98 L307 178" stroke="url(#gm-rg-gold)" stroke-width="9" stroke-linecap="round"/>
-          <path d="M305 170 L324 232" stroke="#1d2027" stroke-width="15" stroke-linecap="round"/>
-          <rect x="276" y="92" width="26" height="12" rx="3" fill="#2b303b" transform="rotate(15 289 98)"/>
-          <!-- руль -->
-          <path d="M282 92 L272 78 L306 72" fill="none" stroke="#2b303b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M296 73 L312 70" stroke="#111" stroke-width="8" stroke-linecap="round"/>
-          <!-- пластик: заднее крыло, боковина, номер, сиденье, обтекатель, переднее крыло -->
-          <path d="M146 126 L40 96 L36 104 L58 116 L150 146 Z" style="fill:var(--gm-bike,#e8312a)"/>
-          <path d="M146 126 L40 96 L36 104 L58 116 L150 146 Z" fill="url(#gm-rg-shade)"/>
-          <path d="M132 132 L186 128 L196 168 L150 176 Q134 160 132 132 Z" fill="#f3f4f6" stroke="#c9ced8" stroke-width="1.5"/>
-          <path d="M128 120 Q190 104 252 112 L256 122 Q190 118 132 132 Z" fill="#15171c"/>
-          <path d="M132 118 Q190 103 250 110" fill="none" stroke="#3a404d" stroke-width="2"/>
-          <path d="M226 116 Q260 106 286 112 L276 158 Q248 166 222 150 Z" style="fill:var(--gm-bike,#e8312a)"/>
-          <path d="M226 116 Q260 106 286 112 L276 158 Q248 166 222 150 Z" fill="url(#gm-rg-shade)"/>
-          <path d="M236 128 Q256 124 272 128" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
-          <path d="M292 150 Q330 136 378 146 L376 154 Q334 146 296 160 Z" style="fill:var(--gm-bike,#e8312a)"/>
-          <path d="M292 150 Q330 136 378 146 L376 154 Q334 146 296 160 Z" fill="url(#gm-rg-shade)"/>
-          <path d="M290 100 L312 96 L320 140 L300 146 Z" fill="#f3f4f6" stroke="#c9ced8" stroke-width="1.5"/>
-          <!-- райдер: ноги -->
-          <path d="M176 110 L232 144 L214 176" fill="none" stroke="#4a5263" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M180 104 L228 134" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="6" stroke-linecap="round"/>
-          <path d="M184 118 L226 144" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-opacity=".8" stroke-width="3"/>
-          <path d="M222 134 Q242 136 242 152 Q240 166 226 166 Q216 156 222 134 Z" fill="#20242c" stroke="#5d6470" stroke-width="2"/>
-          <path d="M202 168 L228 166 L232 176 L240 196 L198 202 Q196 186 202 168 Z" fill="#f3f4f6" stroke="#9aa3b0" stroke-width="1.5"/>
-          <path d="M196 202 L242 196" stroke="#16181d" stroke-width="6" stroke-linecap="round"/>
-          <path d="M204 176 l24 -2 M203 185 l28 -3 M202 193 l32 -4" stroke="#9aa3b0" stroke-width="2.5" stroke-linecap="round"/>
-          <!-- торс в джерси и защита -->
-          <path d="M170 112 Q178 70 222 56 L244 74 Q214 92 200 122 Z" style="fill:var(--gm-jersey,#ffd400)"/>
-          <path d="M170 112 Q178 70 222 56 L244 74 Q214 92 200 122 Z" fill="url(#gm-rg-shade)"/>
-          <path d="M186 104 Q192 80 214 66" fill="none" stroke="#15171c" stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/>
-          <path d="M176 110 Q182 90 196 80" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>
-          <path d="M214 60 Q224 54 236 58 L240 68 Q228 64 218 70 Z" fill="#15171c"/>
-          <!-- рука -->
-          <path d="M226 66 L258 84 L292 74" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M226 66 L258 84 L292 74" fill="none" stroke="#000" stroke-opacity=".15" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/>
-          <circle cx="294" cy="73" r="8.5" fill="#15171c"/>
-          <!-- шлем: оболочка, подбородок, козырёк, очки -->
-          <path d="M214 40 Q214 6 248 4 Q280 4 286 34 L296 54 Q290 66 272 66 L248 66 Q224 64 216 52 Z" style="fill:var(--gm-helmet,#1e5bff)"/>
-          <path d="M214 40 Q214 6 248 4 Q280 4 286 34 L296 54 Q290 66 272 66 L248 66 Q224 64 216 52 Z" fill="url(#gm-rg-shade)"/>
-          <path d="M226 18 Q240 8 258 10" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="4" stroke-linecap="round"/>
-          <path d="M250 8 L304 20 L300 30 L262 24 Z" fill="#f3f4f6"/>
-          <path d="M250 8 L304 20 L300 30 L262 24 Z" style="fill:var(--gm-bike,#e8312a)" opacity=".85"/>
-          <path d="M218 30 L262 30" stroke="#15171c" stroke-width="7" stroke-linecap="round"/>
-          <rect x="258" y="24" width="32" height="18" rx="8" fill="url(#gm-rg-visor)" stroke="#15171c" stroke-width="3"/>
-          <path d="M264 29 l9 -1" stroke="#fff" stroke-opacity=".8" stroke-width="2.5" stroke-linecap="round"/>
-          <path d="M272 48 L296 54 Q292 62 280 62 Z" fill="#15171c" opacity=".55"/>
+          <path d="M286 100 L303 168" stroke="url(#gm-rg-gold)" stroke-width="10" stroke-linecap="round"/>
+          <path d="M288 104 L302 160" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+          <path d="M301 160 L318 232" stroke="url(#gm-rg-dark)" stroke-width="16" stroke-linecap="round"/>
+          <path d="M304 168 L316 222" stroke="#fff" stroke-opacity=".18" stroke-width="3" stroke-linecap="round"/>
+          <path d="M276 94 L302 88 L304 100 L280 106 Z" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="1"/>
+          <path d="M284 128 L306 122 L308 132 L288 138 Z" fill="url(#gm-rg-metal)" stroke="#3a404d" stroke-width="1"/>
+          <path d="M296 110 Q320 150 306 214" fill="none" stroke="#15171c" stroke-width="2"/>
+          <!-- руль, рычаг -->
+          <path d="M289 92 L282 80 Q280 72 288 70 L298 68" fill="none" stroke="#2b303b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M296 70 L310 66" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+          <path d="M300 64 L318 60" stroke="#596070" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- заднее крыло -->
+          <path d="M152 124 L42 92 Q32 92 34 101 L64 114 L152 142 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M152 124 L42 92 Q32 92 34 101 L64 114 L152 142 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M140 128 L50 100" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- боковая номерная табличка -->
+          <path d="M136 128 L196 124 L202 170 Q172 180 148 172 Q134 152 136 128 Z" fill="#f3f4f6" stroke="#b8bec9" stroke-width="1.5"/>
+          <path d="M136 128 L196 124 L202 170 Q172 180 148 172 Q134 152 136 128 Z" fill="url(#gm-rg-side)"/>
+          <path d="M140 128 L196 124 L197 132 L141 137 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <!-- сиденье -->
+          <path d="M132 116 Q196 100 258 108 Q264 112 260 120 Q196 116 136 130 Q126 126 132 116 Z" fill="url(#gm-rg-dark)"/>
+          <path d="M140 116 Q196 103 252 110" fill="none" stroke="#5d6470" stroke-width="1.5"/>
+          <!-- обтекатель батареи / радиаторные накладки -->
+          <path d="M234 114 Q268 100 292 106 L288 152 Q262 172 230 160 Q224 136 234 114 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M234 114 Q268 100 292 106 L288 152 Q262 172 230 160 Q224 136 234 114 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M238 140 Q262 146 288 134 L288 146 Q262 158 236 150 Z" fill="#fff" opacity=".9"/>
+          <path d="M242 118 Q264 110 284 112" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>
+          <!-- переднее крыло и передний номер -->
+          <path d="M290 150 Q326 132 380 142 Q382 148 378 150 Q332 144 296 160 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M290 150 Q326 132 380 142 Q382 148 378 150 Q332 144 296 160 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M292 96 L314 92 Q322 120 318 146 Q306 152 298 146 Z" fill="#f3f4f6" stroke="#b8bec9" stroke-width="1.5"/>
+          <path d="M292 96 L314 92 L315 99 L293 103 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <!-- райдер: ближняя нога -->
+          <path d="M172 102 Q174 96 182 96 L236 124 Q250 134 244 150 L228 182 L208 176 L222 148 L176 122 Q166 114 172 102 Z" fill="#555e72"/>
+          <path d="M172 102 Q174 96 182 96 L236 124 Q250 134 244 150 L228 182 L208 176 L222 148 L176 122 Q166 114 172 102 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M182 104 L232 128" stroke="#fff" stroke-opacity=".25" stroke-width="3" stroke-linecap="round"/>
+          <path d="M186 104 L230 126 L236 134 L184 112 Z" style="fill:var(--gm-jersey,#ffd400)" opacity=".9"/>
+          <path d="M222 150 L238 156 L226 180 L214 176 Z" style="fill:var(--gm-jersey,#ffd400)" opacity=".85"/>
+          <path d="M226 128 Q252 128 250 150 Q246 168 228 166 Q218 150 226 128 Z" fill="url(#gm-rg-dark)" stroke="#5d6470" stroke-width="1.5"/>
+          <path d="M232 136 Q244 138 244 150" fill="none" stroke="#7d8593" stroke-width="2"/>
+          <!-- ботинок -->
+          <path d="M206 166 L232 170 L236 186 L248 194 Q250 202 242 203 L200 204 Q196 186 206 166 Z" fill="url(#gm-rg-boot)" stroke="#8a919f" stroke-width="1.5"/>
+          <path d="M198 204 L246 203" stroke="#15171c" stroke-width="5" stroke-linecap="round"/>
+          <path d="M207 174 l24 3 M205 183 l28 3 M203 192 l40 3" stroke="#596070" stroke-width="2.5" stroke-linecap="round"/>
+          <rect x="204" y="198" width="14" height="5" rx="2" fill="#596070"/>
+          <!-- торс -->
+          <path d="M168 108 Q166 72 202 56 Q218 50 230 56 L240 72 Q218 82 206 104 Q196 118 176 118 Z" style="fill:var(--gm-jersey,#ffd400)"/>
+          <path d="M168 108 Q166 72 202 56 Q218 50 230 56 L240 72 Q218 82 206 104 Q196 118 176 118 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M176 100 Q178 78 200 64" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="4" stroke-linecap="round"/>
+          <path d="M186 110 Q196 86 222 70" fill="none" stroke="#15171c" stroke-opacity=".7" stroke-width="5"/>
+          <path d="M194 112 Q202 94 226 78" fill="none" style="stroke:var(--gm-helmet,#1e5bff)" stroke-width="4"/>
+          <path d="M218 54 Q230 50 238 56 L238 64 Q228 60 220 62 Z" fill="#15171c"/>
+          <!-- ближняя рука: рукав, перчатка -->
+          <path d="M224 64 Q236 60 246 70 L262 84 Q268 92 262 96 Q254 98 248 92 L230 80 Q218 74 224 64 Z" style="fill:var(--gm-jersey,#ffd400)"/>
+          <path d="M224 64 Q236 60 246 70 L262 84 Q268 92 262 96 Q254 98 248 92 L230 80 Q218 74 224 64 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M256 92 L288 76 Q294 76 294 82 L264 98 Q256 100 256 92 Z" style="fill:var(--gm-jersey,#ffd400)"/>
+          <path d="M256 92 L288 76 Q294 76 294 82 L264 98 Q256 100 256 92 Z" fill="#000" fill-opacity=".12"/>
+          <path d="M286 74 Q298 70 302 76 Q304 84 296 86 L288 86 Z" fill="#15171c"/>
+          <path d="M290 76 l8 -1" stroke="#5d6470" stroke-width="2" stroke-linecap="round"/>
+          <!-- шлем -->
+          <path d="M212 40 Q210 6 246 2 Q278 0 288 28 L300 52 Q302 62 292 64 L262 68 Q240 70 228 62 Q214 54 212 40 Z" style="fill:var(--gm-helmet,#1e5bff)"/>
+          <path d="M212 40 Q210 6 246 2 Q278 0 288 28 L300 52 Q302 62 292 64 L262 68 Q240 70 228 62 Q214 54 212 40 Z" fill="url(#gm-rg-shade)"/>
+          <path d="M222 22 Q236 8 256 8" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="4" stroke-linecap="round"/>
+          <path d="M216 44 Q240 40 262 50" fill="none" stroke="#fff" stroke-width="5" stroke-opacity=".9"/>
+          <path d="M272 50 L300 52 Q302 62 292 64 L272 66 Z" fill="#15171c" opacity=".75"/>
+          <path d="M280 54 l14 1 M280 59 l12 1" stroke="#5d6470" stroke-width="1.5"/>
+          <!-- козырёк -->
+          <path d="M244 6 Q280 6 312 18 L308 28 Q280 20 256 22 Z" style="fill:var(--gm-bike,#e8312a)"/>
+          <path d="M244 6 Q280 6 312 18 L308 28 Q280 20 256 22 Z" fill="url(#gm-rg-shade)"/>
+          <!-- очки-маска на ремешке -->
+          <path d="M214 30 Q236 24 262 28" fill="none" stroke="#15171c" stroke-width="7" stroke-linecap="round"/>
+          <path d="M214 30 Q236 24 262 28" fill="none" style="stroke:var(--gm-jersey,#ffd400)" stroke-width="2"/>
+          <path d="M258 26 Q276 22 292 28 Q296 38 290 46 Q274 48 260 44 Q254 36 258 26 Z" fill="#15171c"/>
+          <path d="M262 30 Q276 27 288 31 Q290 37 286 42 Q274 44 264 41 Q260 36 262 30 Z" fill="url(#gm-rg-lens)"/>
+          <path d="M266 32 l10 -2" stroke="#fff" stroke-opacity=".85" stroke-width="2" stroke-linecap="round"/>
         </g>
       </symbol>
       <symbol id="gm-cam" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.6" d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
@@ -449,14 +506,14 @@
           <h3>Для старта</h3>
           <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
           <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
-          <svg viewBox="0 0 420 300" width="280" role="img" aria-label="Ребёнок на мотоцикле класса 50" style="--gm-bike:#e8312a;--gm-jersey:#ffd400;--gm-helmet:#1e5bff"><use href="#gm-bike"/><text x="164" y="162" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#111">3</text></svg>
+          <svg viewBox="0 0 420 300" width="280" role="img" aria-label="Ребёнок на мотоцикле класса 50" style="--gm-bike:#e8312a;--gm-jersey:#ffd400;--gm-helmet:#1e5bff"><use href="#gm-bike"/><text x="168" y="161" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="26" fill="#111">3</text></svg>
         </div>
         <div class="gm-card gm-card--hl gm-class gm-reveal">
           <div class="gm-display">65</div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–10 лет</span><span>Опытные</span><span>Больше мощности</span></div>
           <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
-          <svg viewBox="0 0 420 300" width="340" role="img" aria-label="Ребёнок на мотоцикле класса 65" style="--gm-bike:#1e5bff;--gm-jersey:#ffd400;--gm-helmet:#e8312a"><use href="#gm-bike"/><text x="164" y="162" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="22" fill="#111">57</text></svg>
+          <svg viewBox="0 0 420 300" width="340" role="img" aria-label="Ребёнок на мотоцикле класса 65" style="--gm-bike:#1e5bff;--gm-jersey:#ffd400;--gm-helmet:#e8312a"><use href="#gm-bike"/><text x="168" y="161" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="22" fill="#111">57</text></svg>
         </div>
       </div>
     </div>

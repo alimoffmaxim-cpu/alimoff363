@@ -858,24 +858,137 @@
       var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) }));
       fin.rotation.x = -Math.PI / 2; fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
 
-      // райдеры
-      var riders = [0xff5a1f, 0xf3f4f6, 0xffd400].map(function (c, i) {
-        var g = new T.Group(), m = mat(c, { roughness: .5 }), dark = mat(0x111318);
-        var body = new T.Mesh(new T.BoxGeometry(0.34, 0.3, 1.0), m); body.position.y = 0.45; g.add(body);
-        var rider = new T.Mesh(new T.BoxGeometry(0.3, 0.45, 0.32), mat(0x2b303b)); rider.position.set(0, 0.8, -0.1); g.add(rider);
-        var helm = new T.Mesh(new T.SphereGeometry(0.2, 16, 12), m); helm.position.set(0, 1.12, 0.02); g.add(helm);
-        [-0.42, 0.42].forEach(function (z) {
-          var w = new T.Mesh(new T.CylinderGeometry(0.24, 0.24, 0.12, 16), dark);
-          w.rotation.z = Math.PI / 2; w.position.set(0, 0.24, z); g.add(w);
+      // райдеры: детский электрокросс + ребёнок в мотоэкипировке (цвета — как на фото с трассы)
+      var Y = new T.Vector3(0, 1, 0);
+      function part(geo, m, parent, x, y, z) {
+        var o = new T.Mesh(geo, m); o.position.set(x || 0, y || 0, z || 0);
+        o.castShadow = true; parent.add(o); return o;
+      }
+      function rod(a, b, r, m, parent) {           // цилиндр между двумя точками
+        var A = new T.Vector3(a[0], a[1], a[2]), B = new T.Vector3(b[0], b[1], b[2]), d = B.clone().sub(A);
+        var o = part(new T.CylinderGeometry(r, r, d.length(), 10), m, parent);
+        o.position.copy(A).add(B).multiplyScalar(0.5);
+        o.quaternion.setFromUnitVectors(Y, d.normalize());
+        return o;
+      }
+      function limb(a, b, r, m, parent) { rod(a, b, r, m, parent); part(new T.SphereGeometry(r, 10, 8), m, parent, b[0], b[1], b[2]); }
+      function decal(draw, w, h) {
+        var c = document.createElement('canvas'); c.width = 128; c.height = Math.round(128 * h / w);
+        draw(c.getContext('2d'), c.width, c.height);
+        return new T.MeshStandardMaterial({ map: new T.CanvasTexture(c), roughness: .6, side: T.DoubleSide });
+      }
+      var black = mat(0x15171c, { roughness: .9 }), metal = mat(0xb9c0cc, { metalness: .8, roughness: .3 }),
+        rubber = mat(0x0c0d10, { roughness: 1 }), goggle = mat(0x0a0a0a, { metalness: .6, roughness: .15 });
+
+      function wheel(r, w) {
+        var g = new T.Group();
+        var tire = part(new T.TorusGeometry(r - 0.045, 0.05, 10, 32), rubber, g); tire.rotation.y = Math.PI / 2;
+        var rim = part(new T.TorusGeometry(r - 0.09, 0.012, 6, 32), metal, g); rim.rotation.y = Math.PI / 2;
+        var knob = new T.BoxGeometry(w, 0.03, 0.035);
+        for (var k = 0; k < 22; k++) {
+          var a = k / 22 * Math.PI * 2, kb = part(knob, rubber, g, 0, Math.cos(a) * (r - 0.005), Math.sin(a) * (r - 0.005));
+          kb.rotation.x = -a;
+        }
+        for (var s = 0; s < 12; s++) {
+          var pv = new T.Group(); pv.rotation.x = s / 12 * Math.PI * 2; g.add(pv);
+          part(new T.BoxGeometry(0.006, r - 0.1, 0.006), metal, pv, (s % 2 ? 0.015 : -0.015), (r - 0.1) / 2, 0);
+        }
+        var hub = part(new T.CylinderGeometry(0.035, 0.035, w + 0.04, 12), metal, g); hub.rotation.z = Math.PI / 2;
+        return g;
+      }
+
+      function makeRider(o) {
+        var g = new T.Group(), bike = new T.Group(), kid = new T.Group();
+        g.add(bike); g.add(kid);
+        var plastic = mat(o.bike, { roughness: .45 }), plastic2 = mat(o.trim, { roughness: .45 });
+        var R = 0.23, rear = wheel(R, 0.09), front = wheel(R, 0.07);
+        rear.position.set(0, R, -0.45); front.position.set(0, R, 0.48); bike.add(rear); bike.add(front);
+        // рама, маятник, вилка
+        rod([0.06, 0.25, -0.45], [0.05, 0.38, -0.06], 0.018, black, bike); rod([-0.06, 0.25, -0.45], [-0.05, 0.38, -0.06], 0.018, black, bike);
+        rod([0, 0.79, 0.31], [0, 0.6, 0.35], 0.03, black, bike);
+        rod([0, 0.62, 0.34], [0, 0.32, 0.06], 0.022, black, bike);
+        rod([0, 0.78, 0.31], [0, 0.68, -0.16], 0.022, black, bike);
+        rod([0, 0.68, -0.16], [0, 0.38, -0.06], 0.022, black, bike);
+        rod([0, 0.68, -0.16], [0, 0.7, -0.52], 0.016, black, bike);
+        rod([0, 0.36, -0.25], [0, 0.66, -0.3], 0.03, mat(0xffb000, { metalness: .5, roughness: .4 }), bike); // амортизатор
+        [0.075, -0.075].forEach(function (x) {
+          rod([x, 0.84, 0.29], [x, 0.5, 0.42], 0.026, metal, bike);
+          rod([x, 0.5, 0.42], [x, R, 0.48], 0.02, metal, bike);
         });
-        g.traverse(function (o) { o.castShadow = true; });
-        g.scale.setScalar(1.25); scene.add(g);
-        return { g: g, off: i / 3 };
-      });
+        part(new T.BoxGeometry(0.2, 0.04, 0.08), black, bike, 0, 0.84, 0.3);
+        // руль с грипсами
+        rod([-0.27, 0.93, 0.27], [0.27, 0.93, 0.27], 0.012, black, bike);
+        rod([-0.27, 0.93, 0.27], [-0.2, 0.93, 0.27], 0.02, rubber, bike); rod([0.2, 0.93, 0.27], [0.27, 0.93, 0.27], 0.02, rubber, bike);
+        // батарея с молнией
+        var bolt = decal(function (c, w, h) {
+          c.fillStyle = '#20242c'; c.fillRect(0, 0, w, h); c.fillStyle = '#ffd400';
+          c.beginPath(); c.moveTo(w * .58, h * .1); c.lineTo(w * .3, h * .55); c.lineTo(w * .5, h * .55); c.lineTo(w * .4, h * .9);
+          c.lineTo(w * .72, h * .42); c.lineTo(w * .52, h * .42); c.closePath(); c.fill();
+        }, 0.34, 0.22);
+        var batt = new T.Mesh(new T.BoxGeometry(0.17, 0.22, 0.34), [bolt, bolt, black, black, black, black]);
+        batt.position.set(0, 0.47, 0.1); batt.castShadow = true; bike.add(batt);
+        // пластик: бак-обтекатель, сиденье, крылья, номера
+        var tank = part(new T.BoxGeometry(0.22, 0.12, 0.3), plastic, bike, 0, 0.72, 0.12); tank.rotation.x = 0.25;
+        var seat = part(new T.BoxGeometry(0.15, 0.06, 0.5), black, bike, 0, 0.77, -0.24); seat.rotation.x = -0.06;
+        var rf = part(new T.BoxGeometry(0.15, 0.025, 0.46), plastic2, bike, 0, 0.74, -0.62); rf.rotation.x = -0.28;
+        var ff = part(new T.BoxGeometry(0.12, 0.022, 0.26), plastic, bike, 0, 0.5, 0.55); ff.rotation.x = 0.2;
+        var num = decal(function (c, w, h) {
+          c.fillStyle = '#ffffff'; c.fillRect(0, 0, w, h);
+          c.fillStyle = '#111'; c.font = '900 ' + Math.round(h * .8) + 'px Arial'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText(o.num, w / 2, h * .55);
+        }, 0.26, 0.18);
+        [0.085, -0.085].forEach(function (x) {
+          var pl = part(new T.PlaneGeometry(0.26, 0.18), num, bike, x, 0.6, -0.32); pl.rotation.y = x > 0 ? Math.PI / 2 : -Math.PI / 2;
+        });
+        var np = part(new T.PlaneGeometry(0.2, 0.16), num, bike, 0, 0.82, 0.36); np.rotation.x = -0.3;
+        rod([-0.17, 0.33, -0.02], [0.17, 0.33, -0.02], 0.014, metal, bike); // подножки
+
+        // ребёнок: крупный шлем, джерси, защита, штаны, ботинки
+        var jersey = mat(o.jersey, { roughness: .8 }), pants = mat(o.pants, { roughness: .8 }),
+          helmet = mat(o.helmet, { roughness: .35 }), boot = mat(0xf3f4f6, { roughness: .6 }), glove = mat(o.glove, { roughness: .8 });
+        limb([0, 0.86, -0.13], [0, 1.15, 0.05], 0.12, jersey, kid);                  // торс в наклоне
+        part(new T.SphereGeometry(0.12, 12, 10), pants, kid, 0, 0.86, -0.13);
+        var vest = part(new T.SphereGeometry(1, 16, 12), mat(o.vest, { roughness: .6 }), kid, 0, 1.02, -0.03);
+        vest.scale.set(0.15, 0.13, 0.135); vest.rotation.x = 0.55;   // защита-черепаха
+        part(new T.SphereGeometry(0.05, 8, 6), jersey, kid, 0, 1.23, 0.1);               // шея
+        var head = new T.Group(); head.position.set(0, 1.35, 0.15); kid.add(head);
+        part(new T.SphereGeometry(0.15, 18, 14), helmet, head);
+        var chin = part(new T.BoxGeometry(0.15, 0.08, 0.1), helmet, head, 0, -0.09, 0.11); chin.rotation.x = -0.4;
+        var peak = part(new T.BoxGeometry(0.22, 0.014, 0.16), mat(o.trim === 0xffffff ? o.bike : 0xffffff, { roughness: .4 }), head, 0, 0.1, 0.13); peak.rotation.x = 0.35;
+        var gog = part(new T.BoxGeometry(0.19, 0.06, 0.05), goggle, head, 0, 0.01, 0.135);
+        part(new T.BoxGeometry(0.31, 0.02, 0.02), black, head, 0, 0.01, 0.1);           // ремешок очков
+        [1, -1].forEach(function (sx) {
+          limb([sx * 0.14, 1.15, 0.05], [sx * 0.23, 1.02, 0.17], 0.045, jersey, kid);    // плечо — локоть
+          limb([sx * 0.23, 1.02, 0.17], [sx * 0.235, 0.94, 0.27], 0.04, jersey, kid);   // предплечье к рулю
+          part(new T.SphereGeometry(0.035, 8, 6), glove, kid, sx * 0.235, 0.935, 0.28);
+          limb([sx * 0.09, 0.84, -0.12], [sx * 0.17, 0.74, 0.13], 0.06, pants, kid);    // бедро
+          limb([sx * 0.17, 0.74, 0.13], [sx * 0.16, 0.42, 0.0], 0.05, pants, kid);      // голень
+          part(new T.BoxGeometry(0.09, 0.14, 0.2), boot, kid, sx * 0.16, 0.38, 0.02);    // ботинок
+        });
+        g.traverse(function (m) { if (m.isMesh) m.castShadow = true; });
+        g.scale.setScalar(1.55); scene.add(g);
+        return { g: g, kid: kid, wheels: [rear, front], roll: 0 };
+      }
+      var LEN = curve.getLength(), SCALE = 1.55, WR = 0.23 * SCALE;
+      var riders = [
+        { bike: 0xe8312a, trim: 0xffffff, jersey: 0xffd400, pants: 0x1e2230, helmet: 0x1e5bff, vest: 0x15171c, glove: 0xffd400, num: '3' },
+        { bike: 0x1e5bff, trim: 0xffffff, jersey: 0xffd400, pants: 0x2b303b, helmet: 0xe8312a, vest: 0xffd400, glove: 0x15171c, num: '57' },
+        { bike: 0xffffff, trim: 0xff7a1a, jersey: 0xf3f4f6, pants: 0x1e2230, helmet: 0x1e5bff, vest: 0xff7a1a, glove: 0xff7a1a, num: '7' }
+      ].map(function (o, i) { var r = makeRider(o); r.off = i / 3; return r; });
+      var flat = new T.Vector3(), flat2 = new T.Vector3();
       function placeRiders(t) {
-        riders.forEach(function (r) {
+        riders.forEach(function (r, i) {
           var u = (t + r.off) % 1, p = curve.getPointAt(u), q = curve.getPointAt((u + 0.002) % 1);
           r.g.position.set(p.x, Math.max(p.y, L), p.z); r.g.lookAt(q.x, Math.max(q.y, L), q.z);
+          // крен внутрь виража: по изменению направления в плоскости
+          flat.copy(curve.getTangentAt(u)).setY(0).normalize();
+          flat2.copy(curve.getTangentAt((u + 0.015) % 1)).setY(0).normalize();
+          var turn = flat.x * flat2.z - flat.z * flat2.x, target = Math.max(-0.5, Math.min(0.5, turn * 9));
+          r.roll += (target - r.roll) * 0.12;
+          r.g.rotateZ(r.roll);
+          var spin = (u * LEN) / WR;
+          r.wheels[0].rotation.x = spin; r.wheels[1].rotation.x = spin;
+          r.kid.position.y = Math.sin(t * 90 + i * 2) * 0.012;
         });
       }
 

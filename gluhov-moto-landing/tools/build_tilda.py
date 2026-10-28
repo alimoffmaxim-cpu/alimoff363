@@ -50,7 +50,7 @@ for line in ("    // TODO: URL веб-приложения Apps Script (README, 
              "    // TODO: номер счётчика Яндекс.Метрики (если счётчик подключён в настройках Тильды)\n",
              "    METRIKA_ID: 0,\n", "    GOAL: 'lead_form_submit',\n",
              "  if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));\n",
-             "  $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);\n",
+             "  $('gm-mapframe').src = CONFIG.MAP_URL || 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);\n",
              "  if (CONFIG.ADDRESS !== 'Зеленоград, картодром') $('gm-address').textContent = CONFIG.ADDRESS;\n"):
     assert line in js1, line
     js1 = js1.replace(line, '')
@@ -71,7 +71,7 @@ js3 = r"""
 
   // Карта и адрес
   if (C.ADDRESS) {
-    $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
+    $('gm-mapframe').src = C.MAP_URL || 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
     $('gm-address').textContent = C.ADDRESS;
   }
 

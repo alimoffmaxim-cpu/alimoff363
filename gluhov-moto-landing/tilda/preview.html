@@ -620,6 +620,8 @@
 (function () {
   var CONFIG = {
     // TODO: проверить адрес — он же используется для карты
+    // карта: точка ZelenoKART (OSM 56.000764, 37.256615), жёлтая метка, без списка результатов
+    MAP_URL: 'https://yandex.ru/map-widget/v1/?ll=37.256615%2C56.000764&z=16&pt=37.256615%2C56.000764%2Cpm2ylm',
     ADDRESS: 'Картинг-центр ZelenoKART, ТРЦ «Зеленопарк», Ржавки, Зеленоград',
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
@@ -1198,7 +1200,7 @@
           <p id="gm-address">Адрес картодрома уточняйте у администратора</p>
           <p style="margin-top:20px"><a class="gm-phone" href="#signup">Записаться на тренировку →</a></p>
         </div>
-        <iframe id="gm-mapframe" class="gm-reveal" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
+        <iframe id="gm-mapframe" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
       </div>
 
       <h2 class="gm-reveal" style="margin-top:88px">Частые вопросы</h2>
@@ -1225,7 +1227,7 @@
 
   // Карта и адрес
   if (C.ADDRESS) {
-    $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
+    $('gm-mapframe').src = C.MAP_URL || 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
     $('gm-address').textContent = C.ADDRESS;
   }
 

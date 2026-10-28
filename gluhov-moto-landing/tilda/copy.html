@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <h2>2. Блок 1 — основная часть</h2>
 <ol class="steps"><li><b>Все блоки → Другое → T123 «HTML-код»</b> → «Контент».</li><li>«Скопировать код» ниже → вставить целиком → «Сохранить и закрыть».</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 1 из 3</span><code class="name">T123 · основная часть</code>
-<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 123403 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
+<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 123612 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
 <textarea class="code" id="c1" readonly spellcheck="false">&lt;!--
   БЛОК 1 из 3 (T123). Дальше — блок формы BF204N, затем блок 3 (T123).
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
@@ -654,6 +654,8 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 (function () {
   var CONFIG = {
     // TODO: проверить адрес — он же используется для карты
+    // карта: точка ZelenoKART (OSM 56.000764, 37.256615), жёлтая метка, без списка результатов
+    MAP_URL: &#x27;https://yandex.ru/map-widget/v1/?ll=37.256615%2C56.000764&amp;z=16&amp;pt=37.256615%2C56.000764%2Cpm2ylm&#x27;,
     ADDRESS: &#x27;Картинг-центр ZelenoKART, ТРЦ «Зеленопарк», Ржавки, Зеленоград&#x27;,
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
@@ -1152,7 +1154,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <li><b>Опубликовать.</b> Проверять вид только на опубликованной странице: редактор и «Предпросмотр» Тильды код T123 не выполняют.</li>
 <li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM, таблицу и Telegram → удалить тест.</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 3 из 3</span><code class="name">T123 · подвал и скрипты</code>
-<span class="desc">оформление формы, «Как добраться», FAQ, липкая кнопка · 11476 символов</span></div><button class="copy" type="button" data-target="c3">Скопировать код</button></div>
+<span class="desc">оформление формы, «Как добраться», FAQ, липкая кнопка · 11471 символов</span></div><button class="copy" type="button" data-target="c3">Скопировать код</button></div>
 <textarea class="code" id="c3" readonly spellcheck="false">&lt;!-- БЛОК 3 из 3 (T123): оформление формы Tilda (класс gm-signup), подвал, скрипты. --&gt;
 &lt;style&gt;
 /* Форма записи — стандартный блок Tilda BF204N (t678) с CSS-классом gm-signup (Tilda превращает в uc-gm-signup).
@@ -1232,7 +1234,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
           &lt;p id=&quot;gm-address&quot;&gt;Адрес картодрома уточняйте у администратора&lt;/p&gt;
           &lt;p style=&quot;margin-top:20px&quot;&gt;&lt;a class=&quot;gm-phone&quot; href=&quot;#signup&quot;&gt;Записаться на тренировку →&lt;/a&gt;&lt;/p&gt;
         &lt;/div&gt;
-        &lt;iframe id=&quot;gm-mapframe&quot; class=&quot;gm-reveal&quot; title=&quot;Карта: картодром в Зеленограде&quot; loading=&quot;lazy&quot;&gt;&lt;/iframe&gt;
+        &lt;iframe id=&quot;gm-mapframe&quot; title=&quot;Карта: картодром в Зеленограде&quot; loading=&quot;lazy&quot;&gt;&lt;/iframe&gt;
       &lt;/div&gt;
 
       &lt;h2 class=&quot;gm-reveal&quot; style=&quot;margin-top:88px&quot;&gt;Частые вопросы&lt;/h2&gt;
@@ -1259,7 +1261,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 
   // Карта и адрес
   if (C.ADDRESS) {
-    $(&#x27;gm-mapframe&#x27;).src = &#x27;https://yandex.ru/map-widget/v1/?z=14&amp;text=&#x27; + encodeURIComponent(C.ADDRESS);
+    $(&#x27;gm-mapframe&#x27;).src = C.MAP_URL || &#x27;https://yandex.ru/map-widget/v1/?z=14&amp;text=&#x27; + encodeURIComponent(C.ADDRESS);
     $(&#x27;gm-address&#x27;).textContent = C.ADDRESS;
   }
 

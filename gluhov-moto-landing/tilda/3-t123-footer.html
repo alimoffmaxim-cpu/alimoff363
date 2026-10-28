@@ -77,7 +77,7 @@
           <p id="gm-address">Адрес картодрома уточняйте у администратора</p>
           <p style="margin-top:20px"><a class="gm-phone" href="#signup">Записаться на тренировку →</a></p>
         </div>
-        <iframe id="gm-mapframe" class="gm-reveal" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
+        <iframe id="gm-mapframe" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
       </div>
 
       <h2 class="gm-reveal" style="margin-top:88px">Частые вопросы</h2>
@@ -104,7 +104,7 @@
 
   // Карта и адрес
   if (C.ADDRESS) {
-    $('gm-mapframe').src = 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
+    $('gm-mapframe').src = C.MAP_URL || 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(C.ADDRESS);
     $('gm-address').textContent = C.ADDRESS;
   }
 

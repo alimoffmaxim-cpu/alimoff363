@@ -6,14 +6,14 @@ const SOVA_DATA_HEAD = ['Дата', 'Направление', 'Расход', '�
 /** Догружает каждый кабинет с последней загруженной даты до вчера. Ошибка одного кабинета не мешает остальным. */
 function sovaSyncAll_() {
   const store = sovaReadData_();
-  const yesterday = Utilities.formatDate(new Date(Date.now() - SOVA_DAY_MS), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  const today = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy-MM-dd');   // сегодня — неполный день, догрузится
   const res = { added: {}, errors: [] };
   sovaCabinets_().forEach(function (cab) {
     try {
       const last = Object.keys(store).filter(function (k) { return store[k][1] === cab.name; })
         .map(function (k) { return store[k][0]; }).sort().pop();
-      const from = last ? sovaAddDays_(last, 1 - SOVA.REFRESH_DAYS) : sovaAddDays_(yesterday, 1 - SOVA.INITIAL_DAYS);
-      const days = sovaFetchCabinet_(cab, from, yesterday);
+      const from = last ? sovaAddDays_(last, 1 - SOVA.REFRESH_DAYS) : sovaAddDays_(today, 1 - SOVA.INITIAL_DAYS);
+      const days = sovaFetchCabinet_(cab, from, today);
       Object.keys(days).forEach(function (d) { store[d + '|' + cab.name] = [d, cab.name].concat(days[d]); });
       res.added[cab.name] = Object.keys(days).length;
     } catch (e) {

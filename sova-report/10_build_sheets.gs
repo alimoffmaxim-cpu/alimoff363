@@ -3,7 +3,7 @@
 function sbSummary_(ss, cabs, period) {
   const sh = ss.insertSheet(SB.SUMMARY, 0), n = cabs.length;
   sbSetup_(sh, SB.NAVY, SB.WIDTHS);
-  sbBanner_(sh, 'Сова · Сводная по всем направлениям', '="Все кабинеты VK Реклама клиники · данные по "&TEXT($E$3,"DD.MM.YYYY")');
+  sbBanner_(sh, 'Сова · Сводная по всем направлениям', '="Все кабинеты VK Реклама клиники · отчёт по "&TEXT($E$3,"DD.MM.YYYY")&IF(MAX(' + SB.D + '!$A:$A)<TODAY()-1,"   ⚠ данные не обновлялись с "&TEXT(MAX(' + SB.D + '!$A:$A),"DD.MM")&" — Сова → Проверить автообновление","")');
   sbTopInfo_(sh, null);
   sbPeriodInputs_(sh, period || []);
   let r = sbKpi_(sh, 5, null, true);   // строка «Этот месяц» — 7-я, её даты в K7:L7
@@ -61,7 +61,7 @@ function sbTrends_(sh, cabs) {
 function sbDirection_(ss, cab, index, period) {
   const sh = ss.insertSheet(cab.name, index);
   sbSetup_(sh, cab.color, SB.WIDTHS);
-  sbBanner_(sh, '="Сова · "&$B$3', '="Итоги всех кампаний кабинета VK Реклама · данные по "&TEXT($E$3,"DD.MM.YYYY")');
+  sbBanner_(sh, '="Сова · "&$B$3', '="Итоги всех кампаний кабинета VK Реклама · отчёт по "&TEXT($E$3,"DD.MM.YYYY")&IF(MAX(' + SB.D + '!$A:$A)<TODAY()-1,"   ⚠ данные не обновлялись с "&TEXT(MAX(' + SB.D + '!$A:$A),"DD.MM")&" — Сова → Проверить автообновление","")');
   sbTopInfo_(sh, '=' + SB.SET + '!$A$' + cab.row);
   sbPeriodInputs_(sh, period || []);
   sbKpi_(sh, 5, '$B$3', true);

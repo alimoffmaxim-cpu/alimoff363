@@ -40,8 +40,7 @@ function sovaBuildReport() {
     const periods = {};   // ручной период каждого листа переживает пересборку
     [SB.SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
       const sh = ss.getSheetByName(name);
-      if (sh) periods[name] = sh.getRange('H3:J3').getValues()[0].filter(function (v, i) { return i !== 1; })
-        .map(function (v) { return v instanceof Date ? v : ''; });
+      if (sh) periods[name] = [sh.getRange('H3').getValue()].map(function (v) { return v instanceof Date ? v : ''; });
     });
     const keep = [SOVA.SETTINGS_SHEET, SOVA.DATA_SHEET];
     [SB.SUMMARY, SB.OLD_SUMMARY].concat(cabs.map(function (c) { return c.name; })).forEach(function (name) {
@@ -70,8 +69,9 @@ function sbMissingFiles_() {
 
 /** Лист настроек: направления (сохраняются, если лист уже был), отчётная дата и подсказки. */
 function sbBuildSettings_(ss) {
-  let sh = ss.getSheetByName(SOVA.SETTINGS_SHEET), rows = [];
+  let sh = ss.getSheetByName(SOVA.SETTINGS_SHEET), rows = [], status = '';
   if (sh) {
+    status = sh.getRange('F4').getValue() === 'Последнее обновление данных' ? sh.getRange('F5').getValue() : '';
     const vals = sh.getLastRow() > 1 ? sh.getRange(2, 1, sh.getLastRow() - 1, 4).getValues() : [];
     for (let i = 0; i < vals.length && String(vals[i][0]).trim(); i++) rows.push(vals[i]);
     sh.clear();
@@ -89,20 +89,22 @@ function sbBuildSettings_(ss) {
     const c = String(r[3]).trim();
     if (/^#[0-9a-f]{6}$/i.test(c)) sh.getRange(i + 2, 4).setBackground(c).setFontColor('#ffffff').setFontWeight('bold');
   });
-  sh.getRange('F1').setValue('Отчёт строится по дату (последний день в «Данные», а если они пусты — вчера)')
+  sh.getRange('F1').setValue('Отчёт строится по дату — всегда сегодня')
     .setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
-  sh.getRange('F2').setFormula(sbLocF_('=IF(COUNT(' + SB.D + '!$A:$A),INT(MAX(' + SB.D + '!$A:$A)),TODAY()-1)')).setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
-  sh.getRange(4, 6, 8, 1).setValues(sbLoc_([
+  sh.getRange('F2').setFormula('=TODAY()').setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
+  sh.getRange('F4').setValue('Последнее обновление данных').setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
+  sh.getRange('F5').setValue(status || 'ещё не запускалось — «Сова → Загрузить новые данные из VK»').setFontWeight('bold');
+  sh.getRange(7, 6, 8, 1).setValues(sbLoc_([
     ['Как пользоваться:'],
     ['• Направления — в колонке A подряд, без пустых строк: 1 строка = 1 кабинет VK. Строка, начинающаяся с #, пропускается.'],
     ['• Название направления — это и название его листа. Переименовали — подключите кабинет заново и пересоберите отчёт.'],
     ['• Токен кабинета (из eLama): меню «Сова → Ввести токен кабинета». Статус появится в колонке B.'],
     ['• Метрика подписок — оставьте пустой, если подписки считаются как обычно (' + SOVA.LEADS_METRIC + ').'],
     ['• Все цифры берутся с листа «Данные»: 1 строка = 1 день одного направления (итог всех кампаний кабинета).'],
-    ['• «Этот месяц» = с 1-го числа по отчётную дату; сравнение — с теми же днями прошлого месяца. Неделя — пн–вс.'],
+    ['• Период на листах: «с» — вручную (пусто — с 1-го числа месяца), «по» — всегда сегодня. Неделя — пн–вс.'],
     ['• Добавили направление — «Сова → Создать / пересобрать отчёт».'],
   ])).setFontColor(SB.MUTED);
-  sh.getRange('F4').setFontWeight('bold').setFontColor(SB.INK);
+  sh.getRange('F7').setFontWeight('bold').setFontColor(SB.INK);
   sh.setFrozenRows(1);
   return sh;
 }

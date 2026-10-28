@@ -1,12 +1,12 @@
 // ---------- Перестраиваемые части листов направлений и «Сводной» ----------
 // Лист направления с 11-й строки: таблица по неделям, по месяцам (постоянные — меняются только
-// после загрузки данных) и по дням выбранного периода (поля «Период с / по» в H3 и J3, пусто —
-// текущий месяц; перестраивается и при смене дат, onEdit). Число строк скрипт считает сам.
+// после загрузки данных) и по дням периода («Период с» в H3 — вручную, пусто — с 1-го числа; «по» — сегодня;
+// перестраивается и при смене даты «с», onEdit, и после каждой загрузки). Число строк скрипт считает сам.
 
-/** Простой триггер: изменили «Период с / по» на листе направления — перестроить дни. */
+/** Простой триггер: изменили «Период с» (H3) на листе направления — перестроить дни. */
 function onEdit(e) {
   const a = e && e.range;
-  if (!a || a.getRow() > 3 || a.getLastRow() < 3 || a.getColumn() > 10 || a.getLastColumn() < 8) return;
+  if (!a || a.getRow() > 3 || a.getLastRow() < 3 || a.getColumn() > 8 || a.getLastColumn() < 8) return;
   const sh = a.getSheet();
   if (sbIsDirection_(sh)) sbDays_(sh);
 }
@@ -90,22 +90,14 @@ function sbDays_(sh, cnt) {
   sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [9], [2, 0], [SB.COST]);
 }
 
-/** Даты периода, как их считают формулы K7:L7: «с» = H3 или 1-е число месяца «по», «по» = J3 или отчётная дата. */
+/** Даты периода, как их считают формулы K7:L7: «с» = H3 или 1-е число месяца, «по» = сегодня. */
 function sbPeriodDates_(sh) {
-  const v = sh.getRange('H3:J3').getValues()[0];
-  const to = v[2] instanceof Date ? sbDay_(v[2]) : sbReportDate_();
-  const from = v[0] instanceof Date ? sbDay_(v[0]) : new Date(to.getFullYear(), to.getMonth(), 1);
+  const v = sh.getRange('H3').getValue(), to = sbReportDate_();
+  const from = v instanceof Date ? sbDay_(v) : new Date(to.getFullYear(), to.getMonth(), 1);
   return { from: from, to: to, n: Math.round((to - from) / SOVA_DAY_MS) + 1 };
 }
 
-/** Последний день в «Данных», а если они пусты — вчера (как в «⚙ Настройки»!F2). */
-function sbReportDate_() {
-  const sh = SpreadsheetApp.getActive().getSheetByName(SOVA.DATA_SHEET);
-  let max = null;
-  if (sh && sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, 1).getValues().forEach(function (x) {
-    if (x[0] instanceof Date && (!max || x[0] > max)) max = x[0];
-  });
-  return sbDay_(max || new Date(Date.now() - SOVA_DAY_MS));
-}
+/** Отчётная дата — сегодня (как в «⚙ Настройки»!F2). */
+function sbReportDate_() { return sbDay_(new Date()); }
 
 function sbDay_(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }

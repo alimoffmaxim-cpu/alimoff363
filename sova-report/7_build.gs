@@ -89,9 +89,9 @@ function sbBuildSettings_(ss) {
     const c = String(r[3]).trim();
     if (/^#[0-9a-f]{6}$/i.test(c)) sh.getRange(i + 2, 4).setBackground(c).setFontColor('#ffffff').setFontWeight('bold');
   });
-  sh.getRange('F1').setValue('Отчёт строится по дату — всегда сегодня')
+  sh.getRange('F1').setValue('Отчёт строится по дату — вчера (последний полный день)')
     .setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
-  sh.getRange('F2').setFormula('=TODAY()').setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
+  sh.getRange('F2').setFormula('=TODAY()-1').setNumberFormat('dd.MM.yyyy').setFontWeight('bold');
   sh.getRange('F4').setValue('Последнее обновление данных').setBackground(SB.HEAD).setFontColor('#ffffff').setFontWeight('bold');
   sh.getRange('F5').setValue(status || 'ещё не запускалось — «Сова → Загрузить новые данные из VK»').setFontWeight('bold');
   sh.getRange(7, 6, 8, 1).setValues(sbLoc_([
@@ -101,7 +101,7 @@ function sbBuildSettings_(ss) {
     ['• Токен кабинета (из eLama): меню «Сова → Ввести токен кабинета». Статус появится в колонке B.'],
     ['• Метрика подписок — оставьте пустой, если подписки считаются как обычно (' + SOVA.LEADS_METRIC + ').'],
     ['• Все цифры берутся с листа «Данные»: 1 строка = 1 день одного направления (итог всех кампаний кабинета).'],
-    ['• Период на листах: «с» — вручную (пусто — с 1-го числа месяца), «по» — всегда сегодня. Неделя — пн–вс.'],
+    ['• Период на листах: «с» — вручную (пусто — с 1-го числа месяца), «по» — всегда вчера. Неделя — пн–вс.'],
     ['• Добавили направление — «Сова → Создать / пересобрать отчёт».'],
   ])).setFontColor(SB.MUTED);
   sh.getRange('F7').setFontWeight('bold').setFontColor(SB.INK);

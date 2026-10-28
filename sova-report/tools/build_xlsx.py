@@ -130,7 +130,7 @@ def kpi_block(ws, r, dir_ref, manual=False):
     manual — период можно задать в H3 («с») и J3 («по»), тогда сравнение
     идёт с предыдущим периодом той же длины.
     """
-    M = 'ISNUMBER($H$3)' if manual else 'FALSE'  # «с» — вручную, «по» — всегда сегодня
+    M = 'ISNUMBER($H$3)' if manual else 'FALSE'  # «с» — вручную, «по» — всегда вчера
     section(ws, r, f'=IF({M},"Выбранный период против предыдущего той же длины","Этот месяц против тех же дней прошлого")'
             if manual else 'Этот месяц против тех же дней прошлого')
     h = r + 1
@@ -396,7 +396,7 @@ def fix_cost_refs(ws, c1, c2, s1, e1):
 
 
 def period_inputs(ws):
-    """Период (на «Сводной» и листах направлений): H3 — «с» (вручную), J3 — «по» = сегодня."""
+    """Период (на «Сводной» и листах направлений): H3 — «с» (вручную), J3 — «по» = вчера."""
     from openpyxl.worksheet.datavalidation import DataValidation
     ws['G3'], ws['I3'] = 'Период с', 'по'
     for a in ('G3', 'I3'):
@@ -411,9 +411,9 @@ def period_inputs(ws):
     dv.add('H3')
     ws['J3'] = '=$E$3'
     ws['J3'].font, ws['J3'].number_format, ws['J3'].alignment = font(bold=True), 'DD.MM.YYYY', Alignment(horizontal='center')
-    ws['H4'] = ('=IF(AND(ISNUMBER(H3),H3>$E$3),"⚠ Дата «с» позже сегодняшней",'
+    ws['H4'] = ('=IF(AND(ISNUMBER(H3),H3>$E$3),"⚠ Дата «с» позже вчерашней",'
                 'IF(ISNUMBER(H3),"Сравнение — с предыдущим периодом той же длины. Очистите поле, чтобы считать с 1-го числа месяца.",'
-                '"«С» — вручную (двойной щелчок — календарь), пусто — с 1-го числа месяца. «По» — всегда сегодня."))')
+                '"«С» — вручную (двойной щелчок — календарь), пусто — с 1-го числа месяца. «По» — всегда вчера."))')
     ws['H4'].font = font(color=MUTED, size=9)
 
 
@@ -476,10 +476,10 @@ def settings_sheet(wb):
         ws.cell(j + 2, 4, '#' + DIR_COLORS[j]).fill = fill(DIR_COLORS[j])
         ws.cell(j + 2, 4).font = font(color='FFFFFF', bold=True)
     ws['A7'] = 'Отчёт строится по дату:'
-    ws['B7'] = '=TODAY()'
+    ws['B7'] = '=TODAY()-1'
     ws['B7'].number_format = 'DD.MM.YYYY'
     ws['A7'].font, ws['B7'].font = font(bold=True), font(bold=True)
-    ws['C7'] = '← всегда сегодня'
+    ws['C7'] = '← всегда вчера (последний полный день)'
     ws['C7'].font = font(color=MUTED)
     notes = [
         'Как пользоваться:',

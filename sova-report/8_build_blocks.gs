@@ -81,7 +81,7 @@ function sbUpDown_(sh, a1, good) {
 
 /**
  * Этот месяц (с 1-го по отчётную дату) против тех же дней прошлого месяца.
- * manual — начало периода можно задать вручную в H3 («с»; «по» — всегда сегодня), тогда сравнение
+ * manual — начало периода можно задать вручную в H3 («с»; «по» — всегда вчера), тогда сравнение
  * идёт с предыдущим периодом той же длины.
  */
 function sbKpi_(sh, r, dir, manual) {
@@ -120,10 +120,10 @@ function sbPeriodInputs_(sh, period) {
     .setNumberFormat('dd.MM.yyyy').setDataValidation(rule)
     .setBorder(true, true, true, true, null, null, '#e0c46c', SpreadsheetApp.BorderStyle.SOLID);
   sh.getRange('J3').setFontColor(SB.INK).setFontWeight('bold').setHorizontalAlignment('center').setNumberFormat('dd.MM.yyyy')
-    .setNote('«По» — всегда сегодня, меняется само.');
-  sh.getRange('H4').setValue(sbLocF_('=IF(AND(ISNUMBER(H3),H3>$E$3),"⚠ Дата «с» позже сегодняшней",' +
+    .setNote('«По» — всегда вчера (последний полный день), меняется само.');
+  sh.getRange('H4').setValue(sbLocF_('=IF(AND(ISNUMBER(H3),H3>$E$3),"⚠ Дата «с» позже вчерашней",' +
     'IF(ISNUMBER(H3),"Сравнение — с предыдущим периодом той же длины. Очистите поле, чтобы считать с 1-го числа месяца.",' +
-    '"«С» — вручную (двойной щелчок — календарь), пусто — с 1-го числа месяца. «По» — всегда сегодня."))')).setFontColor(SB.MUTED).setFontSize(9);
+    '"«С» — вручную (двойной щелчок — календарь), пусто — с 1-го числа месяца. «По» — всегда вчера."))')).setFontColor(SB.MUTED).setFontSize(9);
 }
 
 // ---------- Формулы под локаль таблицы ----------

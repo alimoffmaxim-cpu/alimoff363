@@ -17,7 +17,8 @@ const SOVA = {
   LEADS_METRIC: 'base.vk.result',     // метрика подписок (вступлений): результат по цели кампании; можно переопределить на листе настроек
   INITIAL_DAYS: 365,                  // сколько дней загрузить при первом запуске
   REFRESH_DAYS: 3,                    // последние N дней перезагружаются каждый раз (VK досчитывает конверсии)
-  UPDATE_EVERY_HOURS: 3,              // автообновление: раз в N часов (1, 2, 4, 6, 8 или 12 — тоже можно)
+  UPDATE_HOUR: 1,                     // автообновление раз в сутки в этот час (Google запускает в пределах ~15 мин)
+  TIMEZONE: 'Europe/Moscow',          // часовой пояс автообновления и «вчера»
   VAT_PERCENT: 22,                    // НДС для колонки «Расход с НДС» (VK отдаёт расход без НДС)
   TRENDS_FROM: '2026-09-21',          // недели и месяцы в таблицах — не раньше этой недели (пусто — с первых данных)
 };
@@ -37,14 +38,14 @@ function onOpen() {
     .addToUi();
 }
 
-/** Автообновление (триггер, раз в UPDATE_EVERY_HOURS часов): догрузить данные всех кабинетов по сегодня. */
+/** Автообновление (триггер, раз в сутки в UPDATE_HOUR по TIMEZONE): догрузить данные всех кабинетов по вчера. */
 function sovaDailyUpdate() {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(30 * 1000)) throw new Error('Данные уже загружаются, попробуйте через минуту.');
   try {
     const res = sovaSyncAll_();
     if (res.errors.length) throw new Error('Не загрузились: ' + res.errors.join(' | '));
-    sovaStatus_('✅ ' + sovaNow_() + ' — данные загружены по сегодня');
+    sovaStatus_('✅ ' + sovaNow_() + ' — данные загружены по вчера (' + sovaYesterday_().split('-').reverse().join('.') + ')');
     return res;
   } catch (e) {
     sovaStatus_('❌ ' + sovaNow_() + ' — ' + e.message);   // видно на листе настроек; Google ещё пришлёт письмо
@@ -59,13 +60,16 @@ function sovaStatus_(text) {
   try { sovaSettingsSheet_().getRange('F5').setValue(String(text).slice(0, 300)); } catch (e) { /* лист настроек недоступен */ }
 }
 
-function sovaNow_() { return Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd.MM HH:mm'); }
+function sovaNow_() { return Utilities.formatDate(new Date(), SOVA.TIMEZONE, 'dd.MM HH:mm'); }
+
+/** Вчера по TIMEZONE: 'yyyy-MM-dd'. В 01:00 28.10 — это 27.10. */
+function sovaYesterday_() { return Utilities.formatDate(new Date(Date.now() - SOVA_DAY_MS), SOVA.TIMEZONE, 'yyyy-MM-dd'); }
 
 /** Меню: есть ли триггер автообновления и чем закончился последний запуск. */
 function sovaCheckUpdates() {
   const n = ScriptApp.getProjectTriggers().filter(function (t) { return t.getHandlerFunction() === 'sovaDailyUpdate'; }).length;
   const last = String(sovaSettingsSheet_().getRange('F5').getValue() || 'ещё не запускалось');
-  SpreadsheetApp.getUi().alert((n ? '✅ Автообновление включено: каждые ' + SOVA.UPDATE_EVERY_HOURS + ' ч.'
+  SpreadsheetApp.getUi().alert((n ? '✅ Автообновление включено: каждый день около ' + SOVA.UPDATE_HOUR + ':00 по Москве, данные за вчера.'
     : '❌ Автообновление выключено. Включите: «Сова → Включить автообновление».') +
     (n > 1 ? '\n⚠ Триггеров несколько (' + n + ') — нажмите «Включить автообновление», останется один.' : '') +
     '\n\nПоследнее обновление: ' + last +
@@ -91,10 +95,11 @@ function setupSovaTrigger() {
   ScriptApp.getProjectTriggers()
     .filter(function (t) { return t.getHandlerFunction() === 'sovaDailyUpdate'; })
     .forEach(function (t) { ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('sovaDailyUpdate').timeBased().everyHours(SOVA.UPDATE_EVERY_HOURS || 3).create();
+  ScriptApp.newTrigger('sovaDailyUpdate').timeBased().everyDays(1).atHour(SOVA.UPDATE_HOUR).nearMinute(5)
+    .inTimezone(SOVA.TIMEZONE).create();
   try {
-    SpreadsheetApp.getUi().alert('Автообновление включено: каждые ' + (SOVA.UPDATE_EVERY_HOURS || 3) + ' ч. ' +
-      'Загружаются дни по сегодня включительно, последние ' + SOVA.REFRESH_DAYS + ' дня — заново (VK досчитывает).');
+    SpreadsheetApp.getUi().alert('Автообновление включено: каждый день около ' + SOVA.UPDATE_HOUR + ':00 по Москве: ' +
+      'загружаются данные по вчера включительно, последние ' + SOVA.REFRESH_DAYS + ' дня — заново (VK досчитывает).');
   } catch (e) { /* запуск из редактора без UI */ }
 }
 

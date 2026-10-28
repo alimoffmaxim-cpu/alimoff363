@@ -3,12 +3,26 @@
 // после загрузки данных) и по дням периода («Период с / по» в H3 и J3; «с» пусто — с 1-го числа, «по» по умолчанию —
 // вчера; перестраивается при смене дат, onEdit, при открытии и после каждой загрузки). Число строк скрипт считает сам.
 
-/** Простой триггер: изменили «Период с / по» (H3, J3) на листе направления — перестроить дни. */
+/** Простой триггер: изменили «Период с / по» (H3, J3): на листе направления — перестроить его дни,
+ *  на «Сводной» — те же даты на все листы направлений. */
 function onEdit(e) {
   const a = e && e.range;
   if (!a || a.getRow() > 3 || a.getLastRow() < 3 || a.getColumn() > 10 || a.getLastColumn() < 8) return;
   const sh = a.getSheet();
   if (sbIsDirection_(sh)) sbDays_(sh);
+  else if (sh.getName() === SB.SUMMARY) sbCopyPeriod_(sh);
+}
+
+/** Даты на «Сводной» поменялись — ставим точно такие же на все листы направлений и перестраиваем их дни. */
+function sbCopyPeriod_(summary) {
+  const from = summary.getRange('H3').getValue(), toF = summary.getRange('J3').getFormula();
+  const to = toF ? null : summary.getRange('J3').getValue();
+  SpreadsheetApp.getActive().getSheets().forEach(function (sh) {
+    if (!sbIsDirection_(sh)) return;
+    sh.getRange('H3').setValue(from);
+    if (toF || to === '') sh.getRange('J3').setFormula('=$E$3'); else sh.getRange('J3').setValue(to);
+    sbDays_(sh);
+  });
 }
 
 /**

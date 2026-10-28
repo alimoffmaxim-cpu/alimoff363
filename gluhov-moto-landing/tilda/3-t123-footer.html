@@ -20,8 +20,6 @@
 .uc-gm-signup .gm-sg-perks{list-style:none;margin:24px 0 0;padding:0}
 .uc-gm-signup .gm-sg-perks li{padding:8px 0 8px 30px;position:relative;color:var(--muted);font-size:17px;line-height:1.5}
 .uc-gm-signup .gm-sg-perks li::before{content:"";position:absolute;left:0;top:13px;width:16px;height:10px;background:var(--accent);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%,30% 50%)}
-.uc-gm-signup .gm-sg-call{margin:20px 0 0;color:var(--muted);font-size:17px}
-.uc-gm-signup .gm-sg-call a{font-size:24px;font-weight:800;text-decoration:none;color:var(--accent);white-space:nowrap}
 
 /* правая колонка: карточка формы */
 .uc-gm-signup .t-form{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);box-sizing:border-box}
@@ -77,7 +75,7 @@
         <div class="gm-card gm-reveal">
           <h3>📍 Зеленоград</h3>
           <p id="gm-address">Адрес картодрома уточняйте у администратора</p>
-          <p style="margin-top:20px"><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
+          <p style="margin-top:20px"><a class="gm-phone" href="#signup">Записаться на тренировку →</a></p>
         </div>
         <iframe id="gm-mapframe" class="gm-reveal" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
       </div>
@@ -90,11 +88,11 @@
       <details><summary>Что если на улице дождь?</summary>
         <p>Картодром закрытый, поэтому тренировки проходят при любой погоде.</p></details>
       <details><summary>Можно ли приходить опытным спортсменам?</summary>
-        <p>Да, в дни непогоды трасса открыта и для опытных райдеров — уточните свободное время у администратора.</p></details>
+        <p>Да, в дни непогоды трасса открыта и для опытных райдеров — оставьте заявку, и администратор подберёт свободное время.</p></details>
     </div>
   </section>
 
-  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград · <a href="tel:+79152779121">+7 915 277-91-21</a></div></div>
+  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград</div></div>
 
   <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#signup">Записаться на тренировку →</a></div>
 </div>
@@ -124,8 +122,7 @@
     }
     var extra = document.createElement('div'); extra.className = 'gm-sg-extra';
     extra.innerHTML = '<ul class="gm-sg-perks"><li>Перезвоним в течение дня</li><li>Подберём удобное время</li>' +
-      '<li>Расскажем, что взять с собой</li></ul><p class="gm-sg-call">Удобнее позвонить? ' +
-      '<a href="tel:+79152779121">+7 915 277-91-21</a></p>';
+      '<li>Расскажем, что взять с собой</li></ul>';
     (descr || title || rec).insertAdjacentElement('afterend', extra);
   }
 

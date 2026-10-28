@@ -89,8 +89,7 @@ js3 = r"""
     }
     var extra = document.createElement('div'); extra.className = 'gm-sg-extra';
     extra.innerHTML = '<ul class="gm-sg-perks"><li>Перезвоним в течение дня</li><li>Подберём удобное время</li>' +
-      '<li>Расскажем, что взять с собой</li></ul><p class="gm-sg-call">Удобнее позвонить? ' +
-      '<a href="tel:+79152779121">+7 915 277-91-21</a></p>';
+      '<li>Расскажем, что взять с собой</li></ul>';
     (descr || title || rec).insertAdjacentElement('afterend', extra);
   }
 

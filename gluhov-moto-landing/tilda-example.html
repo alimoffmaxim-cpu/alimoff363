@@ -394,7 +394,6 @@
         <p class="gm-lead">Тренировки на закрытом двухуровневом картодроме: тепло, сухо и безопасно в любую погоду. Мотоциклы классов 50 и 65.</p>
         <div class="gm-actions">
           <a class="gm-btn" href="#gm-form">Записаться на тренировку →</a>
-          <a class="gm-btn gm-btn--ghost" href="tel:+79152779121">📞 +7 915 277-91-21</a>
         </div>
         <div class="gm-facts">
           <div><b>4–12</b>лет</div>
@@ -571,7 +570,7 @@
       <div class="gm-grid gm-sched" style="margin-top:24px">
         <div class="gm-card gm-reveal"><div class="gm-day">Среда</div><div class="gm-time">09:00 – 11:00</div></div>
         <div class="gm-card gm-reveal"><div class="gm-day">Суббота</div><div class="gm-time">09:00 – 11:00</div></div>
-        <div class="gm-card gm-reveal"><p>Расписание предварительное — уточняйте у администратора:</p><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></div>
+        <div class="gm-card gm-reveal"><p>Расписание предварительное — удобное время администратор подберёт после заявки.</p><a class="gm-phone" href="#gm-form">Оставить заявку →</a></div>
       </div>
     </div>
   </section>
@@ -620,7 +619,6 @@
         <h2>Запишите ребёнка<br>на <span class="gm-accent">тренировку</span></h2>
         <p>Оставьте заявку — администратор перезвонит, подберёт группу и класс мотоцикла и ответит на все вопросы.</p>
         <ul class="gm-list gm-perks"><li>Перезвоним в течение дня</li><li>Подберём удобное время</li><li>Расскажем, что взять с собой</li></ul>
-        <p style="margin-top:20px">Удобнее позвонить? <a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
       </div>
 
       <div class="gm-reveal">
@@ -669,7 +667,7 @@
         <div class="gm-card gm-reveal">
           <h3>📍 Зеленоград</h3>
           <p id="gm-address">Адрес картодрома уточняйте у администратора</p>
-          <p style="margin-top:20px"><a class="gm-phone" href="tel:+79152779121">+7 915 277-91-21</a></p>
+          <p style="margin-top:20px"><a class="gm-phone" href="#gm-form">Записаться на тренировку →</a></p>
         </div>
         <iframe id="gm-mapframe" class="gm-reveal" title="Карта: картодром в Зеленограде" loading="lazy"></iframe>
       </div>
@@ -682,11 +680,11 @@
       <details><summary>Что если на улице дождь?</summary>
         <p>Картодром закрытый, поэтому тренировки проходят при любой погоде.</p></details>
       <details><summary>Можно ли приходить опытным спортсменам?</summary>
-        <p>Да, в дни непогоды трасса открыта и для опытных райдеров — уточните свободное время у администратора.</p></details>
+        <p>Да, в дни непогоды трасса открыта и для опытных райдеров — оставьте заявку, и администратор подберёт свободное время.</p></details>
     </div>
   </section>
 
-  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград · <a href="tel:+79152779121">+7 915 277-91-21</a></div></div>
+  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград</div></div>
 
   <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#gm-form">Записаться на тренировку →</a></div>
   <div class="gm-lightbox" id="gm-lightbox"><img alt=""></div>
@@ -702,7 +700,6 @@
     GOAL: 'lead_form_submit',
     // TODO: проверить адрес — он же используется для карты
     ADDRESS: 'Картинг-центр ZelenoKART, ТРЦ «Зеленопарк», Ржавки, Зеленоград',
-    PHONE: '+7 915 277-91-21',
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
     // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
@@ -1255,7 +1252,7 @@
         if (CONFIG.METRIKA_ID && window.ym) window.ym(CONFIG.METRIKA_ID, 'reachGoal', CONFIG.GOAL);
       })
       .catch(function () {
-        err.textContent = 'Не удалось отправить заявку. Позвоните нам: ' + CONFIG.PHONE;
+        err.textContent = 'Не удалось отправить заявку. Проверьте интернет и попробуйте ещё раз.';
         btn.disabled = false;
         btn.textContent = 'Отправить заявку →';
       });

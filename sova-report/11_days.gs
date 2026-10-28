@@ -1,14 +1,28 @@
 // ---------- Перестраиваемые части листов направлений и «Сводной» ----------
 // Лист направления с 11-й строки: таблица по неделям, по месяцам (постоянные — меняются только
-// после загрузки данных) и по дням периода («Период с» в H3 — вручную, пусто — с 1-го числа; «по» — вчера;
-// перестраивается и при смене даты «с», onEdit, и после каждой загрузки). Число строк скрипт считает сам.
+// после загрузки данных) и по дням периода («Период с / по» в H3 и J3; «с» пусто — с 1-го числа, «по» по умолчанию —
+// вчера; перестраивается при смене дат, onEdit, при открытии и после каждой загрузки). Число строк скрипт считает сам.
 
-/** Простой триггер: изменили «Период с» (H3) на листе направления — перестроить дни. */
+/** Простой триггер: изменили «Период с / по» (H3, J3) на листе направления — перестроить дни. */
 function onEdit(e) {
   const a = e && e.range;
-  if (!a || a.getRow() > 3 || a.getLastRow() < 3 || a.getColumn() > 8 || a.getLastColumn() < 8) return;
+  if (!a || a.getRow() > 3 || a.getLastRow() < 3 || a.getColumn() > 10 || a.getLastColumn() < 8) return;
   const sh = a.getSheet();
   if (sbIsDirection_(sh)) sbDays_(sh);
+}
+
+/**
+ * При открытии таблицы (onOpen): «по» (J3) на «Сводной» и листах направлений снова «вчера».
+ * Листы, где стояла своя дата, перестраивают таблицу по дням. Ошибки не мешают открыть таблицу.
+ */
+function sbResetPeriodEnds_() {
+  SpreadsheetApp.getActive().getSheets().forEach(function (sh) {
+    try {
+      if (sh.getRange('G3').getValue() !== 'Период с' || sh.getRange('J3').getFormula()) return;
+      sh.getRange('J3').setFormula('=$E$3');
+      if (sbIsDirection_(sh)) sbDays_(sh);
+    } catch (e) { /* лист другой версии — пропускаем */ }
+  });
 }
 
 function sbIsDirection_(sh) {
@@ -90,9 +104,10 @@ function sbDays_(sh, cnt) {
   sbChart_(sh, 'line', 'Цена подписки по дням, ₽', t, [9], [2, 0], [SB.COST]);
 }
 
-/** Даты периода, как их считают формулы K7:L7: «с» = H3 или 1-е число месяца, «по» = вчера. */
+/** Даты периода, как их считают формулы K7:L7: «с» = H3 или 1-е число месяца «по», «по» = J3 или вчера. */
 function sbPeriodDates_(sh) {
-  const v = sh.getRange('H3').getValue(), to = sbReportDate_();
+  const v = sh.getRange('H3').getValue(), j = sh.getRange('J3').getValue();
+  const to = j instanceof Date ? sbDay_(j) : sbReportDate_();
   const from = v instanceof Date ? sbDay_(v) : new Date(to.getFullYear(), to.getMonth(), 1);
   return { from: from, to: to, n: Math.round((to - from) / SOVA_DAY_MS) + 1 };
 }

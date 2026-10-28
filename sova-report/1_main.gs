@@ -36,6 +36,7 @@ function onOpen() {
     .addSeparator()
     .addItem('🗑 Удалить все строки с листа «Данные»', 'menuClearData')
     .addToUi();
+  if (typeof sbResetPeriodEnds_ === 'function') sbResetPeriodEnds_();   // «по» снова «вчера» (11_days.gs)
 }
 
 /** Автообновление (триггер, раз в сутки в UPDATE_HOUR по TIMEZONE): догрузить данные всех кабинетов по вчера. */

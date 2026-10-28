@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <h2>2. Блок 1 — основная часть</h2>
 <ol class="steps"><li><b>Все блоки → Другое → T123 «HTML-код»</b> → «Контент».</li><li>«Скопировать код» ниже → вставить целиком → «Сохранить и закрыть».</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 1 из 3</span><code class="name">T123 · основная часть</code>
-<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 106671 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
+<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 106899 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
 <textarea class="code" id="c1" readonly spellcheck="false">&lt;!--
   БЛОК 1 из 3 (T123). Дальше — блок формы BF204N, затем блок 3 (T123).
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
@@ -167,7 +167,8 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 .gm .gm-gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:12px}
 .gm .gm-gallery figure{position:relative;border-radius:20px;overflow:hidden;background:var(--card);cursor:zoom-in;border:1px solid var(--line)}
 .gm .gm-gallery figure:first-child{grid-column:span 2;grid-row:span 2}
-.gm .gm-gallery figure:nth-child(8){grid-column:span 2}
+.gm .gm-gallery figure:nth-child(6),.gm .gm-gallery figure:nth-child(7){grid-row:span 2}
+.gm .gm-gallery figure:nth-child(8){grid-column:span 2;grid-row:span 2}
 .gm .gm-gallery img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
 .gm .gm-gallery figure:hover img{transform:scale(1.06)}
 .gm .gm-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:28px 16px 14px;font-weight:600;font-size:14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent)}
@@ -679,10 +680,10 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
         { src: &#x27;kids-bikes.jpg&#x27;, caption: &#x27;Наши райдеры&#x27; },
         { src: &#x27;kids-walk.jpg&#x27;, caption: &#x27;Идём на старт&#x27; },
         { src: &#x27;rider-red.jpg&#x27;, caption: &#x27;Вираж&#x27; },
-        { src: &#x27;kids-smile.jpg&#x27;, caption: &#x27;После заезда&#x27; },
-        { src: &#x27;podium.jpg&#x27;, caption: &#x27;Пьедестал ZelenoKART&#x27; },
-        { src: &#x27;bikes-banner.jpg&#x27;, caption: &#x27;Мотоциклы 50 и 65&#x27; },
-        { src: &#x27;kids-bikes-2.jpg&#x27;, caption: &#x27;Готовы к старту&#x27; }
+        { src: &#x27;kids-smile.jpg&#x27;, caption: &#x27;После заезда&#x27;, pos: &#x27;50% 25%&#x27; },
+        { src: &#x27;podium.jpg&#x27;, caption: &#x27;Пьедестал ZelenoKART&#x27;, pos: &#x27;50% 80%&#x27; },
+        { src: &#x27;bikes-banner.jpg&#x27;, caption: &#x27;Мотоциклы 50 и 65&#x27;, pos: &#x27;50% 80%&#x27; },
+        { src: &#x27;kids-bikes-2.jpg&#x27;, caption: &#x27;Готовы к старту&#x27;, pos: &#x27;50% 45%&#x27; }
       ]
     }
   };
@@ -777,6 +778,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
     if (shots) {
       var src = typeof s === &#x27;string&#x27; ? s : s.src, cap = typeof s === &#x27;string&#x27; ? &#x27;&#x27; : (s.caption || &#x27;&#x27;);
       f.appendChild(img(src, cap));
+      if (s.pos) f.lastChild.style.objectPosition = s.pos;
       if (cap) { var c = document.createElement(&#x27;figcaption&#x27;); c.textContent = cap; f.appendChild(c); }
       f.addEventListener(&#x27;click&#x27;, function () { lb.firstChild.src = url(src); lb.classList.add(&#x27;gm-open&#x27;); });
     } else {

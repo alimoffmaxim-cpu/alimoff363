@@ -1,0 +1,1318 @@
+<title>Электромото: блоки для Tilda</title>
+<style>
+/* Layout: одна колонка — шаги сверху вниз, между ними карточки кода с кнопкой копирования */
+:root{--bg:#f5f6f3;--surface:#fff;--fg:#1d2320;--muted:#5f6a64;--line:#dde2dc;--accent:#b45309;--accent-fg:#fff;--ok:#15803d;--code-bg:#f0f2ee;
+  --sans:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--surface:#1c211e;--fg:#e6ebe7;--muted:#9aa59f;--line:#2f3632;--accent:#ffd400;--accent-fg:#141816;--ok:#4ade80;--code-bg:#171b19;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141816;--surface:#1c211e;--fg:#e6ebe7;--muted:#9aa59f;--line:#2f3632;--accent:#ffd400;--accent-fg:#141816;--ok:#4ade80;--code-bg:#171b19;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:32px 64px}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-size:26px;margin:0;text-wrap:balance} h2{font-size:18px;margin:12px 0 0}
+.lead{color:var(--muted);margin:0;max-width:65ch}
+ol.steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;max-width:70ch}
+.warn{border-left:3px solid var(--accent);padding:10px 14px;background:var(--surface);max-width:70ch;margin:0}
+.file{background:var(--surface);border:1px solid var(--line);border-radius:8px;min-width:0}
+.head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+.meta{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;min-width:0}
+.step{font-family:var(--mono);font-size:12px;color:var(--muted)} .name{font-family:var(--mono);font-size:16px;font-weight:600} .desc{color:var(--muted);font-size:13px}
+button.copy{font:600 14px var(--sans);background:var(--accent);color:var(--accent-fg);border:0;border-radius:6px;padding:9px 16px;cursor:pointer}
+button.copy:focus-visible{outline:3px solid var(--fg);outline-offset:2px} button.copy.done{background:var(--ok);color:#fff}
+textarea.code{display:block;width:100%;box-sizing:border-box;height:220px;margin:0;padding:12px 14px;border:0;resize:vertical;background:var(--code-bg);color:var(--fg);font:12.5px/1.45 var(--mono);border-radius:0 0 8px 8px;white-space:pre;overflow:auto}
+code{font-family:var(--mono);overflow-wrap:anywhere}
+.tbl{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top} th{color:var(--muted);font-weight:600}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<div class="wrap">
+<h1>Электромото Зеленоград: блоки для Tilda</h1>
+<p class="lead">Страница в Тильде собирается из трёх блоков сверху вниз: HTML-код, стандартная форма Тильды, HTML-код. Дизайн один в один с утверждённым макетом; форма — стандартная, поэтому заявки уходят в Tilda CRM, Google Таблицу, Telegram и на почту.</p>
+<h2>1. Новая страница</h2>
+<ol class="steps"><li>Мои сайты → проект → <b>Создать новую страницу</b> → «Пустая страница».</li>
+<li>Настройки страницы: заголовок «Электромотоциклы для детей в Зеленограде», адрес, например <code>/moto-zelenograd</code>.</li></ol>
+<h2>2. Блок 1 — основная часть</h2>
+<ol class="steps"><li><b>Все блоки → Другое → T123 «HTML-код»</b> → «Контент».</li><li>«Скопировать код» ниже → вставить целиком → «Сохранить и закрыть».</li></ol>
+<section class="file"><div class="head"><div class="meta"><span class="step">блок 1 из 3</span><code class="name">T123 · основная часть</code>
+<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 76875 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
+<textarea class="code" id="c1" readonly spellcheck="false">&lt;!--
+  БЛОК 1 из 3 (T123). Дальше — блок формы BF204N, затем блок 3 (T123).
+  Лендинг «Электромотоциклы в Зеленограде» для Тильды.
+  Вставляется целиком в один блок T123 («HTML-код»). Инструкция — README.md.
+  Всё, что нужно заполнить перед публикацией, помечено TODO.
+  Фото и видео подключаются ссылками в CONFIG.MEDIA (в самом конце файла).
+--&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Unbounded:wght@600;800;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+
+&lt;style&gt;
+.gm{--bg:#0d0f13;--card:#171a21;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#ffd400;--accent-ink:#0d0f13;--hot:#ff5a1f;--err:#ff6b6b;
+  background:var(--bg);color:var(--text);font-family:Manrope,Arial,sans-serif;font-size:17px;line-height:1.5;overflow:hidden;position:relative}
+.gm *{box-sizing:border-box;margin:0;padding:0}
+.gm a{color:inherit}
+.gm img{display:block;max-width:100%}
+.gm .gm-wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+.gm section{padding:88px 0;position:relative}
+.gm h1,.gm h2,.gm .gm-display{font-family:Unbounded,Manrope,Arial,sans-serif;font-weight:900;letter-spacing:-.02em;text-transform:uppercase}
+.gm h1{font-size:clamp(34px,6.4vw,78px);line-height:.98}
+.gm h2{font-size:clamp(26px,4.2vw,48px);line-height:1.02;margin-bottom:12px}
+.gm h3{font-size:20px;font-weight:800;margin-bottom:8px}
+.gm p{color:var(--muted)}
+.gm .gm-sub{font-size:19px;max-width:640px;margin-bottom:40px}
+.gm .gm-accent{color:var(--accent)}
+.gm .gm-kicker{display:inline-flex;align-items:center;gap:8px;font:800 13px Manrope,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.gm .gm-kicker::before{content:&quot;&quot;;width:28px;height:3px;background:var(--accent);transform:skewX(-20deg)}
+.gm .gm-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:var(--accent-ink);font:800 18px Manrope,Arial,sans-serif;border:0;border-radius:14px;padding:18px 32px;cursor:pointer;text-decoration:none;transition:transform .15s,box-shadow .15s;box-shadow:0 10px 30px -10px rgba(255,212,0,.6)}
+.gm .gm-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(255,212,0,.8)}
+.gm .gm-btn:disabled{opacity:.6;cursor:wait;transform:none}
+.gm .gm-btn--ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid rgba(255,255,255,.18);box-shadow:none;backdrop-filter:blur(6px)}
+
+/* ---------- Первый экран ---------- */
+.gm .gm-hero{min-height:min(92vh,860px);display:flex;align-items:center;padding:110px 0 90px;isolation:isolate}
+.gm .gm-hero-media{position:absolute;inset:0;z-index:-2;overflow:hidden}
+.gm .gm-hero-media img,.gm .gm-hero-media video{width:100%;height:100%;object-fit:cover}
+.gm .gm-hero-shade{position:absolute;inset:0;z-index:-1;background:
+  linear-gradient(90deg,rgba(13,15,19,.96) 0%,rgba(13,15,19,.75) 45%,rgba(13,15,19,.2) 100%),
+  linear-gradient(0deg,var(--bg) 0%,transparent 30%)}
+.gm .gm-hero--art .gm-hero-shade{background:
+  radial-gradient(55% 70% at 78% 45%,rgba(255,212,0,.22),transparent 70%),
+  radial-gradient(40% 50% at 95% 90%,rgba(255,90,31,.18),transparent 70%)}
+.gm .gm-hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:center;width:100%}
+.gm .gm-hero-art{position:relative}
+.gm .gm-hero:not(.gm-hero--art) .gm-hero-art{display:none}
+.gm .gm-hero:not(.gm-hero--art) .gm-hero-grid{grid-template-columns:1fr}
+.gm .gm-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,212,0,.12);border:1px solid rgba(255,212,0,.5);color:var(--accent);border-radius:999px;padding:8px 16px;font-size:14px;font-weight:800;margin-bottom:24px}
+.gm .gm-badge i{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:gm-pulse 1.6s infinite}
+.gm .gm-lead{font-size:20px;max-width:560px;margin:24px 0 36px;color:#c9ced8}
+.gm .gm-actions{display:flex;flex-wrap:wrap;gap:12px}
+.gm .gm-facts{display:grid;grid-template-columns:repeat(4,auto);gap:12px 36px;margin-top:48px;justify-content:start}
+.gm .gm-facts div{font-size:14px;color:var(--muted);font-weight:600}
+.gm .gm-facts b{display:block;font:900 30px Unbounded,Arial,sans-serif;color:var(--text)}
+.gm .gm-moto{width:100%;height:auto;filter:drop-shadow(0 30px 40px rgba(0,0,0,.5))}
+.gm .gm-moto .gm-wheel{transform-box:fill-box;transform-origin:center;animation:gm-spin .9s linear infinite}
+.gm .gm-moto .gm-body{animation:gm-bob .45s ease-in-out infinite alternate}
+.gm .gm-speed line{stroke:var(--accent);stroke-width:4;stroke-linecap:round;opacity:.0;animation:gm-speed 1.2s linear infinite}
+.gm .gm-speed line:nth-child(2){animation-delay:.3s}.gm .gm-speed line:nth-child(3){animation-delay:.6s}.gm .gm-speed line:nth-child(4){animation-delay:.9s}
+.gm .gm-flag{position:absolute;top:0;right:0;width:56px;height:100%;opacity:.12;z-index:-1;
+  background:repeating-conic-gradient(#fff 0 25%,transparent 0 50%) 0 0/28px 28px}
+
+/* ---------- Бегущая строка ---------- */
+.gm .gm-marquee{background:var(--accent);color:var(--accent-ink);transform:rotate(-2deg) scale(1.04);margin:-8px 0 0;padding:16px 0;overflow:hidden;position:relative;z-index:2;box-shadow:0 20px 40px -20px rgba(0,0,0,.6)}
+.gm .gm-marquee div{display:flex;gap:40px;width:max-content;animation:gm-marquee 28s linear infinite;font:900 22px Unbounded,Arial,sans-serif;text-transform:uppercase;white-space:nowrap}
+.gm .gm-marquee span::after{content:&quot;🏁&quot;;margin-left:40px}
+
+/* ---------- Карточки ---------- */
+.gm .gm-grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.gm .gm-card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;position:relative;overflow:hidden}
+.gm .gm-card--hl{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.gm .gm-feature{min-height:300px;display:flex;flex-direction:column;justify-content:flex-end;transition:transform .25s,border-color .25s}
+.gm .gm-feature:hover{transform:translateY(-6px);border-color:var(--accent)}
+.gm .gm-feature .gm-num{position:absolute;top:18px;right:22px;font:900 64px Unbounded,Arial,sans-serif;color:rgba(255,255,255,.05);line-height:1}
+.gm .gm-feature svg{width:72px;height:72px;margin-bottom:auto}
+.gm .gm-feature--photo{color:#fff}
+.gm .gm-feature--photo .gm-bgimg{position:absolute;inset:0;z-index:0}
+.gm .gm-feature--photo .gm-bgimg img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gm .gm-feature--photo:hover .gm-bgimg img{transform:scale(1.06)}
+.gm .gm-feature--photo::after{content:&quot;&quot;;position:absolute;inset:0;background:linear-gradient(0deg,rgba(13,15,19,.95) 15%,rgba(13,15,19,.1) 70%);z-index:0}
+.gm .gm-feature &gt; *{position:relative;z-index:1}
+.gm .gm-feature--photo p{color:#d4d8e0}
+.gm ul.gm-list{list-style:none}
+.gm ul.gm-list li{padding:8px 0 8px 30px;position:relative;color:var(--muted)}
+.gm ul.gm-list li::before{content:&quot;&quot;;position:absolute;left:0;top:13px;width:16px;height:10px;background:var(--accent);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%,30% 50%)}
+
+/* ---------- Трасса ---------- */
+.gm .gm-track-sec{background:radial-gradient(60% 60% at 50% 40%,#1a1f28,var(--bg))}
+.gm .gm-track{display:grid;grid-template-columns:1.3fr .7fr;gap:32px;align-items:center}
+.gm .gm-track svg{width:100%;height:auto}
+.gm .gm-track-viz{min-width:0}
+.gm .gm-3d{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:24px;overflow:hidden;cursor:grab;touch-action:pan-y;
+  background:radial-gradient(70% 70% at 50% 45%,#1c212b,#0d0f13)}
+.gm .gm-3d:active{cursor:grabbing}
+.gm .gm-3d canvas{display:block;width:100%;height:100%}
+.gm .gm-3d-label{position:absolute;left:0;top:0;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap;
+  font:800 13px Manrope,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;border-radius:999px;
+  background:rgba(13,15,19,.78);color:var(--text);border:1px solid rgba(255,255,255,.14)}
+.gm .gm-3d-label--hl{color:var(--accent);border-color:rgba(255,212,0,.5)}
+.gm .gm-3d-hint{position:absolute;right:14px;bottom:12px;font-size:12px;font-weight:600;color:var(--muted);pointer-events:none}
+.gm .gm-track-viz.gm-has3d .gm-track-map{display:none}
+@media (max-width:600px){.gm .gm-3d{aspect-ratio:1/1}.gm .gm-3d-label{font-size:11px;padding:4px 9px}.gm .gm-3d-hint{font-size:11px}}
+.gm .gm-track-legend{display:grid;gap:14px}
+.gm .gm-track-legend .gm-card{padding:20px 22px;display:flex;gap:16px;align-items:center}
+.gm .gm-track-legend b{font:900 28px Unbounded,Arial,sans-serif;color:var(--accent);min-width:70px}
+
+/* ---------- Классы ---------- */
+.gm .gm-classes{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.gm .gm-class{padding:32px 32px 0;display:flex;flex-direction:column}
+.gm .gm-class .gm-display{font-size:96px;line-height:1;color:transparent;-webkit-text-stroke:2px var(--accent)}
+.gm .gm-class .gm-tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.gm .gm-class .gm-tags span{background:rgba(255,255,255,.06);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600}
+.gm .gm-class svg{margin-top:auto;align-self:flex-end;height:auto}
+.gm .gm-class-bike{margin-top:auto;align-self:flex-end;height:auto;max-width:100%}
+
+/* ---------- Видео ---------- */
+.gm .gm-video{position:relative;aspect-ratio:16/9;border-radius:28px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.gm .gm-video iframe,.gm .gm-video video,.gm .gm-video img,.gm .gm-video svg.gm-poster{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+.gm .gm-play{position:absolute;inset:0;margin:auto;width:108px;height:108px;border-radius:50%;border:0;background:var(--accent);cursor:pointer;display:grid;place-items:center;box-shadow:0 0 0 0 rgba(255,212,0,.6);animation:gm-ring 2s infinite;z-index:2}
+.gm .gm-play::before{content:&quot;&quot;;margin-left:8px;border-style:solid;border-width:18px 0 18px 30px;border-color:transparent transparent transparent var(--accent-ink)}
+.gm .gm-play:disabled{animation:none;opacity:.35;cursor:default}
+.gm .gm-video-cap{position:absolute;left:24px;bottom:20px;z-index:2;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+
+.gm .gm-reels{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.gm .gm-reel{position:relative;aspect-ratio:9/16;border-radius:22px;overflow:hidden;background:var(--card);border:1px solid var(--line)}
+.gm .gm-reel video{width:100%;height:100%;object-fit:cover}
+.gm .gm-reel span{position:absolute;left:12px;top:12px;background:rgba(13,15,19,.7);backdrop-filter:blur(6px);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:800}
+.gm .gm-reel span::before{content:&quot;&quot;;display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--hot);margin-right:6px;vertical-align:1px;animation:gm-pulse 1.2s infinite}
+.gm .gm-video[hidden]{display:none}
+
+/* ---------- Галерея ---------- */
+.gm .gm-gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:12px}
+.gm .gm-gallery figure{position:relative;border-radius:20px;overflow:hidden;background:var(--card);cursor:zoom-in;border:1px solid var(--line)}
+.gm .gm-gallery figure:first-child{grid-column:span 2;grid-row:span 2}
+.gm .gm-gallery figure:nth-child(8){grid-column:span 2}
+.gm .gm-gallery img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.gm .gm-gallery figure:hover img{transform:scale(1.06)}
+.gm .gm-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:28px 16px 14px;font-weight:600;font-size:14px;background:linear-gradient(0deg,rgba(0,0,0,.75),transparent)}
+.gm .gm-ph{cursor:default!important;display:grid;place-items:center;text-align:center;color:var(--muted);font-size:14px;font-weight:600;
+  background:repeating-linear-gradient(135deg,#171a21 0 18px,#1b1f27 18px 36px)!important}
+.gm .gm-ph svg{width:44px;height:44px;margin:0 auto 8px;opacity:.6}
+.gm .gm-lightbox{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out}
+.gm .gm-lightbox.gm-open{display:flex}
+.gm .gm-lightbox img{max-height:90vh;border-radius:12px}
+
+/* ---------- Расписание, цены ---------- */
+.gm .gm-day{font:900 34px Unbounded,Arial,sans-serif;text-transform:uppercase}
+.gm .gm-time{font:800 22px Manrope,Arial,sans-serif;color:var(--accent);margin-top:6px}
+.gm .gm-sched .gm-card::after{content:&quot;&quot;;position:absolute;right:-30px;bottom:-30px;width:120px;height:120px;opacity:.07;background:repeating-conic-gradient(#fff 0 25%,transparent 0 50%) 0 0/20px 20px;transform:rotate(15deg)}
+.gm .gm-phone{font-size:24px;font-weight:800;text-decoration:none;color:var(--accent)}
+.gm .gm-price{font:900 36px Unbounded,Arial,sans-serif;color:var(--text);margin:10px 0}
+.gm .gm-card--hl .gm-ribbon{position:absolute;top:18px;right:-34px;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:800;padding:6px 40px;transform:rotate(35deg)}
+.gm .gm-gear{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.gm .gm-gear svg{width:56px;height:56px;margin-bottom:14px}
+
+/* ---------- Форма ---------- */
+.gm .gm-form-sec{isolation:isolate}
+.gm .gm-form-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.gm .gm-form-bg img{width:100%;height:100%;object-fit:cover;opacity:.25}
+.gm .gm-form-bg::after{content:&quot;&quot;;position:absolute;inset:0;background:radial-gradient(60% 80% at 20% 30%,rgba(255,212,0,.16),transparent 70%),linear-gradient(180deg,var(--bg),rgba(13,15,19,.7) 40%,var(--bg))}
+.gm .gm-form-box{display:grid;gap:48px;grid-template-columns:1fr 1fr;align-items:center}
+.gm .gm-perks{margin-top:24px}
+.gm form{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:28px;padding:32px;display:grid;gap:16px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7)}
+.gm label{display:grid;gap:6px;font-size:14px;font-weight:600;color:var(--muted)}
+.gm input,.gm select{width:100%;font:16px Manrope,Arial,sans-serif;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px 16px;outline:none}
+.gm input:focus,.gm select:focus{border-color:var(--accent)}
+.gm .gm-invalid input,.gm .gm-invalid select{border-color:var(--err)}
+.gm .gm-chips{display:flex;gap:8px;flex-wrap:wrap}
+.gm .gm-chips label{display:block;cursor:pointer}
+.gm .gm-chips input{position:absolute;opacity:0;width:1px;height:1px}
+.gm .gm-chips span{display:block;border:1px solid var(--line);border-radius:999px;padding:10px 18px;color:var(--text);font-size:15px}
+.gm .gm-chips input:checked+span{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.gm .gm-chips input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.gm .gm-consent{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:13px}
+.gm .gm-consent input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--accent)}
+.gm .gm-hp{position:absolute;left:-9999px}
+.gm .gm-err{color:var(--err);font-size:14px;min-height:1em}
+.gm .gm-done{display:none;text-align:center;padding:56px 24px}
+.gm .gm-done svg{width:80px;height:80px;margin:0 auto 16px}
+
+/* ---------- Карта, FAQ, подвал ---------- */
+.gm .gm-map{display:grid;gap:16px;grid-template-columns:1fr 1.5fr;align-items:stretch}
+.gm .gm-map iframe{width:100%;min-height:360px;height:100%;border:0;border-radius:24px;background:var(--card)}
+.gm details{border-bottom:1px solid var(--line);padding:20px 0}
+.gm summary{cursor:pointer;font-weight:800;font-size:18px;list-style:none;padding-right:36px;position:relative}
+.gm summary::-webkit-details-marker{display:none}
+.gm summary::after{content:&quot;+&quot;;position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(255,212,0,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
+.gm details[open] summary::after{transform:rotate(45deg)}
+.gm details p{margin-top:10px}
+.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* ---------- Липкая кнопка на телефоне ---------- */
+.gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
+.gm .gm-sticky.gm-show{transform:none}
+.gm .gm-sticky .gm-btn{width:100%}
+
+/* ---------- Анимации ---------- */
+/* прячем только то, что при загрузке было ниже первого экрана */
+.gm .gm-reveal{transition:opacity .7s ease,transform .7s ease}
+.gm .gm-reveal.gm-pre{opacity:0;transform:translateY(40px)}
+@keyframes gm-spin{to{transform:rotate(360deg)}}
+@keyframes gm-bob{to{transform:translateY(-4px)}}
+@keyframes gm-speed{0%{opacity:0;transform:translateX(40px)}30%{opacity:.9}100%{opacity:0;transform:translateX(-120px)}}
+@keyframes gm-marquee{to{transform:translateX(-50%)}}
+@keyframes gm-pulse{50%{opacity:.3}}
+@keyframes gm-ring{0%{box-shadow:0 0 0 0 rgba(255,212,0,.55)}100%{box-shadow:0 0 0 34px rgba(255,212,0,0)}}
+@media (prefers-reduced-motion:reduce){
+  .gm *,.gm *::before{animation:none!important}
+  .gm .gm-reveal.gm-pre{opacity:1;transform:none;transition:none}
+}
+
+@media (max-width:900px){
+  .gm section{padding:64px 0}
+  .gm .gm-hero{min-height:auto;padding:72px 0 64px}
+  .gm .gm-hero-grid,.gm .gm-track,.gm .gm-form-box,.gm .gm-map,.gm .gm-classes{grid-template-columns:1fr}
+  .gm .gm-hero-art{order:-1;max-width:420px;margin:0 auto -12px}
+  .gm .gm-flag{display:none}
+  .gm .gm-facts{grid-template-columns:repeat(2,auto)}
+  .gm .gm-reels{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
+  .gm .gm-reel{flex:0 0 62%;scroll-snap-align:center}
+  .gm .gm-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:160px}
+  .gm form{padding:24px 18px}
+  .gm .gm-actions .gm-btn{width:100%}
+  .gm .gm-class .gm-display{font-size:72px}
+  .gm .gm-sticky{display:block}
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;gm&quot;&gt;
+
+
+  &lt;!-- Повторно используемая графика --&gt;
+  &lt;svg width=&quot;0&quot; height=&quot;0&quot; style=&quot;position:absolute&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;defs&gt;
+      &lt;linearGradient id=&quot;gm-g-acc&quot; x1=&quot;0&quot; x2=&quot;1&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#ffe766&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#ffbf00&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-g-hot&quot; x1=&quot;0&quot; x2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#ff8a3d&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#ff3d1f&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;!-- Детский кроссовый электромотоцикл с райдером. Цвета задаются переменными на &lt;svg&gt;:
+           --gm-bike (пластик), --gm-jersey (джерси), --gm-helmet (шлем) --&gt;
+      &lt;linearGradient id=&quot;gm-rg-shade&quot; x1=&quot;0&quot; x2=&quot;0&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#fff&quot; stop-opacity=&quot;.38&quot;/&gt;&lt;stop offset=&quot;.45&quot; stop-color=&quot;#fff&quot; stop-opacity=&quot;0&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;.4&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-side&quot; x1=&quot;0&quot; x2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;.3&quot;/&gt;&lt;stop offset=&quot;.5&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;0&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#fff&quot; stop-opacity=&quot;.2&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-metal&quot; x1=&quot;0&quot; x2=&quot;0&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#f1f4f8&quot;/&gt;&lt;stop offset=&quot;.45&quot; stop-color=&quot;#a7afbb&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#596070&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-gold&quot; x1=&quot;0&quot; x2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#8a5a00&quot;/&gt;&lt;stop offset=&quot;.35&quot; stop-color=&quot;#ffd76a&quot;/&gt;&lt;stop offset=&quot;.6&quot; stop-color=&quot;#e0a000&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#7a4f00&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-dark&quot; x1=&quot;0&quot; x2=&quot;0&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#3e4450&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#15171c&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-boot&quot; x1=&quot;0&quot; x2=&quot;0&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#ffffff&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#b8bec9&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;linearGradient id=&quot;gm-rg-lens&quot; x1=&quot;0&quot; x2=&quot;1&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#ffe066&quot;/&gt;&lt;stop offset=&quot;.35&quot; stop-color=&quot;#ff7a1a&quot;/&gt;&lt;stop offset=&quot;.7&quot; stop-color=&quot;#7a1fa2&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#1b2a44&quot;/&gt;&lt;/linearGradient&gt;
+      &lt;radialGradient id=&quot;gm-rg-tire&quot;&gt;&lt;stop offset=&quot;.7&quot; stop-color=&quot;#3a3f49&quot;/&gt;&lt;stop offset=&quot;.86&quot; stop-color=&quot;#2a2e36&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#16181d&quot;/&gt;&lt;/radialGradient&gt;
+      &lt;radialGradient id=&quot;gm-rg-shadow&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;.55&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#000&quot; stop-opacity=&quot;0&quot;/&gt;&lt;/radialGradient&gt;
+
+      &lt;symbol id=&quot;gm-wheel&quot; viewBox=&quot;-64 -64 128 128&quot;&gt;
+        &lt;circle r=&quot;55&quot; fill=&quot;url(#gm-rg-tire)&quot;/&gt;
+        &lt;circle r=&quot;58&quot; fill=&quot;none&quot; stroke=&quot;#2a2e36&quot; stroke-width=&quot;6&quot; stroke-dasharray=&quot;5.5 4&quot;/&gt;
+        &lt;circle r=&quot;60.5&quot; fill=&quot;none&quot; stroke=&quot;#4a505c&quot; stroke-width=&quot;1&quot; stroke-dasharray=&quot;5.5 4&quot;/&gt;
+        &lt;path d=&quot;M-44-33 A55 55 0 0 1 20-51&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.22&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot;/&gt;
+        &lt;circle r=&quot;42&quot; fill=&quot;#0f1115&quot;/&gt;
+        &lt;circle r=&quot;41&quot; fill=&quot;none&quot; stroke=&quot;url(#gm-rg-metal)&quot; stroke-width=&quot;5&quot;/&gt;
+        &lt;circle r=&quot;38&quot; fill=&quot;none&quot; stroke=&quot;#3a404d&quot; stroke-width=&quot;1&quot;/&gt;
+        &lt;g stroke=&quot;#c9ced8&quot; stroke-width=&quot;1.2&quot; stroke-linecap=&quot;round&quot;&gt;
+          &lt;path d=&quot;M-7 0L38 -10M7 0L-38 10M0 -7L10 38M0 7L-10 -38M-5 -5L33 20M5 5L-33 -20M5 -5L-20 33M-5 5L20 -33M-7 2L30 -26M7 -2L-30 26M2 7L-26 -30M-2 -7L26 30&quot;/&gt;
+        &lt;/g&gt;
+        &lt;circle r=&quot;10&quot; fill=&quot;url(#gm-rg-metal)&quot; stroke=&quot;#2b303b&quot; stroke-width=&quot;2&quot;/&gt;
+        &lt;circle r=&quot;3.5&quot; fill=&quot;#2b303b&quot;/&gt;
+      &lt;/symbol&gt;
+
+      &lt;symbol id=&quot;gm-bike&quot; viewBox=&quot;0 0 420 300&quot;&gt;
+        &lt;ellipse cx=&quot;210&quot; cy=&quot;291&quot; rx=&quot;185&quot; ry=&quot;8&quot; fill=&quot;url(#gm-rg-shadow)&quot;/&gt;
+        &lt;g class=&quot;gm-wheel&quot;&gt;&lt;use href=&quot;#gm-wheel&quot; x=&quot;34&quot; y=&quot;172&quot; width=&quot;128&quot; height=&quot;128&quot;/&gt;&lt;/g&gt;
+        &lt;g class=&quot;gm-wheel&quot;&gt;&lt;use href=&quot;#gm-wheel&quot; x=&quot;254&quot; y=&quot;172&quot; width=&quot;128&quot; height=&quot;128&quot;/&gt;&lt;/g&gt;
+        &lt;g class=&quot;gm-body&quot;&gt;
+          &lt;!-- тормоза и звезда --&gt;
+          &lt;circle cx=&quot;98&quot; cy=&quot;236&quot; r=&quot;22&quot; fill=&quot;none&quot; stroke=&quot;#7d8593&quot; stroke-width=&quot;3&quot; stroke-dasharray=&quot;2.5 2&quot;/&gt;
+          &lt;circle cx=&quot;318&quot; cy=&quot;236&quot; r=&quot;21&quot; fill=&quot;none&quot; stroke=&quot;#c9ced8&quot; stroke-width=&quot;5&quot; stroke-dasharray=&quot;4 2.5&quot;/&gt;
+          &lt;path d=&quot;M300 218 q8 -8 18 -6 l-3 9 q-6 -1 -10 4 z&quot; fill=&quot;url(#gm-rg-gold)&quot; stroke=&quot;#5a3d00&quot; stroke-width=&quot;1&quot;/&gt;
+          &lt;!-- цепь --&gt;
+          &lt;path d=&quot;M212 201 L98 214 M212 226 L98 258&quot; stroke=&quot;#3a3f49&quot; stroke-width=&quot;3.2&quot; stroke-dasharray=&quot;2.4 1.2&quot;/&gt;
+          &lt;!-- дальняя нога и рука райдера (в тени, за мотоциклом) --&gt;
+          &lt;path d=&quot;M182 104 L240 132 L226 176&quot; fill=&quot;none&quot; stroke=&quot;#2a2f3a&quot; stroke-width=&quot;20&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M226 60 L258 80 L286 70&quot; fill=&quot;none&quot; style=&quot;stroke:var(--gm-jersey,#ffd400)&quot; stroke-width=&quot;13&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M226 60 L258 80 L286 70&quot; fill=&quot;none&quot; stroke=&quot;#000&quot; stroke-opacity=&quot;.45&quot; stroke-width=&quot;13&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;circle cx=&quot;288&quot; cy=&quot;69&quot; r=&quot;7&quot; fill=&quot;#15171c&quot;/&gt;
+          &lt;!-- маятник --&gt;
+          &lt;path d=&quot;M96 230 L206 198 Q214 200 214 210 L102 244 Q92 240 96 230 Z&quot; fill=&quot;url(#gm-rg-metal)&quot; stroke=&quot;#3a404d&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M106 233 L204 205&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.6&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;circle cx=&quot;98&quot; cy=&quot;236&quot; r=&quot;6&quot; fill=&quot;#2b303b&quot;/&gt;
+          &lt;!-- амортизатор --&gt;
+          &lt;path d=&quot;M176 128 L192 200&quot; stroke=&quot;url(#gm-rg-metal)&quot; stroke-width=&quot;6&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;g stroke=&quot;url(#gm-rg-gold)&quot; stroke-width=&quot;4.5&quot; stroke-linecap=&quot;round&quot;&gt;
+            &lt;path d=&quot;M172 140 l13 -4 M173 147 l13 -4 M175 154 l13 -4 M176 161 l13 -4 M178 168 l13 -4 M179 175 l13 -4 M181 182 l13 -4&quot;/&gt;
+          &lt;/g&gt;
+          &lt;!-- рама --&gt;
+          &lt;path d=&quot;M291 104 L296 140&quot; stroke=&quot;url(#gm-rg-dark)&quot; stroke-width=&quot;13&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M294 138 L244 210 L204 214&quot; fill=&quot;none&quot; stroke=&quot;#23262e&quot; stroke-width=&quot;9&quot; stroke-linejoin=&quot;round&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M290 112 L176 124 L190 204&quot; fill=&quot;none&quot; stroke=&quot;#23262e&quot; stroke-width=&quot;8&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;!-- батарея и мотор --&gt;
+          &lt;path d=&quot;M200 142 L270 136 Q278 136 278 144 L276 196 Q276 204 268 204 L206 206 Q198 206 198 198 Z&quot; fill=&quot;url(#gm-rg-dark)&quot; stroke=&quot;#4a505c&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M206 152 L268 147 M206 162 L268 157 M206 172 L268 167 M206 182 L268 177 M206 192 L268 187&quot; stroke=&quot;#4a505c&quot; stroke-width=&quot;1.2&quot;/&gt;
+          &lt;rect x=&quot;226&quot; y=&quot;154&quot; width=&quot;30&quot; height=&quot;30&quot; rx=&quot;6&quot; fill=&quot;#ffd400&quot;/&gt;
+          &lt;path d=&quot;M243 157 l-11 14 h8 l-4 11 l13 -15 h-8 l4 -10 z&quot; fill=&quot;#15171c&quot;/&gt;
+          &lt;circle cx=&quot;212&quot; cy=&quot;213&quot; r=&quot;17&quot; fill=&quot;url(#gm-rg-metal)&quot; stroke=&quot;#2b303b&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;circle cx=&quot;212&quot; cy=&quot;213&quot; r=&quot;11&quot; fill=&quot;none&quot; stroke=&quot;#596070&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;3 2&quot;/&gt;
+          &lt;circle cx=&quot;212&quot; cy=&quot;213&quot; r=&quot;5&quot; fill=&quot;#2b303b&quot;/&gt;
+          &lt;!-- вилка --&gt;
+          &lt;path d=&quot;M286 100 L303 168&quot; stroke=&quot;url(#gm-rg-gold)&quot; stroke-width=&quot;10&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M288 104 L302 160&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.55&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M301 160 L318 232&quot; stroke=&quot;url(#gm-rg-dark)&quot; stroke-width=&quot;16&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M304 168 L316 222&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.18&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M276 94 L302 88 L304 100 L280 106 Z&quot; fill=&quot;url(#gm-rg-metal)&quot; stroke=&quot;#3a404d&quot; stroke-width=&quot;1&quot;/&gt;
+          &lt;path d=&quot;M284 128 L306 122 L308 132 L288 138 Z&quot; fill=&quot;url(#gm-rg-metal)&quot; stroke=&quot;#3a404d&quot; stroke-width=&quot;1&quot;/&gt;
+          &lt;path d=&quot;M296 110 Q320 150 306 214&quot; fill=&quot;none&quot; stroke=&quot;#15171c&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;!-- руль, рычаг --&gt;
+          &lt;path d=&quot;M289 92 L282 80 Q280 72 288 70 L298 68&quot; fill=&quot;none&quot; stroke=&quot;#2b303b&quot; stroke-width=&quot;5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M296 70 L310 66&quot; stroke=&quot;#111&quot; stroke-width=&quot;8&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M300 64 L318 60&quot; stroke=&quot;#596070&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;!-- заднее крыло --&gt;
+          &lt;path d=&quot;M152 124 L42 92 Q32 92 34 101 L64 114 L152 142 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;path d=&quot;M152 124 L42 92 Q32 92 34 101 L64 114 L152 142 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M140 128 L50 100&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.55&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;!-- боковая номерная табличка --&gt;
+          &lt;path d=&quot;M136 128 L196 124 L202 170 Q172 180 148 172 Q134 152 136 128 Z&quot; fill=&quot;#f3f4f6&quot; stroke=&quot;#b8bec9&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M136 128 L196 124 L202 170 Q172 180 148 172 Q134 152 136 128 Z&quot; fill=&quot;url(#gm-rg-side)&quot;/&gt;
+          &lt;path d=&quot;M140 128 L196 124 L197 132 L141 137 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;!-- сиденье --&gt;
+          &lt;path d=&quot;M132 116 Q196 100 258 108 Q264 112 260 120 Q196 116 136 130 Q126 126 132 116 Z&quot; fill=&quot;url(#gm-rg-dark)&quot;/&gt;
+          &lt;path d=&quot;M140 116 Q196 103 252 110&quot; fill=&quot;none&quot; stroke=&quot;#5d6470&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;!-- обтекатель батареи / радиаторные накладки --&gt;
+          &lt;path d=&quot;M234 114 Q268 100 292 106 L288 152 Q262 172 230 160 Q224 136 234 114 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;path d=&quot;M234 114 Q268 100 292 106 L288 152 Q262 172 230 160 Q224 136 234 114 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M238 140 Q262 146 288 134 L288 146 Q262 158 236 150 Z&quot; fill=&quot;#fff&quot; opacity=&quot;.9&quot;/&gt;
+          &lt;path d=&quot;M242 118 Q264 110 284 112&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.7&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;!-- переднее крыло и передний номер --&gt;
+          &lt;path d=&quot;M290 150 Q326 132 380 142 Q382 148 378 150 Q332 144 296 160 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;path d=&quot;M290 150 Q326 132 380 142 Q382 148 378 150 Q332 144 296 160 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M292 96 L314 92 Q322 120 318 146 Q306 152 298 146 Z&quot; fill=&quot;#f3f4f6&quot; stroke=&quot;#b8bec9&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M292 96 L314 92 L315 99 L293 103 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;!-- райдер: ближняя нога --&gt;
+          &lt;path d=&quot;M172 102 Q174 96 182 96 L236 124 Q250 134 244 150 L228 182 L208 176 L222 148 L176 122 Q166 114 172 102 Z&quot; fill=&quot;#555e72&quot;/&gt;
+          &lt;path d=&quot;M172 102 Q174 96 182 96 L236 124 Q250 134 244 150 L228 182 L208 176 L222 148 L176 122 Q166 114 172 102 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M182 104 L232 128&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.25&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M186 104 L230 126 L236 134 L184 112 Z&quot; style=&quot;fill:var(--gm-jersey,#ffd400)&quot; opacity=&quot;.9&quot;/&gt;
+          &lt;path d=&quot;M222 150 L238 156 L226 180 L214 176 Z&quot; style=&quot;fill:var(--gm-jersey,#ffd400)&quot; opacity=&quot;.85&quot;/&gt;
+          &lt;path d=&quot;M226 128 Q252 128 250 150 Q246 168 228 166 Q218 150 226 128 Z&quot; fill=&quot;url(#gm-rg-dark)&quot; stroke=&quot;#5d6470&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M232 136 Q244 138 244 150&quot; fill=&quot;none&quot; stroke=&quot;#7d8593&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;!-- ботинок --&gt;
+          &lt;path d=&quot;M206 166 L232 170 L236 186 L248 194 Q250 202 242 203 L200 204 Q196 186 206 166 Z&quot; fill=&quot;url(#gm-rg-boot)&quot; stroke=&quot;#8a919f&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;path d=&quot;M198 204 L246 203&quot; stroke=&quot;#15171c&quot; stroke-width=&quot;5&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M207 174 l24 3 M205 183 l28 3 M203 192 l40 3&quot; stroke=&quot;#596070&quot; stroke-width=&quot;2.5&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;rect x=&quot;204&quot; y=&quot;198&quot; width=&quot;14&quot; height=&quot;5&quot; rx=&quot;2&quot; fill=&quot;#596070&quot;/&gt;
+          &lt;!-- торс --&gt;
+          &lt;path d=&quot;M168 108 Q166 72 202 56 Q218 50 230 56 L240 72 Q218 82 206 104 Q196 118 176 118 Z&quot; style=&quot;fill:var(--gm-jersey,#ffd400)&quot;/&gt;
+          &lt;path d=&quot;M168 108 Q166 72 202 56 Q218 50 230 56 L240 72 Q218 82 206 104 Q196 118 176 118 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M176 100 Q178 78 200 64&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.5&quot; stroke-width=&quot;4&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M186 110 Q196 86 222 70&quot; fill=&quot;none&quot; stroke=&quot;#15171c&quot; stroke-opacity=&quot;.7&quot; stroke-width=&quot;5&quot;/&gt;
+          &lt;path d=&quot;M194 112 Q202 94 226 78&quot; fill=&quot;none&quot; style=&quot;stroke:var(--gm-helmet,#1e5bff)&quot; stroke-width=&quot;4&quot;/&gt;
+          &lt;path d=&quot;M218 54 Q230 50 238 56 L238 64 Q228 60 220 62 Z&quot; fill=&quot;#15171c&quot;/&gt;
+          &lt;!-- ближняя рука: рукав, перчатка --&gt;
+          &lt;path d=&quot;M224 64 Q236 60 246 70 L262 84 Q268 92 262 96 Q254 98 248 92 L230 80 Q218 74 224 64 Z&quot; style=&quot;fill:var(--gm-jersey,#ffd400)&quot;/&gt;
+          &lt;path d=&quot;M224 64 Q236 60 246 70 L262 84 Q268 92 262 96 Q254 98 248 92 L230 80 Q218 74 224 64 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M256 92 L288 76 Q294 76 294 82 L264 98 Q256 100 256 92 Z&quot; style=&quot;fill:var(--gm-jersey,#ffd400)&quot;/&gt;
+          &lt;path d=&quot;M256 92 L288 76 Q294 76 294 82 L264 98 Q256 100 256 92 Z&quot; fill=&quot;#000&quot; fill-opacity=&quot;.12&quot;/&gt;
+          &lt;path d=&quot;M286 74 Q298 70 302 76 Q304 84 296 86 L288 86 Z&quot; fill=&quot;#15171c&quot;/&gt;
+          &lt;path d=&quot;M290 76 l8 -1&quot; stroke=&quot;#5d6470&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;!-- шлем --&gt;
+          &lt;path d=&quot;M212 40 Q210 6 246 2 Q278 0 288 28 L300 52 Q302 62 292 64 L262 68 Q240 70 228 62 Q214 54 212 40 Z&quot; style=&quot;fill:var(--gm-helmet,#1e5bff)&quot;/&gt;
+          &lt;path d=&quot;M212 40 Q210 6 246 2 Q278 0 288 28 L300 52 Q302 62 292 64 L262 68 Q240 70 228 62 Q214 54 212 40 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;path d=&quot;M222 22 Q236 8 256 8&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.7&quot; stroke-width=&quot;4&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M216 44 Q240 40 262 50&quot; fill=&quot;none&quot; stroke=&quot;#fff&quot; stroke-width=&quot;5&quot; stroke-opacity=&quot;.9&quot;/&gt;
+          &lt;path d=&quot;M272 50 L300 52 Q302 62 292 64 L272 66 Z&quot; fill=&quot;#15171c&quot; opacity=&quot;.75&quot;/&gt;
+          &lt;path d=&quot;M280 54 l14 1 M280 59 l12 1&quot; stroke=&quot;#5d6470&quot; stroke-width=&quot;1.5&quot;/&gt;
+          &lt;!-- козырёк --&gt;
+          &lt;path d=&quot;M244 6 Q280 6 312 18 L308 28 Q280 20 256 22 Z&quot; style=&quot;fill:var(--gm-bike,#e8312a)&quot;/&gt;
+          &lt;path d=&quot;M244 6 Q280 6 312 18 L308 28 Q280 20 256 22 Z&quot; fill=&quot;url(#gm-rg-shade)&quot;/&gt;
+          &lt;!-- очки-маска на ремешке --&gt;
+          &lt;path d=&quot;M214 30 Q236 24 262 28&quot; fill=&quot;none&quot; stroke=&quot;#15171c&quot; stroke-width=&quot;7&quot; stroke-linecap=&quot;round&quot;/&gt;
+          &lt;path d=&quot;M214 30 Q236 24 262 28&quot; fill=&quot;none&quot; style=&quot;stroke:var(--gm-jersey,#ffd400)&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;path d=&quot;M258 26 Q276 22 292 28 Q296 38 290 46 Q274 48 260 44 Q254 36 258 26 Z&quot; fill=&quot;#15171c&quot;/&gt;
+          &lt;path d=&quot;M262 30 Q276 27 288 31 Q290 37 286 42 Q274 44 264 41 Q260 36 262 30 Z&quot; fill=&quot;url(#gm-rg-lens)&quot;/&gt;
+          &lt;path d=&quot;M266 32 l10 -2&quot; stroke=&quot;#fff&quot; stroke-opacity=&quot;.85&quot; stroke-width=&quot;2&quot; stroke-linecap=&quot;round&quot;/&gt;
+        &lt;/g&gt;
+      &lt;/symbol&gt;
+      &lt;symbol id=&quot;gm-cam&quot; viewBox=&quot;0 0 24 24&quot;&gt;&lt;path fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot; d=&quot;M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z&quot;/&gt;&lt;circle cx=&quot;12&quot; cy=&quot;13&quot; r=&quot;4&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.6&quot;/&gt;&lt;/symbol&gt;
+    &lt;/defs&gt;
+  &lt;/svg&gt;
+
+  &lt;!-- 1. Первый экран. Фон: CONFIG.MEDIA.heroVideo / heroImage, без них — иллюстрация --&gt;
+  &lt;section class=&quot;gm-hero gm-hero--art&quot; id=&quot;gm-hero&quot;&gt;
+    &lt;div class=&quot;gm-hero-media&quot; id=&quot;gm-hero-media&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;gm-hero-shade&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;gm-flag&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;gm-wrap gm-hero-grid&quot;&gt;
+      &lt;div&gt;
+        &lt;span class=&quot;gm-badge&quot;&gt;&lt;i&gt;&lt;/i&gt;Новая локация · Зеленоград&lt;/span&gt;
+        &lt;h1&gt;Расширяем&lt;br&gt;горизонты &lt;span class=&quot;gm-accent&quot;&gt;😜✌&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;gm-accent&quot;&gt;электро&amp;shy;мото&lt;/span&gt; для детей &lt;span style=&quot;white-space:nowrap&quot;&gt;4–12 лет&lt;/span&gt;&lt;/h1&gt;
+        &lt;p class=&quot;gm-lead&quot;&gt;Тренировки на закрытом двухуровневом картодроме: тепло, сухо и безопасно в любую погоду. Мотоциклы классов 50 и 65.&lt;/p&gt;
+        &lt;div class=&quot;gm-actions&quot;&gt;
+          &lt;a class=&quot;gm-btn&quot; href=&quot;#signup&quot;&gt;Записаться на тренировку →&lt;/a&gt;
+          &lt;a class=&quot;gm-btn gm-btn--ghost&quot; href=&quot;tel:+79152779121&quot;&gt;📞 +7 915 277-91-21&lt;/a&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;gm-facts&quot;&gt;
+          &lt;div&gt;&lt;b&gt;4–12&lt;/b&gt;лет&lt;/div&gt;
+          &lt;div&gt;&lt;b&gt;50·65&lt;/b&gt;классы&lt;/div&gt;
+          &lt;div&gt;&lt;b&gt;2&lt;/b&gt;уровня трассы&lt;/div&gt;
+          &lt;div&gt;&lt;b&gt;ср·сб&lt;/b&gt;09:00–11:00&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;gm-hero-art&quot; aria-hidden=&quot;true&quot;&gt;
+        &lt;svg class=&quot;gm-speed&quot; viewBox=&quot;0 0 420 300&quot; style=&quot;position:absolute;inset:0;width:100%;height:100%&quot;&gt;&lt;line x1=&quot;10&quot; y1=&quot;120&quot; x2=&quot;70&quot; y2=&quot;120&quot;/&gt;&lt;line x1=&quot;0&quot; y1=&quot;170&quot; x2=&quot;90&quot; y2=&quot;170&quot;/&gt;&lt;line x1=&quot;20&quot; y1=&quot;215&quot; x2=&quot;60&quot; y2=&quot;215&quot;/&gt;&lt;line x1=&quot;5&quot; y1=&quot;260&quot; x2=&quot;80&quot; y2=&quot;260&quot;/&gt;&lt;/svg&gt;
+        &lt;svg class=&quot;gm-moto&quot; viewBox=&quot;0 0 420 300&quot;&gt;&lt;use href=&quot;#gm-bike&quot;/&gt;&lt;/svg&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;gm-marquee&quot; aria-hidden=&quot;true&quot;&gt;&lt;div&gt;
+    &lt;span&gt;Электромотоциклы&lt;/span&gt;&lt;span&gt;Зеленоград&lt;/span&gt;&lt;span&gt;Дети 4–12 лет&lt;/span&gt;&lt;span&gt;Класс 50&lt;/span&gt;&lt;span&gt;Класс 65&lt;/span&gt;&lt;span&gt;В любую погоду&lt;/span&gt;&lt;span&gt;Двухуровневый картодром&lt;/span&gt;
+    &lt;span&gt;Электромотоциклы&lt;/span&gt;&lt;span&gt;Зеленоград&lt;/span&gt;&lt;span&gt;Дети 4–12 лет&lt;/span&gt;&lt;span&gt;Класс 50&lt;/span&gt;&lt;span&gt;Класс 65&lt;/span&gt;&lt;span&gt;В любую погоду&lt;/span&gt;&lt;span&gt;Двухуровневый картодром&lt;/span&gt;
+  &lt;/div&gt;&lt;/div&gt;
+
+  &lt;!-- 2. Преимущества. Фото в карточках: CONFIG.MEDIA.features --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Почему здесь&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Мотоспорт, который&lt;br&gt;не отменяет дождь&lt;/h2&gt;
+      &lt;p class=&quot;gm-sub gm-reveal&quot;&gt;Новая площадка, где ребёнок за пару занятий начинает уверенно ехать сам.&lt;/p&gt;
+      &lt;div class=&quot;gm-grid&quot; id=&quot;gm-features&quot;&gt;
+        &lt;div class=&quot;gm-card gm-feature gm-reveal&quot;&gt;&lt;span class=&quot;gm-num&quot;&gt;01&lt;/span&gt;
+          &lt;svg viewBox=&quot;0 0 72 72&quot;&gt;&lt;path d=&quot;M8 52 L36 38 L64 52 L36 66 Z&quot; fill=&quot;#2b303b&quot;/&gt;&lt;path d=&quot;M8 34 L36 20 L64 34 L36 48 Z&quot; fill=&quot;url(#gm-g-acc)&quot;/&gt;&lt;path d=&quot;M22 41 L22 59 M50 41 L50 59&quot; stroke=&quot;#ffd400&quot; stroke-width=&quot;3&quot;/&gt;&lt;path d=&quot;M28 10 v14 M28 10 h14 l-4 4 4 4 h-14&quot; fill=&quot;#ff5a1f&quot; stroke=&quot;#ff5a1f&quot; stroke-width=&quot;2&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Закрытый двухуровневый картодром&lt;/h3&gt;&lt;p&gt;Подъёмы, спуски и виражи под крышей — как на настоящей гонке.&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-feature gm-reveal&quot;&gt;&lt;span class=&quot;gm-num&quot;&gt;02&lt;/span&gt;
+          &lt;svg viewBox=&quot;0 0 72 72&quot;&gt;&lt;circle cx=&quot;36&quot; cy=&quot;36&quot; r=&quot;30&quot; fill=&quot;url(#gm-g-acc)&quot;/&gt;&lt;path d=&quot;M40 12 L22 40 h12 l-4 20 L50 30 H38 Z&quot; fill=&quot;#0d0f13&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Электромотоциклы&lt;/h3&gt;&lt;p&gt;Тихие, без выхлопа и с плавной тягой — идеальный старт для малышей.&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-feature gm-reveal&quot;&gt;&lt;span class=&quot;gm-num&quot;&gt;03&lt;/span&gt;
+          &lt;svg viewBox=&quot;0 0 72 72&quot;&gt;&lt;path d=&quot;M18 44 a14 14 0 0 1 4-27 a18 18 0 0 1 34 6 a11 11 0 0 1-2 21 Z&quot; fill=&quot;#c9ced8&quot;/&gt;&lt;path d=&quot;M8 40 L36 26 L64 40&quot; fill=&quot;none&quot; stroke=&quot;#ffd400&quot; stroke-width=&quot;5&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;path d=&quot;M24 54 l-3 8 M36 54 l-3 8 M48 54 l-3 8&quot; stroke=&quot;#6aa8ff&quot; stroke-width=&quot;3&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;В любую погоду&lt;/h3&gt;&lt;p&gt;Ливень и холод больше не срывают тренировки — занимаемся круглый год.&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-feature gm-reveal&quot;&gt;&lt;span class=&quot;gm-num&quot;&gt;04&lt;/span&gt;
+          &lt;svg viewBox=&quot;0 0 72 72&quot;&gt;&lt;circle cx=&quot;36&quot; cy=&quot;24&quot; r=&quot;14&quot; fill=&quot;#f3f4f6&quot;/&gt;&lt;path d=&quot;M26 18 Q36 6 48 18 Z&quot; fill=&quot;url(#gm-g-hot)&quot;/&gt;&lt;path d=&quot;M12 66 Q14 42 36 42 Q58 42 60 66 Z&quot; fill=&quot;url(#gm-g-acc)&quot;/&gt;&lt;path d=&quot;M50 50 l6 6 10-12&quot; fill=&quot;none&quot; stroke=&quot;#0d0f13&quot; stroke-width=&quot;4&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Опытные тренеры&lt;/h3&gt;&lt;p&gt;Ставим технику с первого занятия и следим за безопасностью каждого райдера.&lt;/p&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 3. Трасса: анимированная схема --&gt;
+  &lt;section class=&quot;gm-track-sec&quot;&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Площадка&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Два уровня —&lt;br&gt;&lt;span class=&quot;gm-accent&quot;&gt;двойной драйв&lt;/span&gt;&lt;/h2&gt;
+      &lt;p class=&quot;gm-sub gm-reveal&quot;&gt;Трасса идёт в два яруса: круг по нижнему уровню, подъём наверх, вираж на втором уровне и спуск обратно. Каждый заезд проходит по всей трассе.&lt;/p&gt;
+      &lt;div class=&quot;gm-track&quot;&gt;
+        &lt;div class=&quot;gm-track-viz gm-reveal&quot;&gt;
+        &lt;div class=&quot;gm-3d&quot; id=&quot;gm-3d&quot; hidden&gt;&lt;span class=&quot;gm-3d-hint&quot;&gt;↔ Потяните, чтобы повернуть&lt;/span&gt;&lt;/div&gt;
+        &lt;svg viewBox=&quot;0 0 720 490&quot; class=&quot;gm-track-map&quot; role=&quot;img&quot; aria-label=&quot;Схема трассы: нижний уровень, подъём по рампе, верхний уровень и спуск — один круг&quot;&gt;
+          &lt;defs&gt;
+            &lt;filter id=&quot;gm-glow&quot; x=&quot;-1&quot; y=&quot;-1&quot; width=&quot;3&quot; height=&quot;3&quot;&gt;&lt;feGaussianBlur stdDeviation=&quot;5&quot;/&gt;&lt;/filter&gt;
+            &lt;linearGradient id=&quot;gm-ramp&quot; x1=&quot;0&quot; x2=&quot;0&quot; y1=&quot;0&quot; y2=&quot;1&quot;&gt;&lt;stop offset=&quot;0&quot; stop-color=&quot;#3a404d&quot;/&gt;&lt;stop offset=&quot;1&quot; stop-color=&quot;#1d222b&quot;/&gt;&lt;/linearGradient&gt;
+          &lt;/defs&gt;
+          &lt;!-- нижний уровень: плита --&gt;
+          &lt;path d=&quot;M70 372 L360 482 L650 372 L650 360 L360 470 L70 360 Z&quot; fill=&quot;#101318&quot;/&gt;
+          &lt;path d=&quot;M70 360 L360 250 L650 360 L360 470 Z&quot; fill=&quot;#171a21&quot; stroke=&quot;#2a2f3a&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;!-- опоры второго уровня --&gt;
+          &lt;g fill=&quot;#2b303b&quot;&gt;&lt;rect x=&quot;273&quot; y=&quot;196&quot; width=&quot;14&quot; height=&quot;118&quot;/&gt;&lt;rect x=&quot;433&quot; y=&quot;196&quot; width=&quot;14&quot; height=&quot;118&quot;/&gt;&lt;rect x=&quot;353&quot; y=&quot;262&quot; width=&quot;14&quot; height=&quot;44&quot;/&gt;&lt;/g&gt;
+          &lt;g fill=&quot;#000&quot; opacity=&quot;.35&quot;&gt;&lt;ellipse cx=&quot;280&quot; cy=&quot;316&quot; rx=&quot;16&quot; ry=&quot;5&quot;/&gt;&lt;ellipse cx=&quot;440&quot; cy=&quot;316&quot; rx=&quot;16&quot; ry=&quot;5&quot;/&gt;&lt;ellipse cx=&quot;360&quot; cy=&quot;308&quot; rx=&quot;16&quot; ry=&quot;5&quot;/&gt;&lt;/g&gt;
+          &lt;!-- верхний уровень: плита с торцами --&gt;
+          &lt;path d=&quot;M120 155 L360 252 L360 268 L120 171 Z&quot; fill=&quot;#232833&quot;/&gt;
+          &lt;path d=&quot;M360 252 L600 155 L600 171 L360 268 Z&quot; fill=&quot;#1b1f27&quot;/&gt;
+          &lt;path d=&quot;M120 155 L360 48 L600 155 L360 252 Z&quot; fill=&quot;#1d222b&quot; stroke=&quot;#ffd400&quot; stroke-opacity=&quot;.55&quot; stroke-width=&quot;2&quot;/&gt;
+          &lt;!-- рампы: боковые стенки показывают высоту подъёма --&gt;
+          &lt;path d=&quot;M507 176 L507 334 L600 372 Z&quot; fill=&quot;url(#gm-ramp)&quot; opacity=&quot;.9&quot;/&gt;
+          &lt;path d=&quot;M213 176 L213 334 L120 372 Z&quot; fill=&quot;url(#gm-ramp)&quot; opacity=&quot;.9&quot;/&gt;
+          &lt;path d=&quot;M507 334 L600 372 M213 334 L120 372&quot; stroke=&quot;#000&quot; stroke-opacity=&quot;.35&quot; stroke-width=&quot;10&quot;/&gt;
+          &lt;!-- дорога: один путь через оба уровня --&gt;
+          &lt;path id=&quot;gm-route&quot; d=&quot;M120 372 C170 462 550 462 600 372 L507 176 C550 112 420 86 360 92 C300 86 170 112 213 176 Z&quot; fill=&quot;none&quot;/&gt;
+          &lt;use href=&quot;#gm-route&quot; stroke=&quot;#ff3d1f&quot; stroke-width=&quot;40&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;use href=&quot;#gm-route&quot; stroke=&quot;#f3f4f6&quot; stroke-width=&quot;40&quot; stroke-dasharray=&quot;12 12&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;use href=&quot;#gm-route&quot; stroke=&quot;#2b303b&quot; stroke-width=&quot;30&quot; stroke-linejoin=&quot;round&quot;/&gt;
+          &lt;use href=&quot;#gm-route&quot; stroke=&quot;#ffd400&quot; stroke-opacity=&quot;.35&quot; stroke-width=&quot;2&quot; stroke-dasharray=&quot;10 12&quot;/&gt;
+          &lt;!-- участки трассы (для расчёта длины, не рисуются) --&gt;
+          &lt;g fill=&quot;none&quot; stroke=&quot;none&quot;&gt;
+            &lt;path id=&quot;gm-seg1&quot; d=&quot;M120 372 C170 462 550 462 600 372&quot;/&gt;
+            &lt;path id=&quot;gm-seg2&quot; d=&quot;M600 372 L507 176&quot;/&gt;
+            &lt;path id=&quot;gm-seg3&quot; d=&quot;M507 176 C550 112 420 86 360 92 C300 86 170 112 213 176&quot;/&gt;
+            &lt;path id=&quot;gm-seg4&quot; d=&quot;M213 176 L120 372&quot;/&gt;
+          &lt;/g&gt;
+          &lt;g id=&quot;gm-chevrons&quot; fill=&quot;#ffd400&quot; opacity=&quot;.9&quot;&gt;&lt;/g&gt;
+          &lt;!-- финиш --&gt;
+          &lt;g transform=&quot;translate(340 432)&quot;&gt;&lt;rect width=&quot;40&quot; height=&quot;16&quot; fill=&quot;#fff&quot;/&gt;&lt;path d=&quot;M0 0h8v8H0zM16 0h8v8h-8zM32 0h8v8h-8zM8 8h8v8H8zM24 8h8v8h-8z&quot; fill=&quot;#0d0f13&quot;/&gt;&lt;/g&gt;
+          &lt;g id=&quot;gm-riders&quot;&gt;&lt;/g&gt;
+          &lt;g font-family=&quot;Manrope,Arial,sans-serif&quot; font-weight=&quot;800&quot; font-size=&quot;16&quot;&gt;
+            &lt;text x=&quot;560&quot; y=&quot;452&quot; fill=&quot;#a3a9b6&quot;&gt;1 УРОВЕНЬ&lt;/text&gt;
+            &lt;text x=&quot;540&quot; y=&quot;70&quot; fill=&quot;#ffd400&quot;&gt;2 УРОВЕНЬ&lt;/text&gt;
+            &lt;text x=&quot;618&quot; y=&quot;290&quot; fill=&quot;#f3f4f6&quot;&gt;ПОДЪЁМ ↑&lt;/text&gt;
+            &lt;text x=&quot;102&quot; y=&quot;290&quot; fill=&quot;#f3f4f6&quot; text-anchor=&quot;end&quot;&gt;СПУСК ↓&lt;/text&gt;
+          &lt;/g&gt;
+        &lt;/svg&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;gm-track-legend&quot;&gt;
+          &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;b&gt;2&lt;/b&gt;&lt;div&gt;&lt;h3&gt;уровня трассы&lt;/h3&gt;&lt;p&gt;Подъём, верхний ярус и спуск в одном круге&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
+          &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;b&gt;0&lt;/b&gt;&lt;div&gt;&lt;h3&gt;луж и грязи&lt;/h3&gt;&lt;p&gt;Закрытое помещение — едем в любую погоду&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
+          &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;b&gt;1:1&lt;/b&gt;&lt;div&gt;&lt;h3&gt;тренер рядом&lt;/h3&gt;&lt;p&gt;Контроль на каждом круге&lt;/p&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 4. Классы 50 и 65 --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Мотоциклы&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Класс 50 и класс 65&lt;/h2&gt;
+      &lt;p class=&quot;gm-sub gm-reveal&quot;&gt;Подберём мотоцикл по возрасту, росту и опыту ребёнка.&lt;/p&gt;
+      &lt;div class=&quot;gm-classes&quot;&gt;
+        &lt;div class=&quot;gm-card gm-class gm-reveal&quot;&gt;
+          &lt;div class=&quot;gm-display&quot;&gt;50&lt;/div&gt;
+          &lt;h3&gt;Для старта&lt;/h3&gt;
+          &lt;div class=&quot;gm-tags&quot;&gt;&lt;span&gt;4–7 лет&lt;/span&gt;&lt;span&gt;Новички&lt;/span&gt;&lt;span&gt;Мягкая тяга&lt;/span&gt;&lt;/div&gt;
+          &lt;p&gt;Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.&lt;/p&gt;
+          &lt;img data-media=&quot;bike-50.png&quot; width=&quot;300&quot; alt=&quot;Мотоцикл класса 50&quot; class=&quot;gm-class-bike&quot;&gt;
+        &lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-card--hl gm-class gm-reveal&quot;&gt;
+          &lt;div class=&quot;gm-display&quot;&gt;65&lt;/div&gt;
+          &lt;h3&gt;Для уверенных&lt;/h3&gt;
+          &lt;div class=&quot;gm-tags&quot;&gt;&lt;span&gt;7–12 лет&lt;/span&gt;&lt;span&gt;Опытные&lt;/span&gt;&lt;span&gt;Больше мощности&lt;/span&gt;&lt;/div&gt;
+          &lt;p&gt;Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.&lt;/p&gt;
+          &lt;img data-media=&quot;bike-65.png&quot; width=&quot;360&quot; alt=&quot;Мотоцикл класса 65&quot; class=&quot;gm-class-bike&quot;&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 5. Видео: CONFIG.MEDIA.video --&gt;
+  &lt;section id=&quot;gm-video-sec&quot;&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Смотрите сами&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Как проходит тренировка&lt;/h2&gt;
+      &lt;p class=&quot;gm-sub gm-reveal&quot;&gt;Минута с картодрома — и всё станет понятно.&lt;/p&gt;
+      &lt;div class=&quot;gm-reels&quot; id=&quot;gm-reels&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;gm-video gm-reveal&quot; id=&quot;gm-video&quot;&gt;
+        &lt;svg class=&quot;gm-poster&quot; viewBox=&quot;0 0 1600 900&quot; preserveAspectRatio=&quot;xMidYMid slice&quot; aria-hidden=&quot;true&quot;&gt;
+          &lt;rect width=&quot;1600&quot; height=&quot;900&quot; fill=&quot;#12151b&quot;/&gt;
+          &lt;circle cx=&quot;1200&quot; cy=&quot;300&quot; r=&quot;500&quot; fill=&quot;#ffd400&quot; opacity=&quot;.08&quot;/&gt;
+          &lt;path d=&quot;M0 760 Q400 640 800 720 T1600 660 V900 H0Z&quot; fill=&quot;#171a21&quot;/&gt;
+          &lt;svg x=&quot;760&quot; y=&quot;250&quot; width=&quot;760&quot; height=&quot;543&quot; viewBox=&quot;0 0 420 300&quot;&gt;&lt;use href=&quot;#gm-bike&quot;/&gt;&lt;/svg&gt;
+        &lt;/svg&gt;
+        &lt;button class=&quot;gm-play&quot; type=&quot;button&quot; aria-label=&quot;Смотреть видео&quot;&gt;&lt;/button&gt;
+        &lt;div class=&quot;gm-video-cap&quot; id=&quot;gm-video-cap&quot;&gt;Видео с тренировки&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 6. Галерея: CONFIG.MEDIA.gallery --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Фото&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Наши райдеры&lt;/h2&gt;
+      &lt;p class=&quot;gm-sub gm-reveal&quot;&gt;Эмоции, первые победы и новые друзья.&lt;/p&gt;
+      &lt;div class=&quot;gm-gallery&quot; id=&quot;gm-gallery&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 7. Для кого + расписание --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Для кого&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Начать можно с нуля&lt;/h2&gt;
+      &lt;div class=&quot;gm-grid&quot; style=&quot;margin-top:32px&quot;&gt;
+        &lt;div class=&quot;gm-card gm-card--hl gm-reveal&quot;&gt;&lt;h3&gt;👶 Дети 4–12 лет&lt;/h3&gt;
+          &lt;ul class=&quot;gm-list&quot;&gt;&lt;li&gt;Даже если ребёнок ни разу не садился на мотоцикл&lt;/li&gt;&lt;li&gt;Класс 50 и класс 65 — по возрасту и росту&lt;/li&gt;&lt;li&gt;Развивают координацию, реакцию и уверенность&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;h3&gt;🏆 Опытные спортсмены&lt;/h3&gt;
+          &lt;ul class=&quot;gm-list&quot;&gt;&lt;li&gt;Тренировки в дни непогоды, когда трассы закрыты&lt;/li&gt;&lt;li&gt;Отработка техники на технической трассе&lt;/li&gt;&lt;li&gt;Поддержание формы между сезонами&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;h2 class=&quot;gm-reveal&quot; style=&quot;margin-top:88px&quot;&gt;Расписание&lt;/h2&gt;
+      &lt;div class=&quot;gm-grid gm-sched&quot; style=&quot;margin-top:24px&quot;&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;div class=&quot;gm-day&quot;&gt;Среда&lt;/div&gt;&lt;div class=&quot;gm-time&quot;&gt;09:00 – 11:00&lt;/div&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;div class=&quot;gm-day&quot;&gt;Суббота&lt;/div&gt;&lt;div class=&quot;gm-time&quot;&gt;09:00 – 11:00&lt;/div&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;p&gt;Расписание предварительное — уточняйте у администратора:&lt;/p&gt;&lt;a class=&quot;gm-phone&quot; href=&quot;tel:+79152779121&quot;&gt;+7 915 277-91-21&lt;/a&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 8. Стоимость --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Цены&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Стоимость&lt;/h2&gt;
+      &lt;div class=&quot;gm-grid&quot; style=&quot;margin-top:32px&quot;&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;h3&gt;Разовое занятие&lt;/h3&gt;&lt;div class=&quot;gm-price&quot;&gt;6 000 ₽&lt;/div&gt;&lt;p&gt;Отличный способ попробовать&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-card--hl gm-reveal&quot;&gt;&lt;span class=&quot;gm-ribbon&quot;&gt;Хит&lt;/span&gt;&lt;h3&gt;Абонемент 4 занятия&lt;/h3&gt;&lt;div class=&quot;gm-price&quot;&gt;22 000 ₽&lt;/div&gt;&lt;p&gt;5 500 ₽ за занятие · действует 2&amp;nbsp;месяца&lt;/p&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;&lt;h3&gt;Абонемент 8 занятий&lt;/h3&gt;&lt;div class=&quot;gm-price&quot;&gt;43 200 ₽&lt;/div&gt;&lt;p&gt;5 400 ₽ за занятие · действует 2&amp;nbsp;месяца&lt;/p&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;!-- 9. Экипировка. TODO: проверить, что выдаём, а что берут с собой --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Безопасность&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Экипировка&lt;/h2&gt;
+      &lt;div class=&quot;gm-gear&quot; style=&quot;margin-top:32px&quot;&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;
+          &lt;svg viewBox=&quot;0 0 56 56&quot;&gt;&lt;path d=&quot;M8 34 Q8 10 30 10 Q50 10 50 32 L50 40 L30 40 Q26 30 14 34 Z&quot; fill=&quot;url(#gm-g-hot)&quot;/&gt;&lt;path d=&quot;M32 22 Q46 22 48 34 L34 34 Z&quot; fill=&quot;#0d0f13&quot;/&gt;&lt;path d=&quot;M8 40 h42&quot; stroke=&quot;#ffd400&quot; stroke-width=&quot;4&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Выдаём на месте&lt;/h3&gt;
+          &lt;ul class=&quot;gm-list&quot;&gt;&lt;li&gt;Электромотоцикл класса 50 или 65&lt;/li&gt;&lt;li&gt;Шлем&lt;/li&gt;&lt;li&gt;Защита: черепаха, наколенники, налокотники&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;
+          &lt;svg viewBox=&quot;0 0 56 56&quot;&gt;&lt;path d=&quot;M14 8 h28 l8 12 -8 4 v24 H14 V24 l-8-4 Z&quot; fill=&quot;#c9ced8&quot;/&gt;&lt;path d=&quot;M22 8 Q28 16 34 8&quot; fill=&quot;none&quot; stroke=&quot;#0d0f13&quot; stroke-width=&quot;3&quot;/&gt;&lt;path d=&quot;M14 30 h28&quot; stroke=&quot;url(#gm-g-acc)&quot; stroke-width=&quot;6&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Взять с собой&lt;/h3&gt;
+          &lt;ul class=&quot;gm-list&quot;&gt;&lt;li&gt;Спортивную одежду с длинными рукавами&lt;/li&gt;&lt;li&gt;Закрытую обувь, лучше высокую&lt;/li&gt;&lt;li&gt;Перчатки и воду&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;
+          &lt;svg viewBox=&quot;0 0 56 56&quot;&gt;&lt;path d=&quot;M28 4 L48 12 V28 Q48 44 28 52 Q8 44 8 28 V12 Z&quot; fill=&quot;url(#gm-g-acc)&quot;/&gt;&lt;path d=&quot;M19 28 l7 7 12-14&quot; fill=&quot;none&quot; stroke=&quot;#0d0f13&quot; stroke-width=&quot;5&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot;/&gt;&lt;/svg&gt;
+          &lt;h3&gt;Безопасность&lt;/h3&gt;
+          &lt;ul class=&quot;gm-list&quot;&gt;&lt;li&gt;Закрытая трасса без постороннего транспорта&lt;/li&gt;&lt;li&gt;Тренер рядом на каждом занятии&lt;/li&gt;&lt;li&gt;Мощность мотоцикла — под уровень ребёнка&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;gm-lightbox&quot; id=&quot;gm-lightbox&quot;&gt;&lt;img alt=&quot;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+(function () {
+  var CONFIG = {
+    // TODO: проверить адрес — он же используется для карты
+    ADDRESS: &#x27;Картинг-центр ZelenoKART, ТРЦ «Зеленопарк», Ржавки, Зеленоград&#x27;,
+    PHONE: &#x27;+7 915 277-91-21&#x27;,
+
+    // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
+    // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
+    MEDIA_BASE: &#x27;https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@803dcd87a172/gluhov-moto-landing/media/&#x27;,
+    MEDIA: {
+      heroVideo: &#x27;hero.mp4&#x27;,      // .mp4 без звука, крутится фоном на первом экране (горизонтальный, для компьютера)
+      heroImage: &#x27;hero.jpg&#x27;,      // обложка, пока грузится видео
+      heroVideoMobile: &#x27;hero-m.mp4&#x27;, // вертикальная версия для телефона
+      heroImageMobile: &#x27;hero-m.jpg&#x27;,
+      // короткие вертикальные ролики с трассы: { src, poster, caption }
+      reels: [
+        { src: &#x27;reel-1.mp4&#x27;, poster: &#x27;reel-1.jpg&#x27;, caption: &#x27;Класс 50&#x27; },
+        { src: &#x27;reel-2.mp4&#x27;, poster: &#x27;reel-2.jpg&#x27;, caption: &#x27;Вираж&#x27; },
+        { src: &#x27;reel-3.mp4&#x27;, poster: &#x27;reel-3.jpg&#x27;, caption: &#x27;Финишная прямая&#x27; },
+        { src: &#x27;reel-4.mp4&#x27;, poster: &#x27;reel-4.jpg&#x27;, caption: &#x27;Первые круги&#x27; }
+      ],
+      video: &#x27;&#x27;,       // длинный ролик: ссылка ВК Видео, Rutube, YouTube или .mp4 (необязательно)
+      videoPoster: &#x27;&#x27;, // обложка длинного ролика
+      formBg: &#x27;kids-bikes.jpg&#x27;,
+      // фото в карточках «Почему здесь» по порядку: трасса, мотоцикл, погода, тренер
+      features: [&#x27;track-top.jpg&#x27;, &#x27;bikes.jpg&#x27;, &#x27;rider-blue.jpg&#x27;, &#x27;&#x27;],
+      // галерея: { src, caption }
+      gallery: [
+        { src: &#x27;rider-yellow.jpg&#x27;, caption: &#x27;На трассе&#x27; },
+        { src: &#x27;kids-bikes.jpg&#x27;, caption: &#x27;Наши райдеры&#x27; },
+        { src: &#x27;kids-walk.jpg&#x27;, caption: &#x27;Идём на старт&#x27; },
+        { src: &#x27;rider-red.jpg&#x27;, caption: &#x27;Вираж&#x27; },
+        { src: &#x27;kids-smile.jpg&#x27;, caption: &#x27;После заезда&#x27; },
+        { src: &#x27;podium.jpg&#x27;, caption: &#x27;Пьедестал ZelenoKART&#x27; },
+        { src: &#x27;bikes-banner.jpg&#x27;, caption: &#x27;Мотоциклы 50 и 65&#x27; },
+        { src: &#x27;kids-bikes-2.jpg&#x27;, caption: &#x27;Готовы к старту&#x27; }
+      ]
+    }
+  };
+
+  var M = CONFIG.MEDIA;
+  var root = document;
+  function $(id) { return document.getElementById(id); }
+  function url(s) { return !s || /^(https?:)?\/\//.test(s) ? s : CONFIG.MEDIA_BASE + s; }
+  window.gmConfig = CONFIG; window.gmUrl = url;  // нужны блоку 3
+  function img(src, alt) { var i = new Image(); i.loading = &#x27;lazy&#x27;; i.src = url(src); i.alt = alt || &#x27;&#x27;; return i; }
+
+  /* ---------- Медиа ---------- */
+  var hero = $(&#x27;gm-hero&#x27;), heroMedia = $(&#x27;gm-hero-media&#x27;);
+  var mob = window.matchMedia &amp;&amp; matchMedia(&#x27;(max-width: 900px)&#x27;).matches;
+  var heroV = mob &amp;&amp; M.heroVideoMobile || M.heroVideo, heroI = mob &amp;&amp; M.heroImageMobile || M.heroImage;
+  if (heroV) {
+    var v = document.createElement(&#x27;video&#x27;);
+    v.src = url(heroV); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.setAttribute(&#x27;playsinline&#x27;, &#x27;&#x27;); if (heroI) v.poster = url(heroI);
+    heroMedia.appendChild(v); hero.classList.remove(&#x27;gm-hero--art&#x27;);
+  } else if (heroI) {
+    heroMedia.appendChild(img(heroI, &#x27;&#x27;)); hero.classList.remove(&#x27;gm-hero--art&#x27;);
+  }
+
+  root.querySelectorAll(&#x27;img[data-media]&#x27;).forEach(function (el) { el.src = url(el.getAttribute(&#x27;data-media&#x27;)); });
+
+  var cards = $(&#x27;gm-features&#x27;).children;
+  (M.features || []).forEach(function (src, i) {
+    if (!src || !cards[i]) return;
+    var bg = document.createElement(&#x27;div&#x27;); bg.className = &#x27;gm-bgimg&#x27;; bg.appendChild(img(src, &#x27;&#x27;));
+    cards[i].insertBefore(bg, cards[i].firstChild);
+    cards[i].classList.add(&#x27;gm-feature--photo&#x27;);
+  });
+
+  // Видео: превращаем обычную ссылку в адрес плеера
+  function embedUrl(url) {
+    var m;
+    if ((m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{11})/)))
+      return &#x27;https://www.youtube.com/embed/&#x27; + m[1] + &#x27;?autoplay=1&amp;rel=0&#x27;;
+    if ((m = url.match(/rutube\.ru\/(?:video|shorts|play\/embed)\/([\w]+)/)))
+      return &#x27;https://rutube.ru/play/embed/&#x27; + m[1] + &#x27;?autoplay=1&#x27;;
+    if (/video_ext\.php/.test(url)) return url + (url.indexOf(&#x27;autoplay&#x27;) &lt; 0 ? &#x27;&amp;autoplay=1&#x27; : &#x27;&#x27;);
+    if ((m = url.match(/(?:vk\.com|vkvideo\.ru)\/(?:.*[?&amp;]z=)?video(-?\d+)_(\d+)/)))
+      return &#x27;https://vk.com/video_ext.php?oid=&#x27; + m[1] + &#x27;&amp;id=&#x27; + m[2] + &#x27;&amp;hd=2&amp;autoplay=1&#x27;;
+    return &#x27;&#x27;;
+  }
+  var vbox = $(&#x27;gm-video&#x27;), play = vbox.querySelector(&#x27;.gm-play&#x27;);
+  if (M.videoPoster) { vbox.querySelector(&#x27;.gm-poster&#x27;).remove(); vbox.insertBefore(img(M.videoPoster, &#x27;&#x27;), vbox.firstChild); }
+  // Ролики с трассы: играют без звука, только пока видны на экране
+  var reels = $(&#x27;gm-reels&#x27;);
+  (M.reels || []).forEach(function (r) {
+    var box = document.createElement(&#x27;div&#x27;); box.className = &#x27;gm-reel gm-reveal&#x27;;
+    var v = document.createElement(&#x27;video&#x27;);
+    v.muted = true; v.loop = true; v.playsInline = true; v.setAttribute(&#x27;playsinline&#x27;, &#x27;&#x27;);
+    v.preload = &#x27;none&#x27;; v.poster = url(r.poster); v.dataset.src = url(r.src);
+    box.appendChild(v);
+    if (r.caption) { var s = document.createElement(&#x27;span&#x27;); s.textContent = r.caption; box.appendChild(s); }
+    reels.appendChild(box);
+  });
+  if (&#x27;IntersectionObserver&#x27; in window) {
+    var vio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { if (!v.src) v.src = v.dataset.src; v.play().catch(function () {}); }
+        else v.pause();
+      });
+    }, { threshold: .4 });
+    reels.querySelectorAll(&#x27;video&#x27;).forEach(function (v) { vio.observe(v); });
+  }
+
+  if (!M.video) {
+    if (M.reels &amp;&amp; M.reels.length) vbox.hidden = true;
+    else { play.disabled = true; $(&#x27;gm-video-cap&#x27;).textContent = &#x27;Видео с тренировки — скоро&#x27;; }
+  }
+  play.addEventListener(&#x27;click&#x27;, function () {
+    var src = embedUrl(M.video), el;
+    if (src) {
+      el = document.createElement(&#x27;iframe&#x27;); el.src = src;
+      el.allow = &#x27;autoplay; encrypted-media; fullscreen; picture-in-picture&#x27;; el.allowFullscreen = true;
+    } else {
+      el = document.createElement(&#x27;video&#x27;); el.src = url(M.video); el.controls = true; el.autoplay = true; el.playsInline = true;
+    }
+    vbox.innerHTML = &#x27;&#x27;; vbox.appendChild(el);
+  });
+
+  // Галерея: без фото показываем заглушки, чтобы было видно, сколько кадров нужно
+  var gal = $(&#x27;gm-gallery&#x27;), lb = $(&#x27;gm-lightbox&#x27;);
+  var shots = M.gallery &amp;&amp; M.gallery.length ? M.gallery : null;
+  var hints = [&#x27;Ребёнок на трассе&#x27;, &#x27;Старт заезда&#x27;, &#x27;Тренер и ученик&#x27;, &#x27;Второй уровень трассы&#x27;, &#x27;Мотоциклы 50 и 65&#x27;, &#x27;Эмоции после заезда&#x27;];
+  (shots || hints).forEach(function (s, i) {
+    var f = document.createElement(&#x27;figure&#x27;); f.className = &#x27;gm-reveal&#x27;;
+    if (shots) {
+      var src = typeof s === &#x27;string&#x27; ? s : s.src, cap = typeof s === &#x27;string&#x27; ? &#x27;&#x27; : (s.caption || &#x27;&#x27;);
+      f.appendChild(img(src, cap));
+      if (cap) { var c = document.createElement(&#x27;figcaption&#x27;); c.textContent = cap; f.appendChild(c); }
+      f.addEventListener(&#x27;click&#x27;, function () { lb.firstChild.src = url(src); lb.classList.add(&#x27;gm-open&#x27;); });
+    } else {
+      f.classList.add(&#x27;gm-ph&#x27;);
+      f.innerHTML = &#x27;&lt;div&gt;&lt;svg&gt;&lt;use href=&quot;#gm-cam&quot;/&gt;&lt;/svg&gt;&#x27; + s + &#x27;&lt;/div&gt;&#x27;;
+    }
+    gal.appendChild(f);
+  });
+  lb.addEventListener(&#x27;click&#x27;, function () { lb.classList.remove(&#x27;gm-open&#x27;); });
+
+
+  /* ---------- Схема трассы (SVG, запасной вариант): райдеры едут по одному кругу ---------- */
+  (function () {
+    var route = $(&#x27;gm-route&#x27;);
+    if (!route || !route.getTotalLength) return;
+    var NS = &#x27;http://www.w3.org/2000/svg&#x27;, total = route.getTotalLength();
+    function el(tag, attrs, parent) {
+      var e = document.createElementNS(NS, tag);
+      for (var k in attrs) e.setAttribute(k, attrs[k]);
+      parent.appendChild(e); return e;
+    }
+    var chev = $(&#x27;gm-chevrons&#x27;);
+    for (var c = 0; c &lt; 18; c++) {
+      var d = (c + 0.5) / 18 * total, p = route.getPointAtLength(d), q = route.getPointAtLength(Math.min(total, d + 1));
+      var a = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI;
+      el(&#x27;path&#x27;, { d: &#x27;M-4 -6 L4 0 L-4 6&#x27;, fill: &#x27;none&#x27;, stroke: &#x27;#ffd400&#x27;, &#x27;stroke-width&#x27;: 3, &#x27;stroke-linecap&#x27;: &#x27;round&#x27;,
+        transform: &#x27;translate(&#x27; + p.x.toFixed(1) + &#x27; &#x27; + p.y.toFixed(1) + &#x27;) rotate(&#x27; + a.toFixed(1) + &#x27;)&#x27; }, chev);
+    }
+    [&#x27;#ff5a1f&#x27;, &#x27;#f3f4f6&#x27;, &#x27;#ffd400&#x27;].forEach(function (col, i) {
+      var dot = el(&#x27;circle&#x27;, { r: 9, fill: col, stroke: &#x27;#0d0f13&#x27;, &#x27;stroke-width&#x27;: 2 }, $(&#x27;gm-riders&#x27;));
+      var m = el(&#x27;animateMotion&#x27;, { dur: &#x27;11s&#x27;, begin: (-i * 11 / 3).toFixed(2) + &#x27;s&#x27;, repeatCount: &#x27;indefinite&#x27; }, dot);
+      el(&#x27;mpath&#x27;, { href: &#x27;#gm-route&#x27; }, m);
+    });
+  })();
+
+  /* ---------- Трасса в 3D (three.js). Без WebGL остаётся SVG-схема ---------- */
+  (function () {
+    var box = $(&#x27;gm-3d&#x27;), viz = box &amp;&amp; box.parentNode;
+    if (!box || !window.IntersectionObserver) return;
+    var THREE_URL = &#x27;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&#x27;;
+    var still = window.matchMedia &amp;&amp; matchMedia(&#x27;(prefers-reduced-motion: reduce)&#x27;).matches;
+
+    var lazy = new IntersectionObserver(function (es) {
+      if (!es[0].isIntersecting) return;
+      lazy.disconnect();
+      if (window.THREE) return init();
+      var s = document.createElement(&#x27;script&#x27;);
+      s.src = THREE_URL; s.onload = init;
+      document.head.appendChild(s);
+    }, { rootMargin: &#x27;400px 0px&#x27; });
+    lazy.observe(viz);
+
+    function init() {
+      var T = window.THREE, renderer;
+      try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { return; }
+      if (!renderer.getContext()) return;
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = T.PCFSoftShadowMap;
+      box.insertBefore(renderer.domElement, box.firstChild);
+      box.hidden = false;
+      viz.classList.add(&#x27;gm-has3d&#x27;);
+
+      var scene = new T.Scene();
+      scene.fog = new T.Fog(0x0d0f13, 40, 75);
+      var camera = new T.PerspectiveCamera(34, 4 / 3, 0.1, 200);
+      scene.add(new T.HemisphereLight(0xdfe6ff, 0x1a1408, 0.75));
+      var sun = new T.DirectionalLight(0xffffff, 0.85);
+      sun.position.set(-10, 22, 14); sun.castShadow = true;
+      sun.shadow.mapSize.set(1024, 1024);
+      var sc = sun.shadow.camera; sc.left = -18; sc.right = 18; sc.top = 18; sc.bottom = -18; sc.near = 1; sc.far = 60;
+      sun.shadow.bias = -0.001;
+      scene.add(sun);
+
+      function mat(c, o) { o = o || {}; o.color = c; return new T.MeshStandardMaterial(o); }
+      function boxMesh(w, h, d, x, y, z, m) {
+        var b = new T.Mesh(new T.BoxGeometry(w, h, d), m);
+        b.position.set(x, y, z); b.castShadow = b.receiveShadow = true; scene.add(b); return b;
+      }
+      function neon(w, h, d, x, y, z, c) {
+        var n = new T.Mesh(new T.BoxGeometry(w, h, d), new T.MeshBasicMaterial({ color: c }));
+        n.position.set(x, y, z); scene.add(n);
+      }
+
+      // площадки: нижний уровень, верхний уровень на опорах и площадки у рамп
+      var floor = mat(0x1d2129, { roughness: .95 }), deck = mat(0x2a2f3a, { roughness: .9 }), conc = mat(0x3a404d, { roughness: .8 });
+      boxMesh(28, 0.4, 18, 0, -0.2, 0.3, floor);
+      // второй уровень — одна плита: центр + площадки у рамп, без щелей на пути дороги
+      var TOP = 3.2, outline = [[-8, 1.5], [8, 1.5], [8, -4.6], [12.2, -4.6], [12.2, -7.6], [-12.2, -7.6], [-12.2, -4.6], [-8, -4.6]];
+      var shape = new T.Shape(outline.map(function (p) { return new T.Vector2(p[0], -p[1]); }));
+      var slab = new T.Mesh(new T.ExtrudeGeometry(shape, { depth: 0.4, bevelEnabled: false }), deck);
+      slab.rotation.x = -Math.PI / 2; slab.position.y = TOP - 0.4; slab.castShadow = slab.receiveShadow = true; scene.add(slab);
+      function onUpper(x, z) { return z &lt;= 1.5 &amp;&amp; z &gt;= -7.6 &amp;&amp; (Math.abs(x) &lt;= 8 || (Math.abs(x) &lt;= 12.2 &amp;&amp; z &lt;= -4.6)); }
+      [[-6, -6], [6, -6], [-6, 0.8], [6, 0.8], [0, 0.8], [0, -6], [10.6, -6.4], [-10.6, -6.4]].forEach(function (p) {
+        var col = new T.Mesh(new T.CylinderGeometry(0.28, 0.28, 2.8, 12), conc);
+        col.position.set(p[0], 1.4, p[1]); col.castShadow = true; scene.add(col);
+      });
+      // неон по краям второго уровня, как на картодроме
+      neon(16, 0.08, 0.08, 0, 3.24, 1.5, 0x39ff88);
+      neon(24.4, 0.08, 0.08, 0, 3.24, -7.6, 0xff2e63);
+      neon(28, 0.06, 0.06, 0, 0.03, 9.2, 0x39ff88);
+
+      // трасса: одна замкнутая кривая через оба уровня
+      var L = 0.06, H = 3.26;
+      var pts = [[-10.6, L, 2.6], [-8, L, 6.2], [0, L, 7.3], [8, L, 6.2], [10.6, L, 2.6], [10.6, 1.66, -1.1], [10.6, H, -4.6],
+        [9.2, H, -6.4], [6, H, -5.7], [4.2, H, -1.4], [0, H, 0.3], [-4.2, H, -1.4], [-6, H, -5.7], [-9.2, H, -6.4],
+        [-10.6, H, -4.6], [-10.6, 1.66, -1.1]].map(function (p) { return new T.Vector3(p[0], p[1], p[2]); });
+      var curve = new T.CatmullRomCurve3(pts, true, &#x27;centripetal&#x27;);
+      // высота поверхности: над плитой второго уровня дорога не может уйти внутрь неё
+      function surf(x, y, z) { return onUpper(x, z) ? Math.max(y, TOP + 0.03) : Math.max(y, L); }
+      var N = 600, ps = curve.getSpacedPoints(N), up = new T.Vector3(0, 1, 0);
+      var sides = ps.map(function (p, i) {
+        var t = ps[(i + 1) % N].clone().sub(ps[(i - 1 + N) % N]);
+        return new T.Vector3().crossVectors(t, up).normalize();
+      });
+      function ribbon(w0, w1, colorAt, lift) {
+        var pos = [], col = [], c = new T.Color();
+        for (var i = 0; i &lt; N; i++) {
+          var j = (i + 1) % N;
+          var a0 = ps[i].clone().addScaledVector(sides[i], w0), a1 = ps[i].clone().addScaledVector(sides[i], w1);
+          var b0 = ps[j].clone().addScaledVector(sides[j], w0), b1 = ps[j].clone().addScaledVector(sides[j], w1);
+          [a0, b0, a1, a1, b0, b1].forEach(function (v) { pos.push(v.x, surf(v.x, v.y, v.z) + 0.01 + (lift || 0), v.z); });
+          c.setHex(colorAt(i)); for (var k = 0; k &lt; 6; k++) col.push(c.r, c.g, c.b);
+        }
+        var g = new T.BufferGeometry();
+        g.setAttribute(&#x27;position&#x27;, new T.Float32BufferAttribute(pos, 3));
+        g.setAttribute(&#x27;color&#x27;, new T.Float32BufferAttribute(col, 3));
+        g.computeVertexNormals();
+        var m = new T.Mesh(g, new T.MeshStandardMaterial({ vertexColors: true, roughness: .7, side: T.DoubleSide,
+          polygonOffset: !!lift, polygonOffsetFactor: -1, polygonOffsetUnits: -2 }));
+        m.receiveShadow = true; m.castShadow = true; scene.add(m); return m;
+      }
+      var RW = 1.25;
+      ribbon(-RW, RW, function () { return 0x343a46; });
+      ribbon(RW, RW + 0.32, function (i) { return (i &gt;&gt; 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
+      ribbon(-RW - 0.32, -RW, function (i) { return (i &gt;&gt; 2) % 2 ? 0xffffff : 0xe8312a; }, 0.005);
+      ribbon(-0.06, 0.06, function (i) { return (i &gt;&gt; 3) % 2 ? 0x343a46 : 0xffd400; }, 0.008);
+
+      // стенки под рампами — видно, что дорога поднимается
+      var wpos = [];
+      for (var i = 0; i &lt; N; i++) {
+        var j = (i + 1) % N, p = ps[i], q = ps[j];
+        if (p.y &lt; 0.25 || q.y &lt; 0.25 || Math.abs(p.x) &lt; 9.2) continue;
+        [RW + 0.32, -RW - 0.32].forEach(function (w) {
+          var a = p.clone().addScaledVector(sides[i], w), b = q.clone().addScaledVector(sides[j], w);
+          var ay = surf(a.x, a.y, a.z), by = surf(b.x, b.y, b.z);
+          wpos.push(a.x, ay, a.z, b.x, by, b.z, a.x, 0, a.z, a.x, 0, a.z, b.x, by, b.z, b.x, 0, b.z);
+        });
+      }
+      var wg = new T.BufferGeometry();
+      wg.setAttribute(&#x27;position&#x27;, new T.Float32BufferAttribute(wpos, 3)); wg.computeVertexNormals();
+      var walls = new T.Mesh(wg, mat(0x262b35, { roughness: .9, side: T.DoubleSide }));
+      walls.castShadow = walls.receiveShadow = true; scene.add(walls);
+
+      // финиш
+      var cv = document.createElement(&#x27;canvas&#x27;); cv.width = 64; cv.height = 16;
+      var cx = cv.getContext(&#x27;2d&#x27;);
+      for (var u = 0; u &lt; 8; u++) for (var v = 0; v &lt; 2; v++) { cx.fillStyle = (u + v) % 2 ? &#x27;#111&#x27; : &#x27;#fff&#x27;; cx.fillRect(u * 8, v * 8, 8, 8); }
+      var fin = new T.Mesh(new T.PlaneGeometry(2.5, 0.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(cv) }));
+      fin.rotation.set(-Math.PI / 2, 0, Math.PI / 2); fin.position.set(0, L + 0.03, 7.3); scene.add(fin);
+
+      // райдеры: детский электрокросс + ребёнок в мотоэкипировке (цвета — как на фото с трассы)
+      var Y = new T.Vector3(0, 1, 0);
+      function part(geo, m, parent, x, y, z) {
+        var o = new T.Mesh(geo, m); o.position.set(x || 0, y || 0, z || 0);
+        o.castShadow = true; parent.add(o); return o;
+      }
+      function rod(a, b, r, m, parent) {           // цилиндр между двумя точками
+        var A = new T.Vector3(a[0], a[1], a[2]), B = new T.Vector3(b[0], b[1], b[2]), d = B.clone().sub(A);
+        var o = part(new T.CylinderGeometry(r, r, d.length(), 10), m, parent);
+        o.position.copy(A).add(B).multiplyScalar(0.5);
+        o.quaternion.setFromUnitVectors(Y, d.normalize());
+        return o;
+      }
+      function limb(a, b, r, m, parent) { rod(a, b, r, m, parent); part(new T.SphereGeometry(r, 10, 8), m, parent, b[0], b[1], b[2]); }
+      function decal(draw, w, h) {
+        var c = document.createElement(&#x27;canvas&#x27;); c.width = 128; c.height = Math.round(128 * h / w);
+        draw(c.getContext(&#x27;2d&#x27;), c.width, c.height);
+        return new T.MeshStandardMaterial({ map: new T.CanvasTexture(c), roughness: .6, side: T.DoubleSide });
+      }
+      var black = mat(0x15171c, { roughness: .9 }), metal = mat(0xb9c0cc, { metalness: .8, roughness: .3 }),
+        rubber = mat(0x0c0d10, { roughness: 1 }), goggle = mat(0x0a0a0a, { metalness: .6, roughness: .15 });
+
+      function wheel(r, w) {
+        var g = new T.Group();
+        var tire = part(new T.TorusGeometry(r - 0.045, 0.05, 10, 32), rubber, g); tire.rotation.y = Math.PI / 2;
+        var rim = part(new T.TorusGeometry(r - 0.09, 0.012, 6, 32), metal, g); rim.rotation.y = Math.PI / 2;
+        var knob = new T.BoxGeometry(w, 0.03, 0.035);
+        for (var k = 0; k &lt; 22; k++) {
+          var a = k / 22 * Math.PI * 2, kb = part(knob, rubber, g, 0, Math.cos(a) * (r - 0.005), Math.sin(a) * (r - 0.005));
+          kb.rotation.x = -a;
+        }
+        for (var s = 0; s &lt; 12; s++) {
+          var pv = new T.Group(); pv.rotation.x = s / 12 * Math.PI * 2; g.add(pv);
+          part(new T.BoxGeometry(0.006, r - 0.1, 0.006), metal, pv, (s % 2 ? 0.015 : -0.015), (r - 0.1) / 2, 0);
+        }
+        var hub = part(new T.CylinderGeometry(0.035, 0.035, w + 0.04, 12), metal, g); hub.rotation.z = Math.PI / 2;
+        return g;
+      }
+
+      function makeRider(o) {
+        var g = new T.Group(), bike = new T.Group(), kid = new T.Group();
+        g.add(bike); g.add(kid);
+        var plastic = mat(o.bike, { roughness: .45 }), plastic2 = mat(o.trim, { roughness: .45 });
+        var R = 0.23, rear = wheel(R, 0.09), front = wheel(R, 0.07);
+        rear.position.set(0, R, -0.45); front.position.set(0, R, 0.48); bike.add(rear); bike.add(front);
+        // рама, маятник, вилка
+        rod([0.06, 0.25, -0.45], [0.05, 0.38, -0.06], 0.018, black, bike); rod([-0.06, 0.25, -0.45], [-0.05, 0.38, -0.06], 0.018, black, bike);
+        rod([0, 0.79, 0.31], [0, 0.6, 0.35], 0.03, black, bike);
+        rod([0, 0.62, 0.34], [0, 0.32, 0.06], 0.022, black, bike);
+        rod([0, 0.78, 0.31], [0, 0.68, -0.16], 0.022, black, bike);
+        rod([0, 0.68, -0.16], [0, 0.38, -0.06], 0.022, black, bike);
+        rod([0, 0.68, -0.16], [0, 0.7, -0.52], 0.016, black, bike);
+        rod([0, 0.36, -0.25], [0, 0.66, -0.3], 0.03, mat(0xffb000, { metalness: .5, roughness: .4 }), bike); // амортизатор
+        [0.075, -0.075].forEach(function (x) {
+          rod([x, 0.84, 0.29], [x, 0.5, 0.42], 0.026, metal, bike);
+          rod([x, 0.5, 0.42], [x, R, 0.48], 0.02, metal, bike);
+        });
+        part(new T.BoxGeometry(0.2, 0.04, 0.08), black, bike, 0, 0.84, 0.3);
+        // руль с грипсами
+        rod([-0.27, 0.93, 0.27], [0.27, 0.93, 0.27], 0.012, black, bike);
+        rod([-0.27, 0.93, 0.27], [-0.2, 0.93, 0.27], 0.02, rubber, bike); rod([0.2, 0.93, 0.27], [0.27, 0.93, 0.27], 0.02, rubber, bike);
+        // батарея с молнией
+        var bolt = decal(function (c, w, h) {
+          c.fillStyle = &#x27;#20242c&#x27;; c.fillRect(0, 0, w, h); c.fillStyle = &#x27;#ffd400&#x27;;
+          c.beginPath(); c.moveTo(w * .58, h * .1); c.lineTo(w * .3, h * .55); c.lineTo(w * .5, h * .55); c.lineTo(w * .4, h * .9);
+          c.lineTo(w * .72, h * .42); c.lineTo(w * .52, h * .42); c.closePath(); c.fill();
+        }, 0.34, 0.22);
+        var batt = new T.Mesh(new T.BoxGeometry(0.17, 0.22, 0.34), [bolt, bolt, black, black, black, black]);
+        batt.position.set(0, 0.47, 0.1); batt.castShadow = true; bike.add(batt);
+        // пластик: бак-обтекатель, сиденье, крылья, номера
+        var tank = part(new T.BoxGeometry(0.22, 0.12, 0.3), plastic, bike, 0, 0.72, 0.12); tank.rotation.x = 0.25;
+        var seat = part(new T.BoxGeometry(0.15, 0.06, 0.5), black, bike, 0, 0.77, -0.24); seat.rotation.x = -0.06;
+        var rf = part(new T.BoxGeometry(0.15, 0.025, 0.46), plastic2, bike, 0, 0.74, -0.62); rf.rotation.x = -0.28;
+        var ff = part(new T.BoxGeometry(0.12, 0.022, 0.26), plastic, bike, 0, 0.5, 0.55); ff.rotation.x = 0.2;
+        var num = decal(function (c, w, h) {
+          c.fillStyle = &#x27;#ffffff&#x27;; c.fillRect(0, 0, w, h);
+          c.fillStyle = &#x27;#111&#x27;; c.font = &#x27;900 &#x27; + Math.round(h * .8) + &#x27;px Arial&#x27;; c.textAlign = &#x27;center&#x27;; c.textBaseline = &#x27;middle&#x27;;
+          c.fillText(o.num, w / 2, h * .55);
+        }, 0.26, 0.18);
+        [0.085, -0.085].forEach(function (x) {
+          var pl = part(new T.PlaneGeometry(0.26, 0.18), num, bike, x, 0.6, -0.32); pl.rotation.y = x &gt; 0 ? Math.PI / 2 : -Math.PI / 2;
+        });
+        var np = part(new T.PlaneGeometry(0.2, 0.16), num, bike, 0, 0.82, 0.36); np.rotation.x = -0.3;
+        rod([-0.17, 0.33, -0.02], [0.17, 0.33, -0.02], 0.014, metal, bike); // подножки
+
+        // ребёнок: крупный шлем, джерси, защита, штаны, ботинки
+        var jersey = mat(o.jersey, { roughness: .8 }), pants = mat(o.pants, { roughness: .8 }),
+          helmet = mat(o.helmet, { roughness: .35 }), boot = mat(0xf3f4f6, { roughness: .6 }), glove = mat(o.glove, { roughness: .8 });
+        limb([0, 0.86, -0.13], [0, 1.15, 0.05], 0.12, jersey, kid);                  // торс в наклоне
+        part(new T.SphereGeometry(0.12, 12, 10), pants, kid, 0, 0.86, -0.13);
+        var vest = part(new T.SphereGeometry(1, 16, 12), mat(o.vest, { roughness: .6 }), kid, 0, 1.02, -0.03);
+        vest.scale.set(0.15, 0.13, 0.135); vest.rotation.x = 0.55;   // защита-черепаха
+        part(new T.SphereGeometry(0.05, 8, 6), jersey, kid, 0, 1.23, 0.1);               // шея
+        var head = new T.Group(); head.position.set(0, 1.35, 0.15); kid.add(head);
+        part(new T.SphereGeometry(0.15, 18, 14), helmet, head);
+        var chin = part(new T.BoxGeometry(0.15, 0.08, 0.1), helmet, head, 0, -0.09, 0.11); chin.rotation.x = -0.4;
+        var peak = part(new T.BoxGeometry(0.22, 0.014, 0.16), mat(o.trim === 0xffffff ? o.bike : 0xffffff, { roughness: .4 }), head, 0, 0.1, 0.13); peak.rotation.x = 0.35;
+        var gog = part(new T.BoxGeometry(0.19, 0.06, 0.05), goggle, head, 0, 0.01, 0.135);
+        part(new T.BoxGeometry(0.31, 0.02, 0.02), black, head, 0, 0.01, 0.1);           // ремешок очков
+        [1, -1].forEach(function (sx) {
+          limb([sx * 0.14, 1.15, 0.05], [sx * 0.23, 1.02, 0.17], 0.045, jersey, kid);    // плечо — локоть
+          limb([sx * 0.23, 1.02, 0.17], [sx * 0.235, 0.94, 0.27], 0.04, jersey, kid);   // предплечье к рулю
+          part(new T.SphereGeometry(0.035, 8, 6), glove, kid, sx * 0.235, 0.935, 0.28);
+          limb([sx * 0.09, 0.84, -0.12], [sx * 0.17, 0.74, 0.13], 0.06, pants, kid);    // бедро
+          limb([sx * 0.17, 0.74, 0.13], [sx * 0.16, 0.42, 0.0], 0.05, pants, kid);      // голень
+          part(new T.BoxGeometry(0.09, 0.14, 0.2), boot, kid, sx * 0.16, 0.38, 0.02);    // ботинок
+        });
+        g.traverse(function (m) { if (m.isMesh) m.castShadow = true; });
+        g.scale.setScalar(1.55); scene.add(g);
+        return { g: g, kid: kid, wheels: [rear, front], roll: 0 };
+      }
+      var LEN = curve.getLength(), SCALE = 1.55, WR = 0.23 * SCALE;
+      var riders = [
+        { bike: 0xe8312a, trim: 0xffffff, jersey: 0xffd400, pants: 0x1e2230, helmet: 0x1e5bff, vest: 0x15171c, glove: 0xffd400, num: &#x27;3&#x27; },
+        { bike: 0x1e5bff, trim: 0xffffff, jersey: 0xffd400, pants: 0x2b303b, helmet: 0xe8312a, vest: 0xffd400, glove: 0x15171c, num: &#x27;57&#x27; },
+        { bike: 0xffffff, trim: 0xff7a1a, jersey: 0xf3f4f6, pants: 0x1e2230, helmet: 0x1e5bff, vest: 0xff7a1a, glove: 0xff7a1a, num: &#x27;7&#x27; }
+      ].map(function (o, i) { var r = makeRider(o); r.off = i / 3; return r; });
+      var flat = new T.Vector3(), flat2 = new T.Vector3();
+      function placeRiders(t) {
+        riders.forEach(function (r, i) {
+          var u = (t + r.off) % 1, p = curve.getPointAt(u), q = curve.getPointAt((u + 0.002) % 1);
+          r.g.position.set(p.x, surf(p.x, p.y, p.z), p.z); r.g.lookAt(q.x, surf(q.x, q.y, q.z), q.z);
+          // крен внутрь виража: по изменению направления в плоскости
+          flat.copy(curve.getTangentAt(u)).setY(0).normalize();
+          flat2.copy(curve.getTangentAt((u + 0.015) % 1)).setY(0).normalize();
+          var turn = flat.x * flat2.z - flat.z * flat2.x, target = Math.max(-0.5, Math.min(0.5, turn * 9));
+          r.roll += (target - r.roll) * 0.12;
+          r.g.rotateZ(r.roll);
+          var spin = (u * LEN) / WR;
+          r.wheels[0].rotation.x = spin; r.wheels[1].rotation.x = spin;
+          r.kid.position.y = Math.sin(t * 90 + i * 2) * 0.012;
+        });
+      }
+
+      // подписи, привязанные к точкам сцены
+      var labels = [[&#x27;1 уровень&#x27;, 0, 0.4, 9.6, 0], [&#x27;2 уровень&#x27;, 0, 3.6, -4.2, 1], [&#x27;Подъём ↑&#x27;, 13.3, 1.9, -1.1, 0], [&#x27;Спуск ↓&#x27;, -13.3, 1.9, -1.1, 0]]
+        .map(function (l) {
+          var d = document.createElement(&#x27;div&#x27;); d.className = &#x27;gm-3d-label&#x27; + (l[4] ? &#x27; gm-3d-label--hl&#x27; : &#x27;&#x27;);
+          d.textContent = l[0]; box.appendChild(d);
+          return { el: d, v: new T.Vector3(l[1], l[2], l[3]) };
+        });
+      var tmp = new T.Vector3();
+
+      // камера под углом, медленно покачивается; можно повернуть пальцем/мышью
+      var W = 1, Hh = 1, drag = 0, dragging = false, lastX = 0, target = new T.Vector3(0, 1.3, 0);
+      function resize() {
+        W = box.clientWidth; Hh = box.clientHeight;
+        renderer.setSize(W, Hh, false); camera.aspect = W / Hh;
+        camera.position.length() || 0;
+        camera.updateProjectionMatrix();
+      }
+      if (window.ResizeObserver) new ResizeObserver(function () { resize(); render(lastT); }).observe(box); else resize();
+      box.addEventListener(&#x27;pointerdown&#x27;, function (e) { dragging = true; lastX = e.clientX; });
+      window.addEventListener(&#x27;pointermove&#x27;, function (e) { if (!dragging) return; drag += (e.clientX - lastX) * 0.008; lastX = e.clientX; if (still) render(lastT); });
+      window.addEventListener(&#x27;pointerup&#x27;, function () { dragging = false; });
+
+      var lastT = 0.12;
+      function render(t) {
+        var az = 0.66 + drag, el = 0.62, R = W / Hh &lt; 1.1 ? 54 : 44;
+        camera.position.set(Math.sin(az) * Math.cos(el) * R, Math.sin(el) * R, Math.cos(az) * Math.cos(el) * R);
+        camera.lookAt(target);
+        placeRiders(still ? 0.12 : t / 12);
+        renderer.render(scene, camera);
+        labels.forEach(function (l) {
+          tmp.copy(l.v).project(camera);
+          var hw = l.el.offsetWidth / 2 + 6, x = Math.min(W - hw, Math.max(hw, (tmp.x + 1) / 2 * W));
+          l.el.style.transform = &#x27;translate(&#x27; + x.toFixed(0) + &#x27;px,&#x27; + ((1 - tmp.y) / 2 * Hh).toFixed(0) + &#x27;px) translate(-50%,-50%)&#x27;;
+        });
+      }
+      resize(); render(0);
+      if (still) return;
+
+      var running = false, raf, t0 = performance.now();
+      function loop(now) { lastT = (now - t0) / 1000; render(lastT); raf = requestAnimationFrame(loop); }
+      new IntersectionObserver(function (es) {
+        var on = es[0].isIntersecting;
+        if (on === running) return; running = on;
+        if (on) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf);
+      }).observe(box);
+    }
+  })();
+
+  /* ---------- Анимации при прокрутке и липкая кнопка ---------- */
+  var reveal = root.querySelectorAll(&#x27;.gm-reveal&#x27;);
+  if (&#x27;IntersectionObserver&#x27; in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove(&#x27;gm-pre&#x27;); io.unobserve(e.target); } });
+    }, { rootMargin: &#x27;0px 0px -8% 0px&#x27; });
+    reveal.forEach(function (el) {
+      if (el.getBoundingClientRect().top &gt; window.innerHeight) el.classList.add(&#x27;gm-pre&#x27;);
+      io.observe(el);
+    });
+
+  }
+
+})();
+&lt;/script&gt;
+</textarea></section>
+<h2>3. Блок 2 — форма Тильды BF204N</h2>
+<ol class="steps"><li><b>Все блоки → Форма → BF204N</b> «Вертикальная форма с множеством полей», поставить под блоком 1.</li>
+<li><b>Контент → Шапка блока:</b> заголовок «Запишите ребёнка на тренировку», описание «Оставьте заявку — администратор перезвонит, подберёт группу и класс мотоцикла и ответит на все вопросы.»</li>
+<li><b>Контент → Поля для ввода</b> — как в таблице; Email и прочие лишние поля удалить.</li>
+<li><b>Текст кнопки:</b> «Отправить заявку →». <b>Сообщение об успехе:</b> «Спасибо! Администратор перезвонит вам в ближайшее время.»</li>
+<li><b>Контент → Приём данных:</b> отметить Tilda CRM, Google Таблицу, Telegram и/или Email (сначала подключить их: Настройки сайта → Формы).</li>
+<li><b>Настройки блока:</b> отступы сверху/снизу 0 (и для 480), ширина 12 колонок, фон <code>#0d0f13</code>, название формы «Электромото Зеленоград — запись», якорная ссылка <code>signup</code>, CSS Class Name <code>gm-signup</code>.</li></ol>
+<div class="tbl"><table><tr><th>Поле</th><th>Тип и варианты</th><th>Переменная</th><th>Обязательное</th></tr><tr><td>Имя родителя</td><td>Имя</td><td><code>Name</code></td><td>да</td></tr><tr><td>Телефон</td><td>Телефон, маска «с кодом страны», RU</td><td><code>Phone</code></td><td>да</td></tr><tr><td>Возраст ребёнка</td><td>Выпадающий список: 4, 5, 6, 7, 8, 9, 10, 11, 12, Опытный спортсмен; подсказка «Выберите возраст»</td><td><code>Age</code></td><td>да</td></tr><tr><td>Удобный день</td><td>Варианты (радио): Среда, Суббота, Любой</td><td><code>Day</code></td><td>нет</td></tr><tr><td>Согласие на обработку ПДн</td><td>Галочка, «Отмечено по умолчанию», лейбл со ссылкой на политику</td><td><code>Checkbox</code></td><td>да</td></tr></table></div>
+<p class="warn">Оформление формы (тёмная карточка, жёлтая кнопка, дни-«пилюли», фото на фоне, список «Перезвоним в течение дня…») подтягивается из блока 3 по CSS-классу <code>gm-signup</code>. Без класса форма останется стандартной.</p>
+<h2>4. Блок 3 — подвал и скрипты</h2>
+<ol class="steps"><li>Ещё один <b>T123 «HTML-код»</b> под формой → вставить код ниже → «Сохранить и закрыть».</li>
+<li><b>Опубликовать.</b> Проверять вид только на опубликованной странице: редактор и «Предпросмотр» Тильды код T123 не выполняют.</li>
+<li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM, таблицу и Telegram → удалить тест.</li></ol>
+<section class="file"><div class="head"><div class="meta"><span class="step">блок 3 из 3</span><code class="name">T123 · подвал и скрипты</code>
+<span class="desc">оформление формы, «Как добраться», FAQ, липкая кнопка · 11809 символов</span></div><button class="copy" type="button" data-target="c3">Скопировать код</button></div>
+<textarea class="code" id="c3" readonly spellcheck="false">&lt;!-- БЛОК 3 из 3 (T123): оформление формы Tilda (класс gm-signup), подвал, скрипты. --&gt;
+&lt;style&gt;
+/* Форма записи — стандартный блок Tilda BF204N (t678) с CSS-классом gm-signup (Tilda превращает в uc-gm-signup).
+   Оформлена как секция «Запишите ребёнка на тренировку» из утверждённого дизайна. */
+.uc-gm-signup{--bg:#0d0f13;--card:#171a21;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#ffd400;--accent-ink:#0d0f13;--err:#ff6b6b;
+  position:relative;isolation:isolate;overflow:hidden;background:var(--bg)!important;color:var(--text);font-family:Manrope,Arial,sans-serif}
+.uc-gm-signup .gm-sg-bg{position:absolute;inset:0;z-index:-1;overflow:hidden}
+.uc-gm-signup .gm-sg-bg img{width:100%;height:100%;object-fit:cover;opacity:.25}
+.uc-gm-signup .gm-sg-bg::after{content:&quot;&quot;;position:absolute;inset:0;background:radial-gradient(60% 80% at 20% 30%,rgba(255,212,0,.16),transparent 70%),linear-gradient(180deg,var(--bg),rgba(13,15,19,.7) 40%,var(--bg))}
+.uc-gm-signup .t678{max-width:1180px;margin:0 auto;padding:88px 16px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;box-sizing:border-box}
+.uc-gm-signup .t678&gt;.t-container,.uc-gm-signup .t678&gt;.t-section__container{max-width:none!important;width:auto!important;margin:0!important;padding:0!important;display:block}
+.uc-gm-signup .t-col{width:auto!important;max-width:none!important;margin:0!important;padding:0!important;float:none!important;display:block}
+
+/* левая колонка: шапка блока */
+.uc-gm-signup .gm-sg-kicker{display:inline-flex;align-items:center;gap:8px;font:800 13px Manrope,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.uc-gm-signup .gm-sg-kicker::before{content:&quot;&quot;;width:28px;height:3px;background:var(--accent);transform:skewX(-20deg)}
+.uc-gm-signup .t-section__title{font-family:Unbounded,Manrope,Arial,sans-serif!important;font-weight:900!important;font-size:clamp(26px,4.2vw,48px)!important;line-height:1.02!important;letter-spacing:-.02em;text-transform:uppercase;color:var(--text)!important;text-align:left!important;max-width:none!important;margin:0 0 12px!important}
+.uc-gm-signup .gm-sg-accent{color:var(--accent)}
+.uc-gm-signup .t-section__descr{font-family:Manrope,Arial,sans-serif!important;font-size:17px!important;line-height:1.5!important;color:var(--muted)!important;text-align:left!important;max-width:none!important;margin:0!important;opacity:1!important}
+.uc-gm-signup .gm-sg-perks{list-style:none;margin:24px 0 0;padding:0}
+.uc-gm-signup .gm-sg-perks li{padding:8px 0 8px 30px;position:relative;color:var(--muted);font-size:17px;line-height:1.5}
+.uc-gm-signup .gm-sg-perks li::before{content:&quot;&quot;;position:absolute;left:0;top:13px;width:16px;height:10px;background:var(--accent);clip-path:polygon(0 0,70% 0,100% 50%,70% 100%,0 100%,30% 50%)}
+.uc-gm-signup .gm-sg-call{margin:20px 0 0;color:var(--muted);font-size:17px}
+.uc-gm-signup .gm-sg-call a{font-size:24px;font-weight:800;text-decoration:none;color:var(--accent);white-space:nowrap}
+
+/* правая колонка: карточка формы */
+.uc-gm-signup .t-form{background:rgba(23,26,33,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:28px;padding:32px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7);box-sizing:border-box}
+.uc-gm-signup .t-form__inputsbox{display:flex!important;flex-direction:column;gap:16px}
+.uc-gm-signup .t-input-group{margin:0!important;width:auto!important;padding:0!important}
+.uc-gm-signup .t-input-title{height:auto!important;font:600 14px/1.3 Manrope,Arial,sans-serif!important;color:var(--muted)!important;padding:0 0 6px!important}
+.uc-gm-signup .t-input,.uc-gm-signup .t-select{height:auto!important;min-height:50px;border-radius:12px!important;border:1px solid var(--line)!important;background:var(--bg)!important;color:var(--text)!important;font:16px Manrope,Arial,sans-serif!important;padding:14px 16px!important;box-sizing:border-box;width:100%!important}
+.uc-gm-signup .t-select__wrapper::after{border-top-color:var(--muted)!important}
+.uc-gm-signup .t-select option{background:var(--card);color:var(--text)}
+.uc-gm-signup .t-input-phonemask__wrap{display:flex;align-items:center;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.uc-gm-signup .t-input-phonemask__wrap input{background:transparent!important;border:0!important;color:var(--text)!important}
+.uc-gm-signup .t-input::placeholder{color:var(--muted);opacity:.7}
+.uc-gm-signup .t-input:focus,.uc-gm-signup .t-select:focus,.uc-gm-signup .t-input-phonemask__wrap:focus-within{outline:none;border-color:var(--accent)!important}
+.uc-gm-signup .js-error-control-box .t-input,.uc-gm-signup .js-error-control-box .t-select{border-color:var(--err)!important}
+.uc-gm-signup .t-input-error{color:var(--err)!important;font:14px Manrope,Arial,sans-serif!important}
+
+/* «Удобный день» — пилюли вместо кружков */
+.uc-gm-signup .t-radio__wrapper,.uc-gm-signup .t-radio__wrapper fieldset{display:flex!important;flex-wrap:wrap;gap:8px;margin:0;padding:0;border:0;min-width:0}
+.uc-gm-signup .t-radio__control{display:block!important;position:relative;margin:0!important;width:auto!important;line-height:1.3!important;padding:10px 18px!important;border:1px solid var(--line);border-radius:999px;color:var(--text)!important;font:15px Manrope,Arial,sans-serif!important;cursor:pointer}
+.uc-gm-signup .t-radio__control .t-radio{position:absolute;opacity:0;width:1px;height:1px}
+.uc-gm-signup .t-radio__indicator{display:none!important}
+.uc-gm-signup .t-radio__control:has(.t-radio:checked){background:var(--accent);color:var(--accent-ink)!important;border-color:var(--accent)}
+.uc-gm-signup .t-radio__control:has(.t-radio:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+
+/* согласие */
+.uc-gm-signup .t-checkbox__control{font:400 13px/1.4 Manrope,Arial,sans-serif!important;color:var(--muted)!important;gap:10px;align-items:flex-start}
+.uc-gm-signup .t-checkbox__control a{color:var(--muted)!important;text-decoration:underline}
+.uc-gm-signup .t-checkbox__indicator{border-color:var(--accent)!important;opacity:1!important;flex:none}
+.uc-gm-signup .t-checkbox:checked+.t-checkbox__indicator{background:var(--accent)!important}
+.uc-gm-signup .t-checkbox:checked+.t-checkbox__indicator:after{border-color:var(--accent-ink)!important}
+
+/* кнопка */
+.uc-gm-signup .t-form__submit{display:block!important;width:100%!important;margin:4px 0 0!important;padding:0!important}
+.uc-gm-signup .t-submit{width:100%!important;height:auto!important;min-height:58px;border-radius:14px!important;background:var(--accent)!important;color:var(--accent-ink)!important;border:0!important;font:800 18px Manrope,Arial,sans-serif!important;box-shadow:0 10px 30px -10px rgba(255,212,0,.6)!important;transition:transform .15s,box-shadow .15s}
+.uc-gm-signup .t-submit:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(255,212,0,.8)!important}
+.uc-gm-signup .t-form__successbox{background:var(--card)!important;color:var(--text)!important;border:1px solid var(--accent);border-radius:14px;text-align:center;padding:32px 20px!important;font:800 18px Manrope,Arial,sans-serif!important}
+.uc-gm-signup .t-form__errorbox-wrapper{border-radius:12px}
+
+@media (max-width:900px){
+  .uc-gm-signup .t678{grid-template-columns:1fr;padding:64px 16px}
+  .uc-gm-signup .t-form{padding:24px 18px}
+}
+&lt;/style&gt;
+
+&lt;div class=&quot;gm gm-low&quot;&gt;
+
+  &lt;!-- 11. Адрес и FAQ. TODO: точный адрес картодрома --&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;gm-wrap&quot;&gt;
+      &lt;div class=&quot;gm-kicker gm-reveal&quot;&gt;Адрес&lt;/div&gt;
+      &lt;h2 class=&quot;gm-reveal&quot;&gt;Как добраться&lt;/h2&gt;
+      &lt;div class=&quot;gm-map&quot; style=&quot;margin-top:32px&quot;&gt;
+        &lt;div class=&quot;gm-card gm-reveal&quot;&gt;
+          &lt;h3&gt;📍 Зеленоград&lt;/h3&gt;
+          &lt;p id=&quot;gm-address&quot;&gt;Адрес картодрома уточняйте у администратора&lt;/p&gt;
+          &lt;p style=&quot;margin-top:20px&quot;&gt;&lt;a class=&quot;gm-phone&quot; href=&quot;tel:+79152779121&quot;&gt;+7 915 277-91-21&lt;/a&gt;&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;iframe id=&quot;gm-mapframe&quot; class=&quot;gm-reveal&quot; title=&quot;Карта: картодром в Зеленограде&quot; loading=&quot;lazy&quot;&gt;&lt;/iframe&gt;
+      &lt;/div&gt;
+
+      &lt;h2 class=&quot;gm-reveal&quot; style=&quot;margin-top:88px&quot;&gt;Частые вопросы&lt;/h2&gt;
+      &lt;details&gt;&lt;summary&gt;Ребёнок ни разу не ездил на мотоцикле — подойдёт?&lt;/summary&gt;
+        &lt;p&gt;Да. Занятия начинаются с азов: посадка, газ и тормоз, баланс. Тренер подберёт мотоцикл по росту и возрасту.&lt;/p&gt;&lt;/details&gt;
+      &lt;details&gt;&lt;summary&gt;Чем отличаются классы 50 и 65?&lt;/summary&gt;
+        &lt;p&gt;Это размер и мощность мотоцикла. 50 — для младших и новичков, 65 — для детей постарше и тех, кто уже уверенно едет.&lt;/p&gt;&lt;/details&gt;
+      &lt;details&gt;&lt;summary&gt;Что если на улице дождь?&lt;/summary&gt;
+        &lt;p&gt;Картодром закрытый, поэтому тренировки проходят при любой погоде.&lt;/p&gt;&lt;/details&gt;
+      &lt;details&gt;&lt;summary&gt;Можно ли приходить опытным спортсменам?&lt;/summary&gt;
+        &lt;p&gt;Да, в дни непогоды трасса открыта и для опытных райдеров — уточните свободное время у администратора.&lt;/p&gt;&lt;/details&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;div class=&quot;gm-foot&quot;&gt;&lt;div class=&quot;gm-wrap&quot;&gt;Тренировки на электромотоциклах · Зеленоград · &lt;a href=&quot;tel:+79152779121&quot;&gt;+7 915 277-91-21&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;
+
+  &lt;div class=&quot;gm-sticky&quot; id=&quot;gm-sticky&quot;&gt;&lt;a class=&quot;gm-btn&quot; href=&quot;#signup&quot;&gt;Записаться на тренировку →&lt;/a&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+(function () {
+  var C = window.gmConfig || {}, url = window.gmUrl || function (s) { return s; };
+  function $(id) { return document.getElementById(id); }
+
+  // Карта и адрес
+  if (C.ADDRESS) {
+    $(&#x27;gm-mapframe&#x27;).src = &#x27;https://yandex.ru/map-widget/v1/?z=14&amp;text=&#x27; + encodeURIComponent(C.ADDRESS);
+    $(&#x27;gm-address&#x27;).textContent = C.ADDRESS;
+  }
+
+  // Блок формы Tilda: фон с фото, подпись «Запись», акцент в заголовке, преимущества и телефон
+  var rec = document.querySelector(&#x27;.uc-gm-signup&#x27;);
+  if (rec &amp;&amp; !rec.querySelector(&#x27;.gm-sg-bg&#x27;)) {
+    var bg = document.createElement(&#x27;div&#x27;); bg.className = &#x27;gm-sg-bg&#x27;;
+    if (C.MEDIA &amp;&amp; C.MEDIA.formBg) { var im = new Image(); im.alt = &#x27;&#x27;; im.loading = &#x27;lazy&#x27;; im.src = url(C.MEDIA.formBg); bg.appendChild(im); }
+    rec.insertBefore(bg, rec.firstChild);
+    var title = rec.querySelector(&#x27;.t-section__title&#x27;), descr = rec.querySelector(&#x27;.t-section__descr&#x27;);
+    if (title) {
+      var k = document.createElement(&#x27;div&#x27;); k.className = &#x27;gm-sg-kicker&#x27;; k.textContent = &#x27;Запись&#x27;;
+      title.parentNode.insertBefore(k, title);
+      title.innerHTML = title.innerHTML.replace(/(тренировку)/i, &#x27;&lt;span class=&quot;gm-sg-accent&quot;&gt;$1&lt;/span&gt;&#x27;);
+    }
+    var extra = document.createElement(&#x27;div&#x27;); extra.className = &#x27;gm-sg-extra&#x27;;
+    extra.innerHTML = &#x27;&lt;ul class=&quot;gm-sg-perks&quot;&gt;&lt;li&gt;Перезвоним в течение дня&lt;/li&gt;&lt;li&gt;Подберём удобное время&lt;/li&gt;&#x27; +
+      &#x27;&lt;li&gt;Расскажем, что взять с собой&lt;/li&gt;&lt;/ul&gt;&lt;p class=&quot;gm-sg-call&quot;&gt;Удобнее позвонить? &#x27; +
+      &#x27;&lt;a href=&quot;tel:+79152779121&quot;&gt;+7 915 277-91-21&lt;/a&gt;&lt;/p&gt;&#x27;;
+    (descr || title || rec).insertAdjacentElement(&#x27;afterend&#x27;, extra);
+  }
+
+  // Липкая кнопка на телефоне: видна после первого экрана, прячется у формы
+  var sticky = $(&#x27;gm-sticky&#x27;), hero = $(&#x27;gm-hero&#x27;);
+  if (sticky &amp;&amp; hero &amp;&amp; &#x27;IntersectionObserver&#x27; in window) {
+    var heroOut = false, formIn = false;
+    var upd = function () { sticky.classList.toggle(&#x27;gm-show&#x27;, heroOut &amp;&amp; !formIn); };
+    new IntersectionObserver(function (es) { heroOut = !es[0].isIntersecting; upd(); }).observe(hero);
+    if (rec) new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe(rec);
+  }
+
+  // Появление при прокрутке для нижних секций
+  var low = document.querySelectorAll(&#x27;.gm-low .gm-reveal&#x27;);
+  if (&#x27;IntersectionObserver&#x27; in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.remove(&#x27;gm-pre&#x27;); io.unobserve(e.target); } });
+    }, { rootMargin: &#x27;0px 0px -8% 0px&#x27; });
+    low.forEach(function (el) { if (el.getBoundingClientRect().top &gt; innerHeight) el.classList.add(&#x27;gm-pre&#x27;); io.observe(el); });
+  }
+})();
+&lt;/script&gt;
+</textarea></section>
+</div>
+<script>
+document.querySelectorAll('button.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var ta = document.getElementById(btn.dataset.target);
+    function ok() { btn.textContent = 'Скопировано ✓'; btn.classList.add('done'); setTimeout(function () { btn.textContent = 'Скопировать код'; btn.classList.remove('done'); }, 2500); }
+    ta.focus(); ta.select(); ta.setSelectionRange(0, ta.value.length);
+    var done = false; try { done = document.execCommand('copy'); } catch (e) {}
+    if (done) return ok();
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(ok, function () { btn.textContent = 'Код выделен — нажмите Cmd+C'; });
+    else btn.textContent = 'Код выделен — нажмите Cmd+C';
+  });
+});
+</script>

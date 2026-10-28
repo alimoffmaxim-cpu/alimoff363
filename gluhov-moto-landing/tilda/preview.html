@@ -7,7 +7,8 @@
   Фото и видео подключаются ссылками в CONFIG.MEDIA (в самом конце файла).
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@600;800;900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&family=Unbounded:wght@900&display=swap" rel="stylesheet">
 
 <style>
 .gm{--bg:#0d0f13;--card:#171a21;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#ffd400;--accent-ink:#0d0f13;--hot:#ff5a1f;--err:#ff6b6b;
@@ -514,14 +515,14 @@
           <h3>Для старта</h3>
           <div class="gm-tags"><span>4–7 лет</span><span>Новички</span><span>Мягкая тяга</span></div>
           <p>Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.</p>
-          <img data-media="bike-50.png" width="300" alt="Мотоцикл класса 50" class="gm-class-bike">
+          <img data-media="bike-50.webp" loading="lazy" decoding="async" width="300" alt="Мотоцикл класса 50" class="gm-class-bike">
         </div>
         <div class="gm-card gm-card--hl gm-class gm-reveal">
           <div class="gm-display">65<span class="gm-display-word">Класс</span></div>
           <h3>Для уверенных</h3>
           <div class="gm-tags"><span>7–12 лет</span><span>Опытные</span><span>Больше мощности</span></div>
           <p>Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.</p>
-          <img data-media="bike-65.png" width="360" alt="Мотоцикл класса 65" class="gm-class-bike">
+          <img data-media="bike-65.webp" loading="lazy" decoding="async" width="360" alt="Мотоцикл класса 65" class="gm-class-bike">
         </div>
       </div>
     </div>
@@ -626,7 +627,7 @@
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
     // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
-    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@803dcd87a172/gluhov-moto-landing/media/',
+    MEDIA_BASE: 'https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@480636f55fd2/gluhov-moto-landing/media/',
     MEDIA: {
       heroVideo: 'hero.mp4',      // .mp4 без звука, крутится фоном на первом экране (горизонтальный, для компьютера)
       heroImage: 'hero.jpg',      // обложка, пока грузится видео
@@ -671,9 +672,15 @@
   var heroV = mob && M.heroVideoMobile || M.heroVideo, heroI = mob && M.heroImageMobile || M.heroImage;
   if (heroV) {
     var v = document.createElement('video');
-    v.src = url(heroV); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.preload = 'none';
     v.setAttribute('playsinline', ''); if (heroI) v.poster = url(heroI);
     heroMedia.appendChild(v); hero.classList.remove('gm-hero--art');
+    // видео грузим после загрузки страницы (сначала видна обложка); при экономии трафика и 2G — только обложка
+    var conn = navigator.connection || {};
+    if (!conn.saveData && !/2g/.test(conn.effectiveType || '')) {
+      var startHero = function () { setTimeout(function () { v.src = url(heroV); v.play && v.play().catch(function () {}); }, 200); };
+      if (document.readyState === 'complete') startHero(); else window.addEventListener('load', startHero);
+    }
   } else if (heroI) {
     heroMedia.appendChild(img(heroI, '')); hero.classList.remove('gm-hero--art');
   }

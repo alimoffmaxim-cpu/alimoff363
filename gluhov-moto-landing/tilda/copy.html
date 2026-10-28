@@ -32,7 +32,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <h2>2. Блок 1 — основная часть</h2>
 <ol class="steps"><li><b>Все блоки → Другое → T123 «HTML-код»</b> → «Контент».</li><li>«Скопировать код» ниже → вставить целиком → «Сохранить и закрыть».</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 1 из 3</span><code class="name">T123 · основная часть</code>
-<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 123612 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
+<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 124209 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
 <textarea class="code" id="c1" readonly spellcheck="false">&lt;!--
   БЛОК 1 из 3 (T123). Дальше — блок формы BF204N, затем блок 3 (T123).
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
@@ -41,7 +41,8 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
   Фото и видео подключаются ссылками в CONFIG.MEDIA (в самом конце файла).
 --&gt;
 &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Unbounded:wght@600;800;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Unbounded:wght@900&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
 
 &lt;style&gt;
 .gm{--bg:#0d0f13;--card:#171a21;--line:#2a2f3a;--text:#f3f4f6;--muted:#a3a9b6;--accent:#ffd400;--accent-ink:#0d0f13;--hot:#ff5a1f;--err:#ff6b6b;
@@ -548,14 +549,14 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
           &lt;h3&gt;Для старта&lt;/h3&gt;
           &lt;div class=&quot;gm-tags&quot;&gt;&lt;span&gt;4–7 лет&lt;/span&gt;&lt;span&gt;Новички&lt;/span&gt;&lt;span&gt;Мягкая тяга&lt;/span&gt;&lt;/div&gt;
           &lt;p&gt;Первые круги, баланс, газ и тормоз. Ребёнок привыкает к мотоциклу без страха.&lt;/p&gt;
-          &lt;img data-media=&quot;bike-50.png&quot; width=&quot;300&quot; alt=&quot;Мотоцикл класса 50&quot; class=&quot;gm-class-bike&quot;&gt;
+          &lt;img data-media=&quot;bike-50.webp&quot; loading=&quot;lazy&quot; decoding=&quot;async&quot; width=&quot;300&quot; alt=&quot;Мотоцикл класса 50&quot; class=&quot;gm-class-bike&quot;&gt;
         &lt;/div&gt;
         &lt;div class=&quot;gm-card gm-card--hl gm-class gm-reveal&quot;&gt;
           &lt;div class=&quot;gm-display&quot;&gt;65&lt;span class=&quot;gm-display-word&quot;&gt;Класс&lt;/span&gt;&lt;/div&gt;
           &lt;h3&gt;Для уверенных&lt;/h3&gt;
           &lt;div class=&quot;gm-tags&quot;&gt;&lt;span&gt;7–12 лет&lt;/span&gt;&lt;span&gt;Опытные&lt;/span&gt;&lt;span&gt;Больше мощности&lt;/span&gt;&lt;/div&gt;
           &lt;p&gt;Больше скорости, виражи, подъёмы и спуски. Подготовка к соревнованиям.&lt;/p&gt;
-          &lt;img data-media=&quot;bike-65.png&quot; width=&quot;360&quot; alt=&quot;Мотоцикл класса 65&quot; class=&quot;gm-class-bike&quot;&gt;
+          &lt;img data-media=&quot;bike-65.webp&quot; loading=&quot;lazy&quot; decoding=&quot;async&quot; width=&quot;360&quot; alt=&quot;Мотоцикл класса 65&quot; class=&quot;gm-class-bike&quot;&gt;
         &lt;/div&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -660,7 +661,7 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 
     // Фото и видео. Короткие имена берутся из папки MEDIA_BASE (папка media/ в репозитории),
     // полные ссылки (https://…) — как есть. Пустое поле — остаётся иллюстрация. Подробно — README.
-    MEDIA_BASE: &#x27;https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@803dcd87a172/gluhov-moto-landing/media/&#x27;,
+    MEDIA_BASE: &#x27;https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@480636f55fd2/gluhov-moto-landing/media/&#x27;,
     MEDIA: {
       heroVideo: &#x27;hero.mp4&#x27;,      // .mp4 без звука, крутится фоном на первом экране (горизонтальный, для компьютера)
       heroImage: &#x27;hero.jpg&#x27;,      // обложка, пока грузится видео
@@ -705,9 +706,15 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
   var heroV = mob &amp;&amp; M.heroVideoMobile || M.heroVideo, heroI = mob &amp;&amp; M.heroImageMobile || M.heroImage;
   if (heroV) {
     var v = document.createElement(&#x27;video&#x27;);
-    v.src = url(heroV); v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true;
+    v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.preload = &#x27;none&#x27;;
     v.setAttribute(&#x27;playsinline&#x27;, &#x27;&#x27;); if (heroI) v.poster = url(heroI);
     heroMedia.appendChild(v); hero.classList.remove(&#x27;gm-hero--art&#x27;);
+    // видео грузим после загрузки страницы (сначала видна обложка); при экономии трафика и 2G — только обложка
+    var conn = navigator.connection || {};
+    if (!conn.saveData &amp;&amp; !/2g/.test(conn.effectiveType || &#x27;&#x27;)) {
+      var startHero = function () { setTimeout(function () { v.src = url(heroV); v.play &amp;&amp; v.play().catch(function () {}); }, 200); };
+      if (document.readyState === &#x27;complete&#x27;) startHero(); else window.addEventListener(&#x27;load&#x27;, startHero);
+    }
   } else if (heroI) {
     heroMedia.appendChild(img(heroI, &#x27;&#x27;)); hero.classList.remove(&#x27;gm-hero--art&#x27;);
   }

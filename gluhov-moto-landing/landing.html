@@ -219,6 +219,7 @@
   #gm .gm-reels{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;margin:0 -16px 16px;padding:0 16px;scrollbar-width:none}
   #gm .gm-reel{flex:0 0 62%;scroll-snap-align:center}
   #gm .gm-gallery{grid-template-columns:1fr 1fr;grid-auto-rows:160px}
+  #gm .gm-gallery figure:first-child{grid-row:span 3}
   #gm form{padding:24px 18px}
   #gm .gm-actions .gm-btn{width:100%}
   #gm .gm-class .gm-display{font-size:72px}
@@ -721,7 +722,7 @@
       features: ['track-top.jpg', 'bikes.jpg', 'rider-blue.jpg', ''],
       // галерея: { src, caption }
       gallery: [
-        { src: 'rider-yellow.jpg', caption: 'На трассе' },
+        { src: 'rider-yellow.jpg', caption: 'На трассе', pos: '50% 60%' },
         { src: 'kids-bikes.jpg', caption: 'Наши райдеры' },
         { src: 'kids-walk.jpg', caption: 'Идём на старт' },
         { src: 'rider-red.jpg', caption: 'Вираж' },

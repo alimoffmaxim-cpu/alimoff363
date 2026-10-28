@@ -191,7 +191,19 @@
 .gm summary::after{content:"+";position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(255,212,0,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
 .gm details[open] summary::after{transform:rotate(45deg)}
 .gm details p{margin-top:10px}
-.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);line-height:1.9}
+.gm .gm-foot a{color:var(--muted)}
+.gm .gm-foot a:hover{color:var(--accent)}
+
+/* ---------- Уведомление о cookie ---------- */
+.gm .gm-cookie{position:fixed;left:24px;bottom:24px;z-index:10000;max-width:520px;padding:18px 20px;border-radius:20px;background:#171a21;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px -20px rgba(0,0,0,.7);font-size:14px;line-height:1.45;color:#d5d9e1}
+.gm .gm-cookie[hidden]{display:none}
+.gm .gm-cookie p{margin:0 0 12px}
+.gm .gm-cookie a{color:var(--accent)}
+.gm .gm-cookie-btns{display:flex;flex-wrap:wrap;gap:10px}
+.gm .gm-cookie .gm-btn{min-height:42px;padding:0 20px;font-size:14px}
+.gm .gm-cookie-min{min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:none;color:#eef0f4;font:600 14px Manrope,Arial,sans-serif;cursor:pointer}
+@media (max-width:640px){.gm .gm-cookie{left:12px;right:12px;bottom:84px;max-width:none;padding:16px}}
 
 /* ---------- Липкая кнопка на телефоне ---------- */
 .gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
@@ -620,6 +632,10 @@
 <script>
 (function () {
   var CONFIG = {
+    // номер счётчика Яндекс Метрики. Счётчик запускается этим кодом только после «Принять» в уведомлении о cookie,
+    // поэтому в «Настройках сайта» Тильды Метрику НЕ подключать (иначе она пишет данные без согласия)
+    METRIKA_ID: 0,
+    GOAL: 'lead_form_submit',
     // TODO: проверить адрес — он же используется для карты
     // карта: точка ZelenoKART (OSM 56.000764, 37.256615), жёлтая метка, без списка результатов
     MAP_URL: 'https://yandex.ru/map-widget/v1/?ll=37.256615%2C56.000764&z=16&pt=37.256615%2C56.000764%2Cpm2ylm',
@@ -1110,6 +1126,8 @@
 
   }
 
+
+
 })();
 </script>
 <div id="rec000" class="r t-rec uc-gm-signup" data-record-type="678"><a name="signup"></a><div id="signup"></div>
@@ -1124,8 +1142,8 @@
 <div class="t-input-group t-input-group_sb" data-field-name="Age"><label class="t-input-title t-descr t-descr_md">Возраст ребёнка</label><div class="t-input-block"><div class="t-select__wrapper"><select name="Age" class="t-select"><option value="">Выберите возраст</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="Опытный спортсмен">Опытный спортсмен</option></select></div></div><div class="t-input-error"></div></div>
 <div class="t-input-group t-input-group_rd" data-field-name="Day"><label class="t-input-title t-descr t-descr_md">Удобный день</label><div class="t-input-block"><div class="t-radio__wrapper"><label class="t-radio__control t-text t-text_xs"><input type="radio" name="Day" value="Среда" class="t-radio"><div class="t-radio__indicator"></div>Среда</label><label class="t-radio__control t-text t-text_xs"><input type="radio" name="Day" value="Суббота" class="t-radio"><div class="t-radio__indicator"></div>Суббота</label><label class="t-radio__control t-text t-text_xs"><input type="radio" name="Day" value="Любой" class="t-radio" checked><div class="t-radio__indicator"></div>Любой</label></div></div><div class="t-input-error"></div></div>
 <div class="t-input-group t-input-group_cb"><div class="t-input-block"><label class="t-checkbox__control t-checkbox__control_flex t-text t-text_xs">
-<input type="checkbox" name="Checkbox" value="yes" class="t-checkbox" checked><div class="t-checkbox__indicator"></div>
-<span>Согласен(на) на обработку персональных данных в соответствии с <a href="#">политикой конфиденциальности</a></span></label></div></div>
+<input type="checkbox" name="Checkbox" value="yes" class="t-checkbox"><div class="t-checkbox__indicator"></div>
+<span>Я даю <a href="/consent-moto" target="_blank">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="/privacy-moto" target="_blank">политикой обработки персональных данных</a></span></label></div></div>
 <div class="t-form__submit"><button class="t-submit t-btnflex t-btnflex_type_submit t-btnflex_md" type="submit"><span class="t-btnflex__text">Отправить заявку →</span></button></div>
 </div></form></div></div></div></div></div>
 <!-- БЛОК 3 из 3 (T123): оформление формы Tilda (класс gm-signup), подвал, скрипты. -->
@@ -1222,9 +1240,14 @@
     </div>
   </section>
 
-  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград</div></div>
+  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград<br>
+    <a href="/privacy-moto">Политика обработки персональных данных</a> · <a href="/consent-moto">Согласие на обработку персональных данных</a></div></div>
 
   <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#signup">Записаться на тренировку →</a></div>
+  <div class="gm-cookie" id="gm-cookie" role="region" aria-label="Уведомление о cookie" hidden>
+    <p>Мы используем cookie: необходимые — для работы сайта, аналитические — только с вашего согласия. <a href="/privacy-moto" target="_blank" rel="noopener">Подробнее</a></p>
+    <div class="gm-cookie-btns"><button class="gm-btn" type="button" data-ck="all">Принять</button><button class="gm-cookie-min" type="button" data-ck="min">Только необходимые</button></div>
+  </div>
 </div>
 
 <script>
@@ -1265,6 +1288,15 @@
     if (rec) new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe(rec);
   }
 
+  // Цель Метрики при успешной отправке формы Tilda (счётчик есть только после согласия на cookie)
+  var lastGoal = 0;
+  var onLead = function () {
+    if (Date.now() - lastGoal < 3000) return; lastGoal = Date.now();
+    if (C.METRIKA_ID && window.ym) window.ym(C.METRIKA_ID, 'reachGoal', C.GOAL || 'lead_form_submit');
+  };
+  document.addEventListener('tildaform:aftersuccess', onLead);
+  if (window.jQuery) window.jQuery(document).on('tildaform:aftersuccess', onLead);
+
   // Появление при прокрутке для нижних секций
   var low = document.querySelectorAll('.gm-low .gm-reveal');
   if ('IntersectionObserver' in window) {
@@ -1274,5 +1306,28 @@
     low.forEach(function (el) { if (el.getBoundingClientRect().top > innerHeight) el.classList.add('gm-pre'); io.observe(el); });
   }
 })();
+
+  /* ---------- cookie-start: уведомление о cookie и Яндекс Метрика только после «Принять» ---------- */
+  (function () {
+    var CFG = typeof CONFIG !== 'undefined' ? CONFIG : (window.gmConfig || {});
+    var box = document.getElementById('gm-cookie'), KEY = 'gm-cookie-choice', choice = null;
+    try { choice = localStorage.getItem(KEY); } catch (e) {}
+    function metrika() {
+      var id = CFG.METRIKA_ID; if (!id || window.ym) return;
+      (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
+        k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+      })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+      window.ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+    }
+    if (choice === 'all') metrika();
+    if (!box) return;
+    if (!choice) box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var v = e.target.getAttribute && e.target.getAttribute('data-ck'); if (!v) return;
+      try { localStorage.setItem(KEY, v); } catch (er) {}
+      box.hidden = true; if (v === 'all') metrika();
+    });
+  })();
+  /* ---------- cookie-end ---------- */
 </script>
 </body></html>

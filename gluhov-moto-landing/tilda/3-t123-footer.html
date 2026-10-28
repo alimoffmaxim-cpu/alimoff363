@@ -92,9 +92,14 @@
     </div>
   </section>
 
-  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград</div></div>
+  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград<br>
+    <a href="/privacy-moto">Политика обработки персональных данных</a> · <a href="/consent-moto">Согласие на обработку персональных данных</a></div></div>
 
   <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#signup">Записаться на тренировку →</a></div>
+  <div class="gm-cookie" id="gm-cookie" role="region" aria-label="Уведомление о cookie" hidden>
+    <p>Мы используем cookie: необходимые — для работы сайта, аналитические — только с вашего согласия. <a href="/privacy-moto" target="_blank" rel="noopener">Подробнее</a></p>
+    <div class="gm-cookie-btns"><button class="gm-btn" type="button" data-ck="all">Принять</button><button class="gm-cookie-min" type="button" data-ck="min">Только необходимые</button></div>
+  </div>
 </div>
 
 <script>
@@ -135,6 +140,15 @@
     if (rec) new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe(rec);
   }
 
+  // Цель Метрики при успешной отправке формы Tilda (счётчик есть только после согласия на cookie)
+  var lastGoal = 0;
+  var onLead = function () {
+    if (Date.now() - lastGoal < 3000) return; lastGoal = Date.now();
+    if (C.METRIKA_ID && window.ym) window.ym(C.METRIKA_ID, 'reachGoal', C.GOAL || 'lead_form_submit');
+  };
+  document.addEventListener('tildaform:aftersuccess', onLead);
+  if (window.jQuery) window.jQuery(document).on('tildaform:aftersuccess', onLead);
+
   // Появление при прокрутке для нижних секций
   var low = document.querySelectorAll('.gm-low .gm-reveal');
   if ('IntersectionObserver' in window) {
@@ -144,4 +158,27 @@
     low.forEach(function (el) { if (el.getBoundingClientRect().top > innerHeight) el.classList.add('gm-pre'); io.observe(el); });
   }
 })();
+
+  /* ---------- cookie-start: уведомление о cookie и Яндекс Метрика только после «Принять» ---------- */
+  (function () {
+    var CFG = typeof CONFIG !== 'undefined' ? CONFIG : (window.gmConfig || {});
+    var box = document.getElementById('gm-cookie'), KEY = 'gm-cookie-choice', choice = null;
+    try { choice = localStorage.getItem(KEY); } catch (e) {}
+    function metrika() {
+      var id = CFG.METRIKA_ID; if (!id || window.ym) return;
+      (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
+        k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+      })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+      window.ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+    }
+    if (choice === 'all') metrika();
+    if (!box) return;
+    if (!choice) box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var v = e.target.getAttribute && e.target.getAttribute('data-ck'); if (!v) return;
+      try { localStorage.setItem(KEY, v); } catch (er) {}
+      box.hidden = true; if (v === 'all') metrika();
+    });
+  })();
+  /* ---------- cookie-end ---------- */
 </script>

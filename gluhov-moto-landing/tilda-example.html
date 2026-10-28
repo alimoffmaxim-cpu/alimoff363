@@ -1,7 +1,7 @@
 <!--
   ПРИМЕР ДЛЯ ТИЛЬДЫ (демо): вставьте этот файл целиком в блок «Другое → T123 HTML-код».
   Форма работает в демо-режиме: показывает «Спасибо», но заявку никуда не отправляет.
-  Чтобы заявки шли в таблицу/Telegram/почту — README, шаги 1–3, затем впишите SCRIPT_URL в CONFIG.
+  Чтобы заявки шли на почту/в таблицу — README, шаги 1–3, затем впишите SCRIPT_URL в CONFIG.
 -->
 <!--
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
@@ -194,7 +194,19 @@
 #gm summary::after{content:"+";position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(255,212,0,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
 #gm details[open] summary::after{transform:rotate(45deg)}
 #gm details p{margin-top:10px}
-#gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+#gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);line-height:1.9}
+#gm .gm-foot a{color:var(--muted)}
+#gm .gm-foot a:hover{color:var(--accent)}
+
+/* ---------- Уведомление о cookie ---------- */
+#gm .gm-cookie{position:fixed;left:24px;bottom:24px;z-index:10000;max-width:520px;padding:18px 20px;border-radius:20px;background:#171a21;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px -20px rgba(0,0,0,.7);font-size:14px;line-height:1.45;color:#d5d9e1}
+#gm .gm-cookie[hidden]{display:none}
+#gm .gm-cookie p{margin:0 0 12px}
+#gm .gm-cookie a{color:var(--accent)}
+#gm .gm-cookie-btns{display:flex;flex-wrap:wrap;gap:10px}
+#gm .gm-cookie .gm-btn{min-height:42px;padding:0 20px;font-size:14px}
+#gm .gm-cookie-min{min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:none;color:#eef0f4;font:600 14px Manrope,Arial,sans-serif;cursor:pointer}
+@media (max-width:640px){#gm .gm-cookie{left:12px;right:12px;bottom:84px;max-width:none;padding:16px}}
 
 /* ---------- Липкая кнопка на телефоне ---------- */
 #gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
@@ -650,8 +662,8 @@
           </div>
           <input class="gm-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
           <label class="gm-consent"><input type="checkbox" name="consent" required>
-            <!-- TODO: ссылка на политику обработки персональных данных -->
-            <span>Согласен(на) на обработку персональных данных в соответствии с <a href="#" target="_blank" rel="noopener">политикой конфиденциальности</a></span></label>
+            <!-- согласие — отдельный документ (152-ФЗ, ст. 9, с 01.09.2025); галочка НЕ отмечена по умолчанию -->
+            <span>Я даю <a href="/consent-moto" target="_blank" rel="noopener">согласие на обработку персональных данных</a> и ознакомлен(а) с <a href="/privacy-moto" target="_blank" rel="noopener">политикой обработки персональных данных</a></span></label>
           <div class="gm-err" role="alert"></div>
           <button class="gm-btn" type="submit">Отправить заявку →</button>
         </form>
@@ -690,9 +702,14 @@
     </div>
   </section>
 
-  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград</div></div>
+  <div class="gm-foot"><div class="gm-wrap">Тренировки на электромотоциклах · Зеленоград<br>
+    <a href="/privacy-moto">Политика обработки персональных данных</a> · <a href="/consent-moto">Согласие на обработку персональных данных</a></div></div>
 
   <div class="gm-sticky" id="gm-sticky"><a class="gm-btn" href="#gm-form">Записаться на тренировку →</a></div>
+  <div class="gm-cookie" id="gm-cookie" role="region" aria-label="Уведомление о cookie" hidden>
+    <p>Мы используем cookie: необходимые — для работы сайта, аналитические — только с вашего согласия. <a href="/privacy-moto" target="_blank" rel="noopener">Подробнее</a></p>
+    <div class="gm-cookie-btns"><button class="gm-btn" type="button" data-ck="all">Принять</button><button class="gm-cookie-min" type="button" data-ck="min">Только необходимые</button></div>
+  </div>
   <div class="gm-lightbox" id="gm-lightbox"><img alt=""></div>
 </div>
 
@@ -701,7 +718,8 @@
   var CONFIG = {
     // TODO: URL веб-приложения Apps Script (README, шаг 2)
     SCRIPT_URL: 'https://script.google.com/macros/s/XXXXXXXX/exec',
-    // TODO: номер счётчика Яндекс.Метрики (если счётчик подключён в настройках Тильды)
+    // номер счётчика Яндекс Метрики. Счётчик запускается этим кодом только после «Принять» в уведомлении о cookie,
+    // поэтому в «Настройках сайта» Тильды Метрику НЕ подключать (иначе она пишет данные без согласия)
     METRIKA_ID: 0,
     GOAL: 'lead_form_submit',
     // TODO: проверить адрес — он же используется для карты
@@ -1199,6 +1217,29 @@
     new IntersectionObserver(function (es) { heroOut = !es[0].isIntersecting; upd(); }).observe(hero);
     new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe($('gm-form'));
   }
+
+  /* ---------- cookie-start: уведомление о cookie и Яндекс Метрика только после «Принять» ---------- */
+  (function () {
+    var CFG = typeof CONFIG !== 'undefined' ? CONFIG : (window.gmConfig || {});
+    var box = document.getElementById('gm-cookie'), KEY = 'gm-cookie-choice', choice = null;
+    try { choice = localStorage.getItem(KEY); } catch (e) {}
+    function metrika() {
+      var id = CFG.METRIKA_ID; if (!id || window.ym) return;
+      (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
+        k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+      })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+      window.ym(id, 'init', { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+    }
+    if (choice === 'all') metrika();
+    if (!box) return;
+    if (!choice) box.hidden = false;
+    box.addEventListener('click', function (e) {
+      var v = e.target.getAttribute && e.target.getAttribute('data-ck'); if (!v) return;
+      try { localStorage.setItem(KEY, v); } catch (er) {}
+      box.hidden = true; if (v === 'all') metrika();
+    });
+  })();
+  /* ---------- cookie-end ---------- */
 
   /* ---------- Форма ---------- */
   var form = $('gm-lead');

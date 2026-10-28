@@ -25,14 +25,15 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
 <div class="wrap">
 <h1>Электромото Зеленоград: блоки для Tilda</h1>
-<p class="lead">Страница в Тильде собирается из трёх блоков сверху вниз: HTML-код, стандартная форма Тильды, HTML-код. Дизайн один в один с утверждённым макетом; форма — стандартная, поэтому заявки уходят в Tilda CRM, Google Таблицу, Telegram и на почту.</p>
+<p class="lead">Страница в Тильде собирается из трёх блоков сверху вниз: HTML-код, стандартная форма Тильды, HTML-код. Дизайн один в один с утверждённым макетом; форма — стандартная, заявки уходят в Tilda CRM и на почту. Плюс две страницы: политика и согласие на обработку персональных данных.</p>
+<p class="warn"><b>Связь — только через форму.</b> Не подключать в Тильде виджеты мессенджеров и обратного звонка, соцсети в шапке и подвале проекта, Telegram и Google Таблицу как приёмщики заявок (данные россиян нельзя хранить в зарубежных базах — 152-ФЗ, ч. 5 ст. 18). Яндекс Метрику не подключать в «Настройках сайта»: её запускает код страницы после согласия на cookie — впишите номер счётчика в <code>METRIKA_ID</code> в блоке 1.</p>
 <h2>1. Новая страница</h2>
 <ol class="steps"><li>Мои сайты → проект → <b>Создать новую страницу</b> → «Пустая страница».</li>
 <li>Настройки страницы: заголовок «Электромотоциклы для детей в Зеленограде», адрес, например <code>/moto-zelenograd</code>.</li></ol>
 <h2>2. Блок 1 — основная часть</h2>
 <ol class="steps"><li><b>Все блоки → Другое → T123 «HTML-код»</b> → «Контент».</li><li>«Скопировать код» ниже → вставить целиком → «Сохранить и закрыть».</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 1 из 3</span><code class="name">T123 · основная часть</code>
-<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 124209 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
+<span class="desc">шрифты, стили, всё до формы, 3D-трасса · 125424 символов</span></div><button class="copy" type="button" data-target="c1">Скопировать код</button></div>
 <textarea class="code" id="c1" readonly spellcheck="false">&lt;!--
   БЛОК 1 из 3 (T123). Дальше — блок формы BF204N, затем блок 3 (T123).
   Лендинг «Электромотоциклы в Зеленограде» для Тильды.
@@ -225,7 +226,19 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 .gm summary::after{content:&quot;+&quot;;position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(255,212,0,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
 .gm details[open] summary::after{transform:rotate(45deg)}
 .gm details p{margin-top:10px}
-.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);line-height:1.9}
+.gm .gm-foot a{color:var(--muted)}
+.gm .gm-foot a:hover{color:var(--accent)}
+
+/* ---------- Уведомление о cookie ---------- */
+.gm .gm-cookie{position:fixed;left:24px;bottom:24px;z-index:10000;max-width:520px;padding:18px 20px;border-radius:20px;background:#171a21;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px -20px rgba(0,0,0,.7);font-size:14px;line-height:1.45;color:#d5d9e1}
+.gm .gm-cookie[hidden]{display:none}
+.gm .gm-cookie p{margin:0 0 12px}
+.gm .gm-cookie a{color:var(--accent)}
+.gm .gm-cookie-btns{display:flex;flex-wrap:wrap;gap:10px}
+.gm .gm-cookie .gm-btn{min-height:42px;padding:0 20px;font-size:14px}
+.gm .gm-cookie-min{min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:none;color:#eef0f4;font:600 14px Manrope,Arial,sans-serif;cursor:pointer}
+@media (max-width:640px){.gm .gm-cookie{left:12px;right:12px;bottom:84px;max-width:none;padding:16px}}
 
 /* ---------- Липкая кнопка на телефоне ---------- */
 .gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
@@ -654,6 +667,10 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 &lt;script&gt;
 (function () {
   var CONFIG = {
+    // номер счётчика Яндекс Метрики. Счётчик запускается этим кодом только после «Принять» в уведомлении о cookie,
+    // поэтому в «Настройках сайта» Тильды Метрику НЕ подключать (иначе она пишет данные без согласия)
+    METRIKA_ID: 0,
+    GOAL: &#x27;lead_form_submit&#x27;,
     // TODO: проверить адрес — он же используется для карты
     // карта: точка ZelenoKART (OSM 56.000764, 37.256615), жёлтая метка, без списка результатов
     MAP_URL: &#x27;https://yandex.ru/map-widget/v1/?ll=37.256615%2C56.000764&amp;z=16&amp;pt=37.256615%2C56.000764%2Cpm2ylm&#x27;,
@@ -1144,6 +1161,8 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 
   }
 
+
+
 })();
 &lt;/script&gt;
 </textarea></section>
@@ -1152,16 +1171,17 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
 <li><b>Контент → Шапка блока:</b> заголовок «Запишите ребёнка на тренировку», описание «Оставьте заявку — администратор перезвонит, подберёт группу и класс мотоцикла и ответит на все вопросы.»</li>
 <li><b>Контент → Поля для ввода</b> — как в таблице; Email и прочие лишние поля удалить.</li>
 <li><b>Текст кнопки:</b> «Отправить заявку →». <b>Сообщение об успехе:</b> «Спасибо! Администратор перезвонит вам в ближайшее время.»</li>
-<li><b>Контент → Приём данных:</b> отметить Tilda CRM, Google Таблицу, Telegram и/или Email (сначала подключить их: Настройки сайта → Формы).</li>
+<li><b>Контент → Приём данных:</b> отметить Tilda CRM и Email на российском почтовом сервисе (сначала подключить: Настройки сайта → Формы). Telegram и Google Таблицу не подключать.</li>
+<li><b>Поле «Согласие»:</b> галочка не отмечена по умолчанию, лейбл — этот HTML: <code>Я даю &lt;a href=&quot;/consent-moto&quot; target=&quot;_blank&quot;&gt;согласие на обработку персональных данных&lt;/a&gt; и ознакомлен(а) с &lt;a href=&quot;/privacy-moto&quot; target=&quot;_blank&quot;&gt;политикой обработки персональных данных&lt;/a&gt;</code></li>
 <li><b>Настройки блока:</b> отступы сверху/снизу 0 (и для 480), ширина 12 колонок, фон <code>#0d0f13</code>, название формы «Электромото Зеленоград — запись», якорная ссылка <code>signup</code>, CSS Class Name <code>gm-signup</code>.</li></ol>
-<div class="tbl"><table><tr><th>Поле</th><th>Тип и варианты</th><th>Переменная</th><th>Обязательное</th></tr><tr><td>Имя родителя</td><td>Имя</td><td><code>Name</code></td><td>да</td></tr><tr><td>Телефон</td><td>Телефон, маска «с кодом страны», RU</td><td><code>Phone</code></td><td>да</td></tr><tr><td>Возраст ребёнка</td><td>Выпадающий список: 4, 5, 6, 7, 8, 9, 10, 11, 12, Опытный спортсмен; подсказка «Выберите возраст»</td><td><code>Age</code></td><td>да</td></tr><tr><td>Удобный день</td><td>Варианты (радио): Среда, Суббота, Любой</td><td><code>Day</code></td><td>нет</td></tr><tr><td>Согласие на обработку ПДн</td><td>Галочка, «Отмечено по умолчанию», лейбл со ссылкой на политику</td><td><code>Checkbox</code></td><td>да</td></tr></table></div>
+<div class="tbl"><table><tr><th>Поле</th><th>Тип и варианты</th><th>Переменная</th><th>Обязательное</th></tr><tr><td>Имя родителя</td><td>Имя</td><td><code>Name</code></td><td>да</td></tr><tr><td>Телефон</td><td>Телефон, маска «с кодом страны», RU</td><td><code>Phone</code></td><td>да</td></tr><tr><td>Возраст ребёнка</td><td>Выпадающий список: 4, 5, 6, 7, 8, 9, 10, 11, 12, Опытный спортсмен; подсказка «Выберите возраст»</td><td><code>Age</code></td><td>да</td></tr><tr><td>Удобный день</td><td>Варианты (радио): Среда, Суббота, Любой</td><td><code>Day</code></td><td>нет</td></tr><tr><td>Согласие на обработку ПДн</td><td>Галочка. «Отмечено по умолчанию» — <b>ВЫКЛЮЧИТЬ</b> (152-ФЗ: согласие — отдельное действие). Лейбл — HTML ниже</td><td><code>Checkbox</code></td><td>да</td></tr></table></div>
 <p class="warn">Оформление формы (тёмная карточка, жёлтая кнопка, дни-«пилюли», фото на фоне, список «Перезвоним в течение дня…») подтягивается из блока 3 по CSS-классу <code>gm-signup</code>. Без класса форма останется стандартной.</p>
 <h2>4. Блок 3 — подвал и скрипты</h2>
 <ol class="steps"><li>Ещё один <b>T123 «HTML-код»</b> под формой → вставить код ниже → «Сохранить и закрыть».</li>
 <li><b>Опубликовать.</b> Проверять вид только на опубликованной странице: редактор и «Предпросмотр» Тильды код T123 не выполняют.</li>
-<li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM, таблицу и Telegram → удалить тест.</li></ol>
+<li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM и почту → удалить тест.</li></ol>
 <section class="file"><div class="head"><div class="meta"><span class="step">блок 3 из 3</span><code class="name">T123 · подвал и скрипты</code>
-<span class="desc">оформление формы, «Как добраться», FAQ, липкая кнопка · 11471 символов</span></div><button class="copy" type="button" data-target="c3">Скопировать код</button></div>
+<span class="desc">оформление формы, «Как добраться», FAQ, липкая кнопка, cookie · 13851 символов</span></div><button class="copy" type="button" data-target="c3">Скопировать код</button></div>
 <textarea class="code" id="c3" readonly spellcheck="false">&lt;!-- БЛОК 3 из 3 (T123): оформление формы Tilda (класс gm-signup), подвал, скрипты. --&gt;
 &lt;style&gt;
 /* Форма записи — стандартный блок Tilda BF204N (t678) с CSS-классом gm-signup (Tilda превращает в uc-gm-signup).
@@ -1256,9 +1276,14 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
     &lt;/div&gt;
   &lt;/section&gt;
 
-  &lt;div class=&quot;gm-foot&quot;&gt;&lt;div class=&quot;gm-wrap&quot;&gt;Тренировки на электромотоциклах · Зеленоград&lt;/div&gt;&lt;/div&gt;
+  &lt;div class=&quot;gm-foot&quot;&gt;&lt;div class=&quot;gm-wrap&quot;&gt;Тренировки на электромотоциклах · Зеленоград&lt;br&gt;
+    &lt;a href=&quot;/privacy-moto&quot;&gt;Политика обработки персональных данных&lt;/a&gt; · &lt;a href=&quot;/consent-moto&quot;&gt;Согласие на обработку персональных данных&lt;/a&gt;&lt;/div&gt;&lt;/div&gt;
 
   &lt;div class=&quot;gm-sticky&quot; id=&quot;gm-sticky&quot;&gt;&lt;a class=&quot;gm-btn&quot; href=&quot;#signup&quot;&gt;Записаться на тренировку →&lt;/a&gt;&lt;/div&gt;
+  &lt;div class=&quot;gm-cookie&quot; id=&quot;gm-cookie&quot; role=&quot;region&quot; aria-label=&quot;Уведомление о cookie&quot; hidden&gt;
+    &lt;p&gt;Мы используем cookie: необходимые — для работы сайта, аналитические — только с вашего согласия. &lt;a href=&quot;/privacy-moto&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Подробнее&lt;/a&gt;&lt;/p&gt;
+    &lt;div class=&quot;gm-cookie-btns&quot;&gt;&lt;button class=&quot;gm-btn&quot; type=&quot;button&quot; data-ck=&quot;all&quot;&gt;Принять&lt;/button&gt;&lt;button class=&quot;gm-cookie-min&quot; type=&quot;button&quot; data-ck=&quot;min&quot;&gt;Только необходимые&lt;/button&gt;&lt;/div&gt;
+  &lt;/div&gt;
 &lt;/div&gt;
 
 &lt;script&gt;
@@ -1299,6 +1324,15 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
     if (rec) new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe(rec);
   }
 
+  // Цель Метрики при успешной отправке формы Tilda (счётчик есть только после согласия на cookie)
+  var lastGoal = 0;
+  var onLead = function () {
+    if (Date.now() - lastGoal &lt; 3000) return; lastGoal = Date.now();
+    if (C.METRIKA_ID &amp;&amp; window.ym) window.ym(C.METRIKA_ID, &#x27;reachGoal&#x27;, C.GOAL || &#x27;lead_form_submit&#x27;);
+  };
+  document.addEventListener(&#x27;tildaform:aftersuccess&#x27;, onLead);
+  if (window.jQuery) window.jQuery(document).on(&#x27;tildaform:aftersuccess&#x27;, onLead);
+
   // Появление при прокрутке для нижних секций
   var low = document.querySelectorAll(&#x27;.gm-low .gm-reveal&#x27;);
   if (&#x27;IntersectionObserver&#x27; in window) {
@@ -1308,7 +1342,228 @@ table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px} th,td{
     low.forEach(function (el) { if (el.getBoundingClientRect().top &gt; innerHeight) el.classList.add(&#x27;gm-pre&#x27;); io.observe(el); });
   }
 })();
+
+  /* ---------- cookie-start: уведомление о cookie и Яндекс Метрика только после «Принять» ---------- */
+  (function () {
+    var CFG = typeof CONFIG !== &#x27;undefined&#x27; ? CONFIG : (window.gmConfig || {});
+    var box = document.getElementById(&#x27;gm-cookie&#x27;), KEY = &#x27;gm-cookie-choice&#x27;, choice = null;
+    try { choice = localStorage.getItem(KEY); } catch (e) {}
+    function metrika() {
+      var id = CFG.METRIKA_ID; if (!id || window.ym) return;
+      (function (m, e, t, r, i, k, a) { m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); }; m[i].l = 1 * new Date();
+        k = e.createElement(t); a = e.getElementsByTagName(t)[0]; k.async = 1; k.src = r; a.parentNode.insertBefore(k, a);
+      })(window, document, &#x27;script&#x27;, &#x27;https://mc.yandex.ru/metrika/tag.js&#x27;, &#x27;ym&#x27;);
+      window.ym(id, &#x27;init&#x27;, { clickmap: true, trackLinks: true, accurateTrackBounce: true });
+    }
+    if (choice === &#x27;all&#x27;) metrika();
+    if (!box) return;
+    if (!choice) box.hidden = false;
+    box.addEventListener(&#x27;click&#x27;, function (e) {
+      var v = e.target.getAttribute &amp;&amp; e.target.getAttribute(&#x27;data-ck&#x27;); if (!v) return;
+      try { localStorage.setItem(KEY, v); } catch (er) {}
+      box.hidden = true; if (v === &#x27;all&#x27;) metrika();
+    });
+  })();
+  /* ---------- cookie-end ---------- */
 &lt;/script&gt;
+</textarea></section>
+<h2>5. Страницы политики и согласия</h2>
+<p class="warn">Перед публикацией замените жёлтые заглушки <code>[ОПЕРАТОР]</code>, <code>[ИНН]</code>, <code>[ОГРН]</code>, <code>[АДРЕС ОПЕРАТОРА]</code>, <code>[E-MAIL]</code>, <code>[АДРЕС САЙТА]</code>, <code>[ПОЧТОВЫЙ СЕРВИС]</code> на данные оператора. Ссылка «← Вернуться» ведёт на <code>/moto-zelenograd</code> — поменяйте, если адрес лендинга другой.</p>
+<ol class="steps"><li>Две новые пустые страницы: «Политика обработки персональных данных» с адресом <code>/privacy-moto</code> и «Согласие на обработку персональных данных» с адресом <code>/consent-moto</code>. Фон страницы — <code>#0d0f13</code>.</li>
+<li>На каждой — один T123, вставить код ниже → опубликовать.</li></ol>
+<section class="file"><div class="head"><div class="meta"><span class="step">страница /privacy-moto</span><code class="name">T123 · политика</code>
+<span class="desc">текст от 28.10.2026, 152-ФЗ · 12174 символов</span></div><button class="copy" type="button" data-target="c4">Скопировать код</button></div>
+<textarea class="code" id="c4" readonly spellcheck="false">&lt;!-- Общие стили юридических страниц (privacy, consent). build_tilda.py вставляет их в начало каждого блока T123. --&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Unbounded:wght@900&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+.gm-legal{--bg:#0d0f13;--card:#171a21;--line:#262b35;--text:#eef0f4;--muted:#a3a9b6;--accent:#ffd400;
+  background:var(--bg);color:var(--text);font:400 16px/1.65 Manrope,Arial,sans-serif;padding:56px 20px 88px;-webkit-font-smoothing:antialiased}
+.gm-legal *{box-sizing:border-box}
+.gm-legal .gm-l-wrap{max-width:820px;margin:0 auto}
+.gm-legal .gm-l-back{display:inline-block;color:var(--accent);font-weight:800;text-decoration:none;margin-bottom:28px}
+.gm-legal .gm-l-back:hover{text-decoration:underline}
+.gm-legal h1{font:900 clamp(26px,5vw,42px)/1.08 Unbounded,Manrope,Arial,sans-serif;text-transform:uppercase;letter-spacing:-.02em;margin:0 0 14px}
+.gm-legal .gm-l-date{color:var(--muted);margin:0 0 32px}
+.gm-legal h2{font:800 20px/1.3 Manrope,Arial,sans-serif;margin:40px 0 12px;color:var(--text)}
+.gm-legal p,.gm-legal li{color:#d5d9e1;margin:0 0 10px}
+.gm-legal ul,.gm-legal ol{padding-left:22px;margin:0 0 12px}
+.gm-legal a{color:var(--accent)}
+.gm-legal .gm-l-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 22px;margin:0 0 14px}
+.gm-legal .gm-l-card h3{font:800 16px/1.4 Manrope,Arial,sans-serif;margin:0 0 8px}
+.gm-legal .gm-l-card p{margin:0 0 6px}
+.gm-legal .gm-l-card b{color:var(--text)}
+/* заглушки: заполнить данными оператора до публикации */
+.gm-legal .gm-ph{background:rgba(255,212,0,.16);color:var(--accent);border-radius:6px;padding:0 6px;font-weight:600;white-space:nowrap}
+@media (max-width:600px){.gm-legal{padding:36px 16px 72px;font-size:15px}.gm-legal .gm-ph{white-space:normal}}
+&lt;/style&gt;
+
+&lt;div class=&quot;gm-legal&quot;&gt;&lt;div class=&quot;gm-l-wrap&quot;&gt;
+&lt;a class=&quot;gm-l-back&quot; href=&quot;/moto-zelenograd&quot;&gt;← Вернуться к записи на тренировку&lt;/a&gt;
+&lt;h1&gt;Политика обработки персональных данных&lt;/h1&gt;
+&lt;p class=&quot;gm-l-date&quot;&gt;Редакция от 28 октября 2026 года&lt;/p&gt;
+
+&lt;h2&gt;1. Общие положения&lt;/h2&gt;
+&lt;p&gt;1.1. Настоящая Политика обработки персональных данных (далее — Политика) определяет порядок и условия обработки персональных данных и меры по их защите. Она принята во исполнение пункта 2 части 1 статьи 18.1 Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» (далее — Закон о персональных данных).&lt;/p&gt;
+&lt;p&gt;1.2. Политика применяется к персональным данным, которые Оператор получает через сайт &lt;span class=&quot;gm-ph&quot;&gt;[АДРЕС САЙТА]&lt;/span&gt;, в том числе через страницу записи на тренировки на электромотоциклах в Зеленограде (далее — Сайт).&lt;/p&gt;
+&lt;p&gt;1.3. Оператор персональных данных (далее — Оператор):&lt;/p&gt;
+&lt;div class=&quot;gm-l-card&quot;&gt;
+  &lt;p&gt;&lt;b&gt;&lt;span class=&quot;gm-ph&quot;&gt;[ОПЕРАТОР: ФИО индивидуального предпринимателя или наименование организации]&lt;/span&gt;&lt;/b&gt;&lt;/p&gt;
+  &lt;p&gt;ИНН &lt;span class=&quot;gm-ph&quot;&gt;[ИНН]&lt;/span&gt;, ОГРН/ОГРНИП &lt;span class=&quot;gm-ph&quot;&gt;[ОГРН]&lt;/span&gt;&lt;/p&gt;
+  &lt;p&gt;Адрес: &lt;span class=&quot;gm-ph&quot;&gt;[АДРЕС ОПЕРАТОРА]&lt;/span&gt;&lt;/p&gt;
+  &lt;p&gt;Электронная почта для обращений по вопросам персональных данных: &lt;span class=&quot;gm-ph&quot;&gt;[E-MAIL]&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;1.4. Политика опубликована в свободном доступе на Сайте (часть 2 статьи 18.1 Закона о персональных данных). Оператор обрабатывает персональные данные только в объёме и для целей, указанных в Политике.&lt;/p&gt;
+
+&lt;h2&gt;2. Основные понятия&lt;/h2&gt;
+&lt;p&gt;Термины используются в значении статьи 3 Закона о персональных данных. Персональные данные — любая информация, относящаяся прямо или косвенно к определённому или определяемому физическому лицу (субъекту персональных данных). Обработка персональных данных — любое действие или совокупность действий с персональными данными, совершаемых с использованием средств автоматизации или без них.&lt;/p&gt;
+
+&lt;h2&gt;3. Цели обработки, категории субъектов, перечень данных и сроки&lt;/h2&gt;
+&lt;div class=&quot;gm-l-card&quot;&gt;
+  &lt;h3&gt;Цель 1. Обработка заявки на тренировку и связь для записи&lt;/h3&gt;
+  &lt;p&gt;&lt;b&gt;Субъекты:&lt;/b&gt; лица, заполнившие форму заявки на Сайте, — родители или иные законные представители несовершеннолетних, а также совершеннолетние спортсмены.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Персональные данные:&lt;/b&gt; имя; номер телефона; возраст ребёнка либо отметка «опытный спортсмен»; удобный день тренировки.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Вместе с заявкой автоматически передаются:&lt;/b&gt; адрес страницы, с которой отправлена заявка, адрес страницы перехода и UTM-метки рекламной ссылки. Эти сведения используются только для обработки заявки.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Правовое основание:&lt;/b&gt; согласие субъекта персональных данных (пункт 1 части 1 статьи 6 Закона о персональных данных). Согласие оформляется отдельным документом — &lt;a href=&quot;/consent-moto&quot;&gt;Согласием на обработку персональных данных&lt;/a&gt;.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Срок обработки и хранения:&lt;/b&gt; до достижения цели (записи на тренировку или отказа от неё), но не более 12 месяцев с даты получения заявки, либо до отзыва согласия — в зависимости от того, что наступит раньше.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&quot;gm-l-card&quot;&gt;
+  &lt;h3&gt;Цель 2. Анализ посещаемости Сайта и эффективности рекламы&lt;/h3&gt;
+  &lt;p&gt;&lt;b&gt;Субъекты:&lt;/b&gt; посетители Сайта, которые разрешили аналитические cookie в уведомлении на Сайте.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Данные:&lt;/b&gt; файлы cookie и идентификаторы, IP-адрес, сведения о браузере и устройстве, адреса посещённых страниц и источник перехода, действия на Сайте. Данные обрабатываются сервисом «Яндекс Метрика» (ООО «ЯНДЕКС») в обезличенном и обобщённом виде.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Правовое основание:&lt;/b&gt; согласие посетителя, выраженное нажатием кнопки «Принять» в уведомлении о cookie. Без этого согласия сервис аналитики на Сайте не запускается.&lt;/p&gt;
+  &lt;p&gt;&lt;b&gt;Срок:&lt;/b&gt; до отзыва согласия. Сервис хранит данные по своим правилам.&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;3.1. Оператор не обрабатывает специальные категории персональных данных (о здоровье, расовой и национальной принадлежности и т. п.) и биометрические персональные данные, не принимает решений, порождающих юридические последствия, исключительно на основании автоматизированной обработки и не распространяет персональные данные (не делает их доступными неограниченному кругу лиц).&lt;/p&gt;
+
+&lt;h2&gt;4. Данные несовершеннолетних&lt;/h2&gt;
+&lt;p&gt;4.1. Сайт адресован взрослым. Заявку на тренировку ребёнка оставляет его родитель или иной законный представитель, действующий в интересах ребёнка.&lt;/p&gt;
+&lt;p&gt;4.2. О ребёнке через форму передаётся только его возраст — без имени, фамилии и иных данных. Лица младше 18 лет не должны отправлять форму самостоятельно. Если Оператору станет известно, что заявку отправил несовершеннолетний без согласия законного представителя, такие данные уничтожаются.&lt;/p&gt;
+
+&lt;h2&gt;5. Порядок и условия обработки&lt;/h2&gt;
+&lt;p&gt;5.1. Оператор совершает с персональными данными следующие действия: сбор, запись, систематизацию, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передачу (предоставление, доступ) лицам, обрабатывающим данные по поручению Оператора, блокирование, удаление и уничтожение.&lt;/p&gt;
+&lt;p&gt;5.2. Обработка смешанная: с использованием средств автоматизации и без них.&lt;/p&gt;
+&lt;p&gt;5.3. Запись, систематизация, накопление, хранение, уточнение и извлечение персональных данных граждан Российской Федерации осуществляются с использованием баз данных, находящихся на территории Российской Федерации (часть 5 статьи 18 Закона о персональных данных). Трансграничную передачу данных из формы заявки Оператор не осуществляет.&lt;/p&gt;
+&lt;p&gt;5.4. Оператор может поручить обработку персональных данных другому лицу на основании договора (часть 3 статьи 6 Закона о персональных данных) с обязательством соблюдать конфиденциальность и меры защиты. Для работы Сайта используются:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;конструктор сайтов и сервис приёма заявок Tilda — размещение Сайта, приём и хранение заявок;&lt;/li&gt;
+  &lt;li&gt;сервис электронной почты &lt;span class=&quot;gm-ph&quot;&gt;[ПОЧТОВЫЙ СЕРВИС, например Яндекс Почта]&lt;/span&gt; — получение уведомлений о заявках;&lt;/li&gt;
+  &lt;li&gt;сервисы ООО «ЯНДЕКС»: «Яндекс Карты» — показ схемы проезда; «Яндекс Метрика» — только при согласии на аналитические cookie.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;5.5. Для отображения шрифтов, фото и видео страница подключает публичные технические сети доставки контента (Google Fonts, jsDelivr, cdnjs). При загрузке страницы браузер посетителя обращается к ним напрямую, и они получают технические сведения о запросе (IP-адрес, данные браузера). Данные из формы заявки этим сервисам не передаются.&lt;/p&gt;
+&lt;p&gt;5.6. Персональные данные из заявок не передаются третьим лицам для их собственных целей, не продаются и не используются для рекламных рассылок.&lt;/p&gt;
+
+&lt;h2&gt;6. Файлы cookie&lt;/h2&gt;
+&lt;p&gt;6.1. Cookie — небольшие файлы, которые браузер сохраняет на устройстве посетителя. На Сайте используются:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;b&gt;необходимые&lt;/b&gt; — обеспечивают работу Сайта, формы заявки и запоминают выбор в уведомлении о cookie; устанавливаются всегда;&lt;/li&gt;
+  &lt;li&gt;&lt;b&gt;функциональные&lt;/b&gt; — устанавливаются сервисом «Яндекс Карты» при показе карты;&lt;/li&gt;
+  &lt;li&gt;&lt;b&gt;аналитические&lt;/b&gt; — «Яндекс Метрика»; устанавливаются, только если посетитель нажал «Принять» в уведомлении о cookie.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;6.2. Посетитель может отказаться от аналитических cookie, нажав «Только необходимые», а также удалить cookie или запретить их сохранение в настройках браузера. Запрет необходимых cookie может нарушить работу Сайта.&lt;/p&gt;
+
+&lt;h2&gt;7. Права субъекта персональных данных&lt;/h2&gt;
+&lt;p&gt;7.1. Субъект персональных данных вправе (статьи 14–17 Закона о персональных данных):&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;получить сведения об обработке своих персональных данных Оператором;&lt;/li&gt;
+  &lt;li&gt;требовать уточнения, блокирования или уничтожения персональных данных, если они неполные, устаревшие, неточные, незаконно полученные или не являются необходимыми для заявленной цели;&lt;/li&gt;
+  &lt;li&gt;отозвать согласие на обработку персональных данных;&lt;/li&gt;
+  &lt;li&gt;обжаловать действия или бездействие Оператора в Роскомнадзоре или в суде.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;7.2. Запрос или отзыв согласия направляется на электронную почту Оператора &lt;span class=&quot;gm-ph&quot;&gt;[E-MAIL]&lt;/span&gt;. В запросе укажите имя и номер телефона, указанные в заявке, — чтобы Оператор мог найти ваши данные. Оператор отвечает в течение 10 рабочих дней с даты получения запроса. Срок может быть продлён не более чем на 5 рабочих дней с направлением мотивированного уведомления.&lt;/p&gt;
+
+&lt;h2&gt;8. Отзыв согласия и уничтожение данных&lt;/h2&gt;
+&lt;p&gt;8.1. При отзыве согласия Оператор прекращает обработку персональных данных и уничтожает их в срок, не превышающий 30 дней с даты поступления отзыва, если иное не предусмотрено законом (часть 5 статьи 21 Закона о персональных данных).&lt;/p&gt;
+&lt;p&gt;8.2. По достижении целей обработки или по истечении сроков, указанных в разделе 3, персональные данные уничтожаются в течение 30 дней. Уничтожение подтверждается в порядке, установленном Роскомнадзором.&lt;/p&gt;
+
+&lt;h2&gt;9. Меры по защите персональных данных&lt;/h2&gt;
+&lt;p&gt;9.1. Оператор принимает необходимые правовые, организационные и технические меры для защиты персональных данных от неправомерного или случайного доступа, уничтожения, изменения, блокирования, копирования, предоставления и распространения (статьи 18.1 и 19 Закона о персональных данных), в том числе:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;назначает лицо, ответственное за организацию обработки персональных данных;&lt;/li&gt;
+  &lt;li&gt;ограничивает доступ к заявкам кругом лиц, которым он необходим для работы, и защищает учётные записи паролями;&lt;/li&gt;
+  &lt;li&gt;знакомит лиц, допущенных к обработке, с требованиями законодательства и настоящей Политикой;&lt;/li&gt;
+  &lt;li&gt;использует сервисы с защищённым соединением (HTTPS);&lt;/li&gt;
+  &lt;li&gt;проводит внутренний контроль соответствия обработки требованиям закона;&lt;/li&gt;
+  &lt;li&gt;в случае утечки персональных данных уведомляет Роскомнадзор в сроки, установленные частью 3.1 статьи 21 Закона о персональных данных.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;10. Заключительные положения&lt;/h2&gt;
+&lt;p&gt;10.1. Оператор вправе изменять Политику. Новая редакция вступает в силу с момента её публикации на Сайте, если иное не указано в ней. Действующая редакция всегда доступна на этой странице.&lt;/p&gt;
+&lt;p&gt;10.2. По вопросам обработки персональных данных обращайтесь на &lt;span class=&quot;gm-ph&quot;&gt;[E-MAIL]&lt;/span&gt;.&lt;/p&gt;
+&lt;p style=&quot;margin-top:28px&quot;&gt;&lt;a href=&quot;/consent-moto&quot;&gt;Согласие на обработку персональных данных →&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;
+</textarea></section>
+<section class="file"><div class="head"><div class="meta"><span class="step">страница /consent-moto</span><code class="name">T123 · согласие</code>
+<span class="desc">отдельный документ, ст. 9 152-ФЗ · 5461 символов</span></div><button class="copy" type="button" data-target="c5">Скопировать код</button></div>
+<textarea class="code" id="c5" readonly spellcheck="false">&lt;!-- Общие стили юридических страниц (privacy, consent). build_tilda.py вставляет их в начало каждого блока T123. --&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&amp;family=Unbounded:wght@900&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+.gm-legal{--bg:#0d0f13;--card:#171a21;--line:#262b35;--text:#eef0f4;--muted:#a3a9b6;--accent:#ffd400;
+  background:var(--bg);color:var(--text);font:400 16px/1.65 Manrope,Arial,sans-serif;padding:56px 20px 88px;-webkit-font-smoothing:antialiased}
+.gm-legal *{box-sizing:border-box}
+.gm-legal .gm-l-wrap{max-width:820px;margin:0 auto}
+.gm-legal .gm-l-back{display:inline-block;color:var(--accent);font-weight:800;text-decoration:none;margin-bottom:28px}
+.gm-legal .gm-l-back:hover{text-decoration:underline}
+.gm-legal h1{font:900 clamp(26px,5vw,42px)/1.08 Unbounded,Manrope,Arial,sans-serif;text-transform:uppercase;letter-spacing:-.02em;margin:0 0 14px}
+.gm-legal .gm-l-date{color:var(--muted);margin:0 0 32px}
+.gm-legal h2{font:800 20px/1.3 Manrope,Arial,sans-serif;margin:40px 0 12px;color:var(--text)}
+.gm-legal p,.gm-legal li{color:#d5d9e1;margin:0 0 10px}
+.gm-legal ul,.gm-legal ol{padding-left:22px;margin:0 0 12px}
+.gm-legal a{color:var(--accent)}
+.gm-legal .gm-l-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 22px;margin:0 0 14px}
+.gm-legal .gm-l-card h3{font:800 16px/1.4 Manrope,Arial,sans-serif;margin:0 0 8px}
+.gm-legal .gm-l-card p{margin:0 0 6px}
+.gm-legal .gm-l-card b{color:var(--text)}
+/* заглушки: заполнить данными оператора до публикации */
+.gm-legal .gm-ph{background:rgba(255,212,0,.16);color:var(--accent);border-radius:6px;padding:0 6px;font-weight:600;white-space:nowrap}
+@media (max-width:600px){.gm-legal{padding:36px 16px 72px;font-size:15px}.gm-legal .gm-ph{white-space:normal}}
+&lt;/style&gt;
+
+&lt;div class=&quot;gm-legal&quot;&gt;&lt;div class=&quot;gm-l-wrap&quot;&gt;
+&lt;a class=&quot;gm-l-back&quot; href=&quot;/moto-zelenograd&quot;&gt;← Вернуться к записи на тренировку&lt;/a&gt;
+&lt;h1&gt;Согласие на обработку персональных данных&lt;/h1&gt;
+&lt;p class=&quot;gm-l-date&quot;&gt;Редакция от 28 октября 2026 года&lt;/p&gt;
+
+&lt;p&gt;Отмечая галочку «Я даю согласие на обработку персональных данных» и нажимая кнопку «Отправить заявку» в форме записи на тренировку на сайте &lt;span class=&quot;gm-ph&quot;&gt;[АДРЕС САЙТА]&lt;/span&gt;, я, действуя свободно, своей волей и в своём интересе, а также в интересах несовершеннолетнего, законным представителем которого являюсь (если в заявке указан возраст ребёнка), в соответствии со статьёй 9 Федерального закона от 27.07.2006 № 152-ФЗ «О персональных данных» даю согласие на обработку моих персональных данных на следующих условиях.&lt;/p&gt;
+
+&lt;h2&gt;1. Оператор&lt;/h2&gt;
+&lt;div class=&quot;gm-l-card&quot;&gt;
+  &lt;p&gt;&lt;b&gt;&lt;span class=&quot;gm-ph&quot;&gt;[ОПЕРАТОР: ФИО индивидуального предпринимателя или наименование организации]&lt;/span&gt;&lt;/b&gt;&lt;/p&gt;
+  &lt;p&gt;ИНН &lt;span class=&quot;gm-ph&quot;&gt;[ИНН]&lt;/span&gt;, ОГРН/ОГРНИП &lt;span class=&quot;gm-ph&quot;&gt;[ОГРН]&lt;/span&gt;&lt;/p&gt;
+  &lt;p&gt;Адрес: &lt;span class=&quot;gm-ph&quot;&gt;[АДРЕС ОПЕРАТОРА]&lt;/span&gt;&lt;/p&gt;
+  &lt;p&gt;Электронная почта: &lt;span class=&quot;gm-ph&quot;&gt;[E-MAIL]&lt;/span&gt;&lt;/p&gt;
+&lt;/div&gt;
+
+&lt;h2&gt;2. Цель обработки&lt;/h2&gt;
+&lt;p&gt;Обработка моей заявки на тренировку на электромотоциклах, связь со мной по телефону для записи на тренировку, подбора группы и класса мотоцикла и ответа на мои вопросы.&lt;/p&gt;
+
+&lt;h2&gt;3. Перечень персональных данных&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;имя;&lt;/li&gt;
+  &lt;li&gt;номер телефона;&lt;/li&gt;
+  &lt;li&gt;возраст ребёнка, законным представителем которого я являюсь, либо отметка «опытный спортсмен»;&lt;/li&gt;
+  &lt;li&gt;удобный день тренировки;&lt;/li&gt;
+  &lt;li&gt;сведения, автоматически передаваемые вместе с заявкой: адрес страницы, с которой отправлена заявка, адрес страницы перехода, UTM-метки рекламной ссылки.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;4. Действия с персональными данными и способы обработки&lt;/h2&gt;
+&lt;p&gt;Сбор, запись, систематизация, накопление, хранение, уточнение (обновление, изменение), извлечение, использование, передача (предоставление, доступ) лицам, обрабатывающим данные по поручению Оператора, блокирование, удаление и уничтожение. Обработка смешанная — с использованием средств автоматизации и без них. Данные хранятся в базах данных на территории Российской Федерации.&lt;/p&gt;
+
+&lt;h2&gt;5. Лица, обрабатывающие данные по поручению Оператора&lt;/h2&gt;
+&lt;p&gt;Сервис-конструктор сайтов и приёма заявок Tilda и сервис электронной почты &lt;span class=&quot;gm-ph&quot;&gt;[ПОЧТОВЫЙ СЕРВИС]&lt;/span&gt; — только для приёма и хранения заявки и уведомления Оператора о ней. Оператор не передаёт мои данные третьим лицам для их собственных целей и не использует их для рекламных рассылок.&lt;/p&gt;
+
+&lt;h2&gt;6. Срок действия согласия&lt;/h2&gt;
+&lt;p&gt;Согласие действует до достижения цели обработки, но не более 12 месяцев с даты отправки заявки, либо до его отзыва — в зависимости от того, что наступит раньше. По окончании срока или после отзыва персональные данные уничтожаются в течение 30 дней.&lt;/p&gt;
+
+&lt;h2&gt;7. Порядок отзыва согласия&lt;/h2&gt;
+&lt;p&gt;Я могу отозвать согласие в любой момент, направив письмо на электронную почту Оператора &lt;span class=&quot;gm-ph&quot;&gt;[E-MAIL]&lt;/span&gt; с указанием имени и номера телефона, указанных в заявке. Отзыв согласия не влияет на законность обработки, проведённой до его получения.&lt;/p&gt;
+
+&lt;h2&gt;8. Подтверждение&lt;/h2&gt;
+&lt;p&gt;Я подтверждаю, что ознакомился(-ась) с &lt;a href=&quot;/privacy-moto&quot;&gt;Политикой обработки персональных данных&lt;/a&gt;, мне разъяснены мои права как субъекта персональных данных (статьи 14–17 Федерального закона № 152-ФЗ), а сведения в заявке указаны мной добровольно и достоверно.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;
 </textarea></section>
 </div>
 <script>

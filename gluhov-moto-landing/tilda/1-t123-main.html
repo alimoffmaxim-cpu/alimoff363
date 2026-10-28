@@ -190,7 +190,19 @@
 .gm summary::after{content:"+";position:absolute;right:0;top:-4px;width:30px;height:30px;border-radius:50%;background:rgba(255,212,0,.12);color:var(--accent);display:grid;place-items:center;transition:transform .2s}
 .gm details[open] summary::after{transform:rotate(45deg)}
 .gm details p{margin-top:10px}
-.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.gm .gm-foot{padding:32px 0 96px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);line-height:1.9}
+.gm .gm-foot a{color:var(--muted)}
+.gm .gm-foot a:hover{color:var(--accent)}
+
+/* ---------- Уведомление о cookie ---------- */
+.gm .gm-cookie{position:fixed;left:24px;bottom:24px;z-index:10000;max-width:520px;padding:18px 20px;border-radius:20px;background:#171a21;border:1px solid rgba(255,255,255,.14);box-shadow:0 20px 50px -20px rgba(0,0,0,.7);font-size:14px;line-height:1.45;color:#d5d9e1}
+.gm .gm-cookie[hidden]{display:none}
+.gm .gm-cookie p{margin:0 0 12px}
+.gm .gm-cookie a{color:var(--accent)}
+.gm .gm-cookie-btns{display:flex;flex-wrap:wrap;gap:10px}
+.gm .gm-cookie .gm-btn{min-height:42px;padding:0 20px;font-size:14px}
+.gm .gm-cookie-min{min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:none;color:#eef0f4;font:600 14px Manrope,Arial,sans-serif;cursor:pointer}
+@media (max-width:640px){.gm .gm-cookie{left:12px;right:12px;bottom:84px;max-width:none;padding:16px}}
 
 /* ---------- Липкая кнопка на телефоне ---------- */
 .gm .gm-sticky{position:fixed;left:12px;right:12px;bottom:12px;z-index:9999;display:none;transform:translateY(140%);transition:transform .3s}
@@ -619,6 +631,10 @@
 <script>
 (function () {
   var CONFIG = {
+    // номер счётчика Яндекс Метрики. Счётчик запускается этим кодом только после «Принять» в уведомлении о cookie,
+    // поэтому в «Настройках сайта» Тильды Метрику НЕ подключать (иначе она пишет данные без согласия)
+    METRIKA_ID: 0,
+    GOAL: 'lead_form_submit',
     // TODO: проверить адрес — он же используется для карты
     // карта: точка ZelenoKART (OSM 56.000764, 37.256615), жёлтая метка, без списка результатов
     MAP_URL: 'https://yandex.ru/map-widget/v1/?ll=37.256615%2C56.000764&z=16&pt=37.256615%2C56.000764%2Cpm2ylm',
@@ -1108,6 +1124,8 @@
     });
 
   }
+
+
 
 })();
 </script>

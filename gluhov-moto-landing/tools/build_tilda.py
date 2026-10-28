@@ -47,8 +47,6 @@ def drop(s, a, b, keep_b=False):
 js1 = js
 for line in ("    // TODO: URL веб-приложения Apps Script (README, шаг 2)\n",
              "    SCRIPT_URL: 'https://script.google.com/macros/s/XXXXXXXX/exec',\n",
-             "    // TODO: номер счётчика Яндекс.Метрики (если счётчик подключён в настройках Тильды)\n",
-             "    METRIKA_ID: 0,\n", "    GOAL: 'lead_form_submit',\n",
              "  if (M.formBg) $('gm-form-bg').appendChild(img(M.formBg, ''));\n",
              "  $('gm-mapframe').src = CONFIG.MAP_URL || 'https://yandex.ru/map-widget/v1/?z=14&text=' + encodeURIComponent(CONFIG.ADDRESS);\n",
              "  if (CONFIG.ADDRESS !== 'Зеленоград, картодром') $('gm-address').textContent = CONFIG.ADDRESS;\n"):
@@ -58,6 +56,9 @@ js1 = js1.replace("  var root = document.getElementById('gm');\n", "  var root =
 js1 = js1.replace("  function img(src, alt)", "  window.gmConfig = CONFIG; window.gmUrl = url;  // нужны блоку 3\n  function img(src, alt)")
 js1 = drop(js1, "\n    var sticky = $('gm-sticky')", "\n  }\n", keep_b=True)
 js1 = drop(js1, "  /* ---------- Форма ---------- */", "})();", keep_b=True)
+# уведомление о cookie (+ запуск Метрики после «Принять») — в блок 3: там его разметка
+cookie_js = js[js.index('  /* ---------- cookie-start'):js.index('/* ---------- cookie-end ---------- */') + len('/* ---------- cookie-end ---------- */')]
+js1 = js1.replace(cookie_js, '')
 assert 'gm-lead' not in js1 and 'gm-sticky' not in js1
 
 block1 = head + '<div class="gm">\n' + main + '</div>\n\n<script>' + js1 + '</script>\n'
@@ -102,6 +103,15 @@ js3 = r"""
     if (rec) new IntersectionObserver(function (es) { formIn = es[0].isIntersecting; upd(); }).observe(rec);
   }
 
+  // Цель Метрики при успешной отправке формы Tilda (счётчик есть только после согласия на cookie)
+  var lastGoal = 0;
+  var onLead = function () {
+    if (Date.now() - lastGoal < 3000) return; lastGoal = Date.now();
+    if (C.METRIKA_ID && window.ym) window.ym(C.METRIKA_ID, 'reachGoal', C.GOAL || 'lead_form_submit');
+  };
+  document.addEventListener('tildaform:aftersuccess', onLead);
+  if (window.jQuery) window.jQuery(document).on('tildaform:aftersuccess', onLead);
+
   // Появление при прокрутке для нижних секций
   var low = document.querySelectorAll('.gm-low .gm-reveal');
   if ('IntersectionObserver' in window) {
@@ -113,10 +123,17 @@ js3 = r"""
 })();
 """
 block3 = ('<!-- БЛОК 3 из 3 (T123): оформление формы Tilda (класс gm-signup), подвал, скрипты. -->\n'
-          '<style>\n' + form_css + '</style>\n\n<div class="gm gm-low">\n' + rest + '</div>\n\n<script>' + js3 + '</script>\n')
+          '<style>\n' + form_css + '</style>\n\n<div class="gm gm-low">\n' + rest + '</div>\n\n<script>' + js3 + '\n' + cookie_js + '\n</script>\n')
 
 (OUT / '1-t123-main.html').write_text(block1, encoding='utf-8')
 (OUT / '3-t123-footer.html').write_text(block3, encoding='utf-8')
+
+# --- юридические страницы: по одному T123 на страницу ---
+legal_css = (ROOT / 'legal' / '_style.html').read_text(encoding='utf-8')
+for n, name in (('4-t123-privacy.html', 'privacy'), ('5-t123-consent.html', 'consent')):
+    (OUT / n).write_text(legal_css + '\n' + (ROOT / 'legal' / (name + '.html')).read_text(encoding='utf-8'), encoding='utf-8')
+CONSENT_LABEL = ('Я даю <a href="/consent-moto" target="_blank">согласие на обработку персональных данных</a> и ознакомлен(а) с '
+                 '<a href="/privacy-moto" target="_blank">политикой обработки персональных данных</a>')
 
 # --- предпросмотр: разметка BF204N (t678) с нашими полями, как её отдаёт Tilda ---
 def group(kind, name, title, inner):
@@ -138,8 +155,8 @@ mock_form = f'''<div id="rec000" class="r t-rec uc-gm-signup" data-record-type="
 {group('sb', 'Age', 'Возраст ребёнка', '<div class="t-select__wrapper"><select name="Age" class="t-select"><option value="">Выберите возраст</option>' + ages + '</select></div>')}
 {group('rd', 'Day', 'Удобный день', '<div class="t-radio__wrapper">' + days + '</div>')}
 <div class="t-input-group t-input-group_cb"><div class="t-input-block"><label class="t-checkbox__control t-checkbox__control_flex t-text t-text_xs">
-<input type="checkbox" name="Checkbox" value="yes" class="t-checkbox" checked><div class="t-checkbox__indicator"></div>
-<span>Согласен(на) на обработку персональных данных в соответствии с <a href="#">политикой конфиденциальности</a></span></label></div></div>
+<input type="checkbox" name="Checkbox" value="yes" class="t-checkbox"><div class="t-checkbox__indicator"></div>
+<span>{CONSENT_LABEL}</span></label></div></div>
 <div class="t-form__submit"><button class="t-submit t-btnflex t-btnflex_type_submit t-btnflex_md" type="submit"><span class="t-btnflex__text">Отправить заявку →</span></button></div>
 </div></form></div></div></div></div></div>
 '''
@@ -157,6 +174,8 @@ for f in ('1-t123-main.html', '3-t123-footer.html', 'preview.html'):
 import html as _h
 b1 = (OUT / '1-t123-main.html').read_text(encoding='utf-8')
 b3 = (OUT / '3-t123-footer.html').read_text(encoding='utf-8')
+b4 = (OUT / '4-t123-privacy.html').read_text(encoding='utf-8')
+b5 = (OUT / '5-t123-consent.html').read_text(encoding='utf-8')
 def card(n, step, name, desc, code):
     return f'''<section class="file"><div class="head"><div class="meta"><span class="step">{step}</span><code class="name">{name}</code>
 <span class="desc">{desc} · {len(code)} символов</span></div><button class="copy" type="button" data-target="c{n}">Скопировать код</button></div>
@@ -165,7 +184,7 @@ rows = ''.join(f'<tr><td>{a}</td><td>{b}</td><td><code>{c}</code></td><td>{d}</t
     ('Имя родителя', 'Имя', 'Name', 'да'), ('Телефон', 'Телефон, маска «с кодом страны», RU', 'Phone', 'да'),
     ('Возраст ребёнка', 'Выпадающий список: 4, 5, 6, 7, 8, 9, 10, 11, 12, Опытный спортсмен; подсказка «Выберите возраст»', 'Age', 'да'),
     ('Удобный день', 'Варианты (радио): Среда, Суббота, Любой', 'Day', 'нет'),
-    ('Согласие на обработку ПДн', 'Галочка, «Отмечено по умолчанию», лейбл со ссылкой на политику', 'Checkbox', 'да')])
+    ('Согласие на обработку ПДн', 'Галочка. «Отмечено по умолчанию» — <b>ВЫКЛЮЧИТЬ</b> (152-ФЗ: согласие — отдельное действие). Лейбл — HTML ниже', 'Checkbox', 'да')])
 copy_page = f'''<title>Электромото: блоки для Tilda</title>
 <style>
 /* Layout: одна колонка — шаги сверху вниз, между ними карточки кода с кнопкой копирования */
@@ -193,7 +212,8 @@ table{{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}} th,t
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
 <div class="wrap">
 <h1>Электромото Зеленоград: блоки для Tilda</h1>
-<p class="lead">Страница в Тильде собирается из трёх блоков сверху вниз: HTML-код, стандартная форма Тильды, HTML-код. Дизайн один в один с утверждённым макетом; форма — стандартная, поэтому заявки уходят в Tilda CRM, Google Таблицу, Telegram и на почту.</p>
+<p class="lead">Страница в Тильде собирается из трёх блоков сверху вниз: HTML-код, стандартная форма Тильды, HTML-код. Дизайн один в один с утверждённым макетом; форма — стандартная, заявки уходят в Tilda CRM и на почту. Плюс две страницы: политика и согласие на обработку персональных данных.</p>
+<p class="warn"><b>Связь — только через форму.</b> Не подключать в Тильде виджеты мессенджеров и обратного звонка, соцсети в шапке и подвале проекта, Telegram и Google Таблицу как приёмщики заявок (данные россиян нельзя хранить в зарубежных базах — 152-ФЗ, ч. 5 ст. 18). Яндекс Метрику не подключать в «Настройках сайта»: её запускает код страницы после согласия на cookie — впишите номер счётчика в <code>METRIKA_ID</code> в блоке 1.</p>
 <h2>1. Новая страница</h2>
 <ol class="steps"><li>Мои сайты → проект → <b>Создать новую страницу</b> → «Пустая страница».</li>
 <li>Настройки страницы: заголовок «Электромотоциклы для детей в Зеленограде», адрес, например <code>/moto-zelenograd</code>.</li></ol>
@@ -205,15 +225,22 @@ table{{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}} th,t
 <li><b>Контент → Шапка блока:</b> заголовок «Запишите ребёнка на тренировку», описание «Оставьте заявку — администратор перезвонит, подберёт группу и класс мотоцикла и ответит на все вопросы.»</li>
 <li><b>Контент → Поля для ввода</b> — как в таблице; Email и прочие лишние поля удалить.</li>
 <li><b>Текст кнопки:</b> «Отправить заявку →». <b>Сообщение об успехе:</b> «Спасибо! Администратор перезвонит вам в ближайшее время.»</li>
-<li><b>Контент → Приём данных:</b> отметить Tilda CRM, Google Таблицу, Telegram и/или Email (сначала подключить их: Настройки сайта → Формы).</li>
+<li><b>Контент → Приём данных:</b> отметить Tilda CRM и Email на российском почтовом сервисе (сначала подключить: Настройки сайта → Формы). Telegram и Google Таблицу не подключать.</li>
+<li><b>Поле «Согласие»:</b> галочка не отмечена по умолчанию, лейбл — этот HTML: <code>{_h.escape(CONSENT_LABEL)}</code></li>
 <li><b>Настройки блока:</b> отступы сверху/снизу 0 (и для 480), ширина 12 колонок, фон <code>#0d0f13</code>, название формы «Электромото Зеленоград — запись», якорная ссылка <code>signup</code>, CSS Class Name <code>gm-signup</code>.</li></ol>
 <div class="tbl"><table><tr><th>Поле</th><th>Тип и варианты</th><th>Переменная</th><th>Обязательное</th></tr>{rows}</table></div>
 <p class="warn">Оформление формы (тёмная карточка, жёлтая кнопка, дни-«пилюли», фото на фоне, список «Перезвоним в течение дня…») подтягивается из блока 3 по CSS-классу <code>gm-signup</code>. Без класса форма останется стандартной.</p>
 <h2>4. Блок 3 — подвал и скрипты</h2>
 <ol class="steps"><li>Ещё один <b>T123 «HTML-код»</b> под формой → вставить код ниже → «Сохранить и закрыть».</li>
 <li><b>Опубликовать.</b> Проверять вид только на опубликованной странице: редактор и «Предпросмотр» Тильды код T123 не выполняют.</li>
-<li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM, таблицу и Telegram → удалить тест.</li></ol>
-{card(3, 'блок 3 из 3', 'T123 · подвал и скрипты', 'оформление формы, «Как добраться», FAQ, липкая кнопка', b3)}
+<li>Отправить тестовую заявку «ТЕСТ» → проверить «Заявки», Tilda CRM и почту → удалить тест.</li></ol>
+{card(3, 'блок 3 из 3', 'T123 · подвал и скрипты', 'оформление формы, «Как добраться», FAQ, липкая кнопка, cookie', b3)}
+<h2>5. Страницы политики и согласия</h2>
+<p class="warn">Перед публикацией замените жёлтые заглушки <code>[ОПЕРАТОР]</code>, <code>[ИНН]</code>, <code>[ОГРН]</code>, <code>[АДРЕС ОПЕРАТОРА]</code>, <code>[E-MAIL]</code>, <code>[АДРЕС САЙТА]</code>, <code>[ПОЧТОВЫЙ СЕРВИС]</code> на данные оператора. Ссылка «← Вернуться» ведёт на <code>/moto-zelenograd</code> — поменяйте, если адрес лендинга другой.</p>
+<ol class="steps"><li>Две новые пустые страницы: «Политика обработки персональных данных» с адресом <code>/privacy-moto</code> и «Согласие на обработку персональных данных» с адресом <code>/consent-moto</code>. Фон страницы — <code>#0d0f13</code>.</li>
+<li>На каждой — один T123, вставить код ниже → опубликовать.</li></ol>
+{card(4, 'страница /privacy-moto', 'T123 · политика', 'текст от 28.10.2026, 152-ФЗ', b4)}
+{card(5, 'страница /consent-moto', 'T123 · согласие', 'отдельный документ, ст. 9 152-ФЗ', b5)}
 </div>
 <script>
 document.querySelectorAll('button.copy').forEach(function (btn) {{

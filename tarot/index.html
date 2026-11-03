@@ -183,6 +183,26 @@
   .asked { margin: 0; font-family: var(--display); font-style: italic; font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
 
   .positions li { cursor: pointer; }
+  .positions .when, .viewer .when { color: var(--gold); font-size: 0.8rem; }
+  .positions .comment, .viewer .comment { margin: 4px 0 0; }
+  .positions .meaning, .viewer .meaning { color: var(--muted); font-size: 0.88rem; }
+  .list-title { font-family: var(--display); font-size: 1.6rem; font-weight: 600; margin: 6px 0 0; }
+
+  /* Conclusion */
+  .summary {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 20px; border-radius: 14px;
+    border: 1px solid var(--gold);
+    background: linear-gradient(180deg, #26284a, var(--cloth));
+  }
+  .summary h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .summary p { margin: 0; }
+  #sum-body { display: flex; flex-direction: column; gap: 8px; }
+  .summary .verdict { font-family: var(--display); font-size: 1.3rem; line-height: 1.3; }
+  .ai { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; margin-top: 4px; }
+  .ai-text p { margin: 0 0 10px; }
+  .ai-text p:last-child { margin-bottom: 0; }
+  .ai-note { color: var(--muted); font-size: 0.82rem; margin: 0; }
 
   /* Card viewer */
   #viewer {
@@ -286,6 +306,20 @@
       <p class="note" id="spread-hint" hidden>Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх.</p>
       <p class="asked" id="asked" hidden></p>
       <div class="table" id="table" aria-label="Расклад"></div>
+      <section class="summary" id="summary" hidden aria-live="polite">
+        <span class="tag">Вывод по раскладу</span>
+        <h3 id="sum-title"></h3>
+        <div id="sum-body"></div>
+        <div class="ai" id="ai" hidden>
+          <div class="row">
+            <button class="btn" type="button" id="ai-ask">Подробное толкование от Claude</button>
+            <button class="btn ghost" type="button" id="ai-stop" hidden>Остановить</button>
+          </div>
+          <p class="ai-note" id="ai-note">Claude разберёт расклад целиком: свяжет карты между собой и ответит на твой вопрос.</p>
+          <div class="ai-text" id="ai-text"></div>
+        </div>
+      </section>
+      <h3 class="list-title" id="list-title" hidden>Карты по позициям</h3>
       <ol class="positions" id="positions"></ol>
     </div>
   </section>
@@ -301,6 +335,8 @@
     <span class="tag" id="v-orient"></span>
     <h3 id="v-name"></h3>
     <p class="what" id="v-what"></p>
+    <span class="when" id="v-when"></span>
+    <p class="comment" id="v-comment"></p>
     <p class="meaning" id="v-meaning"></p>
     <div class="viewer-nav">
       <button class="icon-btn" type="button" id="v-prev" aria-label="Предыдущая карта">←</button>
@@ -324,6 +360,81 @@
     ["Надежды и страхи", "Чего ты ждёшь и чего опасаешься"],
     ["Итог", "К чему всё придёт"]
   ];
+  // What part of life or time each position speaks about, and how to read a light (+1), mixed (0) or heavy (-1) card there
+  const READING = [
+    ["Время: сейчас", ["Ситуация в целом складывается в твою пользу.", "Ситуация пока неоднозначна и может повернуть в любую сторону.", "Сейчас ситуация непростая, и это стоит честно признать."]],
+    ["Время: сейчас", ["Препятствие мягкое: мешает не беда, а то, что может отвлечь или расслабить.", "Мешает неопределённость: ясности пока не хватает.", "Это главная трудность, с которой предстоит справиться."]],
+    ["Время: давнее прошлое, корни", ["В основе ситуации хороший фундамент, на него можно опереться.", "Причины глубже, чем кажется: стоит в них разобраться.", "Корень проблемы здесь: пока он не проработан, ситуация будет повторяться."]],
+    ["Время: недавнее прошлое", ["Недавнее прошлое дало тебе силы, которые ещё работают.", "Недавний этап завершается, его влияние слабеет.", "Недавние события оставили след, но эта полоса уже уходит."]],
+    ["О чём: твоя цель и лучший исход", ["Лучший сценарий светлый, к нему стоит стремиться.", "Цель пока размыта: стоит точнее понять, чего ты хочешь.", "Будь осторожен с ожиданиями: желаемое может принести не только радость."]],
+    ["Время: ближайшие недели", ["В ближайшее время жди хороших перемен.", "Ближайшее время переходное: многое зависит от твоих решений.", "В ближайшие недели возможны трудности, к ним лучше подготовиться заранее."]],
+    ["О чём: ты сам", ["Ты в хорошей форме и можешь сам влиять на ситуацию.", "Ты в поиске и пока не определился со своей позицией.", "Мешать может твоё собственное состояние, стоит позаботиться о себе."]],
+    ["О чём: люди и обстоятельства вокруг", ["Окружение на твоей стороне, не бойся просить поддержки.", "Окружение нейтрально: многое зависит от того, как ты выстроишь отношения.", "Присмотрись к людям и обстоятельствам вокруг: не всё работает на тебя."]],
+    ["О чём: твои надежды и страхи", ["Твои надежды светлые, и они дают силы.", "В тебе смешаны надежда и тревога, это нормально.", "Именно это тебя тревожит. Часто страх сильнее реальной угрозы."]],
+    ["Время: итог, ближайшие месяцы", ["Итог благоприятный: ситуация разрешится хорошо.", "Итог открыт: многое решат твои шаги.", "Итог пока тяжёлый, но расклад показывает тенденцию, а не приговор."]]
+  ];
+  const SUITS = {
+    maj: ["Старший аркан", "важный, судьбоносный момент"],
+    wands: ["Жезлов", "действия, работа и энергия"],
+    cups: ["Кубков", "чувства и отношения"],
+    swords: ["Мечей", "мысли, решения и конфликты"],
+    pents: ["Пентаклей", "деньги, работа и быт"]
+  };
+  // Card tone when upright: most cards are light; these are heavy or mixed
+  const HEAVY = ["maj15", "maj16", "maj18", "wands05", "wands10", "cups05", "swords03", "swords05", "swords07", "swords08", "swords09", "swords10", "pents05"];
+  const MIXED = ["maj09", "maj10", "maj11", "maj12", "maj13", "maj20", "wands07", "wands09", "cups04", "cups07", "cups08", "swords02", "swords04", "swords06", "pents04", "pents07"];
+  const suitOf = card => card[0].replace(/\d+$/, "");
+  function tone({ card, reversed }) {
+    const base = HEAVY.includes(card[0]) ? -1 : MIXED.includes(card[0]) ? 0 : 1;
+    return reversed ? (base === 0 ? 0 : -base) : base;
+  }
+  function comment(i) {
+    const d = spread[i], t = tone(d), suit = SUITS[suitOf(d.card)];
+    return {
+      when: READING[i][0] + " · сфера: " + suit[1],
+      text: READING[i][1][1 - t]
+    };
+  }
+
+  // Conclusion for the whole spread, built from tones, suits and the key positions
+  function summarize() {
+    const tones = spread.map(tone);
+    const score = tones.reduce((a, b) => a + b, 0);
+    const name = i => "«" + spread[i].card[1] + "»";
+    const out = [];
+    const title = score >= 3 ? "Расклад благоприятный" : score <= -3 ? "Расклад напряжённый" : "Расклад смешанный";
+    out.push(score >= 3 ? "Светлых карт заметно больше, чем тяжёлых: обстоятельства в целом работают на тебя."
+      : score <= -3 ? "Тяжёлых карт больше, чем светлых: впереди непростой период, но к нему можно подготовиться."
+      : "Есть и поддержка, и трудности. Многое зависит от твоих решений.");
+
+    const t1 = tones[0], t10 = tones[9];
+    out.push(t10 > t1 ? "Ситуация движется к лучшему: от " + name(0) + " сейчас к " + name(9) + " в итоге."
+      : t10 < t1 ? "Будь внимателен: итог " + name(9) + " пока слабее, чем нынешнее положение " + name(0) + "."
+      : "Скорее всего, ситуация сохранит нынешний характер: " + name(0) + " сейчас и " + name(9) + " в итоге.");
+
+    if (tones[4] > 0 && t10 > 0) out.push("Желаемое " + name(4) + " и итог совпадают: ты на верном пути.");
+    else if (tones[4] > 0 && t10 < 0) out.push("То, чего ты хочешь (" + name(4) + "), и то, куда всё идёт, пока расходятся. Стоит что-то поменять в подходе.");
+
+    const majors = spread.filter(d => suitOf(d.card) === "maj").length;
+    if (majors >= 4) out.push("Старших арканов много (" + majors + " из 10): это важный жизненный этап, и обстоятельства влияют на него сильнее, чем повседневные решения.");
+    else if (majors <= 1) out.push("Старших арканов почти нет: всё в твоих руках, ситуация решается обычными повседневными шагами.");
+
+    const counts = {};
+    spread.forEach(d => { const s = suitOf(d.card); if (s !== "maj") counts[s] = (counts[s] || 0) + 1; });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    if (top.length && top[0][1] >= 3 && (!top[1] || top[0][1] > top[1][1]))
+      out.push("Больше всего карт масти " + SUITS[top[0][0]][0] + " (" + top[0][1] + "): главное в вопросе — " + SUITS[top[0][0]][1] + ".");
+
+    const rev = spread.filter(d => d.reversed).length;
+    if (rev >= 6) out.push("Перевёрнутых карт много (" + rev + "): энергия сейчас скорее заблокирована, многое происходит внутри тебя.");
+    else if (rev <= 2) out.push("Почти все карты прямые: события развиваются открыто и без задержек.");
+
+    out.push("Совет: главное препятствие — " + name(1) + ". " + (tones[6] >= 0
+      ? "Судя по карте " + name(6) + ", у тебя достаточно сил, чтобы с ним справиться."
+      : "Сначала позаботься о себе: карта " + name(6) + " говорит, что твоё состояние сейчас ключ к ситуации."));
+    return { title, paragraphs: out };
+  }
+
   const $ = id => document.getElementById(id);
   const img = c => "cards/" + c[0] + ".jpg";
 
@@ -433,6 +544,9 @@
     preload(spread);
     $("table").innerHTML = '<div class="deck" aria-hidden="true"><div class="back-face"></div><span class="left"></span></div>';
     $("positions").innerHTML = "";
+    if (aiCtl) aiCtl.abort();
+    $("summary").hidden = $("list-title").hidden = true;
+    $("ai-text").textContent = "";
     const q = $("question").value.trim();
     $("asked").textContent = q ? "«" + q + "»" : "";
     $("asked").hidden = !q;
@@ -477,6 +591,7 @@
       setTimeout(() => {
         s.classList.remove("flying");
         addPosition(i);
+        if (i === 9) showSummary();
         busy = false;
         updateButtons();
       }, flip);
@@ -488,13 +603,18 @@
     const li = document.createElement("li");
     li.id = "pos-" + i;
     li.innerHTML = '<div class="thumb' + (reversed ? " reversed" : "") + '"><img alt=""></div><div class="body">' +
-      '<span class="pos"></span><span class="what"></span><span class="name"></span><p class="meaning"></p></div>';
+      '<span class="pos"></span><span class="what"></span><span class="name"></span><span class="when"></span>' +
+      '<p class="comment"></p><p class="meaning"></p></div>';
     li.querySelector("img").src = img(card);
     li.querySelector(".pos").textContent = (i + 1) + " · " + POSITIONS[i][0];
     li.querySelector(".what").textContent = POSITIONS[i][1];
     li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
-    li.querySelector(".meaning").textContent = reversed ? card[3] : card[2];
+    const c = comment(i);
+    li.querySelector(".when").textContent = c.when;
+    li.querySelector(".comment").textContent = c.text;
+    li.querySelector(".meaning").textContent = "Значение карты: " + (reversed ? card[3] : card[2]);
     li.addEventListener("click", () => openViewer(i));
+    $("list-title").hidden = false;
     $("positions").appendChild(li);
     flash(li);
   }
@@ -538,7 +658,10 @@
     $("v-orient").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
     $("v-name").textContent = card[1];
     $("v-what").textContent = POSITIONS[i][1];
-    $("v-meaning").textContent = reversed ? card[3] : card[2];
+    const c = comment(i);
+    $("v-when").textContent = c.when;
+    $("v-comment").textContent = c.text;
+    $("v-meaning").textContent = "Значение карты: " + (reversed ? card[3] : card[2]);
     const shown = $("positions").children.length;
     $("v-count").textContent = (i + 1) + " из " + shown;
     $("v-prev").disabled = i === 0;
@@ -563,6 +686,83 @@
     }, 250);
     updateButtons();
   }
+
+  function showSummary() {
+    const { title, paragraphs } = summarize();
+    $("sum-title").textContent = title;
+    $("sum-body").innerHTML = "";
+    paragraphs.forEach((t, k) => {
+      const p = document.createElement("p");
+      if (k === 0) p.className = "verdict";
+      p.textContent = t;
+      $("sum-body").appendChild(p);
+    });
+    $("ai-note").textContent = "Claude разберёт расклад целиком: свяжет карты между собой и ответит на твой вопрос.";
+    $("summary").hidden = false;
+    $("summary").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+  }
+
+  /* Detailed reading from Claude, on the viewer's own account. Hidden where the page cannot ask Claude. */
+  let sample = null, aiCtl = null;
+  if (window.claude && claude.use) claude.use("sample").then(fn => { sample = fn; $("ai").hidden = !fn; }).catch(() => {});
+
+  function readingPrompt() {
+    const q = $("question").value.trim();
+    const lines = spread.map((d, i) =>
+      (i + 1) + ". " + POSITIONS[i][0] + " (" + POSITIONS[i][1].toLowerCase() + "): " + d.card[1] +
+      (d.reversed ? ", перевёрнутая" : ", прямая") + ". Значение: " + (d.reversed ? d.card[3] : d.card[2]));
+    return "Ты опытный и бережный таролог. Растолкуй расклад «Кельтский крест» колодой Райдера — Уэйта.\n\n" +
+      "Вопрос человека: " + (q || "вопрос не задан, дай общее толкование ситуации") + "\n\n" +
+      "Карты по позициям:\n" + lines.join("\n") + "\n\n" +
+      "Напиши толкование на русском, обращаясь на «ты», тепло и по-человечески, без мистического пафоса. " +
+      "Структура: сначала короткий ответ на вопрос в 2–3 предложениях; затем как связаны карты: прошлое и корни, настоящее, " +
+      "ближайшее будущее и итог; затем что говорят позиции «Ты сам», «Окружение» и «Надежды и страхи»; в конце один практический совет. " +
+      "Не пересказывай значения каждой карты по отдельности, ищи связи между ними. До 300 слов. " +
+      "Без Markdown, без списков и заголовков: обычные абзацы, разделённые пустой строкой.";
+  }
+  function renderAi(text) {
+    $("ai-text").innerHTML = "";
+    text.split(/\n\s*\n/).forEach(par => {
+      if (!par.trim()) return;
+      const p = document.createElement("p");
+      p.textContent = par.trim();
+      $("ai-text").appendChild(p);
+    });
+  }
+  $("ai-ask").addEventListener("click", async () => {
+    if (!sample || aiCtl) return;
+    aiCtl = new AbortController();
+    $("ai-ask").disabled = true;
+    $("ai-stop").hidden = false;
+    $("ai-note").textContent = "Claude раскладывает карты в голове… Обычно это занимает до минуты.";
+    $("ai-text").textContent = "";
+    try {
+      await sample(readingPrompt(), { cache: false, signal: aiCtl.signal, onText: ({ text }) => {
+        $("ai-note").textContent = "Толкование от Claude";
+        renderAi(text);
+      } });
+      $("ai-note").textContent = "Толкование от Claude";
+    } catch (e) {
+      if (e.text) renderAi(e.text); else $("ai-text").textContent = "";
+      const msg = {
+        cancelled: "Толкование остановлено.",
+        rate_limited: "Слишком много запросов. Попробуй чуть позже.",
+        session_expired: "Нужно снова войти в Claude.",
+        refused: "Claude не смог растолковать этот расклад. Попробуй переформулировать вопрос."
+      }[e.code];
+      if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) {
+        $("ai").hidden = true;
+      } else {
+        $("ai-note").textContent = msg || "Не получилось связаться с Claude. Попробуй ещё раз.";
+      }
+    } finally {
+      aiCtl = null;
+      $("ai-ask").disabled = false;
+      $("ai-ask").textContent = "Растолковать ещё раз";
+      $("ai-stop").hidden = true;
+    }
+  });
+  $("ai-stop").addEventListener("click", () => aiCtl && aiCtl.abort());
 
   $("deal").addEventListener("click", start);
   $("next").addEventListener("click", dealNext);

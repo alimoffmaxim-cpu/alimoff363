@@ -146,8 +146,19 @@
   }
   #question::placeholder { color: var(--muted); }
   .table { position: relative; width: 100%; max-width: 520px; margin: 0 auto; }
-  .slot { position: absolute; border: 0; padding: 0; background: none; cursor: pointer; transition: opacity .5s, translate .5s; }
-  .slot.dealing { opacity: 0; translate: 0 -30px; }
+  .slot {
+    position: absolute; border: 0; padding: 0; background: none; cursor: pointer;
+    transition: transform .85s cubic-bezier(.25,.8,.25,1);
+  }
+  .slot.flying { cursor: default; }
+  .deck { position: absolute; z-index: 0; }
+  .deck .back-face { box-shadow: 0 3px 0 #0b0c16, 0 6px 0 #0b0c16, 0 10px 18px rgba(0,0,0,.5); }
+  .deck .left {
+    position: absolute; left: 50%; bottom: -22px; translate: -50% 0;
+    white-space: nowrap; color: var(--muted); font-size: 0.72rem;
+  }
+  .positions li { transition: border-color .4s, background-color .4s; }
+  .positions li.flash { border-color: var(--gold); background: #26284a; }
   .slot .num {
     position: absolute; z-index: 3; top: -9px; left: -9px;
     width: 22px; height: 22px; border-radius: 50%;
@@ -172,7 +183,7 @@
   .asked { margin: 0; font-family: var(--display); font-style: italic; font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
 
   @media (prefers-reduced-motion: reduce) {
-    .card .inner, .slot { transition: none; }
+    .card .inner, .slot, .positions li { transition: none; }
     .big:not(.open) .inner { animation: none; }
   }
 </style>
@@ -231,10 +242,11 @@
       <p class="lead">Самый известный полный расклад: 10 карт показывают ситуацию целиком. Задай вопрос, если хочешь, и разложи карты.</p>
       <input id="question" type="text" maxlength="140" autocomplete="off" placeholder="Твой вопрос (можно не писать)">
       <div class="row">
-        <button class="btn" type="button" id="deal">Разложить карты</button>
-        <button class="btn ghost" type="button" id="open-all" hidden>Открыть все</button>
+        <button class="btn" type="button" id="next" hidden>Положить следующую карту</button>
+        <button class="btn ghost" type="button" id="auto" hidden>Разложить остальные</button>
+        <button class="btn" type="button" id="deal">Начать расклад</button>
       </div>
-      <p class="note" id="spread-hint" hidden>Открывай карты по одной, нажимая на них, или сразу все.</p>
+      <p class="note" id="spread-hint" hidden>Нажми на карту, чтобы вынести её на передний план.</p>
       <p class="asked" id="asked" hidden></p>
       <div class="table" id="table" aria-label="Расклад"></div>
       <ol class="positions" id="positions"></ol>
@@ -313,80 +325,149 @@
     setTimeout(newDay, 350);
   });
 
-  /* Celtic Cross: positions are computed from the table width so the cross never overlaps the staff */
-  let spread = [];
-  function layout() {
-    const table = $("table");
-    const W = table.clientWidth;
-    if (!W || !spread.length) return;
+  /* Celtic Cross. Positions are computed from the table width so the cross never overlaps the staff.
+     Cards are dealt one by one from the deck in the top-left corner, then turned face up. */
+  let spread = [], dealt = 0, busy = false, autoTimer = null, topZ = 10;
+  const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function geometry() {
+    const W = $("table").clientWidth;
     const w = W * 0.17, h = w * 1.73, g = W * 0.022;
     const H = 4 * h + 3 * g;
-    table.style.height = H + "px";
     const dx = h / 2 + w / 2 + g;          // card 2 lies across card 1, so neighbours keep clear of its long side
-    const cx = dx + w / 2, cy = H / 2;
-    const sx = W - w / 2;
+    const cx = dx + w / 2, cy = H / 2, sx = W - w / 2;
     const centres = [
       [cx, cy], [cx, cy], [cx, cy + h + g], [cx - dx, cy], [cx, cy - h - g], [cx + dx, cy],
       [sx, H - h / 2], [sx, H - h * 1.5 - g], [sx, h * 1.5 + g], [sx, h / 2]
     ];
-    table.querySelectorAll(".slot").forEach((s, i) => {
-      s.style.width = w + "px";
-      s.style.height = h + "px";
-      s.style.left = centres[i][0] - w / 2 + "px";
-      s.style.top = centres[i][1] - h / 2 + "px";
-    });
+    return { w, h, H, centres, deck: [w / 2, h / 2] };
+  }
+  function place(el, c, G) {
+    el.style.width = G.w + "px";
+    el.style.height = G.h + "px";
+    el.style.left = c[0] - G.w / 2 + "px";
+    el.style.top = c[1] - G.h / 2 + "px";
+  }
+  function layout() {
+    if (!spread.length) return;
+    const G = geometry();
+    $("table").style.height = G.H + "px";
+    const deck = $("table").querySelector(".deck");
+    if (deck) place(deck, G.deck, G);
+    $("table").querySelectorAll(".slot").forEach(s => place(s, G.centres[+s.dataset.i], G));
   }
   window.addEventListener("resize", layout);
 
-  function deal() {
+  function updateButtons() {
+    const left = 10 - dealt;
+    $("next").hidden = $("auto").hidden = left === 0;
+    $("next").textContent = dealt === 0 ? "Положить первую карту" : "Положить следующую карту (" + (dealt + 1) + " из 10)";
+    $("next").disabled = $("auto").disabled = busy || !!autoTimer;
+    const deck = $("table").querySelector(".deck");
+    if (deck) {
+      deck.hidden = left === 0;
+      deck.querySelector(".left").textContent = "Осталось " + left;
+    }
+  }
+
+  function start() {
+    clearInterval(autoTimer); autoTimer = null;
     spread = shuffled().slice(0, 10);
+    dealt = 0; busy = false; topZ = 10;
     preload(spread);
-    const table = $("table");
-    table.innerHTML = "";
-    spread.forEach((d, i) => {
-      const s = document.createElement("button");
-      s.type = "button";
-      s.className = "slot card dealing" + (i === 1 ? " cross" : "") + (d.reversed ? " reversed" : "");
-      s.style.zIndex = i === 1 ? 2 : 1;
-      if (i === 1) s.style.transform = "rotate(90deg)";
-      s.setAttribute("aria-label", (i + 1) + ". " + POSITIONS[i][0] + ": открыть карту");
-      s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
-      s.addEventListener("click", () => reveal(i));
-      table.appendChild(s);
-      setTimeout(() => s.classList.remove("dealing"), 80 + i * 110);
-    });
-    layout();
-    $("positions").innerHTML = spread.map((d, i) =>
-      '<li id="pos-' + i + '"><div class="thumb"></div><div class="body">' +
-      '<span class="pos">' + (i + 1) + ' · ' + POSITIONS[i][0] + '</span>' +
-      '<span class="what">' + POSITIONS[i][1] + '</span>' +
-      '<span class="name"></span><p class="meaning"></p></div></li>').join("");
+    $("table").innerHTML = '<div class="deck" aria-hidden="true"><div class="back-face"></div><span class="left"></span></div>';
+    $("positions").innerHTML = "";
     const q = $("question").value.trim();
     $("asked").textContent = q ? "«" + q + "»" : "";
     $("asked").hidden = !q;
-    $("deal").textContent = "Разложить заново";
-    $("open-all").hidden = $("spread-hint").hidden = false;
-    $("open-all").disabled = false;
+    $("deal").textContent = "Новый расклад";
+    $("deal").classList.add("ghost");
+    $("spread-hint").hidden = false;
+    layout();
+    updateButtons();
   }
 
-  function reveal(i) {
-    const s = $("table").children[i];
-    if (!s || s.classList.contains("open")) return;
+  function dealNext() {
+    if (busy || dealt >= 10) return;
+    busy = true;
+    const i = dealt++;
     const { card, reversed } = spread[i];
-    const im = s.querySelector("img");
-    im.src = img(card);
-    im.alt = card[1];
-    s.classList.add("open");
+    const G = geometry();
+    const s = document.createElement("button");
+    s.type = "button";
+    s.dataset.i = i;
+    s.className = "slot card flying" + (i === 1 ? " cross" : "") + (reversed ? " reversed" : "");
+    s.style.zIndex = ++topZ;
     s.setAttribute("aria-label", (i + 1) + ". " + POSITIONS[i][0] + ": " + card[1]);
-    const li = $("pos-" + i);
-    li.querySelector(".thumb").innerHTML = '<img alt="" src="' + img(card) + '">';
-    li.querySelector(".thumb").classList.toggle("reversed", reversed);
+    s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
+    s.querySelector("img").src = img(card);
+    s.querySelector("img").alt = card[1];
+    s.addEventListener("click", () => toFront(i));
+    place(s, G.centres[i], G);
+    // Start on top of the deck, then glide to the card's place on the table
+    const fromX = G.deck[0] - G.centres[i][0], fromY = G.deck[1] - G.centres[i][1];
+    const rest = i === 1 ? "rotate(90deg)" : "none";
+    s.style.transition = "none";
+    s.style.transform = "translate(" + fromX + "px," + fromY + "px)";
+    $("table").appendChild(s);
+    updateButtons();
+    const fly = reduced() ? 0 : 850, flip = reduced() ? 0 : 700;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      s.style.transition = "";
+      s.style.transform = rest;
+    }));
+    setTimeout(() => {
+      s.classList.add("open");
+      setTimeout(() => {
+        s.classList.remove("flying");
+        addPosition(i);
+        busy = false;
+        updateButtons();
+      }, flip);
+    }, fly);
+  }
+
+  function addPosition(i) {
+    const { card, reversed } = spread[i];
+    const li = document.createElement("li");
+    li.id = "pos-" + i;
+    li.innerHTML = '<div class="thumb' + (reversed ? " reversed" : "") + '"><img alt=""></div><div class="body">' +
+      '<span class="pos"></span><span class="what"></span><span class="name"></span><p class="meaning"></p></div>';
+    li.querySelector("img").src = img(card);
+    li.querySelector(".pos").textContent = (i + 1) + " · " + POSITIONS[i][0];
+    li.querySelector(".what").textContent = POSITIONS[i][1];
     li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
     li.querySelector(".meaning").textContent = reversed ? card[3] : card[2];
-    if ([...$("table").children].every(c => c.classList.contains("open"))) $("open-all").disabled = true;
+    $("positions").appendChild(li);
+    flash(li);
   }
-  $("deal").addEventListener("click", deal);
-  $("open-all").addEventListener("click", () => spread.forEach((_, i) => setTimeout(() => reveal(i), i * 140)));
+  function flash(li) {
+    li.classList.add("flash");
+    setTimeout(() => li.classList.remove("flash"), 1400);
+  }
+
+  // Tapping a card brings it to the front, so card 1 can be seen from under card 2 and back again
+  function toFront(i) {
+    const s = $("table").querySelector('.slot[data-i="' + i + '"]');
+    if (!s || s.classList.contains("flying")) return;
+    s.style.zIndex = ++topZ;
+    const li = $("pos-" + i);
+    if (li) flash(li);
+  }
+
+  function dealRest() {
+    if (autoTimer || dealt >= 10) return;
+    dealNext();
+    autoTimer = setInterval(() => {
+      if (dealt >= 10) { clearInterval(autoTimer); autoTimer = null; updateButtons(); return; }
+      if (!busy) dealNext();
+    }, 250);
+    updateButtons();
+  }
+
+  $("deal").addEventListener("click", start);
+  $("next").addEventListener("click", dealNext);
+  $("auto").addEventListener("click", dealRest);
 
   route();
 </script>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Magic 8 Ball Online — Ask a Question and Get an Answer</title>
+<meta name="description" content="Ask the Magic 8 Ball online for free. Type a yes-or-no question, shake the ball and get one of 20 classic answers. Works on phone and computer.">
+<link rel="canonical" href="https://alimoffmaxim-cpu.github.io/alimoff363/">
+<link rel="alternate" hreflang="en" href="https://alimoffmaxim-cpu.github.io/alimoff363/">
+<link rel="alternate" hreflang="ru" href="https://alimoffmaxim-cpu.github.io/alimoff363/ru/">
+<link rel="alternate" hreflang="uk" href="https://alimoffmaxim-cpu.github.io/alimoff363/uk/">
+<link rel="alternate" hreflang="kk" href="https://alimoffmaxim-cpu.github.io/alimoff363/kk/">
+<link rel="alternate" hreflang="uz" href="https://alimoffmaxim-cpu.github.io/alimoff363/uz/">
+<link rel="alternate" hreflang="de" href="https://alimoffmaxim-cpu.github.io/alimoff363/de/">
+<link rel="alternate" hreflang="fr" href="https://alimoffmaxim-cpu.github.io/alimoff363/fr/">
+<link rel="alternate" hreflang="es" href="https://alimoffmaxim-cpu.github.io/alimoff363/es/">
+<link rel="alternate" hreflang="it" href="https://alimoffmaxim-cpu.github.io/alimoff363/it/">
+<link rel="alternate" hreflang="pt" href="https://alimoffmaxim-cpu.github.io/alimoff363/pt/">
+<link rel="alternate" hreflang="pl" href="https://alimoffmaxim-cpu.github.io/alimoff363/pl/">
+<link rel="alternate" hreflang="cs" href="https://alimoffmaxim-cpu.github.io/alimoff363/cs/">
+<link rel="alternate" hreflang="nl" href="https://alimoffmaxim-cpu.github.io/alimoff363/nl/">
+<link rel="alternate" hreflang="sv" href="https://alimoffmaxim-cpu.github.io/alimoff363/sv/">
+<link rel="alternate" hreflang="tr" href="https://alimoffmaxim-cpu.github.io/alimoff363/tr/">
+<link rel="alternate" hreflang="el" href="https://alimoffmaxim-cpu.github.io/alimoff363/el/">
+<link rel="alternate" hreflang="ar" href="https://alimoffmaxim-cpu.github.io/alimoff363/ar/">
+<link rel="alternate" hreflang="he" href="https://alimoffmaxim-cpu.github.io/alimoff363/he/">
+<link rel="alternate" hreflang="hi" href="https://alimoffmaxim-cpu.github.io/alimoff363/hi/">
+<link rel="alternate" hreflang="zh-Hans" href="https://alimoffmaxim-cpu.github.io/alimoff363/zh/">
+<link rel="alternate" hreflang="zh-Hant" href="https://alimoffmaxim-cpu.github.io/alimoff363/zh-tw/">
+<link rel="alternate" hreflang="ja" href="https://alimoffmaxim-cpu.github.io/alimoff363/ja/">
+<link rel="alternate" hreflang="ko" href="https://alimoffmaxim-cpu.github.io/alimoff363/ko/">
+<link rel="alternate" hreflang="id" href="https://alimoffmaxim-cpu.github.io/alimoff363/id/">
+<link rel="alternate" hreflang="vi" href="https://alimoffmaxim-cpu.github.io/alimoff363/vi/">
+<link rel="alternate" hreflang="th" href="https://alimoffmaxim-cpu.github.io/alimoff363/th/">
+<link rel="alternate" hreflang="x-default" href="https://alimoffmaxim-cpu.github.io/alimoff363/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Magic 8 Ball">
+<meta property="og:title" content="Magic 8 Ball Online — Ask a Question and Get an Answer">
+<meta property="og:description" content="Ask the Magic 8 Ball online for free. Type a yes-or-no question, shake the ball and get one of 20 classic answers. Works on phone and computer.">
+<meta property="og:url" content="https://alimoffmaxim-cpu.github.io/alimoff363/">
+<meta property="og:image" content="https://alimoffmaxim-cpu.github.io/alimoff363/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0e0f1a">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<script>
+  (function () {
+    var P = {"en": "", "ru": "ru/", "uk": "uk/", "kk": "kk/", "uz": "uz/", "de": "de/", "fr": "fr/", "es": "es/", "it": "it/", "pt": "pt/", "pl": "pl/", "cs": "cs/", "nl": "nl/", "sv": "sv/", "tr": "tr/", "el": "el/", "ar": "ar/", "he": "he/", "hi": "hi/", "zh": "zh/", "zh-TW": "zh-tw/", "ja": "ja/", "ko": "ko/", "id": "id/", "vi": "vi/", "th": "th/"};
+    function match(tag) {
+      if (!tag) return null;
+      var t = String(tag).toLowerCase();
+      if (t.indexOf("zh") === 0) return /-(tw|hk|mo|hant)/.test(t) ? "zh-TW" : "zh";
+      for (var k in P) if (k.toLowerCase() === t) return k;
+      var b = t.split("-")[0];
+      return P.hasOwnProperty(b) ? b : null;
+    }
+    var code = match(location.hash.slice(1));
+    if (!code) { try { code = match(localStorage.getItem("lang")); } catch (e) {} }
+    if (!code) {
+      var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+      for (var i = 0; i < list.length && !code; i++) code = match(list[i]);
+    }
+    if (code && code !== "en") location.replace(P[code]);
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;800&family=Manrope:wght@400;600&display=swap">
+<link rel="stylesheet" href="./style.css">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Magic 8 Ball", "alternateName": "Magic 8 Ball", "description": "Ask the Magic 8 Ball online for free. Type a yes-or-no question, shake the ball and get one of 20 classic answers. Works on phone and computer.", "url": "https://alimoffmaxim-cpu.github.io/alimoff363/", "inLanguage": "en", "applicationCategory": "EntertainmentApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "image": "https://alimoffmaxim-cpu.github.io/alimoff363/og.png", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}}</script>
+</head>
+<body>
+<main>
+  <h1 id="title">Magic 8 Ball</h1>
+  <p class="sub">Ask a question that can be answered yes or no</p>
+  <input id="q" type="text" placeholder="For example: will today go well?" aria-label="Ask a question that can be answered yes or no" autocomplete="off" maxlength="120">
+  <button id="ball" type="button" aria-label="Shake the ball">
+    <div class="window" id="window"><div class="eight">8</div></div>
+  </button>
+  <p id="answer-text" aria-live="polite"></p>
+  <p class="hint">Tap the ball or press Enter</p>
+  <label class="lang"><span aria-hidden="true">🌐</span><select id="lang" aria-label="Language"><option value="en" selected>English</option><option value="ru">Русский</option><option value="uk">Українська</option><option value="kk">Қазақша</option><option value="uz">Oʻzbekcha</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="es">Español</option><option value="it">Italiano</option><option value="pt">Português</option><option value="pl">Polski</option><option value="cs">Čeština</option><option value="nl">Nederlands</option><option value="sv">Svenska</option><option value="tr">Türkçe</option><option value="el">Ελληνικά</option><option value="ar">العربية</option><option value="he">עברית</option><option value="hi">हिन्दी</option><option value="zh">简体中文</option><option value="zh-TW">繁體中文</option><option value="ja">日本語</option><option value="ko">한국어</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="th">ไทย</option></select></label>
+</main>
+<section class="info">
+  <p>The Magic 8 Ball answers any question that can be answered yes or no. Think of your question, tap the ball and read the answer in the window. It is free, needs no sign-up and works on any device.</p>
+  <h2>All 20 answers of the Magic 8 Ball</h2>
+  <div class="groups"><div class="yes"><h3>Yes</h3><ul><li>It is certain</li><li>It is decidedly so</li><li>Without a doubt</li><li>Yes, definitely</li><li>You may rely on it</li><li>As I see it, yes</li><li>Most likely</li><li>Outlook good</li><li>Yes</li><li>Signs point to yes</li></ul></div><div class="maybe"><h3>Not sure</h3><ul><li>Reply hazy, try again</li><li>Ask again later</li><li>Better not tell you now</li><li>Cannot predict now</li><li>Concentrate and ask again</li></ul></div><div class="no"><h3>No</h3><ul><li>Don&#x27;t count on it</li><li>My reply is no</li><li>My sources say no</li><li>Outlook not so good</li><li>Very doubtful</li></ul></div></div>
+  <h2 aria-label="Languages">🌐</h2>
+  <ul class="langs"><li><a href="./" hreflang="en" lang="en" data-code="en" aria-current="page">English</a></li><li><a href="./ru/" hreflang="ru" lang="ru" data-code="ru">Русский</a></li><li><a href="./uk/" hreflang="uk" lang="uk" data-code="uk">Українська</a></li><li><a href="./kk/" hreflang="kk" lang="kk" data-code="kk">Қазақша</a></li><li><a href="./uz/" hreflang="uz" lang="uz" data-code="uz">Oʻzbekcha</a></li><li><a href="./de/" hreflang="de" lang="de" data-code="de">Deutsch</a></li><li><a href="./fr/" hreflang="fr" lang="fr" data-code="fr">Français</a></li><li><a href="./es/" hreflang="es" lang="es" data-code="es">Español</a></li><li><a href="./it/" hreflang="it" lang="it" data-code="it">Italiano</a></li><li><a href="./pt/" hreflang="pt" lang="pt" data-code="pt">Português</a></li><li><a href="./pl/" hreflang="pl" lang="pl" data-code="pl">Polski</a></li><li><a href="./cs/" hreflang="cs" lang="cs" data-code="cs">Čeština</a></li><li><a href="./nl/" hreflang="nl" lang="nl" data-code="nl">Nederlands</a></li><li><a href="./sv/" hreflang="sv" lang="sv" data-code="sv">Svenska</a></li><li><a href="./tr/" hreflang="tr" lang="tr" data-code="tr">Türkçe</a></li><li><a href="./el/" hreflang="el" lang="el" data-code="el">Ελληνικά</a></li><li><a href="./ar/" hreflang="ar" lang="ar" data-code="ar">العربية</a></li><li><a href="./he/" hreflang="he" lang="he" data-code="he">עברית</a></li><li><a href="./hi/" hreflang="hi" lang="hi" data-code="hi">हिन्दी</a></li><li><a href="./zh/" hreflang="zh-Hans" lang="zh-Hans" data-code="zh">简体中文</a></li><li><a href="./zh-tw/" hreflang="zh-Hant" lang="zh-Hant" data-code="zh-TW">繁體中文</a></li><li><a href="./ja/" hreflang="ja" lang="ja" data-code="ja">日本語</a></li><li><a href="./ko/" hreflang="ko" lang="ko" data-code="ko">한국어</a></li><li><a href="./id/" hreflang="id" lang="id" data-code="id">Bahasa Indonesia</a></li><li><a href="./vi/" hreflang="vi" lang="vi" data-code="vi">Tiếng Việt</a></li><li><a href="./th/" hreflang="th" lang="th" data-code="th">ไทย</a></li></ul>
+</section>
+<script>window.BALL = {"answers": ["It is certain", "It is decidedly so", "Without a doubt", "Yes, definitely", "You may rely on it", "As I see it, yes", "Most likely", "Outlook good", "Yes", "Signs point to yes", "Reply hazy, try again", "Ask again later", "Better not tell you now", "Cannot predict now", "Concentrate and ask again", "Don't count on it", "My reply is no", "My sources say no", "Outlook not so good", "Very doubtful"], "code": "en"}; window.LANGS = {"en": "", "ru": "ru/", "uk": "uk/", "kk": "kk/", "uz": "uz/", "de": "de/", "fr": "fr/", "es": "es/", "it": "it/", "pt": "pt/", "pl": "pl/", "cs": "cs/", "nl": "nl/", "sv": "sv/", "tr": "tr/", "el": "el/", "ar": "ar/", "he": "he/", "hi": "hi/", "zh": "zh/", "zh-TW": "zh-tw/", "ja": "ja/", "ko": "ko/", "id": "id/", "vi": "vi/", "th": "th/"}; window.ROOT = "./";</script>
+<script src="./app.js" defer></script>
+</body>
+</html>

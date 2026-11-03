@@ -199,10 +199,10 @@
   .summary p { margin: 0; }
   #sum-body { display: flex; flex-direction: column; gap: 8px; }
   .summary .verdict { font-family: var(--display); font-size: 1.3rem; line-height: 1.3; }
-  .ai { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid var(--line); padding-top: 14px; margin-top: 4px; }
-  .ai-text p { margin: 0 0 10px; }
-  .ai-text p:last-child { margin-bottom: 0; }
-  .ai-note { color: var(--muted); font-size: 0.82rem; margin: 0; }
+  .detail { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 4px; }
+  .detail h4 { margin: 0 0 4px; color: var(--gold); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .detail p { margin: 0; }
+  .detail .lead-in { font-family: var(--display); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
 
   /* Card viewer */
   #viewer {
@@ -310,14 +310,7 @@
         <span class="tag">Вывод по раскладу</span>
         <h3 id="sum-title"></h3>
         <div id="sum-body"></div>
-        <div class="ai" id="ai" hidden>
-          <div class="row">
-            <button class="btn" type="button" id="ai-ask">Подробное толкование</button>
-            <button class="btn ghost" type="button" id="ai-stop" hidden>Остановить</button>
-          </div>
-          <p class="ai-note" id="ai-note">Разбор расклада целиком: как карты связаны между собой и что они отвечают на твой вопрос.</p>
-          <div class="ai-text" id="ai-text"></div>
-        </div>
+        <div class="detail" id="detail"></div>
       </section>
       <h3 class="list-title" id="list-title" hidden>Карты по позициям</h3>
       <ol class="positions" id="positions"></ol>
@@ -366,9 +359,9 @@
     ["Время: сейчас", ["Препятствие мягкое: мешает не беда, а то, что может отвлечь или расслабить.", "Мешает неопределённость: ясности пока не хватает.", "Это главная трудность, с которой предстоит справиться."]],
     ["Время: давнее прошлое, корни", ["В основе ситуации хороший фундамент, на него можно опереться.", "Причины глубже, чем кажется: стоит в них разобраться.", "Корень проблемы здесь: пока он не проработан, ситуация будет повторяться."]],
     ["Время: недавнее прошлое", ["Недавнее прошлое дало тебе силы, которые ещё работают.", "Недавний этап завершается, его влияние слабеет.", "Недавние события оставили след, но эта полоса уже уходит."]],
-    ["О чём: твоя цель и лучший исход", ["Лучший сценарий светлый, к нему стоит стремиться.", "Цель пока размыта: стоит точнее понять, чего ты хочешь.", "Будь осторожен с ожиданиями: желаемое может принести не только радость."]],
+    ["О чём: твоя цель и лучший исход", ["Лучший сценарий светлый, к нему стоит стремиться.", "Цель пока размыта: стоит точнее понять, чего ты хочешь.", "Осторожнее с ожиданиями: желаемое может принести не только радость."]],
     ["Время: ближайшие недели", ["В ближайшее время жди хороших перемен.", "Ближайшее время переходное: многое зависит от твоих решений.", "В ближайшие недели возможны трудности, к ним лучше подготовиться заранее."]],
-    ["О чём: ты сам", ["Ты в хорошей форме и можешь сам влиять на ситуацию.", "Ты в поиске и пока не определился со своей позицией.", "Мешать может твоё собственное состояние, стоит позаботиться о себе."]],
+    ["О чём: ты сам", ["Ты в хорошей форме и можешь влиять на ситуацию.", "Ты в поиске, и ясной позиции пока нет.", "Мешать может твоё собственное состояние, стоит позаботиться о себе."]],
     ["О чём: люди и обстоятельства вокруг", ["Окружение на твоей стороне, не бойся просить поддержки.", "Окружение нейтрально: многое зависит от того, как ты выстроишь отношения.", "Присмотрись к людям и обстоятельствам вокруг: не всё работает на тебя."]],
     ["О чём: твои надежды и страхи", ["Твои надежды светлые, и они дают силы.", "В тебе смешаны надежда и тревога, это нормально.", "Именно это тебя тревожит. Часто страх сильнее реальной угрозы."]],
     ["Время: итог, ближайшие месяцы", ["Итог благоприятный: ситуация разрешится хорошо.", "Итог открыт: многое решат твои шаги.", "Итог пока тяжёлый, но расклад показывает тенденцию, а не приговор."]]
@@ -409,7 +402,7 @@
 
     const t1 = tones[0], t10 = tones[9];
     out.push(t10 > t1 ? "Ситуация движется к лучшему: от " + name(0) + " сейчас к " + name(9) + " в итоге."
-      : t10 < t1 ? "Будь внимателен: итог " + name(9) + " пока слабее, чем нынешнее положение " + name(0) + "."
+      : t10 < t1 ? "Важно: итог " + name(9) + " пока слабее, чем нынешнее положение " + name(0) + "."
       : "Скорее всего, ситуация сохранит нынешний характер: " + name(0) + " сейчас и " + name(9) + " в итоге.");
 
     if (tones[4] > 0 && t10 > 0) out.push("Желаемое " + name(4) + " и итог совпадают: ты на верном пути.");
@@ -544,9 +537,7 @@
     preload(spread);
     $("table").innerHTML = '<div class="deck" aria-hidden="true"><div class="back-face"></div><span class="left"></span></div>';
     $("positions").innerHTML = "";
-    if (aiCtl) aiCtl.abort();
     $("summary").hidden = $("list-title").hidden = true;
-    $("ai-text").textContent = "";
     const q = $("question").value.trim();
     $("asked").textContent = q ? "«" + q + "»" : "";
     $("asked").hidden = !q;
@@ -697,73 +688,111 @@
       p.textContent = t;
       $("sum-body").appendChild(p);
     });
-    $("ai-note").textContent = "Разбор расклада целиком: как карты связаны между собой и что они отвечают на твой вопрос.";
-    $("ai-ask").textContent = "Подробное толкование";
+    renderDetail();
     $("summary").hidden = false;
     $("summary").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
   }
 
-  /* Detailed reading on the viewer's own account; the button stays hidden where it cannot run. */
-  let sample = null, aiCtl = null;
-  if (window.claude && claude.use) claude.use("sample").then(fn => { sample = fn; $("ai").hidden = !fn; }).catch(() => {});
+  /* Detailed reading, built on the page from the cards, their positions and how they relate */
+  const lc = t => t.charAt(0).toLowerCase() + t.slice(1);
+  const cardName = i => "карта «" + spread[i].card[1] + "»" + (spread[i].reversed ? " (перевёрнутая)" : "");
+  const meaningOf = i => lc(spread[i].reversed ? spread[i].card[3] : spread[i].card[2]);
+  // "карта «X»: meaning", with a dash when the meaning already has a colon
+  const says = i => cardName(i) + (meaningOf(i).includes(":") ? " — " : ": ") + meaningOf(i);
+  const SUIT_ADVICE = {
+    wands: "Действуй, а не жди: сейчас решают инициатива и энергия. Только не распыляйся на всё сразу.",
+    cups: "Прислушайся к чувствам, своим и чужим: ответ лежит скорее в сердце, чем в расчётах.",
+    swords: "Сначала проясни мысли и поговори открыто: недосказанность сейчас мешает больше всего.",
+    pents: "Опирайся на практические шаги: посчитай ресурсы, составь план и двигайся по нему спокойно.",
+    maj: "Доверься ходу событий: часть вещей сейчас решается не тобой, и это нормально."
+  };
 
-  function readingPrompt() {
+  function detailedReading() {
+    const t = spread.map(tone);
+    const score = t.reduce((a, b) => a + b, 0);
     const q = $("question").value.trim();
-    const lines = spread.map((d, i) =>
-      (i + 1) + ". " + POSITIONS[i][0] + " (" + POSITIONS[i][1].toLowerCase() + "): " + d.card[1] +
-      (d.reversed ? ", перевёрнутая" : ", прямая") + ". Значение: " + (d.reversed ? d.card[3] : d.card[2]));
-    return "Ты опытный и бережный таролог. Растолкуй расклад «Кельтский крест» колодой Райдера — Уэйта.\n\n" +
-      "Вопрос человека: " + (q || "вопрос не задан, дай общее толкование ситуации") + "\n\n" +
-      "Карты по позициям:\n" + lines.join("\n") + "\n\n" +
-      "Напиши толкование на русском, обращаясь на «ты», тепло и по-человечески, без мистического пафоса. " +
-      "Структура: сначала короткий ответ на вопрос в 2–3 предложениях; затем как связаны карты: прошлое и корни, настоящее, " +
-      "ближайшее будущее и итог; затем что говорят позиции «Ты сам», «Окружение» и «Надежды и страхи»; в конце один практический совет. " +
-      "Не пересказывай значения каждой карты по отдельности, ищи связи между ними. До 300 слов. " +
-      "Без Markdown, без списков и заголовков: обычные абзацы, разделённые пустой строкой.";
+    const sections = [];
+
+    // 1. Answer to the question, from the outcome and the overall tone
+    let answer;
+    if (t[9] > 0 && score >= 0) answer = "Ответ скорее «да». Расклад показывает благополучный исход, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
+    else if (t[9] > 0) answer = "Ответ скорее «да, но не сразу». Итог хороший, однако по дороге придётся пройти через трудности.";
+    else if (t[9] === 0) answer = "Однозначного ответа карты не дают. Исход открыт и во многом зависит от твоих решений в ближайшие недели.";
+    else if (score > 0) answer = "Ответ скорее «не так, как ты ждёшь». Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
+    else answer = "Сейчас ответ скорее «нет». Карты предупреждают о трудностях. Это повод пересмотреть подход, а не опускать руки.";
+    if (!q) {
+      // No question asked: describe the overall picture instead of a yes/no answer
+      if (t[9] > 0 && score >= 0) answer = "Картина в целом светлая: ситуация идёт к хорошему исходу, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
+      else if (t[9] > 0) answer = "Итог хороший, но путь к нему лежит через трудности.";
+      else if (t[9] === 0) answer = "Ситуация открыта: многое решится в ближайшие недели и зависит от тебя.";
+      else if (score > 0) answer = "Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
+      else answer = "Карты предупреждают о трудном периоде. Это повод пересмотреть подход, а не опускать руки.";
+    }
+    sections.push([q ? "Ответ на твой вопрос" : "Общая картина", (q ? "«" + q + "» — " + lc(answer) : answer)]);
+
+    // 2. Roots and recent past
+    let past = "В основе ситуации лежит " + says(2) + " ";
+    past += t[2] < 0 ? "Именно отсюда тянутся нынешние сложности. " : t[2] > 0 ? "Это надёжная опора, о которой стоит помнить. " : "";
+    past += "Недавно на тебя повлияла " + says(3) + " ";
+    past += t[3] < 0 ? "Эта полоса уже уходит, и её влияние слабеет." : t[3] > 0 ? "Силы, полученные тогда, работают до сих пор." : "Этот этап завершается.";
+    sections.push(["Прошлое и корни", past]);
+
+    // 3. Present: card 1 and the card that crosses it
+    let now = "Сейчас в центре — " + says(0) + " Поперёк неё легла " + cardName(1) + ", и она показывает, что мешает: " + meaningOf(1) + " ";
+    if (t[0] > 0 && t[1] < 0) now += "Ситуация в целом хорошая, но эта помеха может её испортить, если её не замечать.";
+    else if (t[0] < 0 && t[1] < 0) now += "Сейчас трудно с двух сторон, поэтому важно не торопиться и действовать по шагам.";
+    else if (t[1] >= 0) now += "Препятствие не грозное: скорее это то, что стоит учесть, чем то, с чем придётся бороться.";
+    else now += "Главная задача сейчас — справиться именно с этой помехой.";
+    sections.push(["Настоящее", now]);
+
+    // 4. Near future, outcome and how they relate to the goal
+    let future = "В ближайшие недели тебя ждёт " + says(5) + " В итоге выпала " + says(9) + " ";
+    future += t[9] > t[0] ? "Ситуация движется к лучшему по сравнению с тем, что есть сейчас. "
+      : t[9] < t[0] ? "Итог пока слабее нынешнего положения, так что не стоит расслабляться. "
+      : "Характер ситуации, скорее всего, сохранится. ";
+    future += "Твоя цель — " + cardName(4) + ". " + (t[4] > 0 && t[9] > 0 ? "Желаемое и итог совпадают: ты на верном пути."
+      : t[4] > 0 && t[9] < 0 ? "Желаемое и итог пока расходятся: стоит что-то поменять в подходе, чтобы прийти туда, куда хочешь."
+      : t[4] < 0 ? "Присмотрись к самой цели: возможно, то, к чему ты стремишься, нужно тебе меньше, чем кажется."
+      : "Цель пока размыта, и чем яснее ты её сформулируешь, тем легче будет к ней прийти.");
+    sections.push(["Будущее и итог", future]);
+
+    // 5. You, the people around and your hopes and fears
+    let you = "Твоя роль в этой ситуации — " + says(6) + " Вокруг тебя — " + says(7) + " ";
+    if (t[6] >= 0 && t[7] < 0) you += "Твои силы сейчас важнее поддержки окружения: рассчитывай прежде всего на себя. ";
+    else if (t[6] < 0 && t[7] > 0) you += "Не стесняйся опереться на других: окружение сейчас сильнее тебя и готово помочь. ";
+    else if (t[6] > 0 && t[7] > 0) you += "И ты, и окружение настроены на хороший результат. ";
+    else if (t[6] < 0 && t[7] < 0) you += "Сейчас стоит беречь силы и не ждать многого от окружения. ";
+    you += "Твои надежды и страхи показывает " + says(8) + " ";
+    you += t[8] < 0 ? (t[9] >= 0 ? "Эти страхи во многом преувеличены: итог расклада их не подтверждает." : "Отнесись к этому страху как к предупреждению, а не как к приговору.")
+      : t[8] > 0 ? (t[9] >= 0 ? "Твои ожидания и итог совпадают, поэтому надежда здесь оправдана." : "Надежда важна, но держи в голове и запасной план.")
+      : "Ожидания пока не сложились, и это оставляет место для выбора.";
+    sections.push(["Ты и твоё окружение", you]);
+
+    // 6. Advice from the dominant suit, the obstacle and the outcome
+    const counts = {};
+    spread.forEach(d => { const k = suitOf(d.card); counts[k] = (counts[k] || 0) + 1; });
+    const lead = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+    let advice = SUIT_ADVICE[lead] + " ";
+    advice += t[1] < 0 ? "Главное, над чем стоит поработать, — препятствие из позиции 2 (" + spread[1].card[1] + "). "
+      : "Серьёзных преград расклад не показывает, так что не откладывай важные шаги. ";
+    advice += t[9] >= 0 ? "Итог на твоей стороне, если ты продолжишь в том же направлении." : "Помни: расклад показывает тенденцию, и её можно изменить своими решениями.";
+    sections.push(["Совет", advice]);
+    return sections;
   }
-  function renderAi(text) {
-    $("ai-text").innerHTML = "";
-    text.split(/\n\s*\n/).forEach(par => {
-      if (!par.trim()) return;
+
+  function renderDetail() {
+    const box = $("detail");
+    box.innerHTML = '<p class="lead-in">Подробное толкование</p>';
+    detailedReading().forEach(([title, text]) => {
+      const div = document.createElement("div");
+      const h = document.createElement("h4");
+      h.textContent = title;
       const p = document.createElement("p");
-      p.textContent = par.trim();
-      $("ai-text").appendChild(p);
+      p.textContent = text;
+      div.append(h, p);
+      box.appendChild(div);
     });
   }
-  $("ai-ask").addEventListener("click", async () => {
-    if (!sample || aiCtl) return;
-    aiCtl = new AbortController();
-    $("ai-ask").disabled = true;
-    $("ai-stop").hidden = false;
-    $("ai-note").textContent = "Готовим толкование… Обычно это занимает до минуты.";
-    $("ai-text").textContent = "";
-    try {
-      await sample(readingPrompt(), { cache: false, signal: aiCtl.signal, onText: ({ text }) => {
-        $("ai-note").textContent = "Подробное толкование";
-        renderAi(text);
-      } });
-      $("ai-note").textContent = "Подробное толкование";
-    } catch (e) {
-      if (e.text) renderAi(e.text); else $("ai-text").textContent = "";
-      const msg = {
-        cancelled: "Толкование остановлено.",
-        rate_limited: "Слишком много запросов. Попробуй чуть позже.",
-        session_expired: "Нужно снова войти в аккаунт.",
-        refused: "Не получилось растолковать этот расклад. Попробуй переформулировать вопрос."
-      }[e.code];
-      if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) {
-        $("ai").hidden = true;
-      } else {
-        $("ai-note").textContent = msg || "Не получилось подготовить толкование. Попробуй ещё раз.";
-      }
-    } finally {
-      aiCtl = null;
-      $("ai-ask").disabled = false;
-      $("ai-ask").textContent = "Растолковать ещё раз";
-      $("ai-stop").hidden = true;
-    }
-  });
-  $("ai-stop").addEventListener("click", () => aiCtl && aiCtl.abort());
 
   $("deal").addEventListener("click", start);
   $("next").addEventListener("click", dealNext);

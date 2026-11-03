@@ -312,10 +312,10 @@
         <div id="sum-body"></div>
         <div class="ai" id="ai" hidden>
           <div class="row">
-            <button class="btn" type="button" id="ai-ask">Подробное толкование от Claude</button>
+            <button class="btn" type="button" id="ai-ask">Подробное толкование</button>
             <button class="btn ghost" type="button" id="ai-stop" hidden>Остановить</button>
           </div>
-          <p class="ai-note" id="ai-note">Claude разберёт расклад целиком: свяжет карты между собой и ответит на твой вопрос.</p>
+          <p class="ai-note" id="ai-note">Разбор расклада целиком: как карты связаны между собой и что они отвечают на твой вопрос.</p>
           <div class="ai-text" id="ai-text"></div>
         </div>
       </section>
@@ -697,12 +697,13 @@
       p.textContent = t;
       $("sum-body").appendChild(p);
     });
-    $("ai-note").textContent = "Claude разберёт расклад целиком: свяжет карты между собой и ответит на твой вопрос.";
+    $("ai-note").textContent = "Разбор расклада целиком: как карты связаны между собой и что они отвечают на твой вопрос.";
+    $("ai-ask").textContent = "Подробное толкование";
     $("summary").hidden = false;
     $("summary").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
   }
 
-  /* Detailed reading from Claude, on the viewer's own account. Hidden where the page cannot ask Claude. */
+  /* Detailed reading on the viewer's own account; the button stays hidden where it cannot run. */
   let sample = null, aiCtl = null;
   if (window.claude && claude.use) claude.use("sample").then(fn => { sample = fn; $("ai").hidden = !fn; }).catch(() => {});
 
@@ -734,26 +735,26 @@
     aiCtl = new AbortController();
     $("ai-ask").disabled = true;
     $("ai-stop").hidden = false;
-    $("ai-note").textContent = "Claude раскладывает карты в голове… Обычно это занимает до минуты.";
+    $("ai-note").textContent = "Готовим толкование… Обычно это занимает до минуты.";
     $("ai-text").textContent = "";
     try {
       await sample(readingPrompt(), { cache: false, signal: aiCtl.signal, onText: ({ text }) => {
-        $("ai-note").textContent = "Толкование от Claude";
+        $("ai-note").textContent = "Подробное толкование";
         renderAi(text);
       } });
-      $("ai-note").textContent = "Толкование от Claude";
+      $("ai-note").textContent = "Подробное толкование";
     } catch (e) {
       if (e.text) renderAi(e.text); else $("ai-text").textContent = "";
       const msg = {
         cancelled: "Толкование остановлено.",
         rate_limited: "Слишком много запросов. Попробуй чуть позже.",
-        session_expired: "Нужно снова войти в Claude.",
-        refused: "Claude не смог растолковать этот расклад. Попробуй переформулировать вопрос."
+        session_expired: "Нужно снова войти в аккаунт.",
+        refused: "Не получилось растолковать этот расклад. Попробуй переформулировать вопрос."
       }[e.code];
       if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].includes(e.code)) {
         $("ai").hidden = true;
       } else {
-        $("ai-note").textContent = msg || "Не получилось связаться с Claude. Попробуй ещё раз.";
+        $("ai-note").textContent = msg || "Не получилось подготовить толкование. Попробуй ещё раз.";
       }
     } finally {
       aiCtl = null;

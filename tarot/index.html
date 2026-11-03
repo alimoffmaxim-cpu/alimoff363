@@ -1,0 +1,392 @@
+<title>Таро онлайн</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;600&display=swap">
+<style>
+  /* Layout: three screens in one page (choice, card of the day, Celtic Cross), switched by #day / #spread.
+     Single dark look: night-blue cloth, antique gold for ornament and actions. */
+  :root {
+    --bg: #12131f;
+    --cloth: #1c1d33;
+    --line: #34365a;
+    --fg: #efe9dc;
+    --muted: #a19fb8;
+    --gold: #d3ad62;
+    --gold-ink: #241a06;
+    --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #26284a 0%, transparent 70%),
+      var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 28px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  h1, h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+  h1 { font-size: clamp(2.4rem, 9vw, 3.4rem); line-height: 1.05; }
+  h2 { font-size: clamp(1.8rem, 6vw, 2.3rem); line-height: 1.1; }
+  .lead { margin: 0; color: var(--muted); max-width: 34rem; }
+  .ornament { color: var(--gold); letter-spacing: 0.5em; font-size: 0.8rem; margin: 0; }
+  [hidden] { display: none !important; }
+
+  /* Choice screen */
+  .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .choice {
+    display: flex; flex-direction: column; gap: 6px;
+    text-align: left;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--cloth);
+    color: var(--fg);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s;
+  }
+  .choice:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .choice:focus-visible, .btn:focus-visible, .back:focus-visible, .slot:focus-visible, .big:focus-visible, #question:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 3px;
+  }
+  .choice b { font-family: var(--display); font-size: 1.7rem; font-weight: 600; line-height: 1.1; }
+  .choice span { color: var(--muted); font-size: 0.92rem; }
+  .choice .count { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .fan { display: flex; justify-content: center; height: 150px; margin-block: 4px 0; }
+  .fan .back-face { position: static; width: 84px; height: 145px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,.45); }
+  .fan .back-face:nth-child(1) { transform: rotate(-14deg) translate(26px, 10px); }
+  .fan .back-face:nth-child(2) { transform: rotate(0deg); z-index: 1; }
+  .fan .back-face:nth-child(3) { transform: rotate(14deg) translate(-26px, 10px); }
+
+  /* Buttons */
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: var(--gold-ink);
+    font: 600 0.95rem var(--body);
+    cursor: pointer;
+  }
+  .btn.ghost { background: transparent; color: var(--gold); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .back {
+    align-self: flex-start;
+    background: none; border: 0; padding: 4px 0;
+    color: var(--muted); font: 600 0.9rem var(--body); cursor: pointer;
+  }
+  .back:hover { color: var(--fg); }
+
+  /* Cards */
+  .card { position: relative; perspective: 900px; }
+  .card .inner {
+    position: absolute; inset: 0;
+    transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .card.open .inner { transform: rotateY(180deg); }
+  .face, .back-face {
+    position: absolute; inset: 0;
+    border-radius: 7%/4%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+  .back-face {
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 18%, var(--gold) 18.5% 20%, transparent 20.5%),
+      repeating-linear-gradient(45deg, rgba(211,173,98,.18) 0 2px, transparent 2px 10px),
+      repeating-linear-gradient(-45deg, rgba(211,173,98,.18) 0 2px, transparent 2px 10px),
+      #232548;
+    border: 2px solid var(--gold);
+    box-sizing: border-box;
+    outline: 3px solid #232548;
+    outline-offset: -7px;
+  }
+  .face { transform: rotateY(180deg); background: #f3ead4; box-shadow: 0 10px 28px rgba(0,0,0,.5); }
+  .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card.reversed .face img { transform: rotate(180deg); }
+
+  /* Card of the day */
+  .day-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+  .big { width: min(62vw, 250px); aspect-ratio: 0.578; border: 0; padding: 0; background: none; cursor: pointer; }
+  .big:not(.open) .inner { animation: breathe 3.2s ease-in-out infinite; }
+  @keyframes breathe { 50% { transform: translateY(-6px); } }
+  .result { display: flex; flex-direction: column; gap: 6px; max-width: 30rem; }
+  .result h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .tag { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .result p { margin: 0; }
+
+  /* Celtic Cross */
+  #question {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 16px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--cloth);
+    color: var(--fg); font: 1rem var(--body);
+  }
+  #question::placeholder { color: var(--muted); }
+  .table { position: relative; width: 100%; max-width: 520px; margin: 0 auto; }
+  .slot { position: absolute; border: 0; padding: 0; background: none; cursor: pointer; transition: opacity .5s, translate .5s; }
+  .slot.dealing { opacity: 0; translate: 0 -30px; }
+  .slot .num {
+    position: absolute; z-index: 3; top: -9px; left: -9px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold); color: var(--gold-ink);
+    font: 600 0.72rem/22px var(--body); text-align: center;
+  }
+  .slot.cross .num { left: auto; right: -9px; top: auto; bottom: -9px; transform: rotate(-90deg); }
+  .positions { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .positions li {
+    display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: start;
+    padding: 12px; border-radius: 12px; background: var(--cloth); border: 1px solid var(--line);
+  }
+  .positions .thumb { width: 48px; aspect-ratio: 0.578; border-radius: 4px; overflow: hidden; background: #232548; border: 1px solid var(--gold); box-sizing: border-box; }
+  .positions .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .positions .thumb.reversed img { transform: rotate(180deg); }
+  .positions .body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .positions .pos { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .positions .what { color: var(--muted); font-size: 0.85rem; }
+  .positions .name { font-family: var(--display); font-size: 1.35rem; font-weight: 600; line-height: 1.15; }
+  .positions .meaning { margin: 0; }
+  .note { color: var(--muted); font-size: 0.82rem; margin: 0; }
+  .asked { margin: 0; font-family: var(--display); font-style: italic; font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card .inner, .slot { transition: none; }
+    .big:not(.open) .inner { animation: none; }
+  }
+</style>
+
+<div class="wrap">
+  <!-- Choice -->
+  <section id="home">
+    <div class="wrap" style="padding:0">
+      <p class="ornament">✦ ✦ ✦</p>
+      <h1>Таро</h1>
+      <p class="lead">Классическая колода Райдера — Уэйта, 78 карт. Сосредоточься на своём вопросе и выбери расклад.</p>
+      <div class="fan" aria-hidden="true"><div class="back-face"></div><div class="back-face"></div><div class="back-face"></div></div>
+      <div class="choices">
+        <button class="choice" type="button" data-go="day">
+          <span class="count">1 карта</span>
+          <b>Карта дня</b>
+          <span>Одна карта — настроение и совет на сегодня.</span>
+        </button>
+        <button class="choice" type="button" data-go="spread">
+          <span class="count">10 карт</span>
+          <b>Полный расклад</b>
+          <span>Кельтский крест: ситуация, препятствия, прошлое, будущее и итог.</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Card of the day -->
+  <section id="day" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <h2>Карта дня</h2>
+      <div class="day-stage">
+        <button class="card big" id="day-card" type="button" aria-label="Открыть карту">
+          <div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>
+        </button>
+        <p class="note" id="day-hint">Нажми на карту, чтобы открыть её</p>
+        <div class="result" id="day-result" hidden aria-live="polite">
+          <span class="tag" id="day-tag"></span>
+          <h3 id="day-name"></h3>
+          <p id="day-meaning"></p>
+        </div>
+        <div class="row" id="day-actions" hidden>
+          <button class="btn ghost" type="button" id="day-again">Вытянуть другую карту</button>
+          <button class="btn" type="button" data-go="spread">Полный расклад</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Celtic Cross -->
+  <section id="spread" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <h2>Кельтский крест</h2>
+      <p class="lead">Самый известный полный расклад: 10 карт показывают ситуацию целиком. Задай вопрос, если хочешь, и разложи карты.</p>
+      <input id="question" type="text" maxlength="140" autocomplete="off" placeholder="Твой вопрос (можно не писать)">
+      <div class="row">
+        <button class="btn" type="button" id="deal">Разложить карты</button>
+        <button class="btn ghost" type="button" id="open-all" hidden>Открыть все</button>
+      </div>
+      <p class="note" id="spread-hint" hidden>Открывай карты по одной, нажимая на них, или сразу все.</p>
+      <p class="asked" id="asked" hidden></p>
+      <div class="table" id="table" aria-label="Расклад"></div>
+      <ol class="positions" id="positions"></ol>
+    </div>
+  </section>
+</div>
+
+<script src="cards.js"></script>
+<script>
+  const POSITIONS = [
+    ["Ситуация", "Суть вопроса, то, что происходит сейчас"],
+    ["Препятствие", "Что мешает или усложняет ситуацию"],
+    ["Основа", "Глубинная причина, корни ситуации"],
+    ["Прошлое", "Что уходит и уже влияет на тебя"],
+    ["Цель", "К чему ты стремишься, лучший возможный исход"],
+    ["Ближайшее будущее", "Что произойдёт в ближайшее время"],
+    ["Ты сам", "Твоё отношение и роль в ситуации"],
+    ["Окружение", "Люди и обстоятельства вокруг"],
+    ["Надежды и страхи", "Чего ты ждёшь и чего опасаешься"],
+    ["Итог", "К чему всё придёт"]
+  ];
+  const $ = id => document.getElementById(id);
+  const img = c => "cards/" + c[0] + ".jpg";
+
+  function shuffled() {
+    const d = DECK.slice();
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d.map(c => ({ card: c, reversed: Math.random() < 0.5 }));
+  }
+  function preload(draws) { draws.forEach(d => { const i = new Image(); i.src = img(d.card); }); }
+
+  /* Navigation: #day and #spread are the two app pages; no hash is the choice screen */
+  function route() {
+    const page = location.hash.slice(1);
+    const view = page === "day" || page === "spread" ? page : "home";
+    for (const id of ["home", "day", "spread"]) $(id).hidden = id !== view;
+    if (view === "day" && !dayDraw) newDay();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
+    const to = b.dataset.go;
+    if (to) location.hash = to;
+    else history.pushState("", document.title, location.pathname + location.search), route();
+  }));
+  window.addEventListener("hashchange", route);
+
+  /* Card of the day */
+  let dayDraw = null;
+  function newDay() {
+    dayDraw = shuffled()[0];
+    preload([dayDraw]);
+    const el = $("day-card");
+    el.classList.remove("open", "reversed");
+    el.setAttribute("aria-label", "Открыть карту");
+    $("day-result").hidden = $("day-actions").hidden = true;
+    $("day-hint").hidden = false;
+  }
+  $("day-card").addEventListener("click", () => {
+    const el = $("day-card");
+    if (el.classList.contains("open")) return;
+    const { card, reversed } = dayDraw;
+    const im = el.querySelector("img");
+    im.src = img(card);
+    im.alt = card[1];
+    el.classList.toggle("reversed", reversed);
+    el.classList.add("open");
+    el.setAttribute("aria-label", card[1]);
+    $("day-tag").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
+    $("day-name").textContent = card[1];
+    $("day-meaning").textContent = reversed ? card[3] : card[2];
+    $("day-hint").hidden = true;
+    setTimeout(() => { $("day-result").hidden = $("day-actions").hidden = false; }, 450);
+  });
+  $("day-again").addEventListener("click", () => {
+    $("day-card").classList.remove("open");
+    setTimeout(newDay, 350);
+  });
+
+  /* Celtic Cross: positions are computed from the table width so the cross never overlaps the staff */
+  let spread = [];
+  function layout() {
+    const table = $("table");
+    const W = table.clientWidth;
+    if (!W || !spread.length) return;
+    const w = W * 0.17, h = w * 1.73, g = W * 0.022;
+    const H = 4 * h + 3 * g;
+    table.style.height = H + "px";
+    const dx = h / 2 + w / 2 + g;          // card 2 lies across card 1, so neighbours keep clear of its long side
+    const cx = dx + w / 2, cy = H / 2;
+    const sx = W - w / 2;
+    const centres = [
+      [cx, cy], [cx, cy], [cx, cy + h + g], [cx - dx, cy], [cx, cy - h - g], [cx + dx, cy],
+      [sx, H - h / 2], [sx, H - h * 1.5 - g], [sx, h * 1.5 + g], [sx, h / 2]
+    ];
+    table.querySelectorAll(".slot").forEach((s, i) => {
+      s.style.width = w + "px";
+      s.style.height = h + "px";
+      s.style.left = centres[i][0] - w / 2 + "px";
+      s.style.top = centres[i][1] - h / 2 + "px";
+    });
+  }
+  window.addEventListener("resize", layout);
+
+  function deal() {
+    spread = shuffled().slice(0, 10);
+    preload(spread);
+    const table = $("table");
+    table.innerHTML = "";
+    spread.forEach((d, i) => {
+      const s = document.createElement("button");
+      s.type = "button";
+      s.className = "slot card dealing" + (i === 1 ? " cross" : "") + (d.reversed ? " reversed" : "");
+      s.style.zIndex = i === 1 ? 2 : 1;
+      if (i === 1) s.style.transform = "rotate(90deg)";
+      s.setAttribute("aria-label", (i + 1) + ". " + POSITIONS[i][0] + ": открыть карту");
+      s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
+      s.addEventListener("click", () => reveal(i));
+      table.appendChild(s);
+      setTimeout(() => s.classList.remove("dealing"), 80 + i * 110);
+    });
+    layout();
+    $("positions").innerHTML = spread.map((d, i) =>
+      '<li id="pos-' + i + '"><div class="thumb"></div><div class="body">' +
+      '<span class="pos">' + (i + 1) + ' · ' + POSITIONS[i][0] + '</span>' +
+      '<span class="what">' + POSITIONS[i][1] + '</span>' +
+      '<span class="name"></span><p class="meaning"></p></div></li>').join("");
+    const q = $("question").value.trim();
+    $("asked").textContent = q ? "«" + q + "»" : "";
+    $("asked").hidden = !q;
+    $("deal").textContent = "Разложить заново";
+    $("open-all").hidden = $("spread-hint").hidden = false;
+    $("open-all").disabled = false;
+  }
+
+  function reveal(i) {
+    const s = $("table").children[i];
+    if (!s || s.classList.contains("open")) return;
+    const { card, reversed } = spread[i];
+    const im = s.querySelector("img");
+    im.src = img(card);
+    im.alt = card[1];
+    s.classList.add("open");
+    s.setAttribute("aria-label", (i + 1) + ". " + POSITIONS[i][0] + ": " + card[1]);
+    const li = $("pos-" + i);
+    li.querySelector(".thumb").innerHTML = '<img alt="" src="' + img(card) + '">';
+    li.querySelector(".thumb").classList.toggle("reversed", reversed);
+    li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
+    li.querySelector(".meaning").textContent = reversed ? card[3] : card[2];
+    if ([...$("table").children].every(c => c.classList.contains("open"))) $("open-all").disabled = true;
+  }
+  $("deal").addEventListener("click", deal);
+  $("open-all").addEventListener("click", () => spread.forEach((_, i) => setTimeout(() => reveal(i), i * 140)));
+
+  route();
+</script>

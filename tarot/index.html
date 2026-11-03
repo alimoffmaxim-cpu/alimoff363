@@ -182,7 +182,44 @@
   .note { color: var(--muted); font-size: 0.82rem; margin: 0; }
   .asked { margin: 0; font-family: var(--display); font-style: italic; font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
 
+  .positions li { cursor: pointer; }
+
+  /* Card viewer */
+  #viewer {
+    width: min(92vw, 440px);
+    max-height: 92svh;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--cloth);
+    color: var(--fg);
+    overflow-y: auto;
+  }
+  #viewer::backdrop { background: rgba(6, 7, 14, .82); backdrop-filter: blur(3px); }
+  #viewer[open] { animation: zoom .3s cubic-bezier(.2,.8,.2,1); }
+  @keyframes zoom { from { opacity: 0; transform: scale(.85); } }
+  .viewer { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 18px 18px 22px; }
+  .viewer-top { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+  .viewer-top .tag { text-align: left; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: transparent; color: var(--fg);
+    font: 600 1.1rem/1 var(--body); cursor: pointer; flex: none;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .icon-btn:disabled { opacity: .3; cursor: default; border-color: var(--line); color: var(--fg); }
+  .viewer-card { width: min(70vw, 300px); aspect-ratio: 0.578; border-radius: 10px; overflow: hidden; background: #f3ead4; box-shadow: 0 14px 40px rgba(0,0,0,.6); }
+  .viewer-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .viewer-card.reversed img { transform: rotate(180deg); }
+  .viewer h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .viewer .what { color: var(--muted); font-size: 0.88rem; margin: 0; }
+  .viewer .meaning { margin: 0; max-width: 26rem; }
+  .viewer-nav { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 0.85rem; }
+
   @media (prefers-reduced-motion: reduce) {
+    #viewer[open] { animation: none; }
     .card .inner, .slot, .positions li { transition: none; }
     .big:not(.open) .inner { animation: none; }
   }
@@ -246,13 +283,32 @@
         <button class="btn ghost" type="button" id="auto" hidden>Разложить остальные</button>
         <button class="btn" type="button" id="deal">Начать расклад</button>
       </div>
-      <p class="note" id="spread-hint" hidden>Нажми на карту, чтобы вынести её на передний план.</p>
+      <p class="note" id="spread-hint" hidden>Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх.</p>
       <p class="asked" id="asked" hidden></p>
       <div class="table" id="table" aria-label="Расклад"></div>
       <ol class="positions" id="positions"></ol>
     </div>
   </section>
 </div>
+
+<dialog id="viewer" aria-labelledby="v-name">
+  <div class="viewer">
+    <div class="viewer-top">
+      <span class="tag" id="v-pos"></span>
+      <button class="icon-btn" type="button" id="v-close" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="viewer-card" id="v-card"><img alt="" id="v-img"></div>
+    <span class="tag" id="v-orient"></span>
+    <h3 id="v-name"></h3>
+    <p class="what" id="v-what"></p>
+    <p class="meaning" id="v-meaning"></p>
+    <div class="viewer-nav">
+      <button class="icon-btn" type="button" id="v-prev" aria-label="Предыдущая карта">←</button>
+      <span id="v-count"></span>
+      <button class="icon-btn" type="button" id="v-next" aria-label="Следующая карта">→</button>
+    </div>
+  </div>
+</dialog>
 
 <script src="cards.js"></script>
 <script>
@@ -402,7 +458,7 @@
     s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
     s.querySelector("img").src = img(card);
     s.querySelector("img").alt = card[1];
-    s.addEventListener("click", () => toFront(i));
+    s.addEventListener("click", () => tapCard(i));
     place(s, G.centres[i], G);
     // Start on top of the deck, then glide to the card's place on the table
     const fromX = G.deck[0] - G.centres[i][0], fromY = G.deck[1] - G.centres[i][1];
@@ -438,6 +494,7 @@
     li.querySelector(".what").textContent = POSITIONS[i][1];
     li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
     li.querySelector(".meaning").textContent = reversed ? card[3] : card[2];
+    li.addEventListener("click", () => openViewer(i));
     $("positions").appendChild(li);
     flash(li);
   }
@@ -446,14 +503,56 @@
     setTimeout(() => li.classList.remove("flash"), 1400);
   }
 
-  // Tapping a card brings it to the front, so card 1 can be seen from under card 2 and back again
-  function toFront(i) {
-    const s = $("table").querySelector('.slot[data-i="' + i + '"]');
+  const slotOf = i => $("table").querySelector('.slot[data-i="' + i + '"]');
+
+  // Cards 1 and 2 overlap: a tap on the one underneath brings it to the front,
+  // a tap on the card that is already on top opens it in the viewer.
+  function tapCard(i) {
+    const s = slotOf(i);
     if (!s || s.classList.contains("flying")) return;
-    s.style.zIndex = ++topZ;
-    const li = $("pos-" + i);
-    if (li) flash(li);
+    if (i <= 1) {
+      const other = slotOf(1 - i);
+      if (other && +other.style.zIndex > +s.style.zIndex) {
+        s.style.zIndex = ++topZ;
+        const li = $("pos-" + i);
+        if (li) flash(li);
+        return;
+      }
+    }
+    openViewer(i);
   }
+
+  let viewing = -1;
+  function openViewer(i) {
+    if (i < 0 || i >= 10 || !$("pos-" + i)) return;
+    viewing = i;
+    const { card, reversed } = spread[i];
+    const im = $("v-img");
+    im.src = img(card);                          // small copy shows at once, the large one replaces it when loaded
+    const big = new Image();
+    big.onload = () => { if (viewing === i) im.src = big.src; };
+    big.src = "cards/lg/" + card[0] + ".jpg";
+    im.alt = card[1];
+    $("v-card").classList.toggle("reversed", reversed);
+    $("v-pos").textContent = (i + 1) + " · " + POSITIONS[i][0];
+    $("v-orient").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
+    $("v-name").textContent = card[1];
+    $("v-what").textContent = POSITIONS[i][1];
+    $("v-meaning").textContent = reversed ? card[3] : card[2];
+    const shown = $("positions").children.length;
+    $("v-count").textContent = (i + 1) + " из " + shown;
+    $("v-prev").disabled = i === 0;
+    $("v-next").disabled = i >= shown - 1;
+    if (!$("viewer").open) $("viewer").showModal();
+  }
+  $("v-close").addEventListener("click", () => $("viewer").close());
+  $("v-prev").addEventListener("click", () => openViewer(viewing - 1));
+  $("v-next").addEventListener("click", () => openViewer(viewing + 1));
+  $("viewer").addEventListener("click", e => { if (e.target === $("viewer")) $("viewer").close(); });
+  $("viewer").addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") openViewer(viewing - 1);
+    if (e.key === "ArrowRight") openViewer(viewing + 1);
+  });
 
   function dealRest() {
     if (autoTimer || dealt >= 10) return;

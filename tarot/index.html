@@ -152,8 +152,30 @@
     transition: transform .85s cubic-bezier(.25,.8,.25,1);
   }
   .slot.flying { cursor: default; }
-  .deck { position: absolute; z-index: 0; }
-  .deck .back-face { box-shadow: 0 3px 0 #0b0c16, 0 6px 0 #0b0c16, 0 10px 18px rgba(0,0,0,.5); }
+  /* The deck: a stack of backs, each layer a little higher than the one below */
+  .deck { position: absolute; z-index: 1; border: 0; padding: 0; background: none; cursor: pointer; }
+  .deck:disabled { cursor: default; }
+  .deck:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; border-radius: 8px; }
+  .deck .back-face {
+    transform: translate(calc(var(--k) * -1.2px), calc(var(--k) * -1.6px));
+    box-shadow: 0 1px 0 #0b0c16, 0 4px 10px rgba(0,0,0,.35);
+    transition: translate .25s;
+  }
+  .deck.ready:hover .back-face:last-of-type, .deck.ready:focus-visible .back-face:last-of-type { translate: 0 -6px; }
+  .deck.ready .back-face:last-of-type { animation: offer 2.6s ease-in-out infinite; }
+  @keyframes offer { 0%, 70%, 100% { translate: 0 0; } 82% { translate: 0 -5px; } }
+  /* Shuffle: half the deck slides out towards the middle of the table (--dir is 1 or -1) and riffles back in, three times */
+  .deck.shuffling .back-face:nth-of-type(odd) { animation: cut-out .56s ease-in-out 3; }
+  .deck.shuffling .back-face:nth-of-type(even) { animation: cut-stay .56s ease-in-out .07s 3; }
+  @keyframes cut-out {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    40% { translate: calc(var(--dir) * 70%) -8%; rotate: calc(var(--dir) * 10deg); }
+    70% { translate: calc(var(--dir) * 12%) 0; rotate: calc(var(--dir) * 3deg); }
+  }
+  @keyframes cut-stay {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    40% { translate: calc(var(--dir) * 8%) 4%; rotate: calc(var(--dir) * -4deg); }
+  }
   .deck .left {
     position: absolute; left: 50%; bottom: -22px; translate: -50% 0;
     white-space: nowrap; color: var(--muted); font-size: 0.72rem;
@@ -240,6 +262,7 @@
   .viewer-nav { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 0.85rem; }
 
   @media (prefers-reduced-motion: reduce) {
+    .deck .back-face { animation: none !important; transition: none; }
     #viewer[open] { animation: none; }
     .card .inner, .slot, .positions li { transition: none; }
     .big:not(.open) .inner { animation: none; }
@@ -518,6 +541,7 @@
     clearInterval(autoTimer); autoTimer = null;
     S = def;
     spread = []; dealt = 0; busy = false;
+    round++; shuffling = false;                  // timers of the spread left behind are ignored
     $("sp-title").textContent = def.title;
     $("sp-lead").textContent = def.lead;
     $("table").innerHTML = "";
@@ -550,7 +574,10 @@
     const G = geometry();
     $("table").style.height = G.H + "px";
     const deck = $("table").querySelector(".deck");
-    if (deck) place(deck, G.deck, G);
+    if (deck) {
+      place(deck, G.deck, G);
+      deck.style.setProperty("--dir", G.deck[0] < $("table").clientWidth / 2 ? 1 : -1);
+    }
     $("table").querySelectorAll(".slot").forEach(s => place(s, G.centres[+s.dataset.i], G));
   }
   window.addEventListener("resize", layout);
@@ -563,16 +590,33 @@
     const deck = $("table").querySelector(".deck");
     if (deck) {
       deck.hidden = left === 0;
-      deck.querySelector(".left").textContent = "Осталось " + left;
+      deck.disabled = busy || !!autoTimer;
+      deck.classList.toggle("ready", !deck.disabled);
+      deck.querySelector(".left").textContent = shuffling ? "Тасую колоду…" : "Нажми на колоду";
     }
   }
 
+  let shuffling = false, round = 0;
+  const DECK_LAYERS = 7;
+
   function start() {
     clearInterval(autoTimer); autoTimer = null;
+    const thisRound = ++round;
     spread = shuffled().slice(0, N());
-    dealt = 0; busy = false; topZ = 10;
+    dealt = 0; topZ = 10;
     preload(spread);
-    $("table").innerHTML = '<div class="deck" aria-hidden="true"><div class="back-face"></div><span class="left"></span></div>';
+    let layers = "";
+    for (let k = 0; k < DECK_LAYERS; k++) layers += '<div class="back-face" style="--k:' + k + '"></div>';
+    $("table").innerHTML = '<button class="deck shuffling" type="button" aria-label="Положить следующую карту">' + layers + '<span class="left"></span></button>';
+    $("table").querySelector(".deck").addEventListener("click", dealNext);
+    // The deck is shuffled before the first card can be taken
+    busy = shuffling = true;
+    setTimeout(() => {
+      if (round !== thisRound) return;
+      busy = shuffling = false;
+      $("table").querySelector(".deck").classList.remove("shuffling");
+      updateButtons();
+    }, reduced() ? 0 : 1800);
     $("positions").innerHTML = "";
     $("summary").hidden = $("list-title").hidden = true;
     const q = $("question").value.trim();
@@ -588,7 +632,7 @@
   function dealNext() {
     if (busy || dealt >= N()) return;
     busy = true;
-    const i = dealt++;
+    const i = dealt++, thisRound = round;
     const { card, reversed } = spread[i];
     const G = geometry();
     const s = document.createElement("button");
@@ -615,8 +659,10 @@
       s.style.transform = rest;
     }));
     setTimeout(() => {
+      if (round !== thisRound) return;
       s.classList.add("open");
       setTimeout(() => {
+        if (round !== thisRound) return;
         s.classList.remove("flying");
         addPosition(i);
         if (i === N() - 1) showSummary();

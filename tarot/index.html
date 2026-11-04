@@ -574,8 +574,6 @@
     round++; shuffling = false;                  // timers of the spread left behind are ignored
     $("sp-title").textContent = def.title;
     $("sp-lead").textContent = def.lead;
-    $("table").innerHTML = "";
-    $("table").style.height = "";
     $("positions").innerHTML = "";
     $("summary").hidden = $("list-title").hidden = $("asked").hidden = $("spread-hint").hidden = true;
     $("next").hidden = $("auto").hidden = true;
@@ -584,6 +582,10 @@
     $("spread-hint").textContent = def.overlaps && def.overlaps.length
       ? "Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх."
       : "Нажми на карту, чтобы рассмотреть её крупно.";
+    // The deck lies on the table from the start; a tap on it starts the spread
+    $("table").innerHTML = '<button class="deck ready" type="button" aria-label="Начать расклад">' + deckLayers() + '<span class="left">Нажми на колоду, чтобы начать</span></button>';
+    $("table").querySelector(".deck").addEventListener("click", start);
+    layout();
   }
 
   function geometry() {
@@ -600,7 +602,7 @@
     el.style.top = c[1] - G.h / 2 + "px";
   }
   function layout() {
-    if (!spread.length) return;
+    if (!S || S.type !== "spread" || !$("table").clientWidth) return;
     const G = geometry();
     $("table").style.height = G.H + "px";
     const deck = $("table").querySelector(".deck");

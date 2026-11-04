@@ -99,15 +99,15 @@ window.SPREADS = [
       { name: "Совет", what: "Что подсказывают карты", when: "О чём: совет",
         read: ["Карта поддерживает тебя: действуй уверенно.", "Карта советует ещё раз всё взвесить.", "Карта советует не торопиться и беречь силы."] }
     ],
-    // The choice on top, two columns below (left: do it, right: don't), advice between them
+    // Deck on its own row on top; below it the choice, then two columns (left: do it, right: don't), advice between them
     layout(u) {
       return {
-        width: 3 * u.w + 2 * u.g, height: 4 * u.h + 3 * u.g, deck: [col(u, 0), rowY(u, 0)],
+        width: 3 * u.w + 2 * u.g, height: 5 * u.h + 4 * u.g, deck: [col(u, 0), rowY(u, 0)],
         slots: [
-          [col(u, 1), rowY(u, 0), 0],
-          [col(u, 0), rowY(u, 1), 0], [col(u, 0), rowY(u, 2), 0], [col(u, 0), rowY(u, 3), 0],
-          [col(u, 2), rowY(u, 1), 0], [col(u, 2), rowY(u, 2), 0], [col(u, 2), rowY(u, 3), 0],
-          [col(u, 1), rowY(u, 2), 0]
+          [col(u, 1), rowY(u, 1), 0],
+          [col(u, 0), rowY(u, 2), 0], [col(u, 0), rowY(u, 3), 0], [col(u, 0), rowY(u, 4), 0],
+          [col(u, 2), rowY(u, 2), 0], [col(u, 2), rowY(u, 3), 0], [col(u, 2), rowY(u, 4), 0],
+          [col(u, 1), rowY(u, 3), 0]
         ]
       };
     }
@@ -136,14 +136,15 @@ window.SPREADS = [
       { name: "Итог и совет", what: "К чему идут отношения и что делать", when: "Время: итог",
         read: ["Отношения идут к хорошему итогу.", "Итог зависит от того, что вы оба будете делать.", "Если ничего не менять, отношения ждёт трудный итог."] }
     ],
-    // You and the other person on either side of what connects you; past, what divides and the future below; outcome at the bottom
+    // Deck on top; below it you and the other person on either side of what connects you,
+    // then past, what divides and the future; outcome at the bottom
     layout(u) {
       return {
-        width: 3 * u.w + 2 * u.g, height: 3 * u.h + 2 * u.g, deck: [col(u, 0), rowY(u, 2)],
+        width: 3 * u.w + 2 * u.g, height: 4 * u.h + 3 * u.g, deck: [col(u, 0), rowY(u, 0)],
         slots: [
-          [col(u, 0), rowY(u, 0), 0], [col(u, 1), rowY(u, 0), 0], [col(u, 2), rowY(u, 0), 0],
           [col(u, 0), rowY(u, 1), 0], [col(u, 1), rowY(u, 1), 0], [col(u, 2), rowY(u, 1), 0],
-          [col(u, 1), rowY(u, 2), 0]
+          [col(u, 0), rowY(u, 2), 0], [col(u, 1), rowY(u, 2), 0], [col(u, 2), rowY(u, 2), 0],
+          [col(u, 1), rowY(u, 3), 0]
         ]
       };
     }
@@ -182,17 +183,18 @@ window.SPREADS = [
       { name: "Третий месяц", what: "К чему придёт ситуация", when: "Время: третий месяц",
         read: ["К третьему месяцу ситуация придёт к хорошему результату.", "К третьему месяцу ситуация ещё не решится окончательно.", "Третий месяц будет тяжёлым, но это тенденция, а не приговор."] }
     ],
-    // The cross in the middle (card 3 lies across card 1), helps and outside view in the top corners,
-    // fears bottom left, deck bottom right, the three months in a row at the bottom
+    // Deck on its own row on top. Below it: the cross in the middle (card 3 lies across card 1),
+    // helps top left, outside view bottom right, fears bottom left, the three months in a row at the bottom
     layout(u) {
       const dx = u.h / 2 + u.w / 2 + u.g;    // neighbours keep clear of the long side of the crossing card
       const x = c => u.w / 2 + c * dx;
+      const y = r => rowY(u, r + 1);         // row 0 belongs to the deck
       return {
-        width: u.w + 2 * dx, height: 4 * u.h + 3 * u.g, deck: [x(2), rowY(u, 2)],
+        width: u.w + 2 * dx, height: 5 * u.h + 4 * u.g, deck: [x(0), rowY(u, 0)],
         slots: [
-          [x(1), rowY(u, 1), 0], [x(0), rowY(u, 0), 0], [x(1), rowY(u, 1), 90], [x(1), rowY(u, 0), 0], [x(1), rowY(u, 2), 0],
-          [x(0), rowY(u, 1), 0], [x(2), rowY(u, 1), 0], [x(2), rowY(u, 0), 0], [x(0), rowY(u, 2), 0],
-          [x(0), rowY(u, 3), 0], [x(1), rowY(u, 3), 0], [x(2), rowY(u, 3), 0]
+          [x(1), y(1), 0], [x(0), y(0), 0], [x(1), y(1), 90], [x(1), y(0), 0], [x(1), y(2), 0],
+          [x(0), y(1), 0], [x(2), y(1), 0], [x(2), y(2), 0], [x(0), y(2), 0],
+          [x(0), y(3), 0], [x(1), y(3), 0], [x(2), y(3), 0]
         ]
       };
     }

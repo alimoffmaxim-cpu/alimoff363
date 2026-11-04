@@ -71,6 +71,7 @@
   .choice b { font-family: var(--display); font-size: 1.7rem; font-weight: 600; line-height: 1.1; }
   .choice span { color: var(--muted); font-size: 0.92rem; }
   .choice .count { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .choice .lock { align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; }
   .fan { display: flex; justify-content: center; height: 150px; margin-block: 4px 0; }
   .fan .back-face { position: static; width: 84px; height: 145px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,.45); }
   .fan .back-face:nth-child(1) { transform: rotate(-14deg) translate(26px, 10px); }
@@ -253,18 +254,7 @@
       <h1>Таро</h1>
       <p class="lead">Классическая колода Райдера — Уэйта, 78 карт. Сосредоточься на своём вопросе и выбери расклад.</p>
       <div class="fan" aria-hidden="true"><div class="back-face"></div><div class="back-face"></div><div class="back-face"></div></div>
-      <div class="choices">
-        <button class="choice" type="button" data-go="day">
-          <span class="count">1 карта</span>
-          <b>Карта дня</b>
-          <span>Одна карта — настроение и совет на сегодня.</span>
-        </button>
-        <button class="choice" type="button" data-go="spread">
-          <span class="count">10 карт</span>
-          <b>Полный расклад</b>
-          <span>Кельтский крест: ситуация, препятствия, прошлое, будущее и итог.</span>
-        </button>
-      </div>
+      <div class="choices" id="choices"></div>
     </div>
   </section>
 
@@ -295,8 +285,8 @@
   <section id="spread" hidden>
     <div class="wrap" style="padding:0">
       <button class="back" type="button" data-go="">← К выбору расклада</button>
-      <h2>Кельтский крест</h2>
-      <p class="lead">Самый известный полный расклад: 10 карт показывают ситуацию целиком. Задай вопрос, если хочешь, и разложи карты.</p>
+      <h2 id="sp-title"></h2>
+      <p class="lead" id="sp-lead"></p>
       <input id="question" type="text" maxlength="140" autocomplete="off" placeholder="Твой вопрос (можно не писать)">
       <div class="row">
         <button class="btn" type="button" id="next" hidden>Положить следующую карту</button>
@@ -314,6 +304,18 @@
       </section>
       <h3 class="list-title" id="list-title" hidden>Карты по позициям</h3>
       <ol class="positions" id="positions"></ol>
+    </div>
+  </section>
+
+  <!-- A paid spread without access -->
+  <section id="locked" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <span class="tag">Полный доступ</span>
+      <h2 id="lk-title"></h2>
+      <p class="lead" id="lk-lead"></p>
+      <div class="row"><button class="btn" type="button" id="lk-buy">Открыть полный доступ</button></div>
+      <p class="note" id="lk-note" hidden>Оплата скоро появится.</p>
     </div>
   </section>
 </div>
@@ -340,32 +342,12 @@
 </dialog>
 
 <script src="cards.js"></script>
+<script src="spreads.js"></script>
+<script src="access.js"></script>
 <script>
-  const POSITIONS = [
-    ["Ситуация", "Суть вопроса, то, что происходит сейчас"],
-    ["Препятствие", "Что мешает или усложняет ситуацию"],
-    ["Основа", "Глубинная причина, корни ситуации"],
-    ["Прошлое", "Что уходит и уже влияет на тебя"],
-    ["Цель", "К чему ты стремишься, лучший возможный исход"],
-    ["Ближайшее будущее", "Что произойдёт в ближайшее время"],
-    ["Ты сам", "Твоё отношение и роль в ситуации"],
-    ["Окружение", "Люди и обстоятельства вокруг"],
-    ["Надежды и страхи", "Чего ты ждёшь и чего опасаешься"],
-    ["Итог", "К чему всё придёт"]
-  ];
-  // What part of life or time each position speaks about, and how to read a light (+1), mixed (0) or heavy (-1) card there
-  const READING = [
-    ["Время: сейчас", ["Ситуация в целом складывается в твою пользу.", "Ситуация пока неоднозначна и может повернуть в любую сторону.", "Сейчас ситуация непростая, и это стоит честно признать."]],
-    ["Время: сейчас", ["Препятствие мягкое: мешает не беда, а то, что может отвлечь или расслабить.", "Мешает неопределённость: ясности пока не хватает.", "Это главная трудность, с которой предстоит справиться."]],
-    ["Время: давнее прошлое, корни", ["В основе ситуации хороший фундамент, на него можно опереться.", "Причины глубже, чем кажется: стоит в них разобраться.", "Корень проблемы здесь: пока он не проработан, ситуация будет повторяться."]],
-    ["Время: недавнее прошлое", ["Недавнее прошлое дало тебе силы, которые ещё работают.", "Недавний этап завершается, его влияние слабеет.", "Недавние события оставили след, но эта полоса уже уходит."]],
-    ["О чём: твоя цель и лучший исход", ["Лучший сценарий светлый, к нему стоит стремиться.", "Цель пока размыта: стоит точнее понять, чего ты хочешь.", "Осторожнее с ожиданиями: желаемое может принести не только радость."]],
-    ["Время: ближайшие недели", ["В ближайшее время жди хороших перемен.", "Ближайшее время переходное: многое зависит от твоих решений.", "В ближайшие недели возможны трудности, к ним лучше подготовиться заранее."]],
-    ["О чём: ты сам", ["Ты в хорошей форме и можешь влиять на ситуацию.", "Ты в поиске, и ясной позиции пока нет.", "Мешать может твоё собственное состояние, стоит позаботиться о себе."]],
-    ["О чём: люди и обстоятельства вокруг", ["Окружение на твоей стороне, не бойся просить поддержки.", "Окружение нейтрально: многое зависит от того, как ты выстроишь отношения.", "Присмотрись к людям и обстоятельствам вокруг: не всё работает на тебя."]],
-    ["О чём: твои надежды и страхи", ["Твои надежды светлые, и они дают силы.", "В тебе смешаны надежда и тревога, это нормально.", "Именно это тебя тревожит. Часто страх сильнее реальной угрозы."]],
-    ["Время: итог, ближайшие месяцы", ["Итог благоприятный: ситуация разрешится хорошо.", "Итог открыт: многое решат твои шаги.", "Итог пока тяжёлый, но расклад показывает тенденцию, а не приговор."]]
-  ];
+  let S = null;                                  // the spread on screen, from spreads.js
+  const N = () => S.positions.length;
+  const POS = i => S.positions[i];
   const SUITS = {
     maj: ["Старший аркан", "важный, судьбоносный момент"],
     wands: ["Жезлов", "действия, работа и энергия"],
@@ -384,48 +366,62 @@
   function comment(i) {
     const d = spread[i], t = tone(d), suit = SUITS[suitOf(d.card)];
     return {
-      when: READING[i][0] + " · сфера: " + suit[1],
-      text: READING[i][1][1 - t]
+      when: (POS(i).when ? POS(i).when + " · " : "") + "сфера: " + suit[1],
+      text: POS(i).read ? POS(i).read[1 - t] : ""
     };
   }
 
-  // Conclusion for the whole spread, built from tones, suits and the key positions
-  function summarize() {
+  // What any spread can say as a whole: overall tone, many or few major arcana, a leading suit, reversed cards
+  function generalSummary() {
     const tones = spread.map(tone);
-    const score = tones.reduce((a, b) => a + b, 0);
-    const name = i => "«" + spread[i].card[1] + "»";
-    const out = [];
-    const title = score >= 3 ? "Расклад благоприятный" : score <= -3 ? "Расклад напряжённый" : "Расклад смешанный";
-    out.push(score >= 3 ? "Светлых карт заметно больше, чем тяжёлых: обстоятельства в целом работают на тебя."
-      : score <= -3 ? "Тяжёлых карт больше, чем светлых: впереди непростой период, но к нему можно подготовиться."
-      : "Есть и поддержка, и трудности. Многое зависит от твоих решений.");
+    const score = tones.reduce((a, b) => a + b, 0), n = spread.length, big = Math.max(2, Math.round(n * 0.3));
+    const title = score >= big ? "Расклад благоприятный" : score <= -big ? "Расклад напряжённый" : "Расклад смешанный";
+    const verdict = score >= big ? "Светлых карт заметно больше, чем тяжёлых: обстоятельства в целом работают на тебя."
+      : score <= -big ? "Тяжёлых карт больше, чем светлых: впереди непростой период, но к нему можно подготовиться."
+      : "Есть и поддержка, и трудности. Многое зависит от твоих решений.";
+    const notes = [];
+    if (n >= 5) {
+      const majors = spread.filter(d => suitOf(d.card) === "maj").length;
+      if (majors >= Math.ceil(n * 0.4)) notes.push("Старших арканов много (" + majors + " из " + n + "): это важный жизненный этап, и обстоятельства влияют на него сильнее, чем повседневные решения.");
+      else if (majors <= Math.floor(n * 0.1)) notes.push("Старших арканов почти нет: всё в твоих руках, ситуация решается обычными повседневными шагами.");
 
+      const counts = {};
+      spread.forEach(d => { const k = suitOf(d.card); if (k !== "maj") counts[k] = (counts[k] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      if (top.length && top[0][1] >= 3 && (!top[1] || top[0][1] > top[1][1]))
+        notes.push("Больше всего карт масти " + SUITS[top[0][0]][0] + " (" + top[0][1] + "): главное в вопросе — " + SUITS[top[0][0]][1] + ".");
+
+      const rev = spread.filter(d => d.reversed).length;
+      if (rev >= Math.ceil(n * 0.6)) notes.push("Перевёрнутых карт много (" + rev + "): энергия сейчас скорее заблокирована, многое происходит внутри тебя.");
+      else if (rev <= Math.floor(n * 0.2)) notes.push("Почти все карты прямые: события развиваются открыто и без задержек.");
+    }
+    return { title, verdict, notes };
+  }
+
+  // Celtic Cross conclusion: the general part plus the trend from now to the outcome, the goal and advice
+  function celticSummary() {
+    const tones = spread.map(tone);
+    const name = i => "«" + spread[i].card[1] + "»";
+    const { title, verdict, notes } = generalSummary();
+    const out = [verdict];
     const t1 = tones[0], t10 = tones[9];
     out.push(t10 > t1 ? "Ситуация движется к лучшему: от " + name(0) + " сейчас к " + name(9) + " в итоге."
       : t10 < t1 ? "Важно: итог " + name(9) + " пока слабее, чем нынешнее положение " + name(0) + "."
       : "Скорее всего, ситуация сохранит нынешний характер: " + name(0) + " сейчас и " + name(9) + " в итоге.");
-
     if (tones[4] > 0 && t10 > 0) out.push("Желаемое " + name(4) + " и итог совпадают: ты на верном пути.");
     else if (tones[4] > 0 && t10 < 0) out.push("То, чего ты хочешь (" + name(4) + "), и то, куда всё идёт, пока расходятся. Стоит что-то поменять в подходе.");
-
-    const majors = spread.filter(d => suitOf(d.card) === "maj").length;
-    if (majors >= 4) out.push("Старших арканов много (" + majors + " из 10): это важный жизненный этап, и обстоятельства влияют на него сильнее, чем повседневные решения.");
-    else if (majors <= 1) out.push("Старших арканов почти нет: всё в твоих руках, ситуация решается обычными повседневными шагами.");
-
-    const counts = {};
-    spread.forEach(d => { const s = suitOf(d.card); if (s !== "maj") counts[s] = (counts[s] || 0) + 1; });
-    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-    if (top.length && top[0][1] >= 3 && (!top[1] || top[0][1] > top[1][1]))
-      out.push("Больше всего карт масти " + SUITS[top[0][0]][0] + " (" + top[0][1] + "): главное в вопросе — " + SUITS[top[0][0]][1] + ".");
-
-    const rev = spread.filter(d => d.reversed).length;
-    if (rev >= 6) out.push("Перевёрнутых карт много (" + rev + "): энергия сейчас скорее заблокирована, многое происходит внутри тебя.");
-    else if (rev <= 2) out.push("Почти все карты прямые: события развиваются открыто и без задержек.");
-
+    out.push(...notes);
     out.push("Совет: главное препятствие — " + name(1) + ". " + (tones[6] >= 0
       ? "Судя по карте " + name(6) + ", у тебя достаточно сил, чтобы с ним справиться."
       : "Сначала позаботься о себе: карта " + name(6) + " говорит, что твоё состояние сейчас ключ к ситуации."));
     return { title, paragraphs: out };
+  }
+
+  function summarize() {
+    const r = READERS[S.reader];
+    if (r && r.summary) return r.summary();
+    const { title, verdict, notes } = generalSummary();
+    return { title, paragraphs: [verdict, ...notes] };
   }
 
   const $ = id => document.getElementById(id);
@@ -438,19 +434,63 @@
   }
   function preload(draws) { draws.forEach(d => { const i = new Image(); i.src = img(d.card); }); }
 
-  /* Navigation: #day and #spread are the two app pages; no hash is the choice screen */
+  /* Navigation: #day, #<spread id> (#spread is the old address of the Celtic Cross); no hash is the choice screen */
+  const spreadById = id => SPREADS.find(x => x.id === (id === "spread" ? "celtic-cross" : id));
   function route() {
-    const page = location.hash.slice(1);
-    const view = page === "day" || page === "spread" ? page : "home";
-    for (const id of ["home", "day", "spread"]) $(id).hidden = id !== view;
+    const def = spreadById(location.hash.slice(1));
+    let view = "home";
+    if (def) view = !ACCESS.canOpen(def) ? "locked" : def.type === "day" ? "day" : "spread";
+    for (const id of ["home", "day", "spread", "locked"]) $(id).hidden = id !== view;
     if (view === "day" && !dayDraw) newDay();
+    if (view === "spread") openSpread(def);
+    if (view === "locked") showLocked(def);
     window.scrollTo(0, 0);
   }
-  document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
-    const to = b.dataset.go;
-    if (to) location.hash = to;
-    else history.pushState("", document.title, location.pathname + location.search), route();
-  }));
+  function bindGo(root) {
+    root.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
+      const to = b.dataset.go;
+      if (to) location.hash = to;
+      else history.pushState("", document.title, location.pathname + location.search), route();
+    }));
+  }
+
+  // Choice screen, built from the catalogue
+  function renderMenu() {
+    const box = $("choices");
+    box.innerHTML = "";
+    SPREADS.forEach(def => {
+      const b = document.createElement("button");
+      b.className = "choice";
+      b.type = "button";
+      b.dataset.go = def.id;
+      const [count, title, blurb] = def.menu;
+      b.innerHTML = '<span class="count"></span><b></b><span></span>';
+      b.children[0].textContent = count;
+      b.children[1].textContent = title;
+      b.children[2].textContent = blurb;
+      if (!ACCESS.canOpen(def)) {
+        const lock = document.createElement("span");
+        lock.className = "lock";
+        lock.textContent = "Полный доступ";
+        b.appendChild(lock);
+      }
+      box.appendChild(b);
+    });
+    bindGo(box);
+  }
+
+  function showLocked(def) {
+    $("lk-title").textContent = def.title || def.menu[1];
+    $("lk-lead").textContent = def.menu[2] + " Этот расклад входит в полный доступ.";
+    $("lk-note").hidden = true;
+    $("lk-buy").onclick = () => ACCESS.requestAccess(def).then(ok => {
+      if (ok) { renderMenu(); route(); }
+      else $("lk-note").hidden = ACCESS.paymentsReady;
+    });
+  }
+  ACCESS.onChange(() => { renderMenu(); route(); });
+
+  bindGo(document);
   window.addEventListener("hashchange", route);
 
   /* Card of the day */
@@ -485,22 +525,37 @@
     setTimeout(newDay, 350);
   });
 
-  /* Celtic Cross. Positions are computed from the table width so the cross never overlaps the staff.
-     Cards are dealt one by one from the deck in the top-left corner, then turned face up. */
+  /* Spread table. Card positions come from the spread's layout (in card widths), scaled to the table width.
+     Cards are dealt one by one from the deck, then turned face up. */
   let spread = [], dealt = 0, busy = false, autoTimer = null, topZ = 10;
   const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const CARD = { w: 1, h: 1.73, g: 0.13 };
+
+  function openSpread(def) {
+    if (S === def) return;
+    clearInterval(autoTimer); autoTimer = null;
+    S = def;
+    spread = []; dealt = 0; busy = false;
+    $("sp-title").textContent = def.title;
+    $("sp-lead").textContent = def.lead;
+    $("table").innerHTML = "";
+    $("table").style.height = "";
+    $("positions").innerHTML = "";
+    $("summary").hidden = $("list-title").hidden = $("asked").hidden = $("spread-hint").hidden = true;
+    $("next").hidden = $("auto").hidden = true;
+    $("deal").textContent = "Начать расклад";
+    $("deal").classList.remove("ghost");
+    $("spread-hint").textContent = def.overlaps && def.overlaps.length
+      ? "Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх."
+      : "Нажми на карту, чтобы рассмотреть её крупно.";
+  }
 
   function geometry() {
     const W = $("table").clientWidth;
-    const w = W * 0.17, h = w * 1.73, g = W * 0.022;
-    const H = 4 * h + 3 * g;
-    const dx = h / 2 + w / 2 + g;          // card 2 lies across card 1, so neighbours keep clear of its long side
-    const cx = dx + w / 2, cy = H / 2, sx = W - w / 2;
-    const centres = [
-      [cx, cy], [cx, cy], [cx, cy + h + g], [cx - dx, cy], [cx, cy - h - g], [cx + dx, cy],
-      [sx, H - h / 2], [sx, H - h * 1.5 - g], [sx, h * 1.5 + g], [sx, h / 2]
-    ];
-    return { w, h, H, centres, deck: [w / 2, h / 2] };
+    const L = S.layout(CARD);
+    const k = W / L.width;
+    const at = p => [p[0] * k, p[1] * k];
+    return { w: CARD.w * k, h: CARD.h * k, H: L.height * k, centres: L.slots.map(at), rot: L.slots.map(p => p[2] || 0), deck: at(L.deck) };
   }
   function place(el, c, G) {
     el.style.width = G.w + "px";
@@ -519,9 +574,9 @@
   window.addEventListener("resize", layout);
 
   function updateButtons() {
-    const left = 10 - dealt;
+    const left = N() - dealt;
     $("next").hidden = $("auto").hidden = left === 0;
-    $("next").textContent = dealt === 0 ? "Положить первую карту" : "Положить следующую карту (" + (dealt + 1) + " из 10)";
+    $("next").textContent = dealt === 0 ? "Положить первую карту" : "Положить следующую карту (" + (dealt + 1) + " из " + N() + ")";
     $("next").disabled = $("auto").disabled = busy || !!autoTimer;
     const deck = $("table").querySelector(".deck");
     if (deck) {
@@ -532,7 +587,7 @@
 
   function start() {
     clearInterval(autoTimer); autoTimer = null;
-    spread = shuffled().slice(0, 10);
+    spread = shuffled().slice(0, N());
     dealt = 0; busy = false; topZ = 10;
     preload(spread);
     $("table").innerHTML = '<div class="deck" aria-hidden="true"><div class="back-face"></div><span class="left"></span></div>';
@@ -549,7 +604,7 @@
   }
 
   function dealNext() {
-    if (busy || dealt >= 10) return;
+    if (busy || dealt >= N()) return;
     busy = true;
     const i = dealt++;
     const { card, reversed } = spread[i];
@@ -557,9 +612,9 @@
     const s = document.createElement("button");
     s.type = "button";
     s.dataset.i = i;
-    s.className = "slot card flying" + (i === 1 ? " cross" : "") + (reversed ? " reversed" : "");
+    s.className = "slot card flying" + (G.rot[i] === 90 ? " cross" : "") + (reversed ? " reversed" : "");
     s.style.zIndex = ++topZ;
-    s.setAttribute("aria-label", (i + 1) + ". " + POSITIONS[i][0] + ": " + card[1]);
+    s.setAttribute("aria-label", (i + 1) + ". " + POS(i).name + ": " + card[1]);
     s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
     s.querySelector("img").src = img(card);
     s.querySelector("img").alt = card[1];
@@ -567,7 +622,7 @@
     place(s, G.centres[i], G);
     // Start on top of the deck, then glide to the card's place on the table
     const fromX = G.deck[0] - G.centres[i][0], fromY = G.deck[1] - G.centres[i][1];
-    const rest = i === 1 ? "rotate(90deg)" : "none";
+    const rest = G.rot[i] ? "rotate(" + G.rot[i] + "deg)" : "none";
     s.style.transition = "none";
     s.style.transform = "translate(" + fromX + "px," + fromY + "px)";
     $("table").appendChild(s);
@@ -582,7 +637,7 @@
       setTimeout(() => {
         s.classList.remove("flying");
         addPosition(i);
-        if (i === 9) showSummary();
+        if (i === N() - 1) showSummary();
         busy = false;
         updateButtons();
       }, flip);
@@ -597,8 +652,8 @@
       '<span class="pos"></span><span class="what"></span><span class="name"></span><span class="when"></span>' +
       '<p class="comment"></p><p class="meaning"></p></div>';
     li.querySelector("img").src = img(card);
-    li.querySelector(".pos").textContent = (i + 1) + " · " + POSITIONS[i][0];
-    li.querySelector(".what").textContent = POSITIONS[i][1];
+    li.querySelector(".pos").textContent = (i + 1) + " · " + POS(i).name;
+    li.querySelector(".what").textContent = POS(i).what;
     li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
     const c = comment(i);
     li.querySelector(".when").textContent = c.when;
@@ -616,13 +671,14 @@
 
   const slotOf = i => $("table").querySelector('.slot[data-i="' + i + '"]');
 
-  // Cards 1 and 2 overlap: a tap on the one underneath brings it to the front,
-  // a tap on the card that is already on top opens it in the viewer.
+  // Cards that lie on top of each other (the spread's `overlaps`): a tap on the one underneath
+  // brings it to the front, a tap on the card that is already on top opens it in the viewer.
   function tapCard(i) {
     const s = slotOf(i);
     if (!s || s.classList.contains("flying")) return;
-    if (i <= 1) {
-      const other = slotOf(1 - i);
+    const pair = (S.overlaps || []).find(p => p.includes(i));
+    if (pair) {
+      const other = slotOf(pair[0] === i ? pair[1] : pair[0]);
       if (other && +other.style.zIndex > +s.style.zIndex) {
         s.style.zIndex = ++topZ;
         const li = $("pos-" + i);
@@ -635,7 +691,7 @@
 
   let viewing = -1;
   function openViewer(i) {
-    if (i < 0 || i >= 10 || !$("pos-" + i)) return;
+    if (i < 0 || i >= N() || !$("pos-" + i)) return;
     viewing = i;
     const { card, reversed } = spread[i];
     const im = $("v-img");
@@ -645,10 +701,10 @@
     big.src = "cards/lg/" + card[0] + ".jpg";
     im.alt = card[1];
     $("v-card").classList.toggle("reversed", reversed);
-    $("v-pos").textContent = (i + 1) + " · " + POSITIONS[i][0];
+    $("v-pos").textContent = (i + 1) + " · " + POS(i).name;
     $("v-orient").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
     $("v-name").textContent = card[1];
-    $("v-what").textContent = POSITIONS[i][1];
+    $("v-what").textContent = POS(i).what;
     const c = comment(i);
     $("v-when").textContent = c.when;
     $("v-comment").textContent = c.text;
@@ -669,10 +725,10 @@
   });
 
   function dealRest() {
-    if (autoTimer || dealt >= 10) return;
+    if (autoTimer || dealt >= N()) return;
     dealNext();
     autoTimer = setInterval(() => {
-      if (dealt >= 10) { clearInterval(autoTimer); autoTimer = null; updateButtons(); return; }
+      if (dealt >= N()) { clearInterval(autoTimer); autoTimer = null; updateButtons(); return; }
       if (!busy) dealNext();
     }, 250);
     updateButtons();
@@ -688,7 +744,9 @@
       p.textContent = t;
       $("sum-body").appendChild(p);
     });
-    renderDetail();
+    const r = READERS[S.reader];
+    $("detail").hidden = !(r && r.detail);
+    if (r && r.detail) renderDetail(r.detail());
     $("summary").hidden = false;
     $("summary").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
   }
@@ -780,10 +838,10 @@
     return sections;
   }
 
-  function renderDetail() {
+  function renderDetail(sections) {
     const box = $("detail");
     box.innerHTML = '<p class="lead-in">Подробное толкование</p>';
-    detailedReading().forEach(([title, text]) => {
+    sections.forEach(([title, text]) => {
       const div = document.createElement("div");
       const h = document.createElement("h4");
       h.textContent = title;
@@ -794,9 +852,15 @@
     });
   }
 
+  // Readings that know a particular spread's positions; spreads.js points to them by `reader`
+  const READERS = {
+    celtic: { summary: celticSummary, detail: detailedReading }
+  };
+
   $("deal").addEventListener("click", start);
   $("next").addEventListener("click", dealNext);
   $("auto").addEventListener("click", dealRest);
 
+  renderMenu();
   route();
 </script>

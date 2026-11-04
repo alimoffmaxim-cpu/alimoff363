@@ -65,7 +65,7 @@
     transition: border-color .2s, transform .2s;
   }
   .choice:hover { border-color: var(--gold); transform: translateY(-2px); }
-  .choice:focus-visible, .btn:focus-visible, .back:focus-visible, .slot:focus-visible, .big:focus-visible, #question:focus-visible {
+  .choice:focus-visible, .btn:focus-visible, .back:focus-visible, .slot:focus-visible, #question:focus-visible {
     outline: 2px solid var(--gold); outline-offset: 3px;
   }
   .choice b { font-family: var(--display); font-size: 1.7rem; font-weight: 600; line-height: 1.1; }
@@ -130,8 +130,12 @@
 
   /* Card of the day */
   .day-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
-  .big { width: min(62vw, 250px); aspect-ratio: 0.578; border: 0; padding: 0; background: none; cursor: pointer; }
-  .big:not(.open) .inner { animation: breathe 3.2s ease-in-out infinite; }
+  .day-table { position: relative; width: min(62vw, 250px); aspect-ratio: 0.578; }
+  .day-table .deck { inset: 0; width: 100%; height: 100%; }
+  .day-table .deck .left { bottom: -26px; font-size: 0.82rem; }
+  .big { position: absolute; inset: 0; z-index: 2; }
+  .big.drawn { animation: draw .7s cubic-bezier(.25,.8,.25,1); }
+  @keyframes draw { 0% { translate: 0 0; } 45% { translate: 0 -16%; rotate: -4deg; } 100% { translate: 0 0; rotate: 0deg; } }
   @keyframes breathe { 50% { transform: translateY(-6px); } }
   .result { display: flex; flex-direction: column; gap: 6px; max-width: 30rem; }
   .result h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
@@ -165,8 +169,13 @@
   .deck.ready .back-face:last-of-type { animation: offer 2.6s ease-in-out infinite; }
   @keyframes offer { 0%, 70%, 100% { translate: 0 0; } 82% { translate: 0 -5px; } }
   /* Shuffle: half the deck slides out towards the middle of the table (--dir is 1 or -1) and riffles back in, three times */
-  .deck.shuffling .back-face:nth-of-type(odd) { animation: cut-out .56s ease-in-out 3; }
-  .deck.shuffling .back-face:nth-of-type(even) { animation: cut-stay .56s ease-in-out .07s 3; }
+  .deck.shuffling .back-face:nth-of-type(odd) { animation: cut-out .56s ease-in-out var(--n, 3); }
+  .deck.shuffling .back-face:nth-of-type(even) { animation: cut-stay .56s ease-in-out .07s var(--n, 3); }
+  /* A deck in the middle of the screen splits both ways */
+  .deck.split.shuffling .back-face:nth-of-type(odd) { animation-name: split-a; }
+  .deck.split.shuffling .back-face:nth-of-type(even) { animation-name: split-b; animation-delay: 0s; }
+  @keyframes split-a { 0%, 100% { translate: 0 0; rotate: 0deg; } 40% { translate: -15% -5%; rotate: -6deg; } 70% { translate: -5% 0; rotate: -2deg; } }
+  @keyframes split-b { 0%, 100% { translate: 0 0; rotate: 0deg; } 40% { translate: 15% -5%; rotate: 6deg; } 70% { translate: 5% 0; rotate: 2deg; } }
   @keyframes cut-out {
     0%, 100% { translate: 0 0; rotate: 0deg; }
     40% { translate: calc(var(--dir) * 70%) -8%; rotate: calc(var(--dir) * 10deg); }
@@ -265,7 +274,7 @@
     .deck .back-face { animation: none !important; transition: none; }
     #viewer[open] { animation: none; }
     .card .inner, .slot, .positions li { transition: none; }
-    .big:not(.open) .inner { animation: none; }
+    .big.drawn { animation: none; }
   }
 </style>
 
@@ -287,10 +296,13 @@
       <button class="back" type="button" data-go="">← К выбору расклада</button>
       <h2>Карта дня</h2>
       <div class="day-stage">
-        <button class="card big" id="day-card" type="button" aria-label="Открыть карту">
-          <div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>
-        </button>
-        <p class="note" id="day-hint">Нажми на карту, чтобы открыть её</p>
+        <div class="day-table">
+          <button class="deck split" id="day-deck" type="button" aria-label="Вытянуть карту"><span class="left"></span></button>
+          <div class="card big" id="day-card" hidden>
+            <div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>
+          </div>
+        </div>
+        <p class="note" id="day-hint">Нажми на колоду, чтобы вытянуть карту</p>
         <div class="result" id="day-result" hidden aria-live="polite">
           <span class="tag" id="day-tag"></span>
           <h3 id="day-name"></h3>
@@ -498,32 +510,50 @@
   bindGo(document);
   window.addEventListener("hashchange", route);
 
-  /* Card of the day */
-  let dayDraw = null;
+  /* Card of the day: tap the deck, it is shuffled, the top card comes off and turns over */
+  let dayDraw = null, dayBusy = false;
   function newDay() {
+    if (!$("day-deck").querySelector(".back-face")) $("day-deck").innerHTML = deckLayers() + '<span class="left"></span>';
     dayDraw = shuffled()[0];
     preload([dayDraw]);
     const el = $("day-card");
-    el.classList.remove("open", "reversed");
-    el.setAttribute("aria-label", "Открыть карту");
+    el.classList.remove("open", "reversed", "drawn");
+    el.hidden = true;
+    $("day-deck").hidden = false;
+    $("day-deck").disabled = false;
+    $("day-deck").classList.add("ready");
     $("day-result").hidden = $("day-actions").hidden = true;
     $("day-hint").hidden = false;
   }
-  $("day-card").addEventListener("click", () => {
-    const el = $("day-card");
-    if (el.classList.contains("open")) return;
+  $("day-deck").addEventListener("click", async () => {
+    if (dayBusy) return;
+    dayBusy = true;
+    const deck = $("day-deck");
+    deck.disabled = true;
+    deck.classList.remove("ready");
+    $("day-hint").textContent = "Тасую колоду…";
+    await shuffleDeck(deck, 3);
     const { card, reversed } = dayDraw;
+    const el = $("day-card");
     const im = el.querySelector("img");
     im.src = img(card);
     im.alt = card[1];
     el.classList.toggle("reversed", reversed);
-    el.classList.add("open");
-    el.setAttribute("aria-label", card[1]);
-    $("day-tag").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
-    $("day-name").textContent = card[1];
-    $("day-meaning").textContent = reversed ? card[3] : card[2];
+    el.hidden = false;
+    el.classList.add("drawn");
     $("day-hint").hidden = true;
-    setTimeout(() => { $("day-result").hidden = $("day-actions").hidden = false; }, 450);
+    $("day-hint").textContent = "Нажми на колоду, чтобы вытянуть карту";
+    setTimeout(() => {
+      el.classList.add("open");
+      $("day-tag").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
+      $("day-name").textContent = card[1];
+      $("day-meaning").textContent = reversed ? card[3] : card[2];
+      setTimeout(() => {
+        deck.hidden = true;
+        $("day-result").hidden = $("day-actions").hidden = false;
+        dayBusy = false;
+      }, reduced() ? 0 : 600);
+    }, reduced() ? 0 : 650);
   });
   $("day-again").addEventListener("click", () => {
     $("day-card").classList.remove("open");
@@ -589,7 +619,7 @@
     $("next").disabled = $("auto").disabled = busy || !!autoTimer;
     const deck = $("table").querySelector(".deck");
     if (deck) {
-      deck.hidden = left === 0;
+      deck.hidden = left === 0 && !shuffling;
       deck.disabled = busy || !!autoTimer;
       deck.classList.toggle("ready", !deck.disabled);
       deck.querySelector(".left").textContent = shuffling ? "Тасую колоду…" : "Нажми на колоду";
@@ -598,6 +628,19 @@
 
   let shuffling = false, round = 0;
   const DECK_LAYERS = 7;
+  function deckLayers() {
+    let html = "";
+    for (let k = 0; k < DECK_LAYERS; k++) html += '<div class="back-face" style="--k:' + k + '"></div>';
+    return html;
+  }
+  // Riffle the deck `cycles` times; resolves when it is back together
+  function shuffleDeck(deck, cycles) {
+    deck.classList.remove("shuffling");
+    void deck.offsetWidth;                         // restart the animation
+    deck.style.setProperty("--n", cycles);
+    deck.classList.add("shuffling");
+    return new Promise(done => setTimeout(() => { deck.classList.remove("shuffling"); done(); }, reduced() ? 0 : cycles * 560 + 120));
+  }
 
   function start() {
     clearInterval(autoTimer); autoTimer = null;
@@ -605,18 +648,16 @@
     spread = shuffled().slice(0, N());
     dealt = 0; topZ = 10;
     preload(spread);
-    let layers = "";
-    for (let k = 0; k < DECK_LAYERS; k++) layers += '<div class="back-face" style="--k:' + k + '"></div>';
-    $("table").innerHTML = '<button class="deck shuffling" type="button" aria-label="Положить следующую карту">' + layers + '<span class="left"></span></button>';
-    $("table").querySelector(".deck").addEventListener("click", dealNext);
+    $("table").innerHTML = '<button class="deck" type="button" aria-label="Положить следующую карту">' + deckLayers() + '<span class="left"></span></button>';
+    const deck = $("table").querySelector(".deck");
+    deck.addEventListener("click", dealNext);
     // The deck is shuffled before the first card can be taken
     busy = shuffling = true;
-    setTimeout(() => {
+    shuffleDeck(deck, 3).then(() => {
       if (round !== thisRound) return;
       busy = shuffling = false;
-      $("table").querySelector(".deck").classList.remove("shuffling");
       updateButtons();
-    }, reduced() ? 0 : 1800);
+    });
     $("positions").innerHTML = "";
     $("summary").hidden = $("list-title").hidden = true;
     const q = $("question").value.trim();
@@ -629,10 +670,16 @@
     updateButtons();
   }
 
-  function dealNext() {
+  async function dealNext() {
     if (busy || dealt >= N()) return;
-    busy = true;
-    const i = dealt++, thisRound = round;
+    busy = shuffling = true;
+    const thisRound = round;
+    updateButtons();
+    // A short riffle before each card; one when laying out the rest automatically
+    await shuffleDeck($("table").querySelector(".deck"), autoTimer ? 1 : 2);
+    if (round !== thisRound) return;
+    shuffling = false;
+    const i = dealt++;
     const { card, reversed } = spread[i];
     const G = geometry();
     const s = document.createElement("button");

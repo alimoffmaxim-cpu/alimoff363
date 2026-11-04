@@ -344,6 +344,7 @@
 <script src="cards.js"></script>
 <script src="spreads.js"></script>
 <script src="access.js"></script>
+<script src="readings.js"></script>
 <script>
   let S = null;                                  // the spread on screen, from spreads.js
   const N = () => S.positions.length;
@@ -367,7 +368,7 @@
     const d = spread[i], t = tone(d), suit = SUITS[suitOf(d.card)];
     return {
       when: (POS(i).when ? POS(i).when + " · " : "") + "сфера: " + suit[1],
-      text: POS(i).read ? POS(i).read[1 - t] : ""
+      text: POS(i).vote ? POS(i).vote[d.reversed ? 1 : 0] : POS(i).read ? POS(i).read[1 - t] : ""
     };
   }
 
@@ -396,25 +397,6 @@
       else if (rev <= Math.floor(n * 0.2)) notes.push("Почти все карты прямые: события развиваются открыто и без задержек.");
     }
     return { title, verdict, notes };
-  }
-
-  // Celtic Cross conclusion: the general part plus the trend from now to the outcome, the goal and advice
-  function celticSummary() {
-    const tones = spread.map(tone);
-    const name = i => "«" + spread[i].card[1] + "»";
-    const { title, verdict, notes } = generalSummary();
-    const out = [verdict];
-    const t1 = tones[0], t10 = tones[9];
-    out.push(t10 > t1 ? "Ситуация движется к лучшему: от " + name(0) + " сейчас к " + name(9) + " в итоге."
-      : t10 < t1 ? "Важно: итог " + name(9) + " пока слабее, чем нынешнее положение " + name(0) + "."
-      : "Скорее всего, ситуация сохранит нынешний характер: " + name(0) + " сейчас и " + name(9) + " в итоге.");
-    if (tones[4] > 0 && t10 > 0) out.push("Желаемое " + name(4) + " и итог совпадают: ты на верном пути.");
-    else if (tones[4] > 0 && t10 < 0) out.push("То, чего ты хочешь (" + name(4) + "), и то, куда всё идёт, пока расходятся. Стоит что-то поменять в подходе.");
-    out.push(...notes);
-    out.push("Совет: главное препятствие — " + name(1) + ". " + (tones[6] >= 0
-      ? "Судя по карте " + name(6) + ", у тебя достаточно сил, чтобы с ним справиться."
-      : "Сначала позаботься о себе: карта " + name(6) + " говорит, что твоё состояние сейчас ключ к ситуации."));
-    return { title, paragraphs: out };
   }
 
   function summarize() {
@@ -757,87 +739,6 @@
   const meaningOf = i => lc(spread[i].reversed ? spread[i].card[3] : spread[i].card[2]);
   // "карта «X»: meaning", with a dash when the meaning already has a colon
   const says = i => cardName(i) + (meaningOf(i).includes(":") ? " — " : ": ") + meaningOf(i);
-  const SUIT_ADVICE = {
-    wands: "Действуй, а не жди: сейчас решают инициатива и энергия. Только не распыляйся на всё сразу.",
-    cups: "Прислушайся к чувствам, своим и чужим: ответ лежит скорее в сердце, чем в расчётах.",
-    swords: "Сначала проясни мысли и поговори открыто: недосказанность сейчас мешает больше всего.",
-    pents: "Опирайся на практические шаги: посчитай ресурсы, составь план и двигайся по нему спокойно.",
-    maj: "Доверься ходу событий: часть вещей сейчас решается не тобой, и это нормально."
-  };
-
-  function detailedReading() {
-    const t = spread.map(tone);
-    const score = t.reduce((a, b) => a + b, 0);
-    const q = $("question").value.trim();
-    const sections = [];
-
-    // 1. Answer to the question, from the outcome and the overall tone
-    let answer;
-    if (t[9] > 0 && score >= 0) answer = "Ответ скорее «да». Расклад показывает благополучный исход, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
-    else if (t[9] > 0) answer = "Ответ скорее «да, но не сразу». Итог хороший, однако по дороге придётся пройти через трудности.";
-    else if (t[9] === 0) answer = "Однозначного ответа карты не дают. Исход открыт и во многом зависит от твоих решений в ближайшие недели.";
-    else if (score > 0) answer = "Ответ скорее «не так, как ты ждёшь». Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
-    else answer = "Сейчас ответ скорее «нет». Карты предупреждают о трудностях. Это повод пересмотреть подход, а не опускать руки.";
-    if (!q) {
-      // No question asked: describe the overall picture instead of a yes/no answer
-      if (t[9] > 0 && score >= 0) answer = "Картина в целом светлая: ситуация идёт к хорошему исходу, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
-      else if (t[9] > 0) answer = "Итог хороший, но путь к нему лежит через трудности.";
-      else if (t[9] === 0) answer = "Ситуация открыта: многое решится в ближайшие недели и зависит от тебя.";
-      else if (score > 0) answer = "Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
-      else answer = "Карты предупреждают о трудном периоде. Это повод пересмотреть подход, а не опускать руки.";
-    }
-    sections.push([q ? "Ответ на твой вопрос" : "Общая картина", (q ? "«" + q + "» — " + lc(answer) : answer)]);
-
-    // 2. Roots and recent past
-    let past = "В основе ситуации лежит " + says(2) + " ";
-    past += t[2] < 0 ? "Именно отсюда тянутся нынешние сложности. " : t[2] > 0 ? "Это надёжная опора, о которой стоит помнить. " : "";
-    past += "Недавно на тебя повлияла " + says(3) + " ";
-    past += t[3] < 0 ? "Эта полоса уже уходит, и её влияние слабеет." : t[3] > 0 ? "Силы, полученные тогда, работают до сих пор." : "Этот этап завершается.";
-    sections.push(["Прошлое и корни", past]);
-
-    // 3. Present: card 1 and the card that crosses it
-    let now = "Сейчас в центре — " + says(0) + " Поперёк неё легла " + cardName(1) + ", и она показывает, что мешает: " + meaningOf(1) + " ";
-    if (t[0] > 0 && t[1] < 0) now += "Ситуация в целом хорошая, но эта помеха может её испортить, если её не замечать.";
-    else if (t[0] < 0 && t[1] < 0) now += "Сейчас трудно с двух сторон, поэтому важно не торопиться и действовать по шагам.";
-    else if (t[1] >= 0) now += "Препятствие не грозное: скорее это то, что стоит учесть, чем то, с чем придётся бороться.";
-    else now += "Главная задача сейчас — справиться именно с этой помехой.";
-    sections.push(["Настоящее", now]);
-
-    // 4. Near future, outcome and how they relate to the goal
-    let future = "В ближайшие недели тебя ждёт " + says(5) + " В итоге выпала " + says(9) + " ";
-    future += t[9] > t[0] ? "Ситуация движется к лучшему по сравнению с тем, что есть сейчас. "
-      : t[9] < t[0] ? "Итог пока слабее нынешнего положения, так что не стоит расслабляться. "
-      : "Характер ситуации, скорее всего, сохранится. ";
-    future += "Твоя цель — " + cardName(4) + ". " + (t[4] > 0 && t[9] > 0 ? "Желаемое и итог совпадают: ты на верном пути."
-      : t[4] > 0 && t[9] < 0 ? "Желаемое и итог пока расходятся: стоит что-то поменять в подходе, чтобы прийти туда, куда хочешь."
-      : t[4] < 0 ? "Присмотрись к самой цели: возможно, то, к чему ты стремишься, нужно тебе меньше, чем кажется."
-      : "Цель пока размыта, и чем яснее ты её сформулируешь, тем легче будет к ней прийти.");
-    sections.push(["Будущее и итог", future]);
-
-    // 5. You, the people around and your hopes and fears
-    let you = "Твоя роль в этой ситуации — " + says(6) + " Вокруг тебя — " + says(7) + " ";
-    if (t[6] >= 0 && t[7] < 0) you += "Твои силы сейчас важнее поддержки окружения: рассчитывай прежде всего на себя. ";
-    else if (t[6] < 0 && t[7] > 0) you += "Не стесняйся опереться на других: окружение сейчас сильнее тебя и готово помочь. ";
-    else if (t[6] > 0 && t[7] > 0) you += "И ты, и окружение настроены на хороший результат. ";
-    else if (t[6] < 0 && t[7] < 0) you += "Сейчас стоит беречь силы и не ждать многого от окружения. ";
-    you += "Твои надежды и страхи показывает " + says(8) + " ";
-    you += t[8] < 0 ? (t[9] >= 0 ? "Эти страхи во многом преувеличены: итог расклада их не подтверждает." : "Отнесись к этому страху как к предупреждению, а не как к приговору.")
-      : t[8] > 0 ? (t[9] >= 0 ? "Твои ожидания и итог совпадают, поэтому надежда здесь оправдана." : "Надежда важна, но держи в голове и запасной план.")
-      : "Ожидания пока не сложились, и это оставляет место для выбора.";
-    sections.push(["Ты и твоё окружение", you]);
-
-    // 6. Advice from the dominant suit, the obstacle and the outcome
-    const counts = {};
-    spread.forEach(d => { const k = suitOf(d.card); counts[k] = (counts[k] || 0) + 1; });
-    const lead = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
-    let advice = SUIT_ADVICE[lead] + " ";
-    advice += t[1] < 0 ? "Главное, над чем стоит поработать, — препятствие из позиции 2 (" + spread[1].card[1] + "). "
-      : "Серьёзных преград расклад не показывает, так что не откладывай важные шаги. ";
-    advice += t[9] >= 0 ? "Итог на твоей стороне, если ты продолжишь в том же направлении." : "Помни: расклад показывает тенденцию, и её можно изменить своими решениями.";
-    sections.push(["Совет", advice]);
-    return sections;
-  }
-
   function renderDetail(sections) {
     const box = $("detail");
     box.innerHTML = '<p class="lead-in">Подробное толкование</p>';
@@ -851,11 +752,6 @@
       box.appendChild(div);
     });
   }
-
-  // Readings that know a particular spread's positions; spreads.js points to them by `reader`
-  const READERS = {
-    celtic: { summary: celticSummary, detail: detailedReading }
-  };
 
   $("deal").addEventListener("click", start);
   $("next").addEventListener("click", dealNext);

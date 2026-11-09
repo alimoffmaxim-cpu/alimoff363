@@ -28,11 +28,11 @@ CPC = расход / клики, цена подписки = расход / по
 
 1. Создайте пустую Google Таблицу (или откройте ту, что уже лежит на Диске).
 2. **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную
-   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 12 отдельных файлов
+   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 13 отдельных файлов
    (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
    Удобнее всего — со страницы [«Код отчёта «Сова»»](https://claude.ai/artifact/HaCzXDMetXXrG3ynRvkr24):
    у каждого файла имя и кнопка «Скопировать код». Или с raw-страниц (Cmd+A → Cmd+C):
-   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs), [`11_days`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/11_days.gs), [`12_volgograd`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/12_volgograd.gs).
+   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs), [`11_days`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/11_days.gs), [`12_volgograd`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/12_volgograd.gs), [`13_client_week`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/13_client_week.gs).
    Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка) → часовой пояс `Europe/Moscow`.
 4. Обновите страницу таблицы — появится меню **Сова**.
@@ -81,6 +81,16 @@ CPC = расход / клики, цена подписки = расход / по
  "select Col4,Col5,Col6,Col7,Col8,Col9,Col10,Col11,Col12,Col13,Col14 where Col1 = '45 неделя 2026' order by Col4"; 0)
 ```
 Для месяца — `where Col1 = 'Ноябрь 2026'`. При первой вставке нажмите «Разрешить доступ».
+
+### Лист «неделя» в таблице клиента — заполняется сам
+
+`13_client_week.gs`: каждый **понедельник** после ночной загрузки (~01:05 по Москве) скрипт открывает таблицу клиента
+«Отчеты таргет» (`SOVA_CW.SPREADSHEET_ID`, лист «неделя») и дописывает блок прошедшей недели по образцу последнего блока:
+заголовок «46 неделя», строки РК (номер, название, куда ведем, бюджет, показы, клики, пдп — значениями с листа «Волгоград РК»),
+CTR / CPC / стоимость / CR — формулами, ИТОГО и «РАЗНИЦА 46/45» к прошлому блоку. Строк РК в блоке столько, сколько кампаний крутилось.
+Если блок недели уже есть, цифры в нём перезаписываются. Вручную — **Сова → Заполнить неделю в таблице клиента**
+(всегда последняя завершённая неделя). У владельца скрипта должен быть доступ на редактирование таблицы клиента.
+
 
 ## Настройки (`SOVA` в начале `1_main.gs`)
 

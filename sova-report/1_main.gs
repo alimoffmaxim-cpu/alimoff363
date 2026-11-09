@@ -31,6 +31,7 @@ function onOpen() {
     .addItem('⏰ Включить автообновление', 'setupSovaTrigger')
     .addItem('🩺 Проверить автообновление', 'sovaCheckUpdates')
     .addItem('📍 Обновить лист «Волгоград РК»', 'sovaVlgMenu')
+    .addItem('📅 Заполнить неделю в таблице клиента', 'sovaCwMenu')
     .addSeparator()
     .addItem('🔑 Ввести токен кабинета (из eLama)', 'promptCabinetToken')
     .addItem('🔑 Подключить кабинет по client_id / secret', 'connectCabinet')

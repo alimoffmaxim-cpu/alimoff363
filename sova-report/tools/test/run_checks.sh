@@ -6,7 +6,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 OUT="${TMPDIR:-/tmp}/sova-checks"; mkdir -p "$OUT"
-for f in 1_main 2_settings 3_api 4_sync 5_debug 6_connect 7_build 8_build_blocks 9_build_periods 10_build_sheets 11_days 12_volgograd; do
+for f in 1_main 2_settings 3_api 4_sync 5_debug 6_connect 7_build 8_build_blocks 9_build_periods 10_build_sheets 11_days 12_volgograd 13_client_week; do
   cat "../../$f.gs"; echo
 done > "$OUT/all.js"
 node --check "$OUT/all.js"

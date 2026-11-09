@@ -24,6 +24,9 @@ function sovaSyncAll_() {
   sovaWriteData_(store);
   try { sbDaysAll_(); } catch (e) { res.errors.push('таблицы по дням: ' + e.message); }
   try { sovaVlgUpdate_(); } catch (e) { res.errors.push('лист «Волгоград РК»: ' + e.message); }   // 12_volgograd.gs
+  if (Number(Utilities.formatDate(new Date(), SOVA.TIMEZONE, 'u')) === SOVA_CW.WEEKDAY) {   // 13_client_week.gs
+    try { sovaClientWeek_(); } catch (e) { res.errors.push('таблица клиента: ' + e.message); }
+  }
   return res;
 }
 

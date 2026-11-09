@@ -71,7 +71,9 @@ function metrikaVisitor_(phone, time, tildaByPhone, dealName, dealFields) {
       clickId_(String(rows[i]['Страница'] || '') + ' ' + decodeSafe_(rows[i]['Все поля'] || ''), 'yclid');
     if (y) return { clientId: '', yclid: y };
   }
-  return { clientId: '', yclid: String(f['yclid'] || '').split(',')[0].trim() || clickId_(dealName, 'yclid') };
+  // yclid — из поля yclid сделки или из адреса в любом поле (PAGE_URL, REFERER…) и в названии
+  const inFields = Object.keys(f).map(k => decodeSafe_(f[k])).concat(dealName).join(' ');
+  return { clientId: '', yclid: String(f['yclid'] || '').split(',')[0].trim() || clickId_(inFields, 'yclid') };
 }
 
 /** CSV офлайн-конверсий: колонка идентификатора, цель, время (unix). */

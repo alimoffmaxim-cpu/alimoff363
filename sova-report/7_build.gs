@@ -26,7 +26,7 @@ function sovaBuildReport() {
   const ss = SpreadsheetApp.getActive(), ui = SpreadsheetApp.getUi();
   const missing = sbMissingFiles_();
   if (missing.length) return ui.alert('Не хватает кода в Apps Script: ' + missing.join(', ') + '.\nСоздайте эти файлы ' +
-    '(или замените их содержимое) кодом со страницы «Код отчёта «Сова»» и сохраните. Всего файлов должно быть 11.');
+    '(или замените их содержимое) кодом со страницы «Код отчёта «Сова»» и сохраните. Всего файлов должно быть 12.');
   if ((ss.getSheetByName(SB.SUMMARY) || ss.getSheetByName(SB.OLD_SUMMARY)) && ui.alert('Пересобрать отчёт?', 'Листы «Сводная» и направлений будут созданы ' +
     'заново. «Данные», токены и направления на листе настроек сохранятся.', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
   sovaAlert_(function () {
@@ -64,7 +64,7 @@ function sbMissingFiles_() {
   return [['1_main', typeof sovaDailyUpdate], ['2_settings', typeof sovaCabinets_], ['3_api', typeof sovaApiGet_],
     ['4_sync', typeof sovaSyncAll_], ['5_debug', typeof debugVkMetrics], ['6_connect', typeof promptCabinetToken],
     ['8_build_blocks', typeof sbKpi_], ['9_build_periods', typeof sbPeriod_], ['10_build_sheets', typeof sbSummary_],
-    ['11_days', typeof sbDays_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
+    ['11_days', typeof sbDays_], ['12_volgograd', typeof sovaVlgUpdate_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
 }
 
 /** Лист настроек: направления (сохраняются, если лист уже был), отчётная дата и подсказки. */

@@ -2,7 +2,7 @@
 
 Описание файла — его первый комментарий. Файлы идут в порядке номера в имени.
 Запуск:
-  python3 tools/copy_page.py sova-report out.html --title "Код отчёта «Сова»" \
+  python3 tools/copy_page.py sova-report out.html --title "Код отчёта «Сова»" --updated 4_sync,12_volgograd --date 09.11 \
     --final "Обновите таблицу и выберите <b>Сова → Создать / пересобрать отчёт</b>."
 """
 import argparse
@@ -33,6 +33,9 @@ ol.steps { margin:0; padding-left:22px; display:flex; flex-direction:column; gap
 button.copy { font:600 14px var(--sans); background:var(--accent); color:var(--accent-fg); border:0; border-radius:6px; padding:9px 16px; cursor:pointer }
 button.copy:focus-visible { outline:3px solid var(--fg); outline-offset:2px }
 button.copy.done { background:var(--ok) }
+.badge { font:600 12px var(--sans); background:var(--accent); color:var(--accent-fg); border-radius:999px; padding:2px 10px; letter-spacing:.02em }
+.file.upd { border-color:var(--accent); border-width:2px }
+.updnote { border-left:3px solid var(--ok); padding:10px 14px; background:var(--surface); max-width:70ch; margin:0 }
 pre.code { margin:0; padding:12px 14px; max-height:260px; overflow:auto; background:var(--code-bg); font:12.5px/1.45 var(--mono); border-radius:0 0 8px 8px; white-space:pre }
 code { font-family:var(--mono) }
 """
@@ -81,21 +84,36 @@ def main():
     ap.add_argument('out')
     ap.add_argument('--title', required=True)
     ap.add_argument('--final', required=True, help='последний шаг инструкции (HTML)')
+    ap.add_argument('--updated', default='', help='файлы, изменённые в этой версии, через запятую (без .gs): '
+                    'карточки получают пометку «обновлён», вверху — список')
+    ap.add_argument('--date', default='', help='дата обновления для пометки, например 09.11')
     a = ap.parse_args()
     files = sorted(Path(a.dir).glob('*.gs'), key=order)
+    updated = [u.strip().removesuffix('.gs') for u in a.updated.split(',') if u.strip()]
+    unknown = [u for u in updated if u not in {f.stem for f in files}]
+    if unknown:
+        raise SystemExit('нет таких файлов: ' + ', '.join(unknown))
+    when = (' ' + html.escape(a.date)) if a.date else ''
     n = len(files)
     cards = []
     for i, f in enumerate(files):
         src = f.read_text(encoding='utf-8')
         lines = src.count('\n') + (0 if src.endswith('\n') else 1)
         desc = describe(src)
-        cards.append(f'''<section class="file">
+        upd = f.stem in updated
+        badge = f'<span class="badge">обновлён{when}</span>' if upd else ''
+        cards.append(f'''<section class="file{' upd' if upd else ''}">
   <div class="head">
-    <div class="meta"><span class="step">{i + 1}/{n}</span><code class="name">{html.escape(f.stem)}</code><span class="desc">{html.escape(desc)}{' · ' if desc else ''}{lines} строк</span></div>
+    <div class="meta"><span class="step">{i + 1}/{n}</span><code class="name">{html.escape(f.stem)}</code>{badge}<span class="desc">{html.escape(desc)}{' · ' if desc else ''}{lines} строк</span></div>
     <button class="copy" type="button" data-target="c{i}">Скопировать код</button>
   </div>
   <pre class="code" id="c{i}">{html.escape(src)}</pre>
 </section>''')
+    updnote = ''
+    if updated:
+        names = ', '.join(f'<code>{html.escape(u)}</code>' for u in updated)
+        updnote = (f'  <p class="updnote"><b>Обновлено{when}:</b> {names}. Код уже стоит? Замените целиком только эти '
+                   f'файлы (пометка «обновлён»), остальные не трогайте.</p>')
     page = f'''<title>{html.escape(a.title)}</title>
 <style>{CSS}</style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
@@ -108,6 +126,7 @@ def main():
     <li>Нажмите «Скопировать код», вставьте его в новый файл (Cmd+V) и сохраните (Cmd+S). Порядок файлов не важен.</li>
     <li>{a.final}</li>
   </ol>
+{updnote}
   <p class="warn">Перед вставкой убедитесь, что новый файл пуст: Apps Script создаёт его с заготовкой <code>function myFunction() {{}}</code>. Выделите её (Cmd+A) и вставьте код поверх.</p>
 {chr(10).join(cards)}
 </div>

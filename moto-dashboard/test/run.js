@@ -23,7 +23,8 @@ function makeSheet(name) {
         getValue: () => range.getValues()[0][0],
         setValues: rows => { rows.forEach((row, i) => row.forEach((v, j) => { s.cells[(r + i) + ',' + (c + j)] = v; })); return range; },
         setValue: v => { s.cells[r + ',' + c] = v; return range; },
-        setFontWeight: () => range, setNumberFormat: () => range, clearContent: () => range,
+        setFontWeight: () => range, setNumberFormat: () => range,
+        clearContent: () => { for (let i = 0; i < nr; i++) for (let j = 0; j < nc; j++) delete s.cells[(r + i) + ',' + (c + j)]; return range; },
       };
       return range;
     },
@@ -111,6 +112,8 @@ test('metrikaVisitor_: ClientID из свежей заявки, иначе yclid
   // Старая версия веб-приложения: ClientID только в «Все поля»
   const old = { '79160000002': [{ 'Получена': D('2026-11-02T10:00:00Z'), 'Все поля': 'Phone=1; ym_client_id=1762700000123456789; landing_page=https://x.ru/?yclid=5' }] };
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000002', ev, old, '')), { clientId: '1762700000123456789', yclid: '' });
+  // Нет заявки Тильды — yclid из поля сделки амо
+  assert.deepStrictEqual(plain(t.metrikaVisitor_('79990000000', ev, {}, '', { yclid: '5832436442284949503' })), { clientId: '', yclid: '5832436442284949503' });
   assert.strictEqual(t.metrikaCsv_('ClientId', [{ id: '1', goal: 'trial_booked', time: 100 }]), 'ClientId,Target,DateTime\n1,trial_booked,100');
 });
 
@@ -129,10 +132,12 @@ test('sendMetrikaGoals_: этапы амо → офлайн-конверсии, 
       { entity_id: 501, created_at: now - 600, value_after: [{ lead_status: { id: 10, pipeline_id: 1 } }] },
       { entity_id: 501, created_at: now - 300, value_after: [{ lead_status: { id: 11, pipeline_id: 1 } }] },
       { entity_id: 502, created_at: now - 200, value_after: [{ lead_status: { id: 10, pipeline_id: 1 } }] },
-      { entity_id: 503, created_at: now - 100, value_after: [{ lead_status: { id: 12, pipeline_id: 1 } }] }] } }) };
+      { entity_id: 503, created_at: now - 100, value_after: [{ lead_status: { id: 12, pipeline_id: 1 } }] },
+      { entity_id: 504, created_at: now - 50, value_after: [{ lead_status: { id: 11, pipeline_id: 1 } }] }] } }) };
     if (url.includes('/api/v4/leads')) return { code: 200, body: JSON.stringify({ _embedded: { leads: [
       { id: 501, name: 'Сделка', _embedded: { contacts: [{ id: 9, is_main: true }] } },
-      { id: 502, name: 'Lead from: https://x.ru/?yclid=55', _embedded: { contacts: [] } }] } }) };
+      { id: 502, name: 'Lead from: https://x.ru/?yclid=55', _embedded: { contacts: [] } },
+      { id: 504, name: 'Звонок', _embedded: { contacts: [] } }] } }) };
     if (url.includes('/api/v4/contacts')) return { code: 200, body: JSON.stringify({ _embedded: { contacts: [
       { id: 9, custom_fields_values: [{ field_code: 'PHONE', values: [{ value: '+7 916 000-00-01' }] }] }] } }) };
     if (url.includes('offline_conversions/upload')) return { code: 200, body: '{"uploading":{"id":77}}' };
@@ -148,11 +153,14 @@ test('sendMetrikaGoals_: этапы амо → офлайн-конверсии, 
   assert.strictEqual(ups[0].opts.payload.file.data,
     'ClientId,Target,DateTime\n777,trial_booked,' + (now - 600) + '\n777,trial_visited,' + (now - 300));
   assert.strictEqual(ups[1].opts.payload.file.data, 'Yclid,Target,DateTime\n55,trial_booked,' + (now - 200));
-  assert.strictEqual(sheets[t.SHEETS.metrika].getLastRow(), 4);
+  assert.ok(/без ClientID\/yclid: 1/.test(msg), msg);
+  assert.strictEqual(sheets[t.SHEETS.metrika].getLastRow(), 5);
 
   fetches.length = 0;
   const again = t.sendMetrikaGoals_();
-  assert.strictEqual(again, 'новых переходов на этапы пробного нет');
+  // Загруженное не повторяется, сделка без идентификатора проверена снова и не задублирована в журнале
+  assert.ok(/отправлено целей: 0/.test(again), again);
+  assert.strictEqual(sheets[t.SHEETS.metrika].getLastRow(), 5);
   assert.ok(!fetches.some(f => f.url.includes('offline_conversions')));
 });
 

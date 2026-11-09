@@ -50,9 +50,13 @@ function metrikaEvents_(since, statusGoals) {
 
 /**
  * Идентификатор посетителя для события: ClientID или yclid из заявки Тильды с тем же телефоном
- * (последняя заявка до события, не старше 21 дня), иначе yclid из названия сделки.
+ * (последняя заявка до события, не старше 21 дня), иначе yclid из поля или названия сделки амо.
  */
-function metrikaVisitor_(phone, time, tildaByPhone, dealName) {
+function metrikaVisitor_(phone, time, tildaByPhone, dealName, dealFields) {
+  const f = dealFields || {};
+  // ClientID и yclid, которые Тильда передала в поля сделки амо
+  const amoCid = String(f['_ym_uid'] || f['ym_client_id'] || f['ym_uid'] || f['clientid'] || '').replace(/\D/g, '');
+  if (amoCid) return { clientId: amoCid, yclid: '' };
   const minTime = (time - METRIKA_MAX_DAYS * 86400) * 1000;
   const rows = (tildaByPhone[phone] || [])
     .filter(t => { const ms = tildaTime_(t['Получена']); return ms >= minTime && ms <= time * 1000 + 3600 * 1000; })
@@ -67,7 +71,7 @@ function metrikaVisitor_(phone, time, tildaByPhone, dealName) {
       clickId_(String(rows[i]['Страница'] || '') + ' ' + decodeSafe_(rows[i]['Все поля'] || ''), 'yclid');
     if (y) return { clientId: '', yclid: y };
   }
-  return { clientId: '', yclid: clickId_(dealName, 'yclid') };
+  return { clientId: '', yclid: String(f['yclid'] || '').split(',')[0].trim() || clickId_(dealName, 'yclid') };
 }
 
 /** CSV офлайн-конверсий: колонка идентификатора, цель, время (unix). */
@@ -94,21 +98,23 @@ function sendMetrikaGoals_() {
   if (!metrikaConfigured_()) return 'не подключено (Ключи доступа → Яндекс Метрика)';
   if (!amoConfigured_()) return 'амоCRM не подключена';
   const p = params_();
-  const props = PropertiesService.getScriptProperties();
   const now = Math.floor(Date.now() / 1000);
-  const since = Number(props.getProperty('METRIKA_SINCE') || 0) || now - METRIKA_MAX_DAYS * 86400;
+  // Каждый раз смотрим 21 день: сделки без ClientID/yclid проверяются снова, вдруг он появился
+  const since = now - METRIKA_MAX_DAYS * 86400;
 
   const statusGoals = metrikaStatusGoals_(amoPipelines_(), p);
   if (!Object.keys(statusGoals).length) {
     throw new Error('В амо не найдены этапы «' + p.METRIKA_STATUS_BOOKED + '» и «' + p.METRIKA_STATUS_VISITED +
       '». Проверьте названия на листе «Настройки» (METRIKA_STATUS_…).');
   }
-  // Перекрытие в час: повторы отсекает журнал
+  // Уже загруженное повторно не отправляем; строки «нет ClientID» заменяются свежей проверкой
+  const sh = sheet_(SHEETS.metrika, HEAD.metrika);
+  const journal = readRows_(SHEETS.metrika);
   const sent = {};
-  readObjects_(SHEETS.metrika).forEach(r => { sent[r['ID сделки'] + '|' + r['Цель']] = true; });
-  const events = metrikaEvents_(since - 3600, statusGoals)
+  journal.forEach(r => { if (/^загружено/.test(String(r[7]))) sent[r[1] + '|' + r[2]] = true; });
+  const events = metrikaEvents_(since, statusGoals)
     .filter((e, i, a) => !sent[e.lead + '|' + e.goal] && a.findIndex(x => x.lead === e.lead && x.goal === e.goal) === i);
-  if (!events.length) { props.setProperty('METRIKA_SINCE', String(now)); return 'новых переходов на этапы пробного нет'; }
+  if (!events.length) return 'новых переходов на этапы пробного нет';
 
   // Телефоны и названия сделок
   const leads = {};
@@ -131,11 +137,11 @@ function sendMetrikaGoals_() {
     const l = leads[e.lead] || {};
     const c = mainContact_(l);
     const phone = c ? phones[c.id] || '' : '';
-    const v = metrikaVisitor_(phone, e.time, tildaByPhone, String(l.name || ''));
+    const v = metrikaVisitor_(phone, e.time, tildaByPhone, String(l.name || ''), amoFields_(l));
     const row = [new Date(e.time * 1000), e.lead, e.goal, phone, v.clientId, v.yclid, new Date(), ''];
     if (v.clientId) byClient.push({ id: v.clientId, goal: e.goal, time: e.time, row: row });
     else if (v.yclid) byYclid.push({ id: v.yclid, goal: e.goal, time: e.time, row: row });
-    else { row[7] = 'нет ClientID и yclid (заявки Тильды с этим телефоном нет)'; log.push(row); }
+    else { row[7] = 'нет ClientID и yclid (ни в заявке Тильды, ни в сделке)'; log.push(row); }
   });
   if (byClient.length) {
     const r = metrikaUpload_('CLIENT_ID', metrikaCsv_('ClientId', byClient));
@@ -145,9 +151,11 @@ function sendMetrikaGoals_() {
     const r = metrikaUpload_('YCLID', metrikaCsv_('Yclid', byYclid));
     byYclid.forEach(x => { x.row[7] = r; log.push(x.row); });
   }
-  const sh = sheet_(SHEETS.metrika, HEAD.metrika);
-  sh.getRange(sh.getLastRow() + 1, 1, log.length, HEAD.metrika.length).setValues(log);
-  props.setProperty('METRIKA_SINCE', String(now));
+  // Журнал: загруженные строки остаются, непроверенные заменяются результатом этого запуска
+  const rows = journal.map(r => r.slice(0, HEAD.metrika.length)).filter(r => /^загружено/.test(String(r[7]))).concat(log)
+    .sort((a, b) => new Date(b[0]) - new Date(a[0]));
+  if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, HEAD.metrika.length).clearContent();
+  if (rows.length) sh.getRange(2, 1, rows.length, HEAD.metrika.length).setValues(rows);
 
   const count = g => byClient.concat(byYclid).filter(x => x.goal === g).length;
   return 'отправлено целей: ' + (byClient.length + byYclid.length) +

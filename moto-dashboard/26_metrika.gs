@@ -108,14 +108,17 @@ function sendMetrikaGoals_() {
     throw new Error('В амо не найдены этапы «' + p.METRIKA_STATUS_BOOKED + '» и «' + p.METRIKA_STATUS_VISITED +
       '». Проверьте названия на листе «Настройки» (METRIKA_STATUS_…).');
   }
-  // Уже загруженное повторно не отправляем; строки «нет ClientID» заменяются свежей проверкой
+  // Уже загруженное повторно не отправляем, но в его строке журнала дописываем пустые ClientID / yclid / телефон.
+  // Строки «нет ClientID» заменяются свежей проверкой.
   const sh = sheet_(SHEETS.metrika, HEAD.metrika);
-  const journal = readRows_(SHEETS.metrika);
+  const journal = readRows_(SHEETS.metrika).map(r => r.slice(0, HEAD.metrika.length));
   const sent = {};
-  journal.forEach(r => { if (/^загружено/.test(String(r[7]))) sent[r[1] + '|' + r[2]] = true; });
+  journal.forEach(r => { if (/^загружено/.test(String(r[7]))) sent[r[1] + '|' + r[2]] = r; });
   const events = metrikaEvents_(since, statusGoals)
-    .filter((e, i, a) => !sent[e.lead + '|' + e.goal] && a.findIndex(x => x.lead === e.lead && x.goal === e.goal) === i);
-  if (!events.length) return 'новых переходов на этапы пробного нет';
+    .filter((e, i, a) => a.findIndex(x => x.lead === e.lead && x.goal === e.goal) === i);
+  if (!events.some(e => !sent[e.lead + '|' + e.goal]) && !journal.some(r => sent[r[1] + '|' + r[2]] && (!r[4] || !r[5]))) {
+    return 'новых переходов на этапы пробного нет';
+  }
 
   // Телефоны и названия сделок
   const leads = {};
@@ -139,6 +142,13 @@ function sendMetrikaGoals_() {
     const c = mainContact_(l);
     const phone = c ? phones[c.id] || '' : '';
     const v = metrikaVisitor_(phone, e.time, tildaByPhone, String(l.name || ''), amoFields_(l));
+    const old = sent[e.lead + '|' + e.goal];
+    if (old) { // только для информации — в Метрику не отправляем
+      if (!old[3]) old[3] = phone;
+      if (!old[4]) old[4] = v.clientId;
+      if (!old[5]) old[5] = v.yclid;
+      return;
+    }
     const row = [new Date(e.time * 1000), e.lead, e.goal, phone, v.clientId, v.yclid, new Date(), ''];
     if (v.clientId) byClient.push({ id: v.clientId, goal: e.goal, time: e.time, row: row });
     else if (v.yclid) byYclid.push({ id: v.yclid, goal: e.goal, time: e.time, row: row });
@@ -153,7 +163,7 @@ function sendMetrikaGoals_() {
     byYclid.forEach(x => { x.row[7] = r; log.push(x.row); });
   }
   // Журнал: загруженные строки остаются, непроверенные заменяются результатом этого запуска
-  const rows = journal.map(r => r.slice(0, HEAD.metrika.length)).filter(r => /^загружено/.test(String(r[7]))).concat(log)
+  const rows = journal.filter(r => /^загружено/.test(String(r[7]))).concat(log)
     .sort((a, b) => new Date(b[0]) - new Date(a[0]));
   if (sh.getLastRow() > 1) sh.getRange(2, 1, sh.getLastRow() - 1, HEAD.metrika.length).clearContent();
   if (rows.length) sh.getRange(2, 1, rows.length, HEAD.metrika.length).setValues(rows);

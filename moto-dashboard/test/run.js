@@ -158,7 +158,13 @@ test('sendMetrikaGoals_: этапы амо → офлайн-конверсии, 
   assert.strictEqual(sheets[t.SHEETS.metrika].getLastRow(), 5);
 
   fetches.length = 0;
+  // Загруженная строка без yclid: при следующем запуске yclid дописывается, повторной отправки нет
+  const jr = sheets[t.SHEETS.metrika];
+  const r501 = Object.keys(jr.cells).filter(k => k.endsWith(',2') && jr.cells[k] === 501).map(k => +k.split(',')[0]);
+  r501.forEach(r => { jr.cells[r + ',6'] = ''; });
+  tilda.cells['2,' + (t.HEAD.tilda.indexOf('yclid') + 1)] = '31337';
   const again = t.sendMetrikaGoals_();
+  r501.forEach(r => assert.strictEqual(jr.cells[r + ',6'], '31337'));
   // Загруженное не повторяется, сделка без идентификатора проверена снова и не задублирована в журнале
   assert.ok(/отправлено целей: 0/.test(again), again);
   assert.strictEqual(sheets[t.SHEETS.metrika].getLastRow(), 5);

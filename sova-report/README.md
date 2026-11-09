@@ -7,6 +7,7 @@
 | **Сводная** | Итог по всем направлениям: KPI месяца против тех же дней прошлого, таблица направлений с долей бюджета. **Период**: «с» (H3) и «по» (J3), двойной щелчок — календарь. «С» пусто — с 1-го числа месяца; «по» по умолчанию — вчера (последний полный день), можно поставить свою дату, а **при каждом открытии таблицы «по» снова становится вчера**. **Даты, поставленные на «Сводной», сами копируются на все листы направлений** (на листе направления можно поставить и свои). KPI и таблица направлений считаются за период; свой период сравнивается с предыдущим той же длины, иначе — этот месяц с теми же днями прошлого. **Тенденция подписок** по завершённым неделям и месяцам — с первой недели / месяца, где есть данные (расход, показы, клики или подписки), до последнего завершённого — **вся история**, старые недели и месяцы не уходят (подписи с годом: «21.09–27.09.2026», «Сентябрь 2026»); скрипт перестраивает блок после каждой загрузки (в xlsx-шаблоне — всегда 26 недель и 12 месяцев). По направлениям и всего, изменение к прошлому периоду, средний тренд в % за неделю / месяц (с 4 периодов). Цена подписки и расход по направлениям. 6 графиков в колонку справа от таблиц, под подписками — расход за те же периоды: по неделям, по месяцам (вся клиника, с линией тренда); ниже подписки по направлениям по неделям и месяцам |
 | **Направление 1/2/3** | Дневная статистика одного кабинета (итог всех кампаний): KPI периода; **постоянные таблицы по неделям и по месяцам** (все метрики и строка «Разница с прошлой неделей / месяцем»; меняются только после загрузки данных, выбор периода их не трогает); **детализация по дням** с днём недели. Период — как на «Сводной»: «с» и «по», при открытии «по» снова вчера. Таблица по дням и 3 графика в колонку (подписки, под ними расход по дням — с линией тренда; цена подписки по дням) показывают ровно дни этого периода: скрипт перестраивает их, когда меняются даты периода, при открытии таблицы и после каждой загрузки данных (до 400 дней; в xlsx-шаблоне — до 92) |
 | **⚙ Настройки** | Направления (подставляются во все листы и графики), статус подключения кабинетов, отчётная дата |
+| **Волгоград РК** | Для таблицы клиента: каждая волгоградская кампания (в названии `volg` / `vlg`, из всех подключённых кабинетов) по неделям и по месяцам — Номер РК, Название РК, Куда ведем, Бюджет, Показы, Клики, CTR, CPC, Пдп/активности, Стоимость пдп, CR в пдп. Пересобирается после каждой загрузки (`12_volgograd.gs`) |
 | **Данные** | 1 строка = 1 день одного направления: дата, направление, расход, показы, клики, подписки |
 
 Все листы отчёта считаются **формулами из листа «Данные»**: появились новые строки,
@@ -27,11 +28,11 @@ CPC = расход / клики, цена подписки = расход / по
 
 1. Создайте пустую Google Таблицу (или откройте ту, что уже лежит на Диске).
 2. **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**: редактор обрезает длинную
-   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 11 отдельных файлов
+   вставку, и появляется ошибка вида `SyntaxError: Unexpected identifier`. Создайте 12 отдельных файлов
    (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла.
    Удобнее всего — со страницы [«Код отчёта «Сова»»](https://claude.ai/artifact/HaCzXDMetXXrG3ynRvkr24):
    у каждого файла имя и кнопка «Скопировать код». Или с raw-страниц (Cmd+A → Cmd+C):
-   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs), [`11_days`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/11_days.gs).
+   [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/1_main.gs), [`2_settings`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/2_settings.gs), [`3_api`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/3_api.gs), [`4_sync`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/4_sync.gs), [`5_debug`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/5_debug.gs), [`6_connect`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/6_connect.gs), [`7_build`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/7_build.gs), [`8_build_blocks`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/8_build_blocks.gs), [`9_build_periods`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/9_build_periods.gs), [`10_build_sheets`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/10_build_sheets.gs), [`11_days`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/11_days.gs), [`12_volgograd`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/sova-report/12_volgograd.gs).
    Порядок файлов значения не имеет. Файл `Код.gs` удалите или очистите полностью. Сохраните (Cmd+S).
 3. **Настройки проекта** (шестерёнка) → часовой пояс `Europe/Moscow`.
 4. Обновите страницу таблицы — появится меню **Сова**.
@@ -62,6 +63,24 @@ CPC = расход / клики, цена подписки = расход / по
 
 Графики строятся встроенными графиками Google Таблиц, линия тренда — линейная (в настройках графика:
 «Серии → Линия тренда»).
+
+## Волгоград → таблица клиента
+
+Лист **«Волгоград РК»** строит `12_volgograd.gs` теми же токенами кабинетов, отдельно ничего подключать не нужно.
+Обновляется сам после каждой загрузки данных (ночное автообновление), вручную — **Сова → Обновить лист «Волгоград РК»**.
+Кампании: в названии есть `volg` или `vlg` (`SOVA_VLG.NAME_REGEX`), плюс номера из `SOVA_VLG.IDS`.
+«Куда ведем»: в названии `subscri` — «подписка», иначе — «активности». Пдп/активности — та же метрика подписок, что и в отчёте
+(`LEADS_METRIC`, результат по цели кампании).
+
+Колонки листа: A «Период» (`45 неделя 2026` — номер недели по ISO, как в таблице клиента; `Ноябрь 2026`), B тип, C начало периода,
+**D–N — ровно колонки A–K таблицы клиента**, O направление, P время обновления.
+
+В таблице клиента в первую ячейку блока недели (колонка A под заголовками, ячейки A–K строк блока должны быть пустыми):
+```
+=QUERY(IMPORTRANGE("ССЫЛКА_НА_ОТЧЁТ";"'Волгоград РК'!A2:N");
+ "select Col4,Col5,Col6,Col7,Col8,Col9,Col10,Col11,Col12,Col13,Col14 where Col1 = '45 неделя 2026' order by Col4"; 0)
+```
+Для месяца — `where Col1 = 'Ноябрь 2026'`. При первой вставке нажмите «Разрешить доступ».
 
 ## Настройки (`SOVA` в начале `1_main.gs`)
 

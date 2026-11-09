@@ -30,6 +30,7 @@ function onOpen() {
     .addItem('🔄 Загрузить новые данные из VK', 'menuUpdateAll')
     .addItem('⏰ Включить автообновление', 'setupSovaTrigger')
     .addItem('🩺 Проверить автообновление', 'sovaCheckUpdates')
+    .addItem('📍 Обновить лист «Волгоград РК»', 'sovaVlgMenu')
     .addSeparator()
     .addItem('🔑 Ввести токен кабинета (из eLama)', 'promptCabinetToken')
     .addItem('🔑 Подключить кабинет по client_id / secret', 'connectCabinet')

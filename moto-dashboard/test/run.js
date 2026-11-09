@@ -108,6 +108,9 @@ test('metrikaVisitor_: ClientID из свежей заявки, иначе yclid
   by['79160000001'][1]['ClientID Метрики'] = '';
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000001', ev, by, '')), { clientId: '', yclid: '42' });
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79990000000', ev, by, 'Lead from: https://x.ru/?yclid=9')), { clientId: '', yclid: '9' });
+  // Старая версия веб-приложения: ClientID только в «Все поля»
+  const old = { '79160000002': [{ 'Получена': D('2026-11-02T10:00:00Z'), 'Все поля': 'Phone=1; ym_client_id=1762700000123456789; landing_page=https://x.ru/?yclid=5' }] };
+  assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000002', ev, old, '')), { clientId: '1762700000123456789', yclid: '' });
   assert.strictEqual(t.metrikaCsv_('ClientId', [{ id: '1', goal: 'trial_booked', time: 100 }]), 'ClientId,Target,DateTime\n1,trial_booked,100');
 });
 

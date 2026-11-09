@@ -57,8 +57,11 @@ function metrikaVisitor_(phone, time, tildaByPhone, dealName) {
   const rows = (tildaByPhone[phone] || [])
     .filter(t => { const ms = tildaTime_(t['Получена']); return ms >= minTime && ms <= time * 1000 + 3600 * 1000; })
     .sort((a, b) => tildaTime_(b['Получена']) - tildaTime_(a['Получена']));
-  const withId = rows.filter(t => String(t['ClientID Метрики'] || '').trim())[0];
-  if (withId) return { clientId: String(withId['ClientID Метрики']).trim(), yclid: '' };
+  // ClientID — из своей колонки или из «Все поля» (заявки, принятые старой версией веб-приложения)
+  const cid = t => String(t['ClientID Метрики'] || '').trim() ||
+    clickId_(decodeSafe_(t['Все поля'] || ''), 'ym_client_id').replace(/\D/g, '');
+  const withId = rows.filter(cid)[0];
+  if (withId) return { clientId: cid(withId), yclid: '' };
   for (let i = 0; i < rows.length; i++) {
     const y = String(rows[i]['yclid'] || '').trim() ||
       clickId_(String(rows[i]['Страница'] || '') + ' ' + decodeSafe_(rows[i]['Все поля'] || ''), 'yclid');

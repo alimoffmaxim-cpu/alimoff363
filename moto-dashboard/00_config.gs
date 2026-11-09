@@ -19,6 +19,7 @@ const CFG = {
   AVITO_API: 'https://api.avito.ru',
   MK_API: 'https://api.moyklass.com/v1/company',
   MK_PAGE: 100,
+  METRIKA_API: 'https://api-metrika.yandex.net/management/v1',
   // Сколько строк держать в сводках
   ROWS_CHANNELS: 30,
   ROWS_CAMPAIGNS: 150,
@@ -44,6 +45,7 @@ const SHEETS = {
   mkSubs: 'raw_mk_subs',
   mkPays: 'raw_mk_payments',
   tilda: 'raw_tilda',
+  metrika: 'Метрика_цели',
   chartData: 'Данные_графиков',
   log: 'Лог',
   debug: 'debug',
@@ -60,10 +62,11 @@ const HEAD = {
   mkSubs: ['ID', 'Дата продажи', 'ID ученика', 'ID вида абонемента', 'Абонемент', 'Занятий', 'Цена'],
   mkPays: ['ID', 'Дата', 'ID ученика', 'Тип операции', 'Сумма', 'Комментарий'],
   tilda: ['Получена', 'ID заявки', 'Форма', 'Страница', 'Имя', 'Телефон', 'Email',
-    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'Все поля'],
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'Все поля', 'ClientID Метрики', 'yclid'],
   fact: ['Дата', 'Событие', 'Канал', 'Кампания', 'Кол-во', 'Сумма', 'Объект', 'ID ученика'],
   clients: ['ID ученика', 'Имя', 'Телефон', 'Канал', 'Кампания', 'Сопоставлен по', 'Первое обращение',
     'Пробные', 'Повторные', 'Абонементы', 'Выручка, ₽', 'Реклама'],
+  metrika: ['Событие амо', 'ID сделки', 'Цель', 'Телефон', 'ClientID Метрики', 'yclid', 'Отправлено', 'Результат'],
   log: ['Время', 'Задача', 'Результат'],
 };
 
@@ -87,6 +90,8 @@ const PARAMS = [
   ['MK_REFUND', 'refund', 'Мой Класс: типы платежей — возврат (вычитается из выручки)'],
   ['MK_ONLY_ADS', 'да', 'Мой Класс: учитывать пробные, покупки и выручку только учеников из рекламных каналов (да/нет)'],
   ['AMO_TAGGING', 'да', 'амоCRM: ставить новым сделкам тег источника (да/нет)'],
+  ['METRIKA_STATUS_BOOKED', 'Записан на пробное', 'амоCRM: этап, при переходе на который в Метрику уходит цель trial_booked'],
+  ['METRIKA_STATUS_VISITED', 'Посетил пробное', 'амоCRM: этап, при переходе на который в Метрику уходит цель trial_visited'],
   ['AMO_UNKNOWN_TAG', 'Источник не определён', 'амоCRM: тег, если источник не найден за 30 минут. Пусто — не ставить'],
 ];
 
@@ -141,7 +146,12 @@ const CLICK_IDS = [
 // Ежедневное обновление: одна задача по очереди выполняет шаги (функции из 01_menu)
 const DAILY_STEPS = ['jobAds', 'jobAmo', 'jobMk', 'jobFacts'];
 // Старые отдельные триггеры по шагам и вспомогательный триггер продолжения
-const JOB_TRIGGERS = ['jobDaily', 'jobDailyContinue', 'jobAmoTags'].concat(DAILY_STEPS);
+const JOB_TRIGGERS = ['jobDaily', 'jobDailyContinue', 'jobAmoTags', 'jobMetrika'].concat(DAILY_STEPS);
+
+// Цели Метрики (тип «JavaScript-событие») ← параметр с названием этапа амо
+const METRIKA_GOALS = [['trial_booked', 'METRIKA_STATUS_BOOKED'], ['trial_visited', 'METRIKA_STATUS_VISITED']];
+// Метрика принимает офлайн-конверсии по визитам не старше 21 дня
+const METRIKA_MAX_DAYS = 21;
 
 // Теги источника для сделок амо без рекламных меток: по сайту, с которого пришёл посетитель
 const ORGANIC = { yandex: 'Органика Яндекс', google: 'Органика Google', social: 'Соцсети',

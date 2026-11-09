@@ -29,7 +29,9 @@ function setupSheets() {
   sheet_(SHEETS.adsManual, HEAD.adsManual).getRange('A:A').setNumberFormat('dd.mm.yyyy');
   sheet_(SHEETS.costs, HEAD.costs).getRange('A:A').setNumberFormat('mm.yyyy');
   sheet_(SHEETS.costs).getRange('E1').setValue('Месяц — любая дата этого месяца, например 01.09.2026');
-  ['ads', 'tilda', 'amo', 'mkClients', 'mkVisits', 'mkSubs', 'mkPays', 'fact', 'clients', 'log'].forEach(k => sheet_(SHEETS[k], HEAD[k]));
+  ['ads', 'tilda', 'amo', 'mkClients', 'mkVisits', 'mkSubs', 'mkPays', 'fact', 'clients', 'metrika', 'log'].forEach(k => sheet_(SHEETS[k], HEAD[k]));
+  // В старом raw_tilda нет колонок ClientID и yclid — дописываем заголовок
+  sheet_(SHEETS.tilda).getRange(1, 1, 1, HEAD.tilda.length).setValues([HEAD.tilda]).setFontWeight('bold');
 
   buildSummaries_();
   buildDashboard_();

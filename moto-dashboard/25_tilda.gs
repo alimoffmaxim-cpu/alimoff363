@@ -25,6 +25,8 @@ function doPost(e) {
   try {
     const row = tildaRow_(params, new Date());
     const sh = sheet_(SHEETS.tilda, HEAD.tilda);
+    // Новые колонки (ClientID, yclid) дописываются в заголовок старого листа
+    if (sh.getLastColumn() < HEAD.tilda.length) sh.getRange(1, 1, 1, HEAD.tilda.length).setValues([HEAD.tilda]).setFontWeight('bold');
     // Тильда может повторить отправку — заявку с тем же tranid не дублируем
     const ids = sh.getLastRow() > 1 ? sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(r => String(r[0])) : [];
     if (!row[1] || ids.indexOf(String(row[1])) < 0) {
@@ -84,6 +86,8 @@ function tildaRow_(params, receivedAt) {
     find(/e-?mail|почта/i),
     utm.utm_source, utm.utm_medium, utm.utm_campaign, utm.utm_content, utm.utm_term,
     all.slice(0, 2000),
+    ymClientId_(params),
+    clickId_([tildaPage_(params)].concat(keys.map(k => k + '=' + decodeSafe_(params[k]))).join(' '), 'yclid'),
   ];
 }
 
@@ -153,6 +157,20 @@ function clickSource_(text) {
   return out;
 }
 
+/** ClientID Метрики: скрытое поле ym_client_id (код для сайта) или кука _ym_uid из COOKIES. */
+function ymClientId_(params) {
+  const own = String(params.ym_client_id || '').replace(/\D/g, '');
+  if (own) return own;
+  const m = String(params.COOKIES || params.cookies || '').match(/(?:^|[;\s])_ym_uid=(\d+)/);
+  return m ? m[1] : '';
+}
+
+/** Значение метки клика из текста с адресом: clickId_('…?yclid=123&…', 'yclid') → '123'. */
+function clickId_(text, name) {
+  const m = String(text || '').match(new RegExp('(?:^|[?&;\\s])' + name + '=([^&#\\s;]+)', 'i'));
+  return m ? m[1] : '';
+}
+
 /** Отладка: записывает тестовую заявку так же, как это делает вебхук. */
 function debugTildaTest() {
   menuTildaSecret_();
@@ -177,7 +195,8 @@ function menuTildaSecret_() {
 /**
  * Код для сайта (Настройки сайта → Ещё → HTML-код для вставки внутрь HEAD).
  * Запоминает адрес входа по рекламной ссылке (UTM, yclid и т. п.) на 30 дней и добавляет
- * в каждую форму скрытые поля landing_page, referrer, page_url — они приходят в вебхук.
+ * в каждую форму скрытые поля landing_page, referrer, page_url и ym_client_id (ClientID Метрики) —
+ * они приходят в вебхук.
  */
 function tildaSnippet_() {
   return [
@@ -189,7 +208,7 @@ function tildaSnippet_() {
     '  if (ads.test(location.search) || !get("mx_landing")) set("mx_landing", location.href);',
     '  if (document.referrer && document.referrer.indexOf(location.hostname) < 0) set("mx_ref", document.referrer);',
     '  function fill() {',
-    '    var vals = { landing_page: get("mx_landing"), referrer: get("mx_ref"), page_url: location.href };',
+    '    var vals = { landing_page: get("mx_landing"), referrer: get("mx_ref"), page_url: location.href, ym_client_id: get("_ym_uid") };',
     '    var forms = document.querySelectorAll("form");',
     '    for (var i = 0; i < forms.length; i++) {',
     '      for (var name in vals) {',

@@ -7,6 +7,7 @@ function onOpen() {
     .addItem('Перезагрузить рекламу полностью', 'menuAdsFull')
     .addItem('Обновить амоCRM', 'menuAmo')
     .addItem('амоCRM: проставить теги источника сейчас', 'menuAmoTags')
+    .addItem('Метрика: отправить цели из амо сейчас', 'menuMetrika')
     .addItem('Обновить Мой Класс', 'menuMk')
     .addItem('Пересобрать сводку (fact)', 'menuFacts')
     .addItem('Подключить Тильду (заявки с сайта)', 'menuTilda')
@@ -17,14 +18,16 @@ function onOpen() {
       .addItem('Яндекс Директ', 'promptYandexKeys')
       .addItem('Авито', 'promptAvitoKeys')
       .addItem('амоCRM', 'promptAmoKeys')
-      .addItem('Мой Класс', 'promptMkKey'))
+      .addItem('Мой Класс', 'promptMkKey')
+      .addItem('Яндекс Метрика', 'promptMetrikaKeys'))
     .addSubMenu(ui.createMenu('Отладка')
       .addItem('Поля сделок амоCRM', 'debugAmoFields')
       .addItem('Примеры данных Мой Класс', 'debugMk')
       .addItem('Операции Авито за 7 дней', 'debugAvito')
       .addItem('Метрики VK за 7 дней', 'debugVkMetrics')
       .addItem('Тестовая заявка Тильды', 'debugTildaTest')
-      .addItem('Источники заявок Тильды', 'debugTildaSources'))
+      .addItem('Источники заявок Тильды', 'debugTildaSources')
+      .addItem('Метрика: проверить цели', 'debugMetrika'))
     .addSeparator()
     .addItem('Создать / обновить листы', 'setupSheets')
     .addItem('Включить ежедневное обновление', 'setupTriggers')
@@ -137,6 +140,11 @@ function ensureTriggers_() {
     ScriptApp.newTrigger('jobAmoTags').timeBased().everyMinutes(5).create();
     created++;
   }
+  // Цели из амо в Метрику — раз в час
+  if (!triggers.some(t => t.getHandlerFunction() === 'jobMetrika')) {
+    ScriptApp.newTrigger('jobMetrika').timeBased().everyHours(1).create();
+    created++;
+  }
   return created;
 }
 
@@ -147,7 +155,7 @@ function setupTriggers() {
     .forEach(t => ScriptApp.deleteTrigger(t));
   ensureTriggers_();
   alert_('Ежедневное обновление включено: каждый день около ' + CFG.TRIGGER_HOUR + ':00 по очереди обновляются ' +
-    'реклама, амоCRM, Мой Класс и сводка. Теги источника в новых сделках амо — каждые 5 минут.');
+    'реклама, амоCRM, Мой Класс и сводка. Теги источника в новых сделках амо — каждые 5 минут, цели в Метрику — раз в час.');
 }
 
 // ---------- Ввод ключей (хранятся в Свойствах скрипта, не в коде) ----------

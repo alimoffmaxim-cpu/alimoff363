@@ -54,26 +54,25 @@ function metrikaEvents_(since, statusGoals) {
  */
 function metrikaVisitor_(phone, time, tildaByPhone, dealName, dealFields) {
   const f = dealFields || {};
-  // ClientID и yclid, которые Тильда передала в поля сделки амо
-  const amoCid = String(f['_ym_uid'] || f['ym_client_id'] || f['ym_uid'] || f['clientid'] || '').replace(/\D/g, '');
-  if (amoCid) return { clientId: amoCid, yclid: '' };
   const minTime = (time - METRIKA_MAX_DAYS * 86400) * 1000;
   const rows = (tildaByPhone[phone] || [])
     .filter(t => { const ms = tildaTime_(t['Получена']); return ms >= minTime && ms <= time * 1000 + 3600 * 1000; })
     .sort((a, b) => tildaTime_(b['Получена']) - tildaTime_(a['Получена']));
-  // ClientID — из своей колонки или из «Все поля» (заявки, принятые старой версией веб-приложения)
+  // ClientID: поле сделки амо (его передаёт Тильда), колонка заявки или «Все поля» (старая версия веб-приложения)
   const cid = t => String(t['ClientID Метрики'] || '').trim() ||
     clickId_(decodeSafe_(t['Все поля'] || ''), 'ym_client_id').replace(/\D/g, '');
   const withId = rows.filter(cid)[0];
-  if (withId) return { clientId: cid(withId), yclid: '' };
-  for (let i = 0; i < rows.length; i++) {
-    const y = String(rows[i]['yclid'] || '').trim() ||
+  const clientId = String(f['_ym_uid'] || f['ym_client_id'] || f['ym_uid'] || f['clientid'] || '').replace(/\D/g, '') ||
+    (withId ? cid(withId) : '');
+  // yclid: заявка Тильды, поле yclid сделки или адрес в любом поле сделки (PAGE_URL, REFERER…) и в названии
+  let yclid = '';
+  for (let i = 0; i < rows.length && !yclid; i++) {
+    yclid = String(rows[i]['yclid'] || '').trim() ||
       clickId_(String(rows[i]['Страница'] || '') + ' ' + decodeSafe_(rows[i]['Все поля'] || ''), 'yclid');
-    if (y) return { clientId: '', yclid: y };
   }
-  // yclid — из поля yclid сделки или из адреса в любом поле (PAGE_URL, REFERER…) и в названии
   const inFields = Object.keys(f).map(k => decodeSafe_(f[k])).concat(dealName).join(' ');
-  return { clientId: '', yclid: String(f['yclid'] || '').split(',')[0].trim() || clickId_(inFields, 'yclid') };
+  yclid = yclid || String(f['yclid'] || '').split(',')[0].trim() || clickId_(inFields, 'yclid');
+  return { clientId: clientId, yclid: yclid };
 }
 
 /** CSV офлайн-конверсий: колонка идентификатора, цель, время (unix). */

@@ -105,13 +105,13 @@ test('metrikaVisitor_: ClientID из свежей заявки, иначе yclid
     { 'Получена': D('2026-11-02T10:00:00Z'), 'ClientID Метрики': '777', 'yclid': '' },
     { 'Получена': D('2026-09-01T10:00:00Z'), 'ClientID Метрики': '111', 'yclid': '' }, // старше 21 дня
   ] };
-  assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000001', ev, by, '')), { clientId: '777', yclid: '' });
+  assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000001', ev, by, '')), { clientId: '777', yclid: '42' });
   by['79160000001'][1]['ClientID Метрики'] = '';
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000001', ev, by, '')), { clientId: '', yclid: '42' });
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79990000000', ev, by, 'Lead from: https://x.ru/?yclid=9')), { clientId: '', yclid: '9' });
   // Старая версия веб-приложения: ClientID только в «Все поля»
   const old = { '79160000002': [{ 'Получена': D('2026-11-02T10:00:00Z'), 'Все поля': 'Phone=1; ym_client_id=1762700000123456789; landing_page=https://x.ru/?yclid=5' }] };
-  assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000002', ev, old, '')), { clientId: '1762700000123456789', yclid: '' });
+  assert.deepStrictEqual(plain(t.metrikaVisitor_('79160000002', ev, old, '')), { clientId: '1762700000123456789', yclid: '5' });
   // Нет заявки Тильды — yclid из поля сделки амо
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79990000000', ev, {}, '', { page_url: 'https://motocrossmoscow.ru/adult_school?utm_source=yandex&yclid=925086552511741951#signup' })), { clientId: '', yclid: '925086552511741951' });
   assert.deepStrictEqual(plain(t.metrikaVisitor_('79990000000', ev, {}, '', { yclid: '5832436442284949503' })), { clientId: '', yclid: '5832436442284949503' });

@@ -8,15 +8,29 @@ const DR_TEXT_HEAD = ['ID объявления', 'ID группы', 'ID камп
 
 function drPromptDirect() {
   const ui = SpreadsheetApp.getUi(), p = PropertiesService.getScriptProperties();
-  const a = ui.prompt('Яндекс Директ', 'OAuth-токен с доступом к API Директа (выдан на логин клиента):', ui.ButtonSet.OK_CANCEL);
+  const a = ui.prompt('Яндекс Директ', 'OAuth-токен с доступом к API Директа (длинная строка, обычно начинается с y0_):', ui.ButtonSet.OK_CANCEL);
   if (a.getSelectedButton() !== ui.Button.OK || !a.getResponseText().trim()) return;
-  p.setProperty('YANDEX_TOKEN', a.getResponseText().trim().replace(/^(Bearer|OAuth)\s+/i, ''));
-  const b = ui.prompt('Яндекс Директ', 'Логин клиента в Директе — только если токен агентский (иначе оставьте пустым):', ui.ButtonSet.OK_CANCEL);
+  const token = a.getResponseText().trim().replace(/^["'«]|["'»]$/g, '').replace(/^(Bearer|OAuth)\s+/i, '');
+  const bad = drTokenProblem_(token);
+  if (bad && ui.alert('Похоже, это не OAuth-токен', bad + '\n\nВсё равно сохранить?', ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  p.setProperty('YANDEX_TOKEN', token);
+  const b = ui.prompt('Яндекс Директ', 'Логин кабинета клиента в Директе — если токен выдан другому логину ' +
+    '(агентство или аккаунт с доступом к нескольким кабинетам). Если токен выдан самому клиенту — оставьте пустым:', ui.ButtonSet.OK_CANCEL);
   if (b.getSelectedButton() === ui.Button.OK) p.setProperty('YANDEX_LOGIN', b.getResponseText().trim());
   drAlert_(function () {
     const n = drDirectCampaigns_().length;
-    return 'Директ подключён, кампаний: ' + n + '.\nДальше: Отчёт → Загрузить данные из Директа.';
+    return 'Директ подключён' + (drProp_('YANDEX_LOGIN') ? ' (кабинет ' + drProp_('YANDEX_LOGIN') + ')' : '') + ', кампаний: ' + n +
+      '.\nДальше: Отчёт → Загрузить данные из Директа.';
   });
+}
+
+/** Частые ошибки при вставке токена; '' — похоже на токен. */
+function drTokenProblem_(t) {
+  if (/^[0-9a-f]{32}$/i.test(t)) return 'это ClientID или секрет приложения (32 символа 0–9, a–f). Токен получают по ссылке ' +
+    'https://oauth.yandex.ru/authorize?response_type=token&client_id=<ClientID> под нужным логином.';
+  if (/\s/.test(t)) return 'в строке есть пробелы или переносы — скопируйте токен заново, целиком.';
+  if (t.length < 30) return 'слишком короткая строка (' + t.length + ' символов) — скопируйте токен целиком.';
+  return '';
 }
 
 /** Догружает «Данные Директа»: с последней даты − REFRESH_DAYS (или INITIAL_DAYS) по вчера. Возвращает число строк. */
@@ -79,6 +93,9 @@ function drCall_(service, method, params) {
   const resp = UrlFetchApp.fetch(DR_API + service, { method: 'post', contentType: 'application/json; charset=utf-8',
     headers: drHeaders_(), payload: JSON.stringify({ method: method, params: params }), muteHttpExceptions: true });
   const data = JSON.parse(resp.getContentText() || '{}');
+  if (data.error && +data.error.error_code === 53) throw new Error('Директ не принял токен (недействительный OAuth-токен). ' +
+    'Проверьте, что вставлен сам токен (не ClientID), целиком, что он выдан приложению с доступом к API Директа и не отозван. ' +
+    'Ввести заново: Отчёт → Токен Яндекс Директа.');
   if (resp.getResponseCode() !== 200 || data.error) throw new Error('Директ, ' + service + ' → ' + drApiError_(resp.getContentText()));
   return data.result || {};
 }

@@ -38,7 +38,7 @@ description: Отчёт «Директ + Тильда» — расход/пок�
 Страница с кодом: https://claude.ai/artifact/FgNKRZLWu8YZAYCWJ2UcQn — после каждого изменения `.gs` пересобрать
 `python3 tools/copy_page.py direct-tilda <scratchpad>/direct-code.html --title "Код отчёта Директ + Тильда" --final "…"`
 и опубликовать по этому адресу. Таблица клиента: «Директ + Тильда — отчёт», id `1gAfkPG8VGDyLe1i43rmRM0LNQrc0WtvlfXpPVEIWA9I`
-(рабочий аккаунт `alimovagencytech@gmail.com`).
+(владелец — рабочий аккаунт `alimovagencytech@gmail.com`, редактор — `alimoff.marketing@gmail.com`).
 
 ## Открыто (14.11.2026)
 

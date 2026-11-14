@@ -7,6 +7,12 @@
 
 Отчёт «Директ + Тильда» (папка `direct-tilda/`): контекст — `.claude/skills/direct-tilda/SKILL.md`. Проверка — `node direct-tilda/test/run.js`.
 
+## Google-таблицы и файлы на Диске
+
+Коннектор Google Диска работает от рабочего аккаунта `alimovagencytech@gmail.com` — созданные файлы принадлежат ему.
+Пользователь работает в браузере под **`alimoff.marketing@gmail.com`**: **сразу после создания любой таблицы или
+файла открывай этому адресу доступ «Редактор»** (`share_file`, role `writer`) и проверяй права (`get_file_permissions`).
+
 ## Google Apps Script: установка кода (во всех проектах по умолчанию)
 
 Код ставят копированием в редактор Apps Script. Для каждого проекта:

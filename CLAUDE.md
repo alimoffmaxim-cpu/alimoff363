@@ -5,6 +5,8 @@
 Отчёт «Сова» (Google Таблица + Apps Script, папка `sova-report/`): весь контекст — в скилле
 `.claude/skills/sova-report/SKILL.md`, прочитать перед любой работой с ним. Проверка — `bash sova-report/tools/test/run_checks.sh`.
 
+Отчёт «Директ + Тильда» (папка `direct-tilda/`): контекст — `.claude/skills/direct-tilda/SKILL.md`. Проверка — `node direct-tilda/test/run.js`.
+
 ## Google Apps Script: установка кода (во всех проектах по умолчанию)
 
 Код ставят копированием в редактор Apps Script. Для каждого проекта:

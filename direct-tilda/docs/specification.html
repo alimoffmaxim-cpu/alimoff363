@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Спецификация приложения «direct to sheets»</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  body { font: 10.5pt/1.45 Arial, sans-serif; color: #1f2430; }
+  h1 { font-size: 17pt; margin: 0 0 4px; color: #1f2a44; }
+  h2 { font-size: 12.5pt; margin: 18px 0 6px; color: #1f2a44; border-bottom: 1px solid #dfe3eb; padding-bottom: 3px; }
+  .sub { color: #6b7280; margin: 0 0 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 9pt; margin: 6px 0; }
+  th { background: #2f3e60; color: #fff; text-align: left; padding: 5px 6px; font-weight: bold; }
+  td { border-bottom: 1px solid #dfe3eb; padding: 4px 6px; vertical-align: top; }
+  td.n, th.n { text-align: right; }
+  tr.tot td { font-weight: bold; background: #e8ecf4; }
+  .flow { display: flex; gap: 8px; align-items: stretch; margin: 8px 0 4px; }
+  .box { flex: 1; border: 1.5px solid #2f3e60; border-radius: 6px; padding: 7px 8px; font-size: 9pt; background: #f4f6fa; }
+  .box b { display: block; color: #1f2a44; margin-bottom: 2px; }
+  .arr { align-self: center; font-size: 16pt; color: #2f3e60; }
+  code { font: 8.8pt Menlo, monospace; background: #f0f2f5; padding: 0 3px; border-radius: 3px; }
+  ul { margin: 4px 0; padding-left: 18px; } li { margin: 2px 0; }
+  .note { color: #6b7280; font-size: 8.8pt; }
+</style></head><body>
+<h1>Приложение «direct to sheets»: выгрузка статистики Директа в Google Таблицы</h1>
+<p class="sub">Владелец: аккаунт alimov-partners (агентство, работа с кабинетами клиентов). Только чтение данных — кампании не создаются и не изменяются.</p>
+
+<h2>1. Назначение</h2>
+<p>Ежедневный отчёт для клиентов агентства в Google Таблице: расход, показы и клики из Яндекс Директа с разбивкой
+по кампаниям, группам и объявлениям, сведённые с реальными заявками с сайта клиента (Тильда). Заявки сопоставляются
+с кампанией, группой и объявлением по UTM-меткам — видна фактическая цена заявки по каждому объявлению.</p>
+
+<h2>2. Схема взаимодействия</h2>
+<div class="flow">
+  <div class="box"><b>Триггер Google Apps Script</b>1 раз в сутки (01:00 МСК) или вручную из меню таблицы</div>
+  <div class="arr">→</div>
+  <div class="box"><b>API Директа v5 (JSON)</b>OAuth-токен агентства + заголовок <code>Client-Login</code> кабинета клиента</div>
+  <div class="arr">→</div>
+  <div class="box"><b>Google Таблица</b>лист «Данные Директа»: 1 строка = день × объявление; листы отчёта за период</div>
+  <div class="arr">←</div>
+  <div class="box"><b>Заявки с сайта</b>вебхук Тильды (не связан с API Директа)</div>
+</div>
+
+<h2>3. Используемые методы API</h2>
+<table>
+  <tr><th>Сервис / метод</th><th>Что запрашивается</th><th>Частота</th></tr>
+  <tr><td><code>reports</code> (Reports API)</td><td><code>AD_PERFORMANCE_REPORT</code>, <code>CUSTOM_DATE</code>, TSV, <code>IncludeVAT=NO</code>; поля Date, CampaignId, CampaignName, AdGroupId, AdGroupName, AdId, Impressions, Clicks, Cost. Период — последние 3 дня (первая загрузка — 180 дней). <code>processingMode=auto</code>, повтор по <code>retryIn</code> при ответах 201/202.</td><td>1 отчёт в сутки на кабинет</td></tr>
+  <tr><td><code>ads.get</code></td><td>Id, AdGroupId, CampaignId, Type, State; TextAd: Title, Title2, Text, Href — по CampaignIds из отчёта (до 10 за запрос, Page.Limit 10000).</td><td>1–3 запроса в сутки</td></tr>
+  <tr><td><code>campaigns.get</code></td><td>Id, Name — проверка подключения при вводе токена.</td><td>по действию пользователя</td></tr>
+</table>
+<p class="note">Итого ~5–10 запросов в сутки на кабинет. Методы изменения (add, update, delete, set*, suspend/resume) не используются.
+Токен хранится только в защищённых свойствах скрипта, в коде и в таблице его нет.</p>
+
+<h2>4. Логины, для которых используется</h2>
+<ul><li><b>alimov-partners</b> — аккаунт агентства (владелец приложения и токена);</li>
+<li><b>porg-zplkuw5z</b> — кабинет клиента (передаётся в <code>Client-Login</code>).</li></ul>
+
+<h2 style="break-before: page">5. Пример итогового отчёта (лист «Объявления»)</h2>
+<p class="note">Период 01.11–13.11.2026, данные условные.</p>
+<table>
+  <tr><th>Кампания</th><th>Группа</th><th>ID объявления</th><th>Заголовок</th><th class="n">Расход, ₽</th><th class="n">Показы</th><th class="n">Клики</th><th class="n">CTR</th><th class="n">CPC, ₽</th><th class="n">Заявки</th><th class="n">Цена заявки, ₽</th></tr>
+  <tr class="tot"><td>Итого</td><td></td><td></td><td></td><td class="n">8 743</td><td class="n">28 470</td><td class="n">1 085</td><td class="n">3,81%</td><td class="n">8,06</td><td class="n">9</td><td class="n">971</td></tr>
+  <tr><td>Ремонт | Поиск</td><td>Ремонт под ключ</td><td>7000001</td><td>Ремонт квартир под ключ</td><td class="n">1 664</td><td class="n">5 410</td><td class="n">207</td><td class="n">3,83%</td><td class="n">8,04</td><td class="n">2</td><td class="n">832</td></tr>
+  <tr><td>Ремонт | Поиск</td><td>Дизайн-проект</td><td>7000003</td><td>Дизайн-проект за 7 дней</td><td class="n">1 752</td><td class="n">5 730</td><td class="n">219</td><td class="n">3,82%</td><td class="n">8,00</td><td class="n">1</td><td class="n">1 752</td></tr>
+  <tr><td>Ремонт | РСЯ</td><td>Ретаргетинг</td><td>7000004</td><td>Вернитесь — смета бесплатно</td><td class="n">1 796</td><td class="n">5 860</td><td class="n">224</td><td class="n">3,82%</td><td class="n">8,02</td><td class="n">2</td><td class="n">898</td></tr>
+</table>
+<p class="note">Также листы «Сводная» (итоги периода и сравнение с предыдущим, по дням), «Кампании», «Группы», «Заявки» (каждая заявка с меткой и привязкой к объявлению).</p>
+</body></html>

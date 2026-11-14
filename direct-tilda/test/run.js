@@ -118,6 +118,9 @@ doPost({ parameter: { key: 'wrong', tranid: 'x' } });            // чужой �
 NOW = RealDate.parse(TODAY);
 const lead = get('Заявки'), leadsCount = lead.api.getLastRow() - 1;
 if (leadsCount !== L.length + 1) { bad++; console.log(`✗ заявок на листе ${leadsCount}, ждали ${L.length + 1} (дубль или чужой ключ прошли)`); }
+const hook = get('Лог вебхука'), hookRows = [...Array(hook.api.getLastRow()).keys()].slice(1).map(i => hook.cells[(i + 1) + ',2']);
+n++; if (!(hookRows.filter(x => /^записана/.test(x)).length === L.length + 1 && hookRows.some(x => /повтор/.test(x)) && hookRows.some(x => /ОТКЛОНЕНО: неверный ключ/.test(x)))) { bad++; console.log('✗ журнал вебхука:', hookRows); }
+else console.log('✓ журнал вебхука: записано', L.length + 1, '+ повтор + отклонённый ключ');
 drRecompute_();
 L.forEach(([f, exp], i) => {
   const got = [14, 15, 17, 19, 20].map(c => val('Заявки', i + 2, c) ?? '');

@@ -11,9 +11,12 @@ const DR_LEAD_RAW = 13;   // A–M пишет вебхук, N–T — сопос
 /** Тильда шлёт заявку POST-запросом: формой (x-www-form-urlencoded) или JSON. */
 function doPost(e) {
   const params = drTildaParams_(e);
-  if (params.test) return ContentService.createTextOutput('ok');   // проверка вебхука при подключении
+  if (params.test) { drHookLog_(e, params, 'проверка вебхука от Тильды — ок'); return ContentService.createTextOutput('ok'); }
   const sent = [].concat((e && e.parameters && e.parameters.key) || [], params.key || []).map(String);
-  if (!drProp_('TILDA_SECRET') || sent.indexOf(drProp_('TILDA_SECRET')) < 0) return ContentService.createTextOutput('forbidden');
+  if (!drProp_('TILDA_SECRET') || sent.indexOf(drProp_('TILDA_SECRET')) < 0) {
+    drHookLog_(e, params, sent.length ? 'ОТКЛОНЕНО: неверный ключ ?key=' : 'ОТКЛОНЕНО: в адресе вебхука нет ?key=…');
+    return ContentService.createTextOutput('forbidden');
+  }
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
@@ -22,11 +25,22 @@ function doPost(e) {
     if (!row[1] || ids.indexOf(String(row[1])) < 0) {   // Тильда может повторить отправку — без дублей
       sh.appendRow(row);
       sh.getRange(sh.getLastRow(), 5).setNumberFormat('@').setValue(row[4]);
-    }
+      drHookLog_(e, params, 'записана заявка ' + (row[1] || ''));
+    } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
   } finally {
     lock.releaseLock();
   }
   return ContentService.createTextOutput('ok');
+}
+
+/** Журнал вебхука (лист «Лог вебхука», последние 300 запросов): время, итог, формат и названия полей — без значений. */
+function drHookLog_(e, params, result) {
+  try {
+    const sh = drSheet_('Лог вебхука', ['Время', 'Итог', 'Формат', 'Поля запроса']);
+    sh.appendRow([new Date(), result, (e && e.postData && e.postData.type) || '—',
+      Object.keys(params).filter(function (k) { return k !== 'key'; }).join(', ').slice(0, 500)]);
+    if (sh.getLastRow() > 301) sh.deleteRows(2, sh.getLastRow() - 301);
+  } catch (x) { /* журнал не должен мешать приёму заявок */ }
 }
 
 function doGet() { return ContentService.createTextOutput('Отчёт «Директ + Тильда»: приём заявок работает.'); }

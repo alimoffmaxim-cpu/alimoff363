@@ -36,7 +36,7 @@ CR = заявки / клики. Расход — без НДС (как отда�
 ## Установка
 
 1. Создайте Google Таблицу → **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**:
-   редактор обрезает длинную вставку (`SyntaxError: Unexpected identifier`). Создайте 8 отдельных файлов
+   редактор обрезает длинную вставку (`SyntaxError: Unexpected identifier`). Создайте 9 отдельных файлов
    (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла — со страницы
    [«Код отчёта Директ + Тильда»](https://claude.ai/artifact/FgNKRZLWu8YZAYCWJ2UcQn) (кнопка «Скопировать код» у каждого файла) или с raw-страниц (Cmd+A → Cmd+C):
    [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/1_main.gs),
@@ -46,7 +46,8 @@ CR = заявки / клики. Расход — без НДС (как отда�
    [`5_match`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/5_match.gs),
    [`6_report`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/6_report.gs),
    [`7_tables`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/7_tables.gs),
-   [`8_setup`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/8_setup.gs).
+   [`8_setup`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/8_setup.gs),
+   [`9_import`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/9_import.gs).
    Порядок файлов не важен. Сохраните (Cmd+S).
 2. Обновите таблицу — появится меню **Отчёт**. **Отчёт → Создать / обновить листы** (Google попросит разрешения).
 3. **Директ.** Нужен OAuth-токен с доступом к API Директа на логин клиента: в Директе подайте заявку на доступ
@@ -62,6 +63,15 @@ CR = заявки / клики. Расход — без НДС (как отда�
    Проверка: **Отчёт → Тестовая заявка** (строку потом удалите).
 5. **Отчёт → Включить автообновление** — каждый день около **01:00 по Москве** загружаются данные Директа по вчера
    (последние 3 дня — заново) и пересчитывается отчёт. Заявки с Тильды приходят сразу, в отчёт — при пересчёте.
+
+## Заявки, пришедшие до подключения вебхука
+
+1. В Тильде: проект → вкладка **«Заявки»** → **«Экспорт»** (CSV или Excel) за нужный период
+   (если заявки ведутся в Tilda CRM — выгрузка из CRM).
+2. В таблице откройте лист **«Импорт Тильды»** (если его нет — выберите пункт меню из шага 3, он создаст лист) →
+   **Файл → Импорт → Загрузить** файл → «Заменить текущий лист».
+3. **Отчёт → Импортировать заявки из Тильды (выгрузка)**. Колонки находятся по названиям (дата, ID заявки, форма,
+   имя, телефон, email, utm_*, страница); заявки, которые уже есть, пропускаются; привязка к объявлениям — как у новых.
 
 ## Безопасность
 

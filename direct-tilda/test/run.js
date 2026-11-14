@@ -84,7 +84,7 @@ global.UrlFetchApp = { fetch: (url, o) => {
   return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
 } };
 
-eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_ });');
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda });');
 props.YANDEX_TOKEN = 'token';
 props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
 drSetup();
@@ -158,5 +158,22 @@ get('Сводная').cells['3,2'] = new Date('2026-11-05T12:00:00Z'); get('Св
 onEdit({ range: get('Сводная').api.getRange('B3') });
 check('Период 05.11: заявок из Директа', val('Сводная', 7, 8), L.filter((x, i) => x[1][0] === 'Директ' && 1 + i % 9 === 5).length);
 check('Период 05.11: дней в таблице «По дням»', [...Array(30).keys()].filter(i => val('Сводная', 23 + i, 1) instanceof Date).length, 1);
+// ---------- импорт старых заявок из выгрузки Тильды ----------
+const imp = mkSheet('Импорт Тильды');
+[['Date', 'Request ID', 'Form name', 'Name', 'Phone', 'Email', 'utm_source', 'utm_campaign', 'utm_content', 'Referer'],
+ ['2026-11-03 14:23:05', 'old-1', 'Заявка', 'Иван', '+7 900 111-22-33', '', 'yandex', '5000001', '7000002', 'https://site.ru/'],
+ ['04.11.2026 10:00', '', 'Заявка', 'Пётр', '+7 900 222-33-44', '', '', '', '', 'https://site.ru/?utm_source=yandex&utm_content=7000003'],
+ ['2026-11-05 10:00:00', 't0', 'Заявка', 'Дубль', '', '', 'yandex', '', '7000001', ''],
+ ['без даты', 'old-x', 'Заявка', '', '', '', '', '', '', '']].forEach((row, r) => row.forEach((v, c) => { imp.cells[(r + 1) + ',' + (c + 1)] = v; }));
+const before = lead.api.getLastRow();
+get('Сводная').cells['3,2'] = ''; get('Сводная').cells['3,4'] = '=TODAY()-1';
+alerts.length = 0; drImportTilda();
+check('Импорт: добавлено строк (2 новых, дубль и без даты пропущены)', lead.api.getLastRow() - before, 2);
+console.log('   сообщение:', String(alerts[0]).split('\n')[0]);
+const findLead = name => { for (let r = 2; r <= lead.api.getLastRow(); r++) if (val('Заявки', r, 4) === name) return r; };
+check('Импорт: заявка Ивана → объявление 7000002', val('Заявки', findLead('Иван'), 19), 7000002);
+check('Импорт: заявка Петра (метки только в адресе) → объявление 7000003', val('Заявки', findLead('Пётр'), 19), 7000003);
+check('Импорт: дата строки «04.11.2026 10:00»', key(val('Заявки', findLead('Пётр'), 1)) === '2026-11-04' ? 1 : 0, 1);
+check('Сводная после импорта: заявки из Директа за 01–13.11', val('Сводная', 7, 8), directLeads + 2);
 console.log(`\nИТОГ: ${bad ? 'РАСХОЖДЕНИЙ ' + bad : 'всё совпало'} (проверок ${n})`);
 process.exit(bad ? 1 : 0);

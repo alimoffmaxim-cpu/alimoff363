@@ -3,9 +3,9 @@
 function drSetup() {
   const missing = [['1_main', typeof drDailyUpdate], ['2_util', typeof drSheet_], ['3_direct', typeof drLoadDirect_],
     ['4_tilda', typeof drLeadRow_], ['5_match', typeof drMatch_], ['6_report', typeof drRecompute_],
-    ['7_tables', typeof drTables_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
+    ['7_tables', typeof drTables_], ['9_import', typeof drImportTilda]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
   if (missing.length) return SpreadsheetApp.getUi().alert('Не хватает кода в Apps Script: ' + missing.join(', ') +
-    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 8.');
+    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 9.');
   drAlert_(function () {
     const ss = SpreadsheetApp.getActive();
     ss.setSpreadsheetLocale('ru_RU');

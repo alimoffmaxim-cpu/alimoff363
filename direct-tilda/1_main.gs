@@ -32,6 +32,7 @@ function onOpen() {
     .addItem('🔑 Токен Яндекс Директа', 'drPromptDirect')
     .addItem('🌐 Подключить Тильду (вебхук)', 'drMenuTilda')
     .addItem('🧪 Тестовая заявка', 'drTestLead')
+    .addItem('📥 Импортировать заявки из Тильды (выгрузка)', 'drImportTilda')
     .addToUi();
   try { drResetPeriodEnd_(); } catch (e) { /* листов ещё нет */ }
 }

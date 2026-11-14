@@ -4,6 +4,15 @@
 
 const DR_API = 'https://api.direct.yandex.com/json/v5/';
 const DR_DATA_HEAD = ['Дата', 'ID кампании', 'Кампания', 'ID группы', 'Группа', 'ID объявления', 'Показы', 'Клики', 'Расход'];
+const DR_API_HINTS = {   // частые ошибки API Директа → что делать
+  53: 'Директ не принял токен. Вставьте сам токен (не ClientID), целиком; он должен быть выдан приложению с доступом к API ' +
+    'Директа и не отозван. Ввести заново: Отчёт → Токен Яндекс Директа.',
+  58: 'У приложения, на которое выдан токен, нет одобренной заявки на доступ к API Директа. Проверьте в Директе ' +
+    '(Инструменты → API) статус заявки для ClientID этого приложения или возьмите токен приложения, у которого заявка одобрена.',
+  513: 'Логин, на который выдан токен, не подключён к Директу. Получите токен под логином, у которого есть кабинет Директа.',
+  54: 'Нет прав на кабинет: у логина токена нет доступа к кабинету из поля «Логин клиента» (или логин указан неверно).',
+  8800: 'Кабинет не найден: проверьте логин клиента (Отчёт → Токен Яндекс Директа, второе окно).',
+};
 const DR_TEXT_HEAD = ['ID объявления', 'ID группы', 'ID кампании', 'Тип', 'Заголовок', 'Заголовок 2', 'Текст', 'Ссылка', 'Статус'];
 
 function drPromptDirect() {
@@ -93,9 +102,8 @@ function drCall_(service, method, params) {
   const resp = UrlFetchApp.fetch(DR_API + service, { method: 'post', contentType: 'application/json; charset=utf-8',
     headers: drHeaders_(), payload: JSON.stringify({ method: method, params: params }), muteHttpExceptions: true });
   const data = JSON.parse(resp.getContentText() || '{}');
-  if (data.error && +data.error.error_code === 53) throw new Error('Директ не принял токен (недействительный OAuth-токен). ' +
-    'Проверьте, что вставлен сам токен (не ClientID), целиком, что он выдан приложению с доступом к API Директа и не отозван. ' +
-    'Ввести заново: Отчёт → Токен Яндекс Директа.');
+  const hint = data.error && DR_API_HINTS[+data.error.error_code];
+  if (hint) throw new Error(hint + ' (Директ: ' + drApiError_(resp.getContentText()) + ')');
   if (resp.getResponseCode() !== 200 || data.error) throw new Error('Директ, ' + service + ' → ' + drApiError_(resp.getContentText()));
   return data.result || {};
 }

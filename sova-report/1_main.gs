@@ -48,7 +48,8 @@ function sovaDailyUpdate() {
   try {
     const res = sovaSyncAll_();
     if (res.errors.length) throw new Error('Не загрузились: ' + res.errors.join(' | '));
-    sovaStatus_('✅ ' + sovaNow_() + ' — данные загружены по вчера (' + sovaYesterday_().split('-').reverse().join('.') + ')');
+    sovaStatus_('✅ ' + sovaNow_() + ' — данные загружены по вчера (' + sovaYesterday_().split('-').reverse().join('.') + ')' +
+      (res.client ? '. ' + res.client : ''));
     return res;
   } catch (e) {
     sovaStatus_('❌ ' + sovaNow_() + ' — ' + e.message);   // видно на листе настроек; Google ещё пришлёт письмо

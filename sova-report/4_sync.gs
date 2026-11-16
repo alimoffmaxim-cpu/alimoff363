@@ -9,17 +9,25 @@ function sovaSyncAll_() {
   const yesterday = sovaYesterday_();   // последний полный день по Москве
   Object.keys(store).forEach(function (k) { if (store[k][0] > yesterday) delete store[k]; });   // неполные дни (сегодня)
   const res = { added: {}, errors: [] };
-  sovaCabinets_().forEach(function (cab) {
-    try {
-      const last = Object.keys(store).filter(function (k) { return store[k][1] === cab.name; })
-        .map(function (k) { return store[k][0]; }).sort().pop();
-      const from = last ? sovaAddDays_(last, 1 - SOVA.REFRESH_DAYS) : sovaAddDays_(yesterday, 1 - SOVA.INITIAL_DAYS);
-      const days = sovaFetchCabinet_(cab, from, yesterday);
-      Object.keys(days).forEach(function (d) { store[d + '|' + cab.name] = [d, cab.name].concat(days[d]); });
-      res.added[cab.name] = Object.keys(days).length;
-    } catch (e) {
-      res.errors.push(cab.name + ': ' + e.message);
-    }
+  const load = function (cab) {
+    const last = Object.keys(store).filter(function (k) { return store[k][1] === cab.name; })
+      .map(function (k) { return store[k][0]; }).sort().pop();
+    const from = last ? sovaAddDays_(last, 1 - SOVA.REFRESH_DAYS) : sovaAddDays_(yesterday, 1 - SOVA.INITIAL_DAYS);
+    const days = sovaFetchCabinet_(cab, from, yesterday);
+    Object.keys(days).forEach(function (d) { store[d + '|' + cab.name] = [d, cab.name].concat(days[d]); });
+    res.added[cab.name] = Object.keys(days).length;
+  };
+  // Кабинет, который не загрузился, пробуем ещё раз через минуту, когда остальные уже готовы
+  let failed = [];
+  sovaCabinets_().forEach(function (cab) { try { load(cab); } catch (e) { failed.push(cab); } });
+  if (failed.length) Utilities.sleep(60 * 1000);
+  failed.forEach(function (cab) {
+    try { load(cab); } catch (e) { res.errors.push(cab.name + ': ' + e.message); }
+  });
+  sovaCabinets_().forEach(function (cab) {   // статус каждого кабинета — в колонке B листа настроек
+    const err = res.errors.filter(function (x) { return x.indexOf(cab.name + ':') === 0; })[0];
+    sovaSettingsSheet_().getRange(cab.row, 2).setValue(err ? '❌ ' + sovaNow_() + ' — ' + err.slice(cab.name.length + 2, 150)
+      : '✅ ' + sovaNow_() + ' — данные по ' + yesterday.split('-').reverse().join('.'));
   });
   sovaWriteData_(store);
   try { sbDaysAll_(); } catch (e) { res.errors.push('таблицы по дням: ' + e.message); }

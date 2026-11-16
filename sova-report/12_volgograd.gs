@@ -8,7 +8,7 @@
 const SOVA_VLG = {
   SHEET: 'Волгоград РК',
   CABINET_REGEX: 'волгоград|volg|vlg',   // направления (кабинеты), из которых берутся ВСЕ кампании
-  NAME_REGEX: 'volg|vlg',                // из остальных кабинетов — только кампании с этим в названии
+  NAME_REGEX: 'volg|vlg',                // из остальных кабинетов (только если задан IDS) — кампании с этим в названии
   IDS: [],                               // дополнительные номера РК
   LEVELS: ['ad_plans', 'campaigns'],     // «кампании» нового кабинета VK; если не отдаются — группы
   FROM: '2026-08-01',                    // с какой даты строить недели и месяцы
@@ -35,8 +35,9 @@ function sovaVlgUpdate_() {
   const ids = SOVA_VLG.IDS.map(String);
   const groups = {}, camps = {}, log = [];
   sovaCabinets_().forEach(function (cab) {
+    const all = cabRe.test(cab.name);
+    if (!all && !ids.length) return;   // саратовские кабинеты не опрашиваем: лишние запросы ночью к VK
     try {
-      const all = cabRe.test(cab.name);
       const found = sovaVlgCampaigns_(cab, function (c) { return all || re.test(c.name || '') || ids.indexOf(String(c.id)) >= 0; });
       log.push('• ' + cab.name + ': ' + (found.list.length ? found.list.length + ' РК (' + found.level + ')' : 'нет подходящих РК'));
       if (!found.list.length) return;

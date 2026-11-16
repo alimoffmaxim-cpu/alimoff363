@@ -42,25 +42,27 @@ function onOpen() {
 }
 
 /** Автообновление (триггер, раз в сутки в UPDATE_HOUR по TIMEZONE): догрузить данные всех кабинетов по вчера. */
-function sovaDailyUpdate() {
+function sovaDailyUpdate(e) {
+  const who = e ? ' (ночной запуск)' : ' (вручную)';   // триггер передаёт событие, меню — нет
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(30 * 1000)) throw new Error('Данные уже загружаются, попробуйте через минуту.');
   try {
     const res = sovaSyncAll_();
     if (res.errors.length) throw new Error('Не загрузились: ' + res.errors.join(' | '));
-    sovaStatus_('✅ ' + sovaNow_() + ' — данные загружены по вчера (' + sovaYesterday_().split('-').reverse().join('.') + ')' +
-      (res.client ? '. ' + res.client : ''));
+    sovaStatus_('✅ ' + sovaNow_() + who + ' — данные загружены по вчера (' + sovaYesterday_().split('-').reverse().join('.') + ')' +
+      (res.client ? '. ' + res.client : ''), !!e);
     return res;
-  } catch (e) {
-    sovaStatus_('❌ ' + sovaNow_() + ' — ' + e.message);   // видно на листе настроек; Google ещё пришлёт письмо
-    throw e;
+  } catch (err) {
+    sovaStatus_('❌ ' + sovaNow_() + who + ' — ' + err.message, !!e);   // видно на листе настроек; Google ещё пришлёт письмо
+    throw err;
   } finally {
     lock.releaseLock();
   }
 }
 
 /** Пишет результат последнего обновления в «⚙ Настройки»!F5. */
-function sovaStatus_(text) {
+function sovaStatus_(text, auto) {
+  if (auto) PropertiesService.getScriptProperties().setProperty('SOVA_LAST_AUTO', String(text).slice(0, 300));
   try { sovaSettingsSheet_().getRange('F5').setValue(String(text).slice(0, 300)); } catch (e) { /* лист настроек недоступен */ }
 }
 
@@ -77,6 +79,7 @@ function sovaCheckUpdates() {
     : '❌ Автообновление выключено. Включите: «Сова → Включить автообновление».') +
     (n > 1 ? '\n⚠ Триггеров несколько (' + n + ') — нажмите «Включить автообновление», останется один.' : '') +
     '\n\nПоследнее обновление: ' + last +
+    '\nПоследний ночной запуск: ' + (PropertiesService.getScriptProperties().getProperty('SOVA_LAST_AUTO') || 'ещё не было') +
     '\n\nПодробности об ошибках: Расширения → Apps Script → «Выполнения».');
 }
 
@@ -99,7 +102,7 @@ function setupSovaTrigger() {
   ScriptApp.getProjectTriggers()
     .filter(function (t) { return t.getHandlerFunction() === 'sovaDailyUpdate'; })
     .forEach(function (t) { ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('sovaDailyUpdate').timeBased().everyDays(1).atHour(SOVA.UPDATE_HOUR).nearMinute(5)
+  ScriptApp.newTrigger('sovaDailyUpdate').timeBased().everyDays(1).atHour(SOVA.UPDATE_HOUR).nearMinute(0)
     .inTimezone(SOVA.TIMEZONE).create();
   try {
     SpreadsheetApp.getUi().alert('Автообновление включено: каждый день около ' + SOVA.UPDATE_HOUR + ':00 по Москве: ' +

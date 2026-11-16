@@ -9,21 +9,36 @@
 const SOVA_API = 'https://ads.vk.com/api/v2';
 const SOVA_DAY_MS = 24 * 3600 * 1000;
 
-function sovaApiGet_(cab, path, params, isRetry) {
+/**
+ * GET к API VK. Ночью VK чаще отвечает 429 (лимит запросов), 5xx или рвёт соединение — такие ответы
+ * повторяются до 5 раз с паузой 2, 4, 8, 16 с; раньше был один повтор, и кабинет пропускался.
+ */
+function sovaApiGet_(cab, path, params, attempt) {
+  attempt = attempt || 0;
   const qs = Object.keys(params || {})
     .map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); })
     .join('&');
-  const resp = UrlFetchApp.fetch(SOVA_API + path + (qs ? '?' + qs : ''), {
-    headers: { Authorization: 'Bearer ' + sovaToken_(cab) },
-    muteHttpExceptions: true,
-  });
+  const again = function () { Utilities.sleep(2000 * Math.pow(2, attempt)); return sovaApiGet_(cab, path, params, attempt + 1); };
+  let resp;
+  try {
+    resp = UrlFetchApp.fetch(SOVA_API + path + (qs ? '?' + qs : ''), {
+      headers: { Authorization: 'Bearer ' + sovaToken_(cab) },
+      muteHttpExceptions: true,
+    });
+  } catch (e) {   // сеть: таймаут, «Address unavailable» и т. п.
+    if (attempt < 4 && !/кабинет не подключён|не выдал токен/.test(e.message)) return again();
+    throw e;
+  }
   const code = resp.getResponseCode();
   if (code === 401) {
-    PropertiesService.getScriptProperties().deleteProperty(sovaProp_('TOKEN', cab));
-    if (sovaCreds_(cab) && !isRetry) return sovaApiGet_(cab, path, params, true);
-    throw new Error('токен VK недействителен или отозван — запросите новый в eLama и введите его через меню.');
+    // постоянный токен eLama не удаляем: при сбое VK он иначе пропал бы навсегда
+    if (sovaCreds_(cab) && !attempt) {
+      PropertiesService.getScriptProperties().deleteProperty(sovaProp_('TOKEN', cab));
+      return sovaApiGet_(cab, path, params, 1);
+    }
+    throw new Error('VK ответил 401: токен недействителен или отозван — запросите новый в eLama и введите его через меню.');
   }
-  if (code === 429 && !isRetry) { Utilities.sleep(2000); return sovaApiGet_(cab, path, params, true); }
+  if ((code === 429 || code >= 500) && attempt < 4) return again();
   if (code !== 200) throw new Error('VK API ' + path + ' → ' + code + ': ' + sovaMask_(resp.getContentText()));
   return JSON.parse(resp.getContentText());
 }

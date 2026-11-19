@@ -46,7 +46,8 @@ function drTokenProblem_(t) {
 function drLoadDirect_() {
   if (!drProp_('YANDEX_TOKEN')) throw new Error('нет токена Директа: Отчёт → Токен Яндекс Директа.');
   const to = drYesterday_(), sh = drSheet_(DR_SHEETS.DATA, DR_DATA_HEAD);
-  const old = drRows_(DR_SHEETS.DATA, DR_DATA_HEAD.length).filter(function (r) { return drKey_(r[0]); });
+  let old = drRows_(DR_SHEETS.DATA, DR_DATA_HEAD.length).filter(function (r) { return drKey_(r[0]); });
+  if (old.some(function (r) { return typeof r[5] === 'number' && r[5] > 999999999999999; })) old = [];   // ID округлены старым кодом — заново
   const last = old.map(function (r) { return drKey_(r[0]); }).sort().pop();
   const from = last ? drAddDays_(last < to ? last : to, 1 - DR.REFRESH_DAYS) : drAddDays_(to, 1 - DR.INITIAL_DAYS);
   const fresh = drReport_(from, to);

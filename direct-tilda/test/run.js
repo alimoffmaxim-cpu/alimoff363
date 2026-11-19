@@ -233,6 +233,11 @@ check('Смена этапа: записано время (колонка X)', v
 drRecompute_();
 check('«Посетил пробное» → +2 строки (trial_booked и trial_visited)', offRows() - base, 2);
 
+// ---------- данные со старыми округлёнными ID перезагружаются целиком ----------
+const dataSh = get('Данные Директа'); dataSh.cells['2,6'] = 1926247343185940000; reportCalls = 1;
+drDailyUpdate();
+check('Округлённые ID → полная перезагрузка (180 дней × 5 объявлений)', dataSh.api.getLastRow() - 1, 180 * 5);
+
 // ---------- проверка вебхука ----------
 let hookMode = 'ok';
 function hookFetch(url, o) {

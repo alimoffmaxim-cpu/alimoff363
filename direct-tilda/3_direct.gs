@@ -53,7 +53,7 @@ function drLoadDirect_() {
   const rows = old.filter(function (r) { const k = drKey_(r[0]); return k < from; })   // период перезагрузки — заново
     .concat(fresh).sort(function (a, b) { return drKey_(a[0]) < drKey_(b[0]) ? -1 : drKey_(a[0]) > drKey_(b[0]) ? 1 : 0; });
   drClearFrom_(sh, 2, DR_DATA_HEAD.length);
-  drWrite_(sh, 2, rows, ['dd.MM.yyyy', '0', null, '0', null, '0', '#,##0', '#,##0', '#,##0.00']);
+  drWrite_(sh, 2, rows, ['dd.MM.yyyy', '@', null, '@', null, '@', '#,##0', '#,##0', '#,##0.00']);
   drLoadTexts_(rows);
   return fresh.length;
 }
@@ -85,7 +85,7 @@ function drParseTsv_(text) {
   if (lines.length < 2) return [];
   const head = lines[0].split('\t'), at = function (n) { return head.indexOf(n); };
   return lines.slice(1).map(function (l) {
-    const c = l.split('\t'), id = function (n) { return /^\d+$/.test(c[at(n)]) ? +c[at(n)] : ''; };   // «--» — нет ID
+    const c = l.split('\t'), id = function (n) { return drId_(c[at(n)]); };   // «--» — нет ID
     return [drDate_(c[at('Date')]), id('CampaignId'), c[at('CampaignName')], id('AdGroupId'), c[at('AdGroupName')],
       id('AdId'), drNum_(c[at('Impressions')]), drNum_(c[at('Clicks')]), drNum_(c[at('Cost')])];
   }).filter(function (r) { return /^\d{4}-/.test(drKey_(r[0])); });
@@ -101,7 +101,7 @@ function drHeaders_(extra) {
 function drCall_(service, method, params) {
   const resp = UrlFetchApp.fetch(DR_API + service, { method: 'post', contentType: 'application/json; charset=utf-8',
     headers: drHeaders_(), payload: JSON.stringify({ method: method, params: params }), muteHttpExceptions: true });
-  const data = JSON.parse(resp.getContentText() || '{}');
+  const data = JSON.parse(String(resp.getContentText() || '{}').replace(/("\w*Ids?"\s*:\s*)(\d{16,})/g, '$1"$2"'));   // длинные ID — строкой
   const hint = data.error && DR_API_HINTS[+data.error.error_code];
   if (hint) throw new Error(hint + ' (Директ: ' + drApiError_(resp.getContentText()) + ')');
   if (resp.getResponseCode() !== 200 || data.error) throw new Error('Директ, ' + service + ' → ' + drApiError_(resp.getContentText()));
@@ -128,7 +128,7 @@ function drLoadTexts_(rows) {
         Page: { Limit: 10000, Offset: offset } });
       (res.Ads || []).forEach(function (a) {
         const t = a.TextAd || {};
-        out.push([a.Id, a.AdGroupId, a.CampaignId, a.Type, t.Title || '', t.Title2 || '', t.Text || '', t.Href || '', a.State || '']);
+        out.push([drId_(a.Id), drId_(a.AdGroupId), drId_(a.CampaignId), a.Type, t.Title || '', t.Title2 || '', t.Text || '', t.Href || '', a.State || '']);
       });
       if (!res.LimitedBy) break;
       offset = res.LimitedBy;
@@ -136,5 +136,5 @@ function drLoadTexts_(rows) {
   }
   const sh = drSheet_(DR_SHEETS.TEXTS, DR_TEXT_HEAD);
   drClearFrom_(sh, 2, DR_TEXT_HEAD.length);
-  drWrite_(sh, 2, out, ['0', '0', '0']);
+  drWrite_(sh, 2, out, ['@', '@', '@']);
 }

@@ -87,7 +87,7 @@ global.UrlFetchApp = { fetch: (url, o) => {
   return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
 } };
 
-eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_ });');
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_ });');
 props.YANDEX_TOKEN = 'token';
 props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
 drSetup();
@@ -201,6 +201,14 @@ check('Письма: Олег (метки в адресе входа, HTML-пи�
 check('Письма: ID заявки из «Transaction ID»', val('Заявки', findLead('Анна'), 2) === '555:111' ? 1 : 0, 1);
 const beforeH = lead.api.getLastRow(); drMailHourly();
 check('Письма: повторный проход ничего не дублирует', lead.api.getLastRow() - beforeH, 0);
+
+// ---------- длинные ID объявлений (19 цифр) не теряют точность ----------
+const LONG = '1926247343185943274';
+const tsv = drParseTsv_('Date\tCampaignId\tCampaignName\tAdGroupId\tAdGroupName\tAdId\tImpressions\tClicks\tCost\n2026-11-15\t715890110\tМото\t5555555555\tГр\t' + LONG + '\t10\t1\t5');
+check('Длинный ID из отчёта Директа сохранён строкой', tsv[0][5] === LONG ? 1 : 0, 1);
+const dLong = { ads: { [LONG]: { g: 5555555555, c: 715890110 } }, groups: { 5555555555: { c: 715890110, name: 'Гр' } }, camps: { 715890110: 'Мото' }, campByName: {}, groupByName: {} };
+const mLong = drMatch_(['', '', '', '', '', '', 'yandex', 'cpc', 'moto_search_715890110', LONG + '_205821097593', '---autotargeting', '', ''], dLong, []);
+check('Заявка с utm_content=<19 цифр>_… → это объявление', mLong[5] === LONG && mLong[1] === 715890110 ? 1 : 0, 1);
 
 // ---------- проверка вебхука ----------
 let hookMode = 'ok';

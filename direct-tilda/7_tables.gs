@@ -26,12 +26,12 @@ function drTables_(p, cur) {
   const noneRow = function (info) { return { info: info, v: [0, 0, 0, none] }; };   // одинаково на всех листах — итоги сходятся
   const camps = agg(function (x) { return x.c ? 'c' + x.c : ''; }, function (x) { return [x.c, cn(x)]; });
   if (none) camps.push(noneRow(['', 'Директ, заявки без привязки к кампании']));
-  drTable_(DR_SHEETS.CAMPAIGNS, p, ['ID кампании', 'Кампания'], camps, ['0', null]);
+  drTable_(DR_SHEETS.CAMPAIGNS, p, ['ID кампании', 'Кампания'], camps, ['@', null]);
 
   const groups = agg(function (x) { return x.c ? 'g' + x.c + '|' + (x.g || '') : ''; },
     function (x) { return [cn(x), x.g || '', x.g ? gn(x) : '(без группы)']; });
   if (none) groups.push(noneRow(['Директ, заявки без привязки к кампании', '', '']));
-  drTable_(DR_SHEETS.GROUPS, p, ['Кампания', 'ID группы', 'Группа'], groups, [null, '0', null]);
+  drTable_(DR_SHEETS.GROUPS, p, ['Кампания', 'ID группы', 'Группа'], groups, [null, '@', null]);
 
   const ads = agg(function (x) { return x.c ? 'a' + x.c + '|' + (x.g || '') + '|' + (x.a || '') : ''; }, function (x) {
     const t = texts[x.a] || [];
@@ -39,7 +39,7 @@ function drTables_(p, cur) {
   });
   if (none) ads.push(noneRow(['Директ, заявки без привязки к кампании', '', '', '', '']));
   ads.forEach(function (e) { const t = texts[e.info[2]] || []; e.tail = [t[7] || '']; });
-  drTable_(DR_SHEETS.ADS, p, ['Кампания', 'Группа', 'ID объявления', 'Заголовок', 'Текст'], ads, [null, null, '0', null, null], ['Ссылка']);
+  drTable_(DR_SHEETS.ADS, p, ['Кампания', 'Группа', 'ID объявления', 'Заголовок', 'Текст'], ads, [null, null, '@', null, null], ['Ссылка']);
 }
 
 /** Пишет таблицу листа: заголовок, «Итого», строки. */

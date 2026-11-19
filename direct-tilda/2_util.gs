@@ -68,8 +68,14 @@ function drClearFrom_(sh, r, cols) {
 function drWrite_(sh, r, rows, formats) {
   if (!rows.length) return;
   drEnsureRows_(sh, r + rows.length);
-  sh.getRange(r, 1, rows.length, rows[0].length).setValues(rows);
-  (formats || []).forEach(function (f, i) { if (f) sh.getRange(r, i + 1, rows.length, 1).setNumberFormat(f); });
+  (formats || []).forEach(function (f, i) { if (f) sh.getRange(r, i + 1, rows.length, 1).setNumberFormat(f); });   // до значений:
+  sh.getRange(r, 1, rows.length, rows[0].length).setValues(rows);                                                 // '@' сохраняет длинные ID
+}
+
+/** ID Директа: до 15 цифр — число, длиннее — строка (числа в JS и Таблицах точны только до 15–16 цифр). */
+function drId_(v) {
+  const s = String(v == null ? '' : v).trim();
+  return !/^\d+$/.test(s) ? '' : s.length > 15 ? s : +s;
 }
 
 /** «dd.MM.yyyy» для подписей. */

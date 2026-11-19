@@ -70,7 +70,7 @@ function drMatch_(lead, d, rules) {
   const ad = hit.a && d.ads[hit.a] || {};
   const g = hit.g || ad.g || '', grp = g && d.groups[g] || {};
   const c = hit.c || ad.c || grp.c || '';
-  return ['Директ', c ? +c : '', c ? d.camps[c] || '' : '', g ? +g : '', grp.name || '', hit.a ? +hit.a : '', hit.how];
+  return ['Директ', drId_(c), c ? d.camps[c] || '' : '', drId_(g), grp.name || '', drId_(hit.a), hit.how];
 }
 
 /** Сопоставляет все заявки и пишет N–T «Заявок». Возвращает заявки с датой: [{day, m: результат}]. */
@@ -78,6 +78,9 @@ function drMatchAll_() {
   const sh = drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), d = drDict_(), rules = drRules_();
   const rows = drRows_(DR_SHEETS.LEADS, DR_LEAD_RAW);
   const res = rows.map(function (r) { return drMatch_(r, d, rules); });
-  if (res.length) sh.getRange(2, DR_LEAD_RAW + 1, res.length, 7).setValues(res);
+  if (res.length) {
+    [2, 4, 6].forEach(function (i) { sh.getRange(2, DR_LEAD_RAW + i, res.length, 1).setNumberFormat('@'); });
+    sh.getRange(2, DR_LEAD_RAW + 1, res.length, 7).setValues(res);
+  }
   return rows.map(function (r, i) { return { day: drKey_(r[0]), m: res[i] }; }).filter(function (x) { return x.day; });
 }

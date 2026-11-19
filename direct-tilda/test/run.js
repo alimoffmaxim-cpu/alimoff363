@@ -52,7 +52,8 @@ const alerts = [];
 global.SpreadsheetApp = { getActive: () => ssApi, getUi: () => proxy({ alert: m => alerts.push(m), ButtonSet: {}, Button: {} }),
   newDataValidation: () => proxy({ build: () => ({}) }) };
 global.PropertiesService = { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) };
-global.LockService = { getScriptLock: () => ({ tryLock: () => true, waitLock: () => {}, releaseLock: () => {} }) };
+let LOCK_BUSY = false;
+global.LockService = { getScriptLock: () => ({ tryLock: () => !LOCK_BUSY, waitLock: () => {}, releaseLock: () => {} }) };
 global.ContentService = { createTextOutput: t => t };
 global.Utilities = { sleep: () => {}, getUuid: () => 'secret-uuid',
   formatDate: (d, tz, f) => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: tz, year: 'numeric', month: '2-digit',
@@ -238,6 +239,17 @@ check('«Посетил пробное» → +2 строки (trial_booked и tr
 const dataSh = get('Данные Директа'); dataSh.cells['2,6'] = 1926247343185940000; reportCalls = 1;
 drDailyUpdate();
 check('Округлённые ID → полная перезагрузка (180 дней × 5 объявлений)', dataSh.api.getLastRow() - 1, 180 * 5);
+
+// ---------- заявка во время загрузки Директа (блокировка занята) не теряется ----------
+LOCK_BUSY = true; const nBusy = lead.api.getLastRow();
+doPost({ parameter: { key: 'secret-uuid', tranid: 'busy-1', Name: 'Занято', Phone: '2' } });
+LOCK_BUSY = false;
+check('Блокировка занята → заявка всё равно записана', lead.api.getLastRow() - nBusy, 1);
+const hookLast = () => val('Лог вебхука', get('Лог вебхука').api.getLastRow(), 2);
+const realSheet = ssApi.getSheetByName; ssApi.getSheetByName = n => { if (n === 'Заявки') throw new Error('сбой Таблиц'); return realSheet(n); };
+doPost({ parameter: { key: 'secret-uuid', tranid: 'err-1', Name: 'Сбой', Phone: '3' } });
+ssApi.getSheetByName = realSheet;
+check('Ошибка при записи → в журнале «ОШИБКА» и данные заявки', /^ОШИБКА/.test(hookLast()) && /err-1/.test(val('Лог вебхука', get('Лог вебхука').api.getLastRow(), 5)) ? 1 : 0, 1);
 
 // ---------- проверка вебхука ----------
 let hookMode = 'ok';

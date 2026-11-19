@@ -52,3 +52,15 @@ function drHookCleanup_(id) {
   for (let i = ids.length - 1; i >= 0; i--) if (String(ids[i][0]) === id) { sh.deleteRow(i + 2); return true; }
   return false;
 }
+
+/** Журнал вебхука (лист «Лог вебхука», последние 300 запросов): время, итог, формат, названия полей.
+ *  Значения полей — только при ошибке (raw = true), чтобы заявку можно было восстановить. */
+function drHookLog_(e, params, result, raw) {
+  try {
+    const sh = drSheet_('Лог вебхука', ['Время', 'Итог', 'Формат', 'Поля запроса', 'Данные (только при ошибке)']);
+    sh.appendRow([new Date(), result, (e && e.postData && e.postData.type) || '—',
+      Object.keys(params).filter(function (k) { return k !== 'key'; }).join(', ').slice(0, 500),
+      raw ? String((e && e.postData && e.postData.contents) || JSON.stringify((e && e.parameter) || {})).slice(0, 5000) : '']);
+    if (sh.getLastRow() > 301) sh.deleteRows(2, sh.getLastRow() - 301);
+  } catch (x) { /* журнал не должен мешать приёму заявок */ }
+}

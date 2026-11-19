@@ -8,41 +8,36 @@ const DR_LEAD_HEAD = ['Получена', 'ID заявки', 'Форма', 'Им
   'Источник', 'ID кампании', 'Кампания', 'ID группы', 'Группа', 'ID объявления', 'Как сопоставлено'];
 const DR_LEAD_RAW = 13;   // A–M пишет вебхук, N–T — сопоставление (5_match.gs)
 
-/** Тильда шлёт заявку POST-запросом: формой (x-www-form-urlencoded) или JSON. */
+/** Тильда шлёт заявку POST-запросом: формой (x-www-form-urlencoded) или JSON. Заявка не теряется ни при какой ошибке:
+ *  занята блокировка (идёт загрузка Директа) — пишем без проверки дублей; любая ошибка — заявка целиком уходит в журнал. */
 function doPost(e) {
-  const params = drTildaParams_(e);
-  if (params.test) { drHookLog_(e, params, 'проверка вебхука от Тильды — ок'); return ContentService.createTextOutput('ok'); }
-  const sent = [].concat((e && e.parameters && e.parameters.key) || [], params.key || []).map(String);
-  if (!drProp_('TILDA_SECRET') || sent.indexOf(drProp_('TILDA_SECRET')) < 0) {
-    drHookLog_(e, params, sent.length ? 'ОТКЛОНЕНО: неверный ключ ?key=' : 'ОТКЛОНЕНО: в адресе вебхука нет ?key=…');
-    return ContentService.createTextOutput('forbidden');
-  }
-  const lock = LockService.getScriptLock();
-  lock.waitLock(20000);
+  let params = {};
   try {
-    const sh = drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), row = drLeadRow_(params, new Date());
-    const ids = sh.getLastRow() > 1 ? sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(function (r) { return String(r[0]); }) : [];
-    if (!row[1] || ids.indexOf(String(row[1])) < 0) {   // Тильда может повторить отправку — без дублей
-      sh.appendRow(row);
-      sh.getRange(sh.getLastRow(), 5).setNumberFormat('@').setValue(row[4]);
-      drStageNew_(sh, sh.getLastRow());
-      try { drMatchOne_(sh, sh.getLastRow()); } catch (x) { /* сопоставится при пересчёте */ }
-      drHookLog_(e, params, 'записана заявка ' + (row[1] || ''));
-    } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
-  } finally {
-    lock.releaseLock();
+    params = drTildaParams_(e);
+    if (params.test) { drHookLog_(e, params, 'проверка вебхука от Тильды — ок'); return ContentService.createTextOutput('ok'); }
+    const sent = [].concat((e && e.parameters && e.parameters.key) || [], params.key || []).map(String);
+    if (!drProp_('TILDA_SECRET') || sent.indexOf(drProp_('TILDA_SECRET')) < 0) {
+      drHookLog_(e, params, sent.length ? 'ОТКЛОНЕНО: неверный ключ ?key=' : 'ОТКЛОНЕНО: в адресе вебхука нет ?key=…');
+      return ContentService.createTextOutput('forbidden');
+    }
+    const lock = LockService.getScriptLock(), locked = lock.tryLock(25000);
+    try {
+      const sh = drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), row = drLeadRow_(params, new Date());
+      const ids = locked && sh.getLastRow() > 1 ? sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(function (r) { return String(r[0]); }) : [];
+      if (!row[1] || ids.indexOf(String(row[1])) < 0) {   // Тильда может повторить отправку — без дублей
+        sh.appendRow(row);
+        const r = sh.getLastRow();
+        sh.getRange(r, 5).setNumberFormat('@').setValue(row[4]);
+        try { drStageNew_(sh, r); drMatchOne_(sh, r); } catch (x) { /* сопоставится при пересчёте */ }
+        drHookLog_(e, params, 'записана заявка ' + (row[1] || '') + (locked ? '' : ' (отчёт обновлялся — без проверки дублей)'));
+      } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
+    } finally {
+      if (locked) lock.releaseLock();
+    }
+  } catch (x) {
+    drHookLog_(e, params, 'ОШИБКА: ' + x.message + ' — заявка сохранена в колонке «Данные»', true);
   }
   return ContentService.createTextOutput('ok');
-}
-
-/** Журнал вебхука (лист «Лог вебхука», последние 300 запросов): время, итог, формат и названия полей — без значений. */
-function drHookLog_(e, params, result) {
-  try {
-    const sh = drSheet_('Лог вебхука', ['Время', 'Итог', 'Формат', 'Поля запроса']);
-    sh.appendRow([new Date(), result, (e && e.postData && e.postData.type) || '—',
-      Object.keys(params).filter(function (k) { return k !== 'key'; }).join(', ').slice(0, 500)]);
-    if (sh.getLastRow() > 301) sh.deleteRows(2, sh.getLastRow() - 301);
-  } catch (x) { /* журнал не должен мешать приёму заявок */ }
 }
 
 function doGet() { return ContentService.createTextOutput('Отчёт «Директ + Тильда»: приём заявок работает.'); }

@@ -30,9 +30,11 @@ function onOpen() {
     .addItem('⏰ Включить автообновление', 'drSetupTrigger')
     .addSeparator()
     .addItem('🔑 Токен Яндекс Директа', 'drPromptDirect')
+    .addItem('📥 Все заявки из Тильды (из писем)', 'drMailAll')
     .addItem('🌐 Подключить Тильду (вебхук)', 'drMenuTilda')
+    .addItem('🩺 Проверить вебхук Тильды', 'drCheckHook')
     .addItem('🧪 Тестовая заявка', 'drTestLead')
-    .addItem('📥 Импортировать заявки из Тильды (выгрузка)', 'drImportTilda')
+    .addItem('📄 Импорт заявок из файла выгрузки', 'drImportTilda')
     .addToUi();
   try { drResetPeriodEnd_(); } catch (e) { /* листов ещё нет */ }
 }
@@ -67,8 +69,10 @@ function drSetupTrigger() {
     .forEach(function (t) { ScriptApp.deleteTrigger(t); });
   ScriptApp.newTrigger('drDailyUpdate').timeBased().everyDays(1).atHour(DR.UPDATE_HOUR).nearMinute(5)
     .inTimezone(DR.TIMEZONE).create();
+  drSetupMailTrigger_();
   SpreadsheetApp.getUi().alert('Автообновление включено: каждый день около ' + DR.UPDATE_HOUR + ':00 по Москве ' +
-    'загружаются данные Директа по вчера и пересчитывается отчёт. Заявки с Тильды приходят сразу.');
+    'загружаются данные Директа по вчера и пересчитывается отчёт. Заявки с Тильды приходят сразу (вебхук), ' +
+    'а каждый час скрипт ещё добирает их из писем Тильды в почте — если вебхук что-то пропустил.');
 }
 
 /** Простой триггер: поменяли даты периода на «Сводной» (B3 или D3) — пересчитать отчёт. */

@@ -36,6 +36,8 @@ function mkSheet(name) {
     getLastRow: () => Object.keys(s.cells).reduce((m, x) => s.cells[x] === '' ? m : Math.max(m, +x.split(',')[0]), 0),
     getLastColumn: () => Object.keys(s.cells).reduce((m, x) => Math.max(m, +x.split(',')[1]), 0),
     insertRowsAfter: (a, n) => { s.maxR += n; },
+    deleteRow: d => { const c = {}; Object.keys(s.cells).forEach(x => { const [rr, cc] = x.split(',').map(Number);
+      if (rr !== d) c[(rr > d ? rr - 1 : rr) + ',' + cc] = s.cells[x]; }); s.cells = c; },
     getRange: (...a) => typeof a[0] === 'string' ? range(...A1(a[0])) : range(...a),
     appendRow: row => { const r = s.api.getLastRow() + 1; row.forEach((v, j) => { s.cells[r + ',' + (j + 1)] = v; }); },
   });
@@ -70,6 +72,7 @@ const GN = { 6000001: 'Ремонт под ключ', 6000002: 'Дизайн-п�
 const stat = (a, day) => { const n = (a % 7) + day; return [100 + n * 13, 5 + (n % 9), 50 + n * 3.25]; };   // показы, клики, расход
 let reportCalls = 0;
 global.UrlFetchApp = { fetch: (url, o) => {
+  if (/script\.google\.com/.test(url)) return hookFetch(url, o);   // проверка вебхука — см. ниже
   const body = JSON.parse(o.payload);
   if (/reports$/.test(url)) {
     if (reportCalls++ === 0) return { getResponseCode: () => 201, getAllHeaders: () => ({ retryIn: '1' }) };   // «отчёт готовится»
@@ -84,7 +87,7 @@ global.UrlFetchApp = { fetch: (url, o) => {
   return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
 } };
 
-eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda });');
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_ });');
 props.YANDEX_TOKEN = 'token';
 props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
 drSetup();
@@ -178,5 +181,44 @@ check('Импорт: заявка Ивана → объявление 7000002', 
 check('Импорт: заявка Петра (метки только в адресе) → объявление 7000003', val('Заявки', findLead('Пётр'), 19), 7000003);
 check('Импорт: дата строки «04.11.2026 10:00»', key(val('Заявки', findLead('Пётр'), 1)) === '2026-11-04' ? 1 : 0, 1);
 check('Сводная после импорта: заявки из Директа за 01–13.11', val('Сводная', 7, 8), directLeads + 2);
+// ---------- все заявки из писем Тильды (Gmail) ----------
+const MAILS = [   // тело письма, тема, дата
+  ['Name: Анна\nPhone: +7 (900) 333-44-55\nutm_source: yandex\nutm_content: 7000003\n\nRequest details:\nTransaction ID: 555:111\nBlock ID: rec1\nForm Name: Заявка\nReferer: https://site.ru/', 'New lead', '2026-11-06T09:00:00Z'],
+  ['<p><b>Имя:</b> Олег<br><b>Телефон:</b> 89001112233<br>landing_page: https://site.ru/?utm_source=yandex&amp;utm_content=7000004</p>', 'Заявка с сайта', '2026-11-07T09:00:00Z'],
+  ['Счёт за тариф Tilda Business оплачен.\nСумма: 1000 руб.', 'Оплата', '2026-11-07T10:00:00Z'],   // не заявка
+  ['Name: Повтор\nPhone: 1\nTransaction ID: t0', 'дубль вебхука', '2026-11-05T10:00:00Z'],
+];
+const msg = ([body, subj, d], i) => ({ getPlainBody: () => /</.test(body) ? '' : body, getBody: () => body, getSubject: () => subj,
+  getDate: () => new RealDate(d), getId: () => 'm' + i });
+global.Session = { getEffectiveUser: () => ({ getEmail: () => 'test@example.com' }) };
+global.GmailApp = { search: (q, start) => start ? [] : MAILS.map((m, i) => [msg(m, i)]), getMessagesForThreads: t => t };
+const beforeMail = lead.api.getLastRow();
+alerts.length = 0; drMailAll();
+check('Письма: добавлено заявок (2 новых; оплата и дубль вебхука пропущены)', lead.api.getLastRow() - beforeMail, 2);
+console.log('   сообщение:', String(alerts[0]).split('\n')[0]);
+check('Письма: Анна → объявление 7000003', val('Заявки', findLead('Анна'), 19), 7000003);
+check('Письма: Олег (метки в адресе входа, HTML-письмо) → объявление 7000004', val('Заявки', findLead('Олег'), 19), 7000004);
+check('Письма: ID заявки из «Transaction ID»', val('Заявки', findLead('Анна'), 2) === '555:111' ? 1 : 0, 1);
+const beforeH = lead.api.getLastRow(); drMailHourly();
+check('Письма: повторный проход ничего не дублирует', lead.api.getLastRow() - beforeH, 0);
+
+// ---------- проверка вебхука ----------
+let hookMode = 'ok';
+function hookFetch(url, o) {
+  const resp = (c, t) => ({ getResponseCode: () => c, getContentText: () => t });
+  if (hookMode === 'login') return resp(200, '<html>https://accounts.google.com/ServiceLogin</html>');
+  if (hookMode === 'gone') return resp(404, 'not found');
+  return resp(200, doPost({ parameter: Object.assign({ key: (url.match(/key=([^&]+)/) || [])[1] }, o.payload) }));
+}
+const EX = 'https://script.google.com/macros/s/AKfy123/exec';
+const hc = (u, re, name) => { const t = drHookCheck_(u); n++; const ok = re.test(t); if (!ok) bad++; console.log(`${ok ? '✓' : '✗'} вебхук: ${name}${ok ? '' : ' → ' + t.slice(0, 120)}`); };
+const rowsBefore = lead.api.getLastRow();
+hc(EX + '?key=secret-uuid', /^✅/, 'рабочий адрес');
+check('Вебхук: проверочная строка удалена', lead.api.getLastRow() - rowsBefore, 0);
+hc('https://script.google.com/macros/s/AKfy123/dev?key=secret-uuid', /\/dev/, 'адрес /dev');
+hc(EX, /нет \?key/, 'без ключа');
+hc(EX + '?key=zzz', /не тот/, 'чужой ключ');
+hookMode = 'login'; hc(EX + '?key=secret-uuid', /доступ не «Все»/, 'доступ не «Все»');
+hookMode = 'gone'; hc(EX + '?key=secret-uuid', /404/, 'удалённое развёртывание');
 console.log(`\nИТОГ: ${bad ? 'РАСХОЖДЕНИЙ ' + bad : 'всё совпало'} (проверок ${n})`);
 process.exit(bad ? 1 : 0);

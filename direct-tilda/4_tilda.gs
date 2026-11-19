@@ -20,7 +20,7 @@ function doPost(e) {
       drHookLog_(e, params, sent.length ? 'ОТКЛОНЕНО: неверный ключ ?key=' : 'ОТКЛОНЕНО: в адресе вебхука нет ?key=…');
       return ContentService.createTextOutput('forbidden');
     }
-    const lock = LockService.getScriptLock(), locked = lock.tryLock(25000);
+    const lock = LockService.getScriptLock(), locked = lock.tryLock(5000);   // Тильда ждёт ответа недолго: не успели — блокирует вебхук
     try {
       const sh = drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), row = drLeadRow_(params, new Date());
       const ids = locked && sh.getLastRow() > 1 ? sh.getRange(2, 2, sh.getLastRow() - 1, 1).getValues().map(function (r) { return String(r[0]); }) : [];
@@ -28,7 +28,7 @@ function doPost(e) {
         sh.appendRow(row);
         const r = sh.getLastRow();
         sh.getRange(r, 5).setNumberFormat('@').setValue(row[4]);
-        try { drStageNew_(sh, r); drMatchOne_(sh, r); } catch (x) { /* сопоставится при пересчёте */ }
+        try { drStageNew_(sh, r); if (locked) drMatchOne_(sh, r); } catch (x) { /* сопоставится при пересчёте */ }
         drHookLog_(e, params, 'записана заявка ' + (row[1] || '') + (locked ? '' : ' (отчёт обновлялся — без проверки дублей)'));
       } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
     } finally {

@@ -26,6 +26,7 @@ function doPost(e) {
       sh.appendRow(row);
       sh.getRange(sh.getLastRow(), 5).setNumberFormat('@').setValue(row[4]);
       drStageNew_(sh, sh.getLastRow());
+      try { drMatchOne_(sh, sh.getLastRow()); } catch (x) { /* сопоставится при пересчёте */ }
       drHookLog_(e, params, 'записана заявка ' + (row[1] || ''));
     } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
   } finally {

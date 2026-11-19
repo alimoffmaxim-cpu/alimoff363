@@ -84,3 +84,11 @@ function drMatchAll_() {
   }
   return rows.map(function (r, i) { return { day: drKey_(r[0]), m: res[i] }; }).filter(function (x) { return x.day; });
 }
+
+/** Новая заявка (вебхук): сразу сопоставить её строку — кампания, группа, объявление, ClientID, yclid. */
+function drMatchOne_(sh, r) {
+  const lead = sh.getRange(r, 1, 1, DR_LEAD_RAW).getValues()[0];
+  [2, 4, 6].forEach(function (i) { sh.getRange(r, DR_LEAD_RAW + i).setNumberFormat('@'); });
+  sh.getRange(r, DR_LEAD_RAW + 1, 1, 7).setValues([drMatch_(lead, drDict_(), drRules_())]);
+  sh.getRange(r, DR_LEAD_HEAD.length + 1, 1, 2).setNumberFormat('@').setValues([drLeadIds_(lead)]);
+}

@@ -216,6 +216,7 @@ doPost({ parameter: { key: 'secret-uuid', tranid: 'ym-1', Name: 'Клиент', 
   landing_page: 'https://site.ru/?utm_source=yandex&yclid=17287983331083812863' } });
 NOW = RealDate.parse(TODAY);
 const rYm = findLead('Клиент');
+check('Вебхук: заявка сопоставлена сразу, без пересчёта (Источник = Директ)', val('Заявки', rYm, 14) === 'Директ' ? 1 : 0, 1);
 check('Новая заявка вебхуком: этап «Новая заявка»', val('Заявки', rYm, 23) === 'Новая заявка' ? 1 : 0, 1);
 drRecompute_();
 check('ClientID из куки _ym_uid (колонка U)', val('Заявки', rYm, 21) === '1731234567890123456' ? 1 : 0, 1);

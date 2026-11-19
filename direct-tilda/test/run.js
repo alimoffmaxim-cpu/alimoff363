@@ -87,7 +87,7 @@ global.UrlFetchApp = { fetch: (url, o) => {
   return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
 } };
 
-eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_ });');
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_, drLeadIds_ });');
 props.YANDEX_TOKEN = 'token';
 props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
 drSetup();
@@ -209,6 +209,29 @@ check('Длинный ID из отчёта Директа сохранён ст�
 const dLong = { ads: { [LONG]: { g: 5555555555, c: 715890110 } }, groups: { 5555555555: { c: 715890110, name: 'Гр' } }, camps: { 715890110: 'Мото' }, campByName: {}, groupByName: {} };
 const mLong = drMatch_(['', '', '', '', '', '', 'yandex', 'cpc', 'moto_search_715890110', LONG + '_205821097593', '---autotargeting', '', ''], dLong, []);
 check('Заявка с utm_content=<19 цифр>_… → это объявление', mLong[5] === LONG && mLong[1] === 715890110 ? 1 : 0, 1);
+
+// ---------- ClientID, yclid, этап, офлайн-конверсии ----------
+NOW = RealDate.parse('2026-11-10T10:00:00Z');
+doPost({ parameter: { key: 'secret-uuid', tranid: 'ym-1', Name: 'Клиент', Phone: '1', COOKIES: '_ym_d=1; _ym_uid=1731234567890123456; TILDAUTM=x',
+  landing_page: 'https://site.ru/?utm_source=yandex&yclid=17287983331083812863' } });
+NOW = RealDate.parse(TODAY);
+const rYm = findLead('Клиент');
+check('Новая заявка вебхуком: этап «Новая заявка»', val('Заявки', rYm, 23) === 'Новая заявка' ? 1 : 0, 1);
+drRecompute_();
+check('ClientID из куки _ym_uid (колонка U)', val('Заявки', rYm, 21) === '1731234567890123456' ? 1 : 0, 1);
+check('yclid из адреса входа (колонка V), все 20 цифр', val('Заявки', rYm, 22) === '17287983331083812863' ? 1 : 0, 1);
+check('ClientID из поля ym_client_id', drLeadIds_(['', '', '', '', '', '', '', '', '', '', '', '', 'Name=A; ym_client_id=555666777888'])[0] === '555666777888' ? 1 : 0, 1);
+check('Старые заявки без этапа получили «Новая заявка»', val('Заявки', 2, 23) === 'Новая заявка' ? 1 : 0, 1);
+const off = get('Офлайн-конверсии'), offRows = () => off.api.getLastRow() - 1;
+const base = offRows();
+check('Офлайн-конверсии: строка с ClientID, целью lead и unix-временем', [...Array(base).keys()].some(i =>
+  val('Офлайн-конверсии', i + 2, 1) === '1731234567890123456' && val('Офлайн-конверсии', i + 2, 3) === 'lead' &&
+  val('Офлайн-конверсии', i + 2, 4) === String(RealDate.parse('2026-11-10T10:00:00Z') / 1000)) ? 1 : 0, 1);
+get('Заявки').cells[rYm + ',23'] = 'Посетил пробное занятие';
+onEdit({ range: get('Заявки').api.getRange(rYm, 23) });
+check('Смена этапа: записано время (колонка X)', val('Заявки', rYm, 24) instanceof RealDate ? 1 : 0, 1);
+drRecompute_();
+check('«Посетил пробное» → +2 строки (trial_booked и trial_visited)', offRows() - base, 2);
 
 // ---------- проверка вебхука ----------
 let hookMode = 'ok';

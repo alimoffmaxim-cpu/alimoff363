@@ -32,6 +32,7 @@ function drRecompute_() {
   const old = { data: data.filter(function (x) { return inP(x, prev); }), leads: leads.filter(function (x) { return inP(x, prev); }) };
   drSummary_(p, prev, cur, old);
   drTables_(p, cur);
+  drOffline_();
   return { leads: cur.leads.length };
 }
 

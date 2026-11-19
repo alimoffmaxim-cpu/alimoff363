@@ -25,6 +25,7 @@ function doPost(e) {
     if (!row[1] || ids.indexOf(String(row[1])) < 0) {   // Тильда может повторить отправку — без дублей
       sh.appendRow(row);
       sh.getRange(sh.getLastRow(), 5).setNumberFormat('@').setValue(row[4]);
+      drStageNew_(sh, sh.getLastRow());
       drHookLog_(e, params, 'записана заявка ' + (row[1] || ''));
     } else drHookLog_(e, params, 'повтор заявки ' + row[1] + ' — пропущен');
   } finally {
@@ -66,7 +67,9 @@ function drLeadRow_(params, at) {
   const find = function (re) { const k = keys.filter(function (x) { return re.test(x); })[0]; return k ? String(params[k]) : ''; };
   const page = String(params.landing_page || params.page_url || params.referer || params.page || params.url || '');
   const utm = drUtm_(params, page);
-  const all = keys.filter(function (k) { return k !== 'COOKIES'; }).map(function (k) { return k + '=' + params[k]; }).join('; ');
+  let all = keys.filter(function (k) { return k !== 'COOKIES'; }).map(function (k) { return k + '=' + params[k]; }).join('; ');
+  const ym = (String(params.COOKIES || params.cookies || '').match(/_ym_uid=(\d+)/) || [])[1];   // ClientID Метрики из куки
+  if (ym && !params.ym_client_id) all = 'ym_client_id=' + ym + '; ' + all;
   return [at, params.tranid || '', params.formname || params.formid || '', find(/^(name|имя|fio|фио)$/i),
     find(/phone|телефон|tel/i), find(/e-?mail|почта/i), utm.utm_source, utm.utm_medium, utm.utm_campaign,
     utm.utm_content, utm.utm_term, page, all.slice(0, 2000)];
@@ -103,7 +106,7 @@ function drSecret_() {
   return p.getProperty('TILDA_SECRET');
 }
 
-/** Код для сайта: запоминает адрес входа по рекламной ссылке на 30 дней и кладёт его в каждую форму (landing_page). */
+/** Код для сайта: адрес входа по рекламной ссылке (30 дней) → поле landing_page, ClientID Метрики → поле ym_client_id. */
 function drSnippet_() {
   return ['<script>', '(function () {',
     '  var ads = /[?&](utm_[a-z]+|yclid|_openstat)=/i;',
@@ -112,7 +115,10 @@ function drSnippet_() {
     '  function fill() { var f = document.querySelectorAll("form"); for (var i = 0; i < f.length; i++) {',
     '    var el = f[i].querySelector("input[name=landing_page]");',
     '    if (!el) { el = document.createElement("input"); el.type = "hidden"; el.name = "landing_page"; f[i].appendChild(el); }',
-    '    el.value = get("dt_landing"); } }',
+    '    el.value = get("dt_landing");',
+    '    var ym = f[i].querySelector("input[name=ym_client_id]");',
+    '    if (!ym) { ym = document.createElement("input"); ym.type = "hidden"; ym.name = "ym_client_id"; f[i].appendChild(ym); }',
+    '    ym.value = get("_ym_uid"); } }',
     '  document.addEventListener("DOMContentLoaded", fill);',
     '  ["mousedown", "touchstart", "keydown", "submit"].forEach(function (ev) { document.addEventListener(ev, fill, true); });',
     '})();', '</script>'].join('\n');

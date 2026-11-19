@@ -75,9 +75,10 @@ function drSetupTrigger() {
     'а каждый час скрипт ещё добирает их из писем Тильды в почте — если вебхук что-то пропустил.');
 }
 
-/** Простой триггер: поменяли даты периода на «Сводной» (B3 или D3) — пересчитать отчёт. */
+/** Простой триггер: даты периода на «Сводной» (B3 или D3) — пересчёт; «Этап» на «Заявках» — время смены. */
 function onEdit(e) {
   const a = e && e.range;
+  if (a && a.getSheet().getName() === DR_SHEETS.LEADS) return drStageEdit_(a);
   if (!a || a.getSheet().getName() !== DR_SHEETS.SUMMARY || a.getRow() > 3 || a.getLastRow() < 3 ||
     a.getColumn() > 4 || a.getLastColumn() < 2) return;
   drRecompute_();

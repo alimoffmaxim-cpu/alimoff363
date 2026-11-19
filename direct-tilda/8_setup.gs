@@ -4,9 +4,10 @@ function drSetup() {
   const missing = [['1_main', typeof drDailyUpdate], ['2_util', typeof drSheet_], ['3_direct', typeof drLoadDirect_],
     ['4_tilda', typeof drLeadRow_], ['5_match', typeof drMatch_], ['6_report', typeof drRecompute_],
     ['7_tables', typeof drTables_], ['9_import', typeof drImportTilda],
-    ['10_mail', typeof drMailPull_], ['11_hook', typeof drHookCheck_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
+    ['10_mail', typeof drMailPull_], ['11_hook', typeof drHookCheck_],
+    ['12_offline', typeof drOffline_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
   if (missing.length) return SpreadsheetApp.getUi().alert('Не хватает кода в Apps Script: ' + missing.join(', ') +
-    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 11.');
+    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 12.');
   drAlert_(function () {
     const ss = SpreadsheetApp.getActive();
     ss.setSpreadsheetLocale('ru_RU');
@@ -28,7 +29,7 @@ function drSetup() {
     sh.getRange('E3').setValue('«С» пусто — с 1-го числа месяца; «по» — вчера, можно поменять (при открытии таблицы снова вчера). ' +
       'Даты действуют на все листы отчёта.').setFontColor('#6b7280').setFontSize(9);
     sh.setColumnWidth(1, 300);
-    drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD);
+    drHead_(drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), 1, DR_LEAD_HEAD.concat(DR_OFFLINE.LEAD_COLS));
     drSheet_(DR_SHEETS.DATA, DR_DATA_HEAD);
     drSheet_(DR_SHEETS.TEXTS, DR_TEXT_HEAD);
     const rules = drSheet_(DR_SHEETS.RULES, DR_RULE_HEAD);

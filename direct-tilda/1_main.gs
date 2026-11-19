@@ -31,6 +31,7 @@ function onOpen() {
     .addSeparator()
     .addItem('🔑 Токен Яндекс Директа', 'drPromptDirect')
     .addItem('📥 Все заявки из Тильды (из писем)', 'drMailAll')
+    .addItem('📊 Подключить Google Таблицу заявок Тильды', 'drMenuTildaSheet')
     .addItem('🌐 Подключить Тильду (вебхук)', 'drMenuTilda')
     .addItem('🩺 Проверить вебхук Тильды', 'drCheckHook')
     .addItem('🧪 Тестовая заявка', 'drTestLead')

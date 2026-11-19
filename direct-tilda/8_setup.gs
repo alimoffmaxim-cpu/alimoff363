@@ -5,9 +5,10 @@ function drSetup() {
     ['4_tilda', typeof drLeadRow_], ['5_match', typeof drMatch_], ['6_report', typeof drRecompute_],
     ['7_tables', typeof drTables_], ['9_import', typeof drImportTilda],
     ['10_mail', typeof drMailPull_], ['11_hook', typeof drHookCheck_],
-    ['12_offline', typeof drOffline_]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
+    ['12_offline', typeof drOffline_],
+    ['13_tsheet', typeof drTildaSheetPull]].filter(function (f) { return f[1] !== 'function'; }).map(function (f) { return f[0]; });
   if (missing.length) return SpreadsheetApp.getUi().alert('Не хватает кода в Apps Script: ' + missing.join(', ') +
-    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 12.');
+    '. Создайте эти файлы кодом со страницы «Код отчёта Директ + Тильда». Всего файлов — 13.');
   drAlert_(function () {
     const ss = SpreadsheetApp.getActive();
     ss.setSpreadsheetLocale('ru_RU');

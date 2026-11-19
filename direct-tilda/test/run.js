@@ -88,7 +88,7 @@ global.UrlFetchApp = { fetch: (url, o) => {
   return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
 } };
 
-eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_, drLeadIds_ });');
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_, drLeadIds_, drTildaSheetPull });');
 props.YANDEX_TOKEN = 'token';
 props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
 drSetup();
@@ -250,6 +250,24 @@ const realSheet = ssApi.getSheetByName; ssApi.getSheetByName = n => { if (n === 
 doPost({ parameter: { key: 'secret-uuid', tranid: 'err-1', Name: 'Сбой', Phone: '3' } });
 ssApi.getSheetByName = realSheet;
 check('Ошибка при записи → в журнале «ОШИБКА» и данные заявки', /^ОШИБКА/.test(hookLast()) && /err-1/.test(val('Лог вебхука', get('Лог вебхука').api.getLastRow(), 5)) ? 1 : 0, 1);
+
+// ---------- заявки из Google Таблицы Тильды ----------
+const tsh = { name: 'Tilda', cells: {} };
+[['Name', 'Phone', 'utm_source', 'utm_content', 'requestid', 'formname', 'referer', 'sent'],
+ ['Мария', '+7 900 555-66-77', 'yandex', '7000005', 'gs-req-1', 'Заявка', 'https://site.ru/', '2026-11-12 11:00:00'],
+ ['Дубль', '+79000000000', 'yandex', '', 't0', 'Заявка', '', '2026-11-01 13:00:00'],        // уже есть (tranid t0)
+ ['Без ID', '+7 900 777-88-99', '', '', '', 'Заявка', '', '2026-11-12 12:00:00'],
+ ['Без ID, повтор', '+7 900 777-88-99', '', '', '', 'Заявка', '', '2026-11-12 12:00:30']        // тот же телефон и минута
+].forEach((row, r) => row.forEach((v, c) => { tsh.cells[(r + 1) + ',' + (c + 1)] = v; }));
+const tApi = { getLastRow: () => 5, getLastColumn: () => 8, getRange: (r, c, nr, nc) => ({ getValues: () =>
+  Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => tsh.cells[(r + i) + ',' + (c + j)] ?? '')) }) };
+SpreadsheetApp.openById = () => ({ getSheets: () => [tApi] });
+props.TILDA_SHEET_ID = 'sheet-id';
+const nT = lead.api.getLastRow(); const rT = drTildaSheetPull();
+check('Таблица Тильды: добавлено 2 (дубль по ID и дубль по телефону+минуте пропущены)', lead.api.getLastRow() - nT, 2);
+check('Таблица Тильды: Мария → объявление 7000005', val('Заявки', findLead('Мария'), 19), 7000005);
+check('Таблица Тильды: этап «Новая заявка»', val('Заявки', findLead('Мария'), 23) === 'Новая заявка' ? 1 : 0, 1);
+check('Таблица Тильды: повторный проход ничего не добавляет', (drTildaSheetPull(), lead.api.getLastRow() - nT), 2);
 
 // ---------- проверка вебхука ----------
 let hookMode = 'ok';

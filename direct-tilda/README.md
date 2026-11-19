@@ -37,7 +37,7 @@ CR = заявки / клики. Расход — без НДС (как отда�
 ## Установка
 
 1. Создайте Google Таблицу → **Расширения → Apps Script**. **Не вставляйте весь код в один `Код.gs`**:
-   редактор обрезает длинную вставку (`SyntaxError: Unexpected identifier`). Создайте 12 отдельных файлов
+   редактор обрезает длинную вставку (`SyntaxError: Unexpected identifier`). Создайте 13 отдельных файлов
    (**Файлы → + → Скрипт**, имя без `.gs`) и вставьте в каждый код одноимённого файла — со страницы
    [«Код отчёта Директ + Тильда»](https://claude.ai/artifact/FgNKRZLWu8YZAYCWJ2UcQn) (кнопка «Скопировать код» у каждого файла) или с raw-страниц (Cmd+A → Cmd+C):
    [`1_main`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/1_main.gs),
@@ -51,7 +51,8 @@ CR = заявки / клики. Расход — без НДС (как отда�
    [`9_import`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/9_import.gs),
    [`10_mail`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/10_mail.gs),
    [`11_hook`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/11_hook.gs),
-   [`12_offline`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/12_offline.gs).
+   [`12_offline`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/12_offline.gs),
+   [`13_tsheet`](https://raw.githubusercontent.com/alimoffmaxim-cpu/alimoff363/claude/kind-cannon-kebl4w/direct-tilda/13_tsheet.gs).
    Порядок файлов не важен. Сохраните (Cmd+S).
 2. Обновите таблицу — появится меню **Отчёт**. **Отчёт → Создать / обновить листы** (Google попросит разрешения).
 3. **Директ.** Нужен OAuth-токен с доступом к API Директа на логин клиента: в Директе подайте заявку на доступ
@@ -73,6 +74,15 @@ CR = заявки / клики. Расход — без НДС (как отда�
 5. **Отчёт → Включить автообновление** — каждый день около **01:00 по Москве** загружаются данные Директа по вчера
    (последние 3 дня — заново) и пересчитывается отчёт. Заявки с Тильды приходят сразу (вебхук), а **каждый час** скрипт
    добирает их из писем Тильды в почте (см. ниже) — если вебхук что-то пропустил.
+
+## Заявки через Google Таблицу Тильды (основной способ)
+
+Веб-приложение Apps Script всегда отвечает Тильде редиректом 302; Тильда иногда считает это ошибкой и **блокирует вебхук**
+(«Приемщик был заблокирован… autoblock Unknown error 302»). Поэтому основной путь — встроенная интеграция Тильды:
+**Настройки сайта → Формы → Google Таблицы** → подключите Google-аккаунт, создайте таблицу → в форме отметьте этот приёмщик →
+опубликуйте страницу. Затем **Отчёт → Подключить Google Таблицу заявок Тильды** → вставьте ссылку на неё. Скрипт каждые
+5 минут забирает новые строки (колонки по названиям), без дублей с вебхуком (ID заявки или телефон + минута), сразу
+сопоставляет их и пересчитывает отчёт. Вебхук можно оставить вторым путём.
 
 ## Этап заявки и офлайн-конверсии в Метрику
 

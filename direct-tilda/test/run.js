@@ -1,0 +1,291 @@
+// Проверка отчёта «Директ + Тильда» без Google и Директа: node direct-tilda/test/run.js
+// Имитирует Google Таблицы, ответы Директа (отчёт + тексты объявлений) и заявки Тильды с разными метками;
+// сверяет сопоставление каждой заявки и итоги листов с независимым подсчётом. Код выхода 1 — есть расхождения.
+const fs = require('fs'), path = require('path');
+const dir = path.join(__dirname, '..');
+const code = fs.readdirSync(dir).filter(f => /^\d+_.*\.gs$/.test(f)).sort((a, b) => parseInt(a) - parseInt(b))
+  .map(f => fs.readFileSync(path.join(dir, f), 'utf8')).join('\n');
+
+// ---------- имитация Таблиц ----------
+const A1 = a => { const m = a.match(/^([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?$/), c = s => s.split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+  return [+m[2], c(m[1]), m[3] ? +m[4] - +m[2] + 1 : 1, m[3] ? c(m[3]) - c(m[1]) + 1 : 1]; };
+const proxy = api => { const p = new Proxy(api, { get: (t, k) => k in t ? t[k] : () => p }); return p; };
+const sheets = [];
+function mkSheet(name) {
+  const s = { name, cells: {}, maxR: 1000, maxC: 26 };
+  const range = (r, c, nr = 1, nc = 1) => {
+    if (r + nr - 1 > s.maxR) throw new Error(`вне листа ${name} ${r}+${nr}`);
+    s.maxC = Math.max(s.maxC, c + nc - 1);
+    const k = (i, j) => (r + i) + ',' + (c + j);
+    const px = proxy({
+      setValues: v => { if (v.length !== nr || v.some(x => x.length !== nc)) throw new Error(`setValues ${name} ${nr}x${nc} ≠ ${v.length}x${v[0].length}`);
+        v.forEach((row, i) => row.forEach((x, j) => { s.cells[k(i, j)] = x; })); return px; },
+      setValue: v => { s.cells[k(0, 0)] = v; return px; }, setFormula: f => { s.cells[k(0, 0)] = f; return px; },
+      getValue: () => { const v = s.cells[k(0, 0)]; return v === '=TODAY()-1' ? new Date(Date.parse(TODAY) - 864e5) : v ?? ''; },
+      getFormula: () => { const v = s.cells[k(0, 0)]; return typeof v === 'string' && v[0] === '=' ? v : ''; },
+      getValues: () => Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => {
+        const v = s.cells[k(i, j)]; return v === '=TODAY()-1' ? new Date(Date.parse(TODAY) - 864e5) : v ?? ''; })),
+      getSheet: () => s.api, getRow: () => r, getLastRow: () => r + nr - 1, getColumn: () => c, getLastColumn: () => c + nc - 1,
+      clear: () => { Object.keys(s.cells).forEach(x => { const [rr, cc] = x.split(',').map(Number);
+        if (rr >= r && rr < r + nr && cc >= c && cc < c + nc) delete s.cells[x]; }); return px; },
+    });
+    return px;
+  };
+  s.api = proxy({
+    getName: () => name, getMaxRows: () => s.maxR, getMaxColumns: () => s.maxC,
+    getLastRow: () => Object.keys(s.cells).reduce((m, x) => s.cells[x] === '' ? m : Math.max(m, +x.split(',')[0]), 0),
+    getLastColumn: () => Object.keys(s.cells).reduce((m, x) => Math.max(m, +x.split(',')[1]), 0),
+    insertRowsAfter: (a, n) => { s.maxR += n; },
+    deleteRow: d => { const c = {}; Object.keys(s.cells).forEach(x => { const [rr, cc] = x.split(',').map(Number);
+      if (rr !== d) c[(rr > d ? rr - 1 : rr) + ',' + cc] = s.cells[x]; }); s.cells = c; },
+    getRange: (...a) => typeof a[0] === 'string' ? range(...A1(a[0])) : range(...a),
+    appendRow: row => { const r = s.api.getLastRow() + 1; row.forEach((v, j) => { s.cells[r + ',' + (j + 1)] = v; }); },
+  });
+  sheets.push(s); return s;
+}
+mkSheet('Лист1');
+const ssApi = proxy({ getSheetByName: n => (sheets.find(s => s.name === n) || {}).api || null,
+  insertSheet: n => mkSheet(n).api, getSheets: () => sheets.map(s => s.api),
+  deleteSheet: a => { const i = sheets.findIndex(s => s.api === a); sheets.splice(i, 1); } });
+const props = {};
+const alerts = [];
+global.SpreadsheetApp = { getActive: () => ssApi, getUi: () => proxy({ alert: m => alerts.push(m), ButtonSet: {}, Button: {} }),
+  newDataValidation: () => proxy({ build: () => ({}) }) };
+global.PropertiesService = { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) };
+let LOCK_BUSY = false;
+global.LockService = { getScriptLock: () => ({ tryLock: () => !LOCK_BUSY, waitLock: () => {}, releaseLock: () => {} }) };
+global.ContentService = { createTextOutput: t => t };
+global.Utilities = { sleep: () => {}, getUuid: () => 'secret-uuid',
+  formatDate: (d, tz, f) => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: tz, year: 'numeric', month: '2-digit',
+    day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(d).map(x => [x.type, x.value]));
+    return f === 'yyyy-MM-dd' ? `${p.year}-${p.month}-${p.day}` : `${p.day}.${p.month} ${p.hour}:${p.minute}`; } };
+
+// ---------- имитация Директа ----------
+const TODAY = '2026-11-14T09:00:00Z';
+const RealDate = Date;   // «сейчас» в коде — new Date() и Date.now(): подменяем оба
+let NOW = RealDate.parse(TODAY);
+global.Date = class extends RealDate { constructor(...a) { super(...(a.length ? a : [NOW])); } static now() { return NOW; } };
+const ADS = [   // объявление, группа, кампания
+  [7000001, 6000001, 5000001], [7000002, 6000001, 5000001], [7000003, 6000002, 5000001],
+  [7000004, 6000003, 5000002], [7000005, 6000003, 5000002]];
+const CN = { 5000001: 'Ремонт квартир | Поиск', 5000002: 'Ремонт квартир | РСЯ' };
+const GN = { 6000001: 'Ремонт под ключ', 6000002: 'Дизайн-проект', 6000003: 'Ретаргетинг' };
+const stat = (a, day) => { const n = (a % 7) + day; return [100 + n * 13, 5 + (n % 9), 50 + n * 3.25]; };   // показы, клики, расход
+let reportCalls = 0;
+global.UrlFetchApp = { fetch: (url, o) => {
+  if (/script\.google\.com/.test(url)) return hookFetch(url, o);   // проверка вебхука — см. ниже
+  const body = JSON.parse(o.payload);
+  if (/reports$/.test(url)) {
+    if (reportCalls++ === 0) return { getResponseCode: () => 201, getAllHeaders: () => ({ retryIn: '1' }) };   // «отчёт готовится»
+    const { DateFrom, DateTo } = body.params.SelectionCriteria, lines = ['Date\tCampaignId\tCampaignName\tAdGroupId\tAdGroupName\tAdId\tImpressions\tClicks\tCost'];
+    for (let d = DateFrom, i = 0; d <= DateTo; d = new Date(Date.parse(d) + 864e5).toISOString().slice(0, 10), i++)
+      ADS.forEach(([a, g, c]) => { const [sh, cl, sp] = stat(a, i % 30); lines.push([d, c, CN[c], g, GN[g], a, sh, cl, sp].join('\t')); });
+    return { getResponseCode: () => 200, getContentText: () => lines.join('\n') };
+  }
+  if (/ads$/.test(url)) return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: {
+    Ads: ADS.filter(x => body.params.SelectionCriteria.CampaignIds.includes(x[2])).map(([a, g, c]) => ({ Id: a, AdGroupId: g, CampaignId: c,
+      Type: 'TEXT_AD', State: 'ON', TextAd: { Title: 'Заголовок ' + a, Title2: '', Text: 'Текст ' + a, Href: 'https://site.ru/?utm_content={ad_id}' } })) } }) };
+  return { getResponseCode: () => 200, getContentText: () => JSON.stringify({ result: { Campaigns: [] } }) };
+} };
+
+eval(code + '\nObject.assign(global, { drSetup, drDailyUpdate, doPost, onEdit, drRecompute_, drImportTilda, drMailAll, drMailHourly, drHookCheck_, drId_, drMatch_, drParseTsv_, drLeadIds_, drTildaSheetPull });');
+props.YANDEX_TOKEN = 'token';
+props.TILDA_SECRET = 'secret-uuid';   // в таблице его создаёт «Отчёт → Подключить Тильду»
+drSetup();
+const get = n => sheets.find(s => s.name === n);
+const val = (n, r, c) => get(n).cells[r + ',' + c];
+
+// правило: «spring» в utm_campaign → объявление 7000005
+const rules = get('Сопоставление меток'); rules.cells['2,1'] = 'utm_campaign'; rules.cells['2,2'] = 'содержит'; rules.cells['2,3'] = 'Spring'; rules.cells['2,6'] = 7000005;
+drDailyUpdate();
+
+// ---------- заявки ----------
+const L = [   // [поля вебхука, ожидание: источник, кампания, группа, объявление, как]
+  [{ utm_source: 'yandex', utm_campaign: '5000001', utm_content: '7000001' }, ['Директ', 5000001, 6000001, 7000001, 'ID объявления']],
+  [{ utm_source: 'yandex', utm_campaign: 'search', utm_content: 'gid|6000003|aid|0' }, ['Директ', 5000002, 6000003, '', 'ID группы']],
+  [{ utm_source: 'yandex', utm_campaign: 'Ремонт квартир | Поиск' }, ['Директ', 5000001, '', '', 'название кампании']],
+  [{ utm_source: 'yandex', utm_term: 'дизайн-проект' }, ['Директ', 5000001, 6000002, '', 'название группы']],
+  [{ utm_source: 'yandex', utm_campaign: 'unknownxyz' }, ['Директ', '', '', '', 'не сопоставлено']],
+  [{ utm_source: 'vk', utm_campaign: 'promo' }, ['Другой источник: vk', '', '', '', '']],
+  [{}, ['Без меток', '', '', '', '']],
+  [{ landing_page: 'https://site.ru/?utm_source=yandex&utm_medium=cpc&utm_content=7000004&yclid=123456789' }, ['Директ', 5000002, 6000003, 7000004, 'ID объявления']],
+  [{ utm_source: 'yandex', utm_campaign: 'SPRING_sale' }, ['Директ', 5000002, 6000003, 7000005, 'правило (строка 2)']],
+  [{ COOKIES: 'a=1; TILDAUTM=' + encodeURIComponent('utm_source=yandex|||utm_campaign=5000002|||utm_term=xyz') }, ['Директ', 5000002, '', '', 'ID кампании']],
+  [{ landing_page: 'https://site.ru/?yclid=987654321' }, ['Директ', '', '', '', 'не сопоставлено']],
+];
+let bad = 0, n = 0;
+const send = (f, i, when) => { NOW = RealDate.parse(when); doPost({ parameter: Object.assign({ key: 'secret-uuid', tranid: 't' + i, formname: 'Заявка', Name: 'Имя', Phone: '+79000000000' }, f) }); };
+L.forEach(([f], i) => send(f, i, '2026-11-0' + (1 + i % 9) + 'T10:00:00Z'));
+send(L[0][0], 0, '2026-11-05T10:00:00Z');                       // повтор от Тильды — не дублируется
+send({ utm_source: 'yandex', utm_content: '7000001' }, 99, '2026-10-20T10:00:00Z');   // вне периода
+doPost({ parameter: { key: 'wrong', tranid: 'x' } });            // чужой ключ — не записывается
+NOW = RealDate.parse(TODAY);
+const lead = get('Заявки'), leadsCount = lead.api.getLastRow() - 1;
+if (leadsCount !== L.length + 1) { bad++; console.log(`✗ заявок на листе ${leadsCount}, ждали ${L.length + 1} (дубль или чужой ключ прошли)`); }
+const hook = get('Лог вебхука'), hookRows = [...Array(hook.api.getLastRow()).keys()].slice(1).map(i => hook.cells[(i + 1) + ',2']);
+n++; if (!(hookRows.filter(x => /^записана/.test(x)).length === L.length + 1 && hookRows.some(x => /повтор/.test(x)) && hookRows.some(x => /ОТКЛОНЕНО: неверный ключ/.test(x)))) { bad++; console.log('✗ журнал вебхука:', hookRows); }
+else console.log('✓ журнал вебхука: записано', L.length + 1, '+ повтор + отклонённый ключ');
+drRecompute_();
+L.forEach(([f, exp], i) => {
+  const got = [14, 15, 17, 19, 20].map(c => val('Заявки', i + 2, c) ?? '');
+  const ok = JSON.stringify(got) === JSON.stringify(exp); n++;
+  if (!ok) bad++;
+  console.log(`${ok ? '✓' : '✗'} заявка ${i + 1}: ${JSON.stringify(f).slice(0, 90)} → ${got.join(' | ')}${ok ? '' : '   ждали: ' + exp.join(' | ')}`);
+});
+
+// ---------- итоги: период 01.11–13.11 (по умолчанию: с 1-го числа по вчера) ----------
+const data = Object.keys(get('Данные Директа').cells).filter(k => k.endsWith(',1') && k !== '1,1').map(k => +k.split(',')[0])
+  .map(r => [1, 2, 4, 6, 7, 8, 9].map(c => val('Данные Директа', r, c)));
+const key = d => Utilities.formatDate(d, 'Europe/Moscow', 'yyyy-MM-dd');
+const inP = r => key(r[0]) >= '2026-11-01' && key(r[0]) <= '2026-11-13';
+const tot = data.filter(inP).reduce((s, r) => [s[0] + r[6], s[1] + r[4], s[2] + r[5]], [0, 0, 0]);
+const directLeads = L.filter(x => x[1][0] === 'Директ').length;
+const check = (name, got, exp) => { n++; const ok = Math.abs(got - exp) < 1e-6; if (!ok) bad++; console.log(`${ok ? '✓' : '✗'} ${name}: ${got} ${ok ? '' : '≠ ' + exp}`); };
+check('Сводная: расход', val('Сводная', 7, 2), tot[0]);
+check('Сводная: расход с НДС', val('Сводная', 7, 3), tot[0] * 1.22);
+check('Сводная: показы', val('Сводная', 7, 4), tot[1]);
+check('Сводная: заявки из Директа', val('Сводная', 7, 8), directLeads);
+check('Сводная: всего заявок с сайта', val('Сводная', 19, 2), L.length);
+['Кампании', 'Группы', 'Объявления'].forEach(s => {
+  const lc = s === 'Кампании' ? 2 : s === 'Группы' ? 3 : 5;
+  check(`${s}: итого расход`, val(s, 5, lc + 1), tot[0]);
+  check(`${s}: итого заявок`, val(s, 5, lc + 7), directLeads);
+  let rows = 0, sp = 0, ld = 0; for (let r = 6; val(s, r, 1) !== undefined || val(s, r, 2) !== undefined; r++) { rows++; sp += val(s, r, lc + 1); ld += val(s, r, lc + 7); }
+  check(`${s}: сумма строк = итого (расход)`, sp, tot[0]); check(`${s}: сумма строк = итого (заявки)`, ld, directLeads);
+});
+const adRow = r => [val('Объявления', r, 3), val('Объявления', r, 4), val('Объявления', r, 12)];
+let r7 = 6; while (val('Объявления', r7, 3) !== 7000001) r7++;
+check('Объявления: заявки 7000001', val('Объявления', r7, 12), 1);
+const ad = data.filter(x => inP(x) && x[3] === 7000001).reduce((s, x) => s + x[6], 0);
+check('Объявления: расход 7000001', val('Объявления', r7, 6), ad);
+console.log(adRow(r7).join(' | '), '| ссылка:', val('Объявления', r7, 15));
+
+// смена периода на «Сводной» → пересчёт
+get('Сводная').cells['3,2'] = new Date('2026-11-05T12:00:00Z'); get('Сводная').cells['3,4'] = new Date('2026-11-05T12:00:00Z');
+onEdit({ range: get('Сводная').api.getRange('B3') });
+check('Период 05.11: заявок из Директа', val('Сводная', 7, 8), L.filter((x, i) => x[1][0] === 'Директ' && 1 + i % 9 === 5).length);
+check('Период 05.11: дней в таблице «По дням»', [...Array(30).keys()].filter(i => val('Сводная', 23 + i, 1) instanceof Date).length, 1);
+// ---------- импорт старых заявок из выгрузки Тильды ----------
+const imp = mkSheet('Импорт Тильды');
+[['Date', 'Request ID', 'Form name', 'Name', 'Phone', 'Email', 'utm_source', 'utm_campaign', 'utm_content', 'Referer'],
+ ['2026-11-03 14:23:05', 'old-1', 'Заявка', 'Иван', '+7 900 111-22-33', '', 'yandex', '5000001', '7000002', 'https://site.ru/'],
+ ['04.11.2026 10:00', '', 'Заявка', 'Пётр', '+7 900 222-33-44', '', '', '', '', 'https://site.ru/?utm_source=yandex&utm_content=7000003'],
+ ['2026-11-05 10:00:00', 't0', 'Заявка', 'Дубль', '', '', 'yandex', '', '7000001', ''],
+ ['без даты', 'old-x', 'Заявка', '', '', '', '', '', '', '']].forEach((row, r) => row.forEach((v, c) => { imp.cells[(r + 1) + ',' + (c + 1)] = v; }));
+const before = lead.api.getLastRow();
+get('Сводная').cells['3,2'] = ''; get('Сводная').cells['3,4'] = '=TODAY()-1';
+alerts.length = 0; drImportTilda();
+check('Импорт: добавлено строк (2 новых, дубль и без даты пропущены)', lead.api.getLastRow() - before, 2);
+console.log('   сообщение:', String(alerts[0]).split('\n')[0]);
+const findLead = name => { for (let r = 2; r <= lead.api.getLastRow(); r++) if (val('Заявки', r, 4) === name) return r; };
+check('Импорт: заявка Ивана → объявление 7000002', val('Заявки', findLead('Иван'), 19), 7000002);
+check('Импорт: заявка Петра (метки только в адресе) → объявление 7000003', val('Заявки', findLead('Пётр'), 19), 7000003);
+check('Импорт: дата строки «04.11.2026 10:00»', key(val('Заявки', findLead('Пётр'), 1)) === '2026-11-04' ? 1 : 0, 1);
+check('Сводная после импорта: заявки из Директа за 01–13.11', val('Сводная', 7, 8), directLeads + 2);
+// ---------- все заявки из писем Тильды (Gmail) ----------
+const MAILS = [   // тело письма, тема, дата
+  ['Name: Анна\nPhone: +7 (900) 333-44-55\nutm_source: yandex\nutm_content: 7000003\n\nRequest details:\nTransaction ID: 555:111\nBlock ID: rec1\nForm Name: Заявка\nReferer: https://site.ru/', 'New lead', '2026-11-06T09:00:00Z'],
+  ['<p><b>Имя:</b> Олег<br><b>Телефон:</b> 89001112233<br>landing_page: https://site.ru/?utm_source=yandex&amp;utm_content=7000004</p>', 'Заявка с сайта', '2026-11-07T09:00:00Z'],
+  ['Счёт за тариф Tilda Business оплачен.\nСумма: 1000 руб.', 'Оплата', '2026-11-07T10:00:00Z'],   // не заявка
+  ['Name: Повтор\nPhone: 1\nTransaction ID: t0', 'дубль вебхука', '2026-11-05T10:00:00Z'],
+];
+const msg = ([body, subj, d], i) => ({ getPlainBody: () => /</.test(body) ? '' : body, getBody: () => body, getSubject: () => subj,
+  getDate: () => new RealDate(d), getId: () => 'm' + i });
+global.Session = { getEffectiveUser: () => ({ getEmail: () => 'test@example.com' }) };
+global.GmailApp = { search: (q, start) => start ? [] : MAILS.map((m, i) => [msg(m, i)]), getMessagesForThreads: t => t };
+const beforeMail = lead.api.getLastRow();
+alerts.length = 0; drMailAll();
+check('Письма: добавлено заявок (2 новых; оплата и дубль вебхука пропущены)', lead.api.getLastRow() - beforeMail, 2);
+console.log('   сообщение:', String(alerts[0]).split('\n')[0]);
+check('Письма: Анна → объявление 7000003', val('Заявки', findLead('Анна'), 19), 7000003);
+check('Письма: Олег (метки в адресе входа, HTML-письмо) → объявление 7000004', val('Заявки', findLead('Олег'), 19), 7000004);
+check('Письма: ID заявки из «Transaction ID»', val('Заявки', findLead('Анна'), 2) === '555:111' ? 1 : 0, 1);
+const beforeH = lead.api.getLastRow(); drMailHourly();
+check('Письма: повторный проход ничего не дублирует', lead.api.getLastRow() - beforeH, 0);
+
+// ---------- длинные ID объявлений (19 цифр) не теряют точность ----------
+const LONG = '1926247343185943274';
+const tsv = drParseTsv_('Date\tCampaignId\tCampaignName\tAdGroupId\tAdGroupName\tAdId\tImpressions\tClicks\tCost\n2026-11-15\t715890110\tМото\t5555555555\tГр\t' + LONG + '\t10\t1\t5');
+check('Длинный ID из отчёта Директа сохранён строкой', tsv[0][5] === LONG ? 1 : 0, 1);
+const dLong = { ads: { [LONG]: { g: 5555555555, c: 715890110 } }, groups: { 5555555555: { c: 715890110, name: 'Гр' } }, camps: { 715890110: 'Мото' }, campByName: {}, groupByName: {} };
+const mLong = drMatch_(['', '', '', '', '', '', 'yandex', 'cpc', 'moto_search_715890110', LONG + '_205821097593', '---autotargeting', '', ''], dLong, []);
+check('Заявка с utm_content=<19 цифр>_… → это объявление', mLong[5] === LONG && mLong[1] === 715890110 ? 1 : 0, 1);
+
+// ---------- ClientID, yclid, этап, офлайн-конверсии ----------
+NOW = RealDate.parse('2026-11-10T10:00:00Z');
+doPost({ parameter: { key: 'secret-uuid', tranid: 'ym-1', Name: 'Клиент', Phone: '1', COOKIES: '_ym_d=1; _ym_uid=1731234567890123456; TILDAUTM=x',
+  landing_page: 'https://site.ru/?utm_source=yandex&yclid=17287983331083812863' } });
+NOW = RealDate.parse(TODAY);
+const rYm = findLead('Клиент');
+check('Вебхук: заявка сопоставлена сразу, без пересчёта (Источник = Директ)', val('Заявки', rYm, 14) === 'Директ' ? 1 : 0, 1);
+check('Новая заявка вебхуком: этап «Новая заявка»', val('Заявки', rYm, 23) === 'Новая заявка' ? 1 : 0, 1);
+drRecompute_();
+check('ClientID из куки _ym_uid (колонка U)', val('Заявки', rYm, 21) === '1731234567890123456' ? 1 : 0, 1);
+check('yclid из адреса входа (колонка V), все 20 цифр', val('Заявки', rYm, 22) === '17287983331083812863' ? 1 : 0, 1);
+check('ClientID из поля ym_client_id', drLeadIds_(['', '', '', '', '', '', '', '', '', '', '', '', 'Name=A; ym_client_id=555666777888'])[0] === '555666777888' ? 1 : 0, 1);
+check('Старые заявки без этапа получили «Новая заявка»', val('Заявки', 2, 23) === 'Новая заявка' ? 1 : 0, 1);
+const off = get('Офлайн-конверсии'), offRows = () => off.api.getLastRow() - 1;
+const base = offRows();
+check('Офлайн-конверсии: строка с ClientID, целью lead и unix-временем', [...Array(base).keys()].some(i =>
+  val('Офлайн-конверсии', i + 2, 1) === '1731234567890123456' && val('Офлайн-конверсии', i + 2, 3) === 'lead' &&
+  val('Офлайн-конверсии', i + 2, 4) === String(RealDate.parse('2026-11-10T10:00:00Z') / 1000)) ? 1 : 0, 1);
+get('Заявки').cells[rYm + ',23'] = 'Посетил пробное занятие';
+onEdit({ range: get('Заявки').api.getRange(rYm, 23) });
+check('Смена этапа: записано время (колонка X)', val('Заявки', rYm, 24) instanceof RealDate ? 1 : 0, 1);
+drRecompute_();
+check('«Посетил пробное» → +2 строки (trial_booked и trial_visited)', offRows() - base, 2);
+
+// ---------- данные со старыми округлёнными ID перезагружаются целиком ----------
+const dataSh = get('Данные Директа'); dataSh.cells['2,6'] = 1926247343185940000; reportCalls = 1;
+drDailyUpdate();
+check('Округлённые ID → полная перезагрузка (180 дней × 5 объявлений)', dataSh.api.getLastRow() - 1, 180 * 5);
+
+// ---------- заявка во время загрузки Директа (блокировка занята) не теряется ----------
+LOCK_BUSY = true; const nBusy = lead.api.getLastRow();
+doPost({ parameter: { key: 'secret-uuid', tranid: 'busy-1', Name: 'Занято', Phone: '2' } });
+LOCK_BUSY = false;
+check('Блокировка занята → заявка всё равно записана', lead.api.getLastRow() - nBusy, 1);
+const hookLast = () => val('Лог вебхука', get('Лог вебхука').api.getLastRow(), 2);
+const realSheet = ssApi.getSheetByName; ssApi.getSheetByName = n => { if (n === 'Заявки') throw new Error('сбой Таблиц'); return realSheet(n); };
+doPost({ parameter: { key: 'secret-uuid', tranid: 'err-1', Name: 'Сбой', Phone: '3' } });
+ssApi.getSheetByName = realSheet;
+check('Ошибка при записи → в журнале «ОШИБКА» и данные заявки', /^ОШИБКА/.test(hookLast()) && /err-1/.test(val('Лог вебхука', get('Лог вебхука').api.getLastRow(), 5)) ? 1 : 0, 1);
+
+// ---------- заявки из Google Таблицы Тильды ----------
+const tsh = { name: 'Tilda', cells: {} };
+[['Name', 'Phone', 'utm_source', 'utm_content', 'requestid', 'formname', 'referer', 'sent'],
+ ['Мария', '+7 900 555-66-77', 'yandex', '7000005', 'gs-req-1', 'Заявка', 'https://site.ru/', '2026-11-12 11:00:00'],
+ ['Дубль', '+79000000000', 'yandex', '', 't0', 'Заявка', '', '2026-11-01 13:00:00'],        // уже есть (tranid t0)
+ ['Без ID', '+7 900 777-88-99', '', '', '', 'Заявка', '', '2026-11-12 12:00:00'],
+ ['Без ID, повтор', '+7 900 777-88-99', '', '', '', 'Заявка', '', '2026-11-12 12:00:30']        // тот же телефон и минута
+].forEach((row, r) => row.forEach((v, c) => { tsh.cells[(r + 1) + ',' + (c + 1)] = v; }));
+const tApi = { getLastRow: () => 5, getLastColumn: () => 8, getRange: (r, c, nr, nc) => ({ getValues: () =>
+  Array.from({ length: nr }, (_, i) => Array.from({ length: nc }, (_, j) => tsh.cells[(r + i) + ',' + (c + j)] ?? '')) }) };
+SpreadsheetApp.openById = () => ({ getSheets: () => [tApi] });
+props.TILDA_SHEET_ID = 'sheet-id';
+const nT = lead.api.getLastRow(); const rT = drTildaSheetPull();
+check('Таблица Тильды: добавлено 2 (дубль по ID и дубль по телефону+минуте пропущены)', lead.api.getLastRow() - nT, 2);
+check('Таблица Тильды: Мария → объявление 7000005', val('Заявки', findLead('Мария'), 19), 7000005);
+check('Таблица Тильды: этап «Новая заявка»', val('Заявки', findLead('Мария'), 23) === 'Новая заявка' ? 1 : 0, 1);
+check('Таблица Тильды: повторный проход ничего не добавляет', (drTildaSheetPull(), lead.api.getLastRow() - nT), 2);
+
+// ---------- проверка вебхука ----------
+let hookMode = 'ok';
+function hookFetch(url, o) {
+  const resp = (c, t) => ({ getResponseCode: () => c, getContentText: () => t });
+  if (hookMode === 'login') return resp(200, '<html>https://accounts.google.com/ServiceLogin</html>');
+  if (hookMode === 'gone') return resp(404, 'not found');
+  return resp(200, doPost({ parameter: Object.assign({ key: (url.match(/key=([^&]+)/) || [])[1] }, o.payload) }));
+}
+const EX = 'https://script.google.com/macros/s/AKfy123/exec';
+const hc = (u, re, name) => { const t = drHookCheck_(u); n++; const ok = re.test(t); if (!ok) bad++; console.log(`${ok ? '✓' : '✗'} вебхук: ${name}${ok ? '' : ' → ' + t.slice(0, 120)}`); };
+const rowsBefore = lead.api.getLastRow();
+hc(EX + '?key=secret-uuid', /^✅/, 'рабочий адрес');
+check('Вебхук: проверочная строка удалена', lead.api.getLastRow() - rowsBefore, 0);
+hc('https://script.google.com/macros/s/AKfy123/dev?key=secret-uuid', /\/dev/, 'адрес /dev');
+hc(EX, /нет \?key/, 'без ключа');
+hc(EX + '?key=zzz', /не тот/, 'чужой ключ');
+hookMode = 'login'; hc(EX + '?key=secret-uuid', /доступ не «Все»/, 'доступ не «Все»');
+hookMode = 'gone'; hc(EX + '?key=secret-uuid', /404/, 'удалённое развёртывание');
+console.log(`\nИТОГ: ${bad ? 'РАСХОЖДЕНИЙ ' + bad : 'всё совпало'} (проверок ${n})`);
+process.exit(bad ? 1 : 0);

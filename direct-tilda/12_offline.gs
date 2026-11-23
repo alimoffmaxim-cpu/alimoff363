@@ -46,6 +46,7 @@ function drStageEdit_(a) {
   if (a.getRow() < 2 || a.getColumn() > c || a.getLastColumn() < c) return;
   const r = a.getSheet().getRange(a.getRow(), c + 1, a.getLastRow() - a.getRow() + 1, 1);
   r.setValues(r.getValues().map(function () { return [new Date()]; })).setNumberFormat('dd.MM.yyyy HH:mm');
+  drRecompute_();   // записи на пробное — сразу в отчёте
 }
 
 /** Строка «Заявок» (A–M) → [ClientID, yclid]. */

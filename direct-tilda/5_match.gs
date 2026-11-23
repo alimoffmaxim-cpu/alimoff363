@@ -73,7 +73,7 @@ function drMatch_(lead, d, rules) {
   return ['Директ', drId_(c), c ? d.camps[c] || '' : '', drId_(g), grp.name || '', drId_(hit.a), hit.how];
 }
 
-/** Сопоставляет все заявки и пишет N–T «Заявок». Возвращает заявки с датой: [{day, m: результат}]. */
+/** Сопоставляет все заявки и пишет N–T «Заявок». Возвращает заявки с датой: [{day, m: результат, bk: записан на пробное}]. */
 function drMatchAll_() {
   const sh = drSheet_(DR_SHEETS.LEADS, DR_LEAD_HEAD), d = drDict_(), rules = drRules_();
   const rows = drRows_(DR_SHEETS.LEADS, DR_LEAD_RAW);
@@ -82,7 +82,11 @@ function drMatchAll_() {
     [2, 4, 6].forEach(function (i) { sh.getRange(2, DR_LEAD_RAW + i, res.length, 1).setNumberFormat('@'); });
     sh.getRange(2, DR_LEAD_RAW + 1, res.length, 7).setValues(res);
   }
-  return rows.map(function (r, i) { return { day: drKey_(r[0]), m: res[i] }; }).filter(function (x) { return x.day; });
+  const stage = DR_LEAD_HEAD.length + 2;   // «Этап» (12_offline): записан или посетил пробное — запись
+  const st = rows.length ? sh.getRange(2, stage + 1, rows.length, 1).getValues() : [];
+  return rows.map(function (r, i) {
+    return { day: drKey_(r[0]), m: res[i], bk: DR_OFFLINE.STAGES.indexOf(String(st[i][0])) >= 1 };
+  }).filter(function (x) { return x.day; });
 }
 
 /** Новая заявка (вебхук): сразу сопоставить её строку — кампания, группа, объявление, ClientID, yclid. */

@@ -42,7 +42,7 @@ description: Отчёт «Директ + Тильда» — расход/пок�
 Живой API Директа и Тильды стенд не проверяет.
 Страница с кодом: https://claude.ai/artifact/FgNKRZLWu8YZAYCWJ2UcQn — после каждого изменения `.gs` пересобрать
 `python3 tools/copy_page.py direct-tilda <scratchpad>/direct-code.html --title "Код отчёта Директ + Тильда" --final "…"`
-и опубликовать по этому адресу. Таблица клиента: «Директ + Тильда — отчёт», id `1gAfkPG8VGDyLe1i43rmRM0LNQrc0WtvlfXpPVEIWA9I`
+и опубликовать по этому адресу. Таблица клиента: «Сводный отчёт GTMX» (до 23.11 — «Директ + Тильда — отчёт»), id `1gAfkPG8VGDyLe1i43rmRM0LNQrc0WtvlfXpPVEIWA9I`
 (владелец — рабочий аккаунт `alimovagencytech@gmail.com`, редактор — `alimoff.marketing@gmail.com`).
 
 ## Открыто (19.11.2026)

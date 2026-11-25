@@ -136,9 +136,14 @@ def main():
     base = ap.parse_args().base.rstrip("/") + "/"
     langs = json.load(open(os.path.join(HERE, "langs.json"), encoding="utf-8"))
 
-    if os.path.isdir(OUT):
-        shutil.rmtree(OUT)
-    os.makedirs(OUT)
+    # docs/ also holds other projects (tarot-test/), so remove only what this build makes
+    os.makedirs(OUT, exist_ok=True)
+    for L in langs.values():
+        if L["path"] and os.path.isdir(os.path.join(OUT, L["path"])):
+            shutil.rmtree(os.path.join(OUT, L["path"]))
+    for name in ("index.html", "sitemap.xml", "robots.txt", ".nojekyll"):
+        if os.path.exists(os.path.join(OUT, name)):
+            os.remove(os.path.join(OUT, name))
     for code, L in langs.items():
         d = os.path.join(OUT, L["path"])
         os.makedirs(d, exist_ok=True)

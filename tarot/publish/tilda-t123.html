@@ -1,0 +1,1355 @@
+<script>window.CARD_BASE = "https://cdn.jsdelivr.net/gh/alimoffmaxim-cpu/alimoff363@f7431c980613f0656ea6fec4a5326c720441986a/tarot/cards/";</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Manrope:wght@400;600&display=swap">
+<style>
+  /* Layout: three screens in one page (choice, card of the day, Celtic Cross), switched by #day / #spread.
+     Single dark look: night-blue cloth, antique gold for ornament and actions. */
+  :root {
+    --bg: #12131f;
+    --cloth: #1c1d33;
+    --line: #34365a;
+    --fg: #efe9dc;
+    --muted: #a19fb8;
+    --gold: #d3ad62;
+    --gold-ink: #241a06;
+    --display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme: dark;
+  }
+  html, body { min-height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #26284a 0%, transparent 70%),
+      var(--bg);
+    color: var(--fg);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 28px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  h1, h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+    letter-spacing: 0.01em;
+  }
+  h1 { font-size: clamp(2.4rem, 9vw, 3.4rem); line-height: 1.05; }
+  h2 { font-size: clamp(1.8rem, 6vw, 2.3rem); line-height: 1.1; }
+  .lead { margin: 0; color: var(--muted); max-width: 34rem; }
+  .ornament { color: var(--gold); letter-spacing: 0.5em; font-size: 0.8rem; margin: 0; }
+  [hidden] { display: none !important; }
+
+  /* Choice screen */
+  .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+  .choice {
+    display: flex; flex-direction: column; gap: 6px;
+    text-align: left;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--cloth);
+    color: var(--fg);
+    font: inherit;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s;
+  }
+  .choice:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .choice:focus-visible, .btn:focus-visible, .back:focus-visible, .slot:focus-visible, #question:focus-visible {
+    outline: 2px solid var(--gold); outline-offset: 3px;
+  }
+  .choice b { font-family: var(--display); font-size: 1.7rem; font-weight: 600; line-height: 1.1; }
+  .choice span { color: var(--muted); font-size: 0.92rem; }
+  .choice .count { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .choice .lock { align-self: flex-start; margin-top: 4px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--gold); color: var(--gold); font-size: 0.75rem; }
+  .fan { display: flex; justify-content: center; height: 150px; margin-block: 4px 0; }
+  .fan .back-face { position: static; width: 84px; height: 145px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,.45); }
+  .fan .back-face:nth-child(1) { transform: rotate(-14deg) translate(26px, 10px); }
+  .fan .back-face:nth-child(2) { transform: rotate(0deg); z-index: 1; }
+  .fan .back-face:nth-child(3) { transform: rotate(14deg) translate(-26px, 10px); }
+
+  /* Buttons */
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    padding: 11px 20px;
+    border-radius: 999px;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: var(--gold-ink);
+    font: 600 0.95rem var(--body);
+    cursor: pointer;
+  }
+  .btn.ghost { background: transparent; color: var(--gold); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .back {
+    align-self: flex-start;
+    background: none; border: 0; padding: 4px 0;
+    color: var(--muted); font: 600 0.9rem var(--body); cursor: pointer;
+  }
+  .back:hover { color: var(--fg); }
+
+  /* Cards */
+  .card { position: relative; perspective: 900px; }
+  .card .inner {
+    position: absolute; inset: 0;
+    transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.2,.7,.2,1);
+  }
+  .card.open .inner { transform: rotateY(180deg); }
+  .face, .back-face {
+    position: absolute; inset: 0;
+    border-radius: 7%/4%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+  .back-face {
+    background:
+      radial-gradient(circle at 50% 50%, transparent 0 18%, var(--gold) 18.5% 20%, transparent 20.5%),
+      repeating-linear-gradient(45deg, rgba(211,173,98,.18) 0 2px, transparent 2px 10px),
+      repeating-linear-gradient(-45deg, rgba(211,173,98,.18) 0 2px, transparent 2px 10px),
+      #232548;
+    border: 2px solid var(--gold);
+    box-sizing: border-box;
+    outline: 3px solid #232548;
+    outline-offset: -7px;
+  }
+  .face { transform: rotateY(180deg); background: #f3ead4; box-shadow: 0 10px 28px rgba(0,0,0,.5); }
+  .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .card.reversed .face img { transform: rotate(180deg); }
+
+  /* Card of the day */
+  .day-stage { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+  .day-table { position: relative; width: min(62vw, 250px); aspect-ratio: 0.578; }
+  .day-table .deck { inset: 0; width: 100%; height: 100%; }
+  .day-table .deck .left { bottom: -26px; font-size: 0.82rem; }
+  .big { position: absolute; inset: 0; z-index: 2; }
+  .big.drawn { animation: draw .7s cubic-bezier(.25,.8,.25,1); }
+  @keyframes draw { 0% { translate: 0 0; } 45% { translate: 0 -16%; rotate: -4deg; } 100% { translate: 0 0; rotate: 0deg; } }
+  @keyframes breathe { 50% { transform: translateY(-6px); } }
+  .result { display: flex; flex-direction: column; gap: 6px; max-width: 30rem; }
+  .result h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .tag { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .result p { margin: 0; }
+
+  /* Celtic Cross */
+  #question {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 16px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--cloth);
+    color: var(--fg); font: 1rem var(--body);
+  }
+  #question::placeholder { color: var(--muted); }
+  .table { position: relative; width: 100%; max-width: 520px; margin: 0 auto; }
+  .slot {
+    position: absolute; border: 0; padding: 0; background: none; cursor: pointer;
+    transition: transform .85s cubic-bezier(.25,.8,.25,1);
+  }
+  .slot.flying { cursor: default; }
+  /* The deck: a stack of backs, each layer a little higher than the one below */
+  .deck { position: absolute; z-index: 1; border: 0; padding: 0; background: none; cursor: pointer; }
+  .deck:disabled { cursor: default; }
+  .deck:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; border-radius: 8px; }
+  .deck .back-face {
+    transform: translate(calc(var(--k) * -1.2px), calc(var(--k) * -1.6px));
+    box-shadow: 0 1px 0 #0b0c16, 0 4px 10px rgba(0,0,0,.35);
+    transition: translate .25s;
+  }
+  .deck.ready:hover .back-face:last-of-type, .deck.ready:focus-visible .back-face:last-of-type { translate: 0 -6px; }
+  .deck.ready .back-face:last-of-type { animation: offer 2.6s ease-in-out infinite; }
+  @keyframes offer { 0%, 70%, 100% { translate: 0 0; } 82% { translate: 0 -5px; } }
+  /* Shuffle: half the deck slides out towards the middle of the table (--dir is 1 or -1) and riffles back in, three times */
+  .deck.shuffling .back-face:nth-of-type(odd) { animation: cut-out .56s ease-in-out var(--n, 3); }
+  .deck.shuffling .back-face:nth-of-type(even) { animation: cut-stay .56s ease-in-out .07s var(--n, 3); }
+  /* A deck in the middle of the screen splits both ways */
+  .deck.split.shuffling .back-face:nth-of-type(odd) { animation-name: split-a; }
+  .deck.split.shuffling .back-face:nth-of-type(even) { animation-name: split-b; animation-delay: 0s; }
+  @keyframes split-a { 0%, 100% { translate: 0 0; rotate: 0deg; } 40% { translate: -15% -5%; rotate: -6deg; } 70% { translate: -5% 0; rotate: -2deg; } }
+  @keyframes split-b { 0%, 100% { translate: 0 0; rotate: 0deg; } 40% { translate: 15% -5%; rotate: 6deg; } 70% { translate: 5% 0; rotate: 2deg; } }
+  @keyframes cut-out {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    40% { translate: calc(var(--dir) * 70%) -8%; rotate: calc(var(--dir) * 10deg); }
+    70% { translate: calc(var(--dir) * 12%) 0; rotate: calc(var(--dir) * 3deg); }
+  }
+  @keyframes cut-stay {
+    0%, 100% { translate: 0 0; rotate: 0deg; }
+    40% { translate: calc(var(--dir) * 8%) 4%; rotate: calc(var(--dir) * -4deg); }
+  }
+  .deck .left {
+    position: absolute; left: 50%; bottom: -22px; translate: -50% 0;
+    white-space: nowrap; color: var(--muted); font-size: 0.72rem;
+  }
+  .positions li { transition: border-color .4s, background-color .4s; }
+  .positions li.flash { border-color: var(--gold); background: #26284a; }
+  .slot .num {
+    position: absolute; z-index: 3; top: -9px; left: -9px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold); color: var(--gold-ink);
+    font: 600 0.72rem/22px var(--body); text-align: center;
+  }
+  .slot.cross .num { left: auto; right: -9px; top: auto; bottom: -9px; transform: rotate(-90deg); }
+  .positions { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .positions li {
+    display: grid; grid-template-columns: 48px 1fr; gap: 14px; align-items: start;
+    padding: 12px; border-radius: 12px; background: var(--cloth); border: 1px solid var(--line);
+  }
+  .positions .thumb { width: 48px; aspect-ratio: 0.578; border-radius: 4px; overflow: hidden; background: #232548; border: 1px solid var(--gold); box-sizing: border-box; }
+  .positions .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .positions .thumb.reversed img { transform: rotate(180deg); }
+  .positions .body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .positions .pos { color: var(--gold); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .positions .what { color: var(--muted); font-size: 0.85rem; }
+  .positions .name { font-family: var(--display); font-size: 1.35rem; font-weight: 600; line-height: 1.15; }
+  .positions .meaning { margin: 0; }
+  .note { color: var(--muted); font-size: 0.82rem; margin: 0; }
+  .asked { margin: 0; font-family: var(--display); font-style: italic; font-size: 1.35rem; line-height: 1.25; overflow-wrap: anywhere; }
+
+  .positions li { cursor: pointer; }
+  .positions .when, .viewer .when { color: var(--gold); font-size: 0.8rem; }
+  .positions .comment, .viewer .comment { margin: 4px 0 0; }
+  .positions .meaning, .viewer .meaning { color: var(--muted); font-size: 0.88rem; }
+  .list-title { font-family: var(--display); font-size: 1.6rem; font-weight: 600; margin: 6px 0 0; }
+
+  /* Conclusion */
+  .summary {
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 20px; border-radius: 14px;
+    border: 1px solid var(--gold);
+    background: linear-gradient(180deg, #26284a, var(--cloth));
+  }
+  .summary h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .summary p { margin: 0; }
+  #sum-body { display: flex; flex-direction: column; gap: 8px; }
+  .summary .verdict { font-family: var(--display); font-size: 1.3rem; line-height: 1.3; }
+  .detail { display: flex; flex-direction: column; gap: 14px; border-top: 1px solid var(--line); padding-top: 16px; margin-top: 4px; }
+  .detail h4 { margin: 0 0 4px; color: var(--gold); font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .detail p { margin: 0; }
+  .detail .lead-in { font-family: var(--display); font-size: 1.6rem; font-weight: 600; line-height: 1.1; }
+
+  /* Card viewer */
+  #viewer {
+    width: min(92vw, 440px);
+    max-height: 92svh;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--cloth);
+    color: var(--fg);
+    overflow-y: auto;
+  }
+  #viewer::backdrop { background: rgba(6, 7, 14, .82); backdrop-filter: blur(3px); }
+  #viewer[open] { animation: zoom .3s cubic-bezier(.2,.8,.2,1); }
+  @keyframes zoom { from { opacity: 0; transform: scale(.85); } }
+  .viewer { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 18px 18px 22px; }
+  .viewer-top { align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+  .viewer-top .tag { text-align: left; }
+  .icon-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 1px solid var(--line); background: transparent; color: var(--fg);
+    font: 600 1.1rem/1 var(--body); cursor: pointer; flex: none;
+  }
+  .icon-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .icon-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .icon-btn:disabled { opacity: .3; cursor: default; border-color: var(--line); color: var(--fg); }
+  .viewer-card { width: min(70vw, 300px); aspect-ratio: 0.578; border-radius: 10px; overflow: hidden; background: #f3ead4; box-shadow: 0 14px 40px rgba(0,0,0,.6); }
+  .viewer-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .viewer-card.reversed img { transform: rotate(180deg); }
+  .viewer h3 { font-family: var(--display); font-size: 1.9rem; font-weight: 600; margin: 0; line-height: 1.1; }
+  .viewer .what { color: var(--muted); font-size: 0.88rem; margin: 0; }
+  .viewer .meaning { margin: 0; max-width: 26rem; }
+  .viewer-nav { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 0.85rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deck .back-face { animation: none !important; transition: none; }
+    #viewer[open] { animation: none; }
+    .card .inner, .slot, .positions li { transition: none; }
+    .big.drawn { animation: none; }
+  }
+</style>
+
+<div class="wrap">
+  <!-- Choice -->
+  <section id="home">
+    <div class="wrap" style="padding:0">
+      <p class="ornament">✦ ✦ ✦</p>
+      <h1>Таро</h1>
+      <p class="lead">Классическая колода Райдера — Уэйта, 78 карт. Сосредоточься на своём вопросе и выбери расклад.</p>
+      <div class="fan" aria-hidden="true"><div class="back-face"></div><div class="back-face"></div><div class="back-face"></div></div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </section>
+
+  <!-- Card of the day -->
+  <section id="day" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <h2>Карта дня</h2>
+      <div class="day-stage">
+        <div class="day-table">
+          <button class="deck split" id="day-deck" type="button" aria-label="Вытянуть карту"><span class="left"></span></button>
+          <div class="card big" id="day-card" hidden>
+            <div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>
+          </div>
+        </div>
+        <p class="note" id="day-hint">Нажми на колоду, чтобы вытянуть карту</p>
+        <div class="result" id="day-result" hidden aria-live="polite">
+          <span class="tag" id="day-tag"></span>
+          <h3 id="day-name"></h3>
+          <p id="day-meaning"></p>
+        </div>
+        <div class="row" id="day-actions" hidden>
+          <button class="btn ghost" type="button" id="day-again">Вытянуть другую карту</button>
+          <button class="btn" type="button" data-go="spread">Полный расклад</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Celtic Cross -->
+  <section id="spread" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <h2 id="sp-title"></h2>
+      <p class="lead" id="sp-lead"></p>
+      <input id="question" type="text" maxlength="140" autocomplete="off" placeholder="Твой вопрос (можно не писать)">
+      <div class="row">
+        <button class="btn" type="button" id="next" hidden>Положить следующую карту</button>
+        <button class="btn ghost" type="button" id="auto" hidden>Разложить остальные</button>
+        <button class="btn" type="button" id="deal">Начать расклад</button>
+      </div>
+      <p class="note" id="spread-hint" hidden>Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх.</p>
+      <p class="asked" id="asked" hidden></p>
+      <div class="table" id="table" aria-label="Расклад"></div>
+      <section class="summary" id="summary" hidden aria-live="polite">
+        <span class="tag">Вывод по раскладу</span>
+        <h3 id="sum-title"></h3>
+        <div id="sum-body"></div>
+        <div class="detail" id="detail"></div>
+      </section>
+      <h3 class="list-title" id="list-title" hidden>Карты по позициям</h3>
+      <ol class="positions" id="positions"></ol>
+    </div>
+  </section>
+
+  <!-- A paid spread without access -->
+  <section id="locked" hidden>
+    <div class="wrap" style="padding:0">
+      <button class="back" type="button" data-go="">← К выбору расклада</button>
+      <span class="tag">Полный доступ</span>
+      <h2 id="lk-title"></h2>
+      <p class="lead" id="lk-lead"></p>
+      <div class="row"><button class="btn" type="button" id="lk-buy">Открыть полный доступ</button></div>
+      <p class="note" id="lk-note" hidden>Оплата скоро появится.</p>
+    </div>
+  </section>
+</div>
+
+<dialog id="viewer" aria-labelledby="v-name">
+  <div class="viewer">
+    <div class="viewer-top">
+      <span class="tag" id="v-pos"></span>
+      <button class="icon-btn" type="button" id="v-close" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="viewer-card" id="v-card"><img alt="" id="v-img"></div>
+    <span class="tag" id="v-orient"></span>
+    <h3 id="v-name"></h3>
+    <p class="what" id="v-what"></p>
+    <span class="when" id="v-when"></span>
+    <p class="comment" id="v-comment"></p>
+    <p class="meaning" id="v-meaning"></p>
+    <div class="viewer-nav">
+      <button class="icon-btn" type="button" id="v-prev" aria-label="Предыдущая карта">←</button>
+      <span id="v-count"></span>
+      <button class="icon-btn" type="button" id="v-next" aria-label="Следующая карта">→</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+// Classic Rider–Waite deck: [image id, name, upright meaning, reversed meaning]
+window.DECK = [
+  ["maj00", "Шут", "Новое начало, спонтанность и доверие к жизни. Смело делай первый шаг.", "Безрассудство и необдуманный риск. Остановись и подумай, прежде чем прыгать."],
+  ["maj01", "Маг", "Воля, мастерство и умение воплощать замыслы. У тебя есть всё, чтобы начать.", "Манипуляции, нераскрытый талант, распыление сил."],
+  ["maj02", "Верховная Жрица", "Интуиция, тайное знание, внутренний голос. Ответ уже внутри тебя.", "Ты не слышишь интуицию. Скрытые мотивы, оторванность от себя."],
+  ["maj03", "Императрица", "Изобилие, забота и рост. Время созидать и наслаждаться жизнью.", "Творческий застой, зависимость от других, чрезмерная опека."],
+  ["maj04", "Император", "Порядок, власть и ответственность. Возьми ситуацию под контроль.", "Жёсткость и давление или, наоборот, потеря контроля."],
+  ["maj05", "Иерофант", "Традиции, наставник, духовные ценности и правила.", "Бунт против устоев, свой нестандартный путь, сомнение в авторитетах."],
+  ["maj06", "Влюблённые", "Любовь, гармония и важный выбор, сделанный сердцем.", "Разлад, сомнения в отношениях, неверный выбор."],
+  ["maj07", "Колесница", "Победа, движение вперёд, сила воли и целеустремлённость.", "Потеря направления, препятствия, ситуация выходит из-под контроля."],
+  ["maj08", "Сила", "Внутренняя сила, мужество и терпение. Мягкость побеждает.", "Неуверенность, слабость, эмоции берут верх."],
+  ["maj09", "Отшельник", "Уединение, поиск истины, самоанализ. Время побыть с собой.", "Изоляция и одиночество, нежелание смотреть внутрь себя."],
+  ["maj10", "Колесо Фортуны", "Перемены, удача, поворот судьбы. Жизнь выходит на новый виток.", "Невезение, сопротивление переменам, повторение старых ошибок."],
+  ["maj11", "Справедливость", "Честность, равновесие, причина и следствие. Всё будет по заслугам.", "Несправедливость, нечестность, уход от ответственности."],
+  ["maj12", "Повешенный", "Пауза и взгляд под другим углом. Жертва ради большего.", "Застой, напрасные жертвы, нежелание отпустить."],
+  ["maj13", "Смерть", "Завершение этапа и перерождение. Старое уходит, освобождая место новому.", "Страх перемен, цепляние за прошлое, затянувшийся финал."],
+  ["maj14", "Умеренность", "Баланс, терпение и золотая середина.", "Крайности, дисбаланс, спешка и нетерпение."],
+  ["maj15", "Дьявол", "Искушения, зависимости и привязанности, которые держат в плену.", "Освобождение от оков, осознание зависимости, возвращение контроля."],
+  ["maj16", "Башня", "Внезапные потрясения, крушение иллюзий, неожиданное откровение.", "Кризис удалось отложить, но страх перемен остаётся."],
+  ["maj17", "Звезда", "Надежда, вдохновение, исцеление и вера в будущее.", "Разочарование, потеря веры в себя."],
+  ["maj18", "Луна", "Иллюзии, страхи, неясность. Не всё таково, каким кажется.", "Туман рассеивается: обман раскрывается, страхи отступают."],
+  ["maj19", "Солнце", "Радость, успех, ясность и жизненная сила. Всё получается.", "Временные трудности, излишний оптимизм, радость приглушена."],
+  ["maj20", "Суд", "Пробуждение, переоценка, второй шанс и важное решение.", "Самокритика и сомнения, нежелание услышать зов перемен."],
+  ["maj21", "Мир", "Завершённость, целостность, достижение цели.", "Незавершённые дела, не хватает последнего шага."],
+
+  ["wands01", "Туз Жезлов", "Вдохновение, новый проект, прилив энергии.", "Задержки, нехватка мотивации, ложный старт."],
+  ["wands02", "Двойка Жезлов", "Планирование, выбор пути, взгляд в будущее.", "Страх неизвестного, нерешительность."],
+  ["wands03", "Тройка Жезлов", "Расширение, первые результаты, широкие перспективы.", "Планы буксуют, на пути роста появляются препятствия."],
+  ["wands04", "Четвёрка Жезлов", "Праздник, стабильность, дом и радостное событие.", "Нестабильность, напряжение дома, отменённое торжество."],
+  ["wands05", "Пятёрка Жезлов", "Соперничество, споры, борьба мнений.", "Конфликт затухает или, наоборот, затягивается."],
+  ["wands06", "Шестёрка Жезлов", "Победа, признание, публичный успех.", "Нет признания, гордыня, удар по репутации."],
+  ["wands07", "Семёрка Жезлов", "Отстаивай свою позицию. Стойкость и защита.", "Усталость, сдача позиций, ощущение перегрузки."],
+  ["wands08", "Восьмёрка Жезлов", "Быстрое развитие, новости, стремительное движение.", "Задержки, суета, движение не в ту сторону."],
+  ["wands09", "Девятка Жезлов", "Стойкость и последнее усилие перед финишем.", "Истощение, подозрительность, желание сдаться."],
+  ["wands10", "Десятка Жезлов", "Перегрузка, тяжёлая ноша, лишняя ответственность.", "Пора сбросить груз и делегировать, пока не наступило выгорание."],
+  ["wands11", "Паж Жезлов", "Энтузиазм, вдохновляющие новости, жажда приключений.", "Нетерпение, плохие новости, нет направления."],
+  ["wands12", "Рыцарь Жезлов", "Энергия, страсть, смелые и быстрые действия.", "Импульсивность, безрассудство, брошенные на полпути дела."],
+  ["wands13", "Королева Жезлов", "Уверенность, харизма, независимость и тепло.", "Ревность, неуверенность, эгоизм."],
+  ["wands14", "Король Жезлов", "Лидерство, видение, предпринимательский дух.", "Властность, вспыльчивость, завышенные ожидания."],
+
+  ["cups01", "Туз Кубков", "Новая любовь, эмоциональное обновление, открытое сердце.", "Закрытые чувства, подавленные эмоции, пустота."],
+  ["cups02", "Двойка Кубков", "Союз, взаимность, партнёрство и притяжение.", "Разлад, дисбаланс в отношениях."],
+  ["cups03", "Тройка Кубков", "Дружба, праздник, радость общения.", "Сплетни, излишества, одиночество в компании."],
+  ["cups04", "Четвёрка Кубков", "Апатия и скука. Ты не замечаешь предложенных возможностей.", "Интерес возвращается, появляются новые возможности."],
+  ["cups05", "Пятёрка Кубков", "Потеря и сожаление, взгляд прикован к плохому.", "Принятие, прощение, движение дальше."],
+  ["cups06", "Шестёрка Кубков", "Ностальгия, детство, приятные воспоминания.", "Жизнь прошлым, нежелание взрослеть."],
+  ["cups07", "Семёрка Кубков", "Много вариантов, мечты и иллюзии выбора.", "Ясность и решительность, отказ от фантазий."],
+  ["cups08", "Восьмёрка Кубков", "Уход в поисках большего смысла. Что-то остаётся позади.", "Страх перемен, бесцельные метания, возвращение."],
+  ["cups09", "Девятка Кубков", "Исполнение желаний, удовлетворение, довольство.", "Самодовольство, желание не сбывается."],
+  ["cups10", "Десятка Кубков", "Семейное счастье, гармония, эмоциональная полнота.", "Разлад в семье, несбывшиеся ожидания."],
+  ["cups11", "Паж Кубков", "Творческая идея, романтическое послание, интуиция.", "Эмоциональная незрелость, творческий блок."],
+  ["cups12", "Рыцарь Кубков", "Романтика, очарование, предложение от сердца.", "Капризность, завышенные ожидания, самообман в чувствах."],
+  ["cups13", "Королева Кубков", "Сострадание, забота, глубокие чувства и интуиция.", "Эмоциональная зависимость, обидчивость, жертвенность."],
+  ["cups14", "Король Кубков", "Эмоциональная зрелость, мудрость, дипломатичность.", "Игра на чувствах, холодность, вспыльчивость."],
+
+  ["swords01", "Туз Мечей", "Ясность ума, прорыв, правда и новая идея.", "Путаница, ложь, неверные выводы."],
+  ["swords02", "Двойка Мечей", "Трудный выбор, тупик, нежелание решать.", "Нерешительность, перегрузка информацией, правда выходит наружу."],
+  ["swords03", "Тройка Мечей", "Боль, разбитое сердце, печаль.", "Исцеление, прощение, боль отпускает."],
+  ["swords04", "Четвёрка Мечей", "Отдых, восстановление, передышка.", "Беспокойство, выгорание, неумение остановиться."],
+  ["swords05", "Пятёрка Мечей", "Конфликт, победа любой ценой, поражение.", "Примирение, желание оставить ссору в прошлом."],
+  ["swords06", "Шестёрка Мечей", "Переход, уход от трудностей к спокойствию.", "Сопротивление переменам, незавершённый переход."],
+  ["swords07", "Семёрка Мечей", "Хитрость, обман, действия в одиночку.", "Признание, раскаяние, разоблачение."],
+  ["swords08", "Восьмёрка Мечей", "Ограничения, ловушка, ощущение беспомощности.", "Освобождение, новый взгляд, ты видишь свою силу."],
+  ["swords09", "Девятка Мечей", "Тревога, бессонница, страхи и переживания.", "Тревога отступает, появляется надежда."],
+  ["swords10", "Десятка Мечей", "Болезненный конец. Это дно, дальше только вверх.", "Восстановление: самое тяжёлое позади."],
+  ["swords11", "Паж Мечей", "Любопытство, новые идеи, жажда знаний.", "Сплетни, поспешные слова, пустые разговоры."],
+  ["swords12", "Рыцарь Мечей", "Решительность, напор, стремительные действия.", "Безрассудство, агрессия, действия без плана."],
+  ["swords13", "Королева Мечей", "Независимость, ясность суждений, прямота.", "Холодность, жёсткость, горечь."],
+  ["swords14", "Король Мечей", "Интеллект, авторитет, справедливость и логика.", "Манипуляции, тирания, злоупотребление властью."],
+
+  ["pents01", "Туз Пентаклей", "Новая финансовая возможность, процветание, прочное начало.", "Упущенная возможность, неудачные вложения."],
+  ["pents02", "Двойка Пентаклей", "Баланс, гибкость, умение совмещать дела.", "Перегрузка, беспорядок в финансах."],
+  ["pents03", "Тройка Пентаклей", "Командная работа, мастерство, признание навыков.", "Плохая организация, нет слаженности."],
+  ["pents04", "Четвёрка Пентаклей", "Бережливость, контроль, стремление к стабильности.", "Жадность или, наоборот, транжирство."],
+  ["pents05", "Пятёрка Пентаклей", "Финансовые трудности, нужда, чувство изоляции.", "Выход из кризиса, помощь, положение улучшается."],
+  ["pents06", "Шестёрка Пентаклей", "Щедрость, помощь, справедливый обмен.", "Долги, неравные отношения, помощь с условиями."],
+  ["pents07", "Семёрка Пентаклей", "Терпение, долгосрочные вложения, оценка результатов.", "Нетерпение, усилия не окупаются."],
+  ["pents08", "Восьмёрка Пентаклей", "Усердие, обучение, оттачивание мастерства.", "Перфекционизм, рутина, нет мотивации."],
+  ["pents09", "Девятка Пентаклей", "Достаток, независимость, заслуженный комфорт.", "Финансовая зависимость, показная роскошь."],
+  ["pents10", "Десятка Пентаклей", "Богатство, наследие, семейное благополучие.", "Финансовые потери, семейные споры о деньгах."],
+  ["pents11", "Паж Пентаклей", "Новые цели, учёба, практичное начало.", "Лень, нет прогресса, упущенные шансы."],
+  ["pents12", "Рыцарь Пентаклей", "Надёжность и трудолюбие. Медленно, но верно.", "Застой, скука, излишняя осторожность."],
+  ["pents13", "Королева Пентаклей", "Забота, практичность, уют и разумное отношение к деньгам.", "Суета, неуверенность, перекос между работой и жизнью."],
+  ["pents14", "Король Пентаклей", "Изобилие, успех в делах, надёжность и щедрость.", "Материализм, жадность, упрямство."]
+];
+
+</script>
+<script>
+// Spread catalogue. The page builds the menu, the table and the readings from these descriptions,
+// so a new spread is added here without touching the app.
+//
+// Fields:
+//   id        address of the spread page (#id) and its key for access rights
+//   type      "day" — one card turned over on its own screen; "spread" — cards dealt onto a table
+//   access    "free" or "paid"; see access.js
+//   menu      [count label, title, one-line description] for the choice screen
+//   title, lead   heading and intro on the spread page
+//   positions [{name, what, when, read: [light, mixed, heavy]}] — one per card, in dealing order;
+//             `read` is the comment for a light, mixed or heavy card in that position;
+//             `vote: [upright, reversed]` instead of `read` for yes/no spreads
+//   layout(u) card centres in card widths: u = {w: 1, h, g}; returns {width, height, deck: [x, y], slots: [[x, y, rotation]]}
+//   overlaps  pairs of positions that lie on top of each other (the first tap raises the lower card)
+//   reader    key of the reading in the page (READERS); omit for the general reading only
+
+window.LAYOUTS = {
+  // Cards side by side in one row, deck above them
+  row(n) {
+    return u => {
+      const width = n * u.w + (n - 1) * u.g;
+      const y = u.h * 1.5 + u.g;
+      return {
+        width, height: u.h * 2 + u.g, deck: [u.w / 2, u.h / 2],
+        slots: Array.from({ length: n }, (_, i) => [u.w / 2 + i * (u.w + u.g), y, 0])
+      };
+    };
+  }
+};
+
+const SITUATION = ["Ситуация в целом складывается в твою пользу.", "Ситуация пока неоднозначна и может повернуть в любую сторону.", "Сейчас ситуация непростая, и это стоит честно признать."];
+const VOTE = { what: "Прямая карта — голос «за», перевёрнутая — «против»", vote: ["Прямая карта: голос «за».", "Перевёрнутая карта: голос «против»."] };
+
+// Three columns of cards (relationships, two paths); x and y of a cell in card widths
+const col = (u, c) => u.w / 2 + c * (u.w + u.g);
+const rowY = (u, r) => u.h / 2 + r * (u.h + u.g);
+
+window.SPREADS = [
+  {
+    id: "day",
+    type: "day",
+    access: "free",
+    menu: ["1 карта", "Карта дня", "Одна карта — настроение и совет на сегодня."]
+  },
+  {
+    id: "yes-no",
+    type: "spread",
+    access: "free",
+    menu: ["3 карты", "Да или нет", "Быстрый ответ на простой вопрос."],
+    title: "Да или нет",
+    lead: "Задай вопрос, на который можно ответить «да» или «нет», и вытяни три карты. Прямая карта — голос «за», перевёрнутая — «против».",
+    reader: "yesNo",
+    positions: [
+      Object.assign({ name: "Первая карта" }, VOTE),
+      Object.assign({ name: "Вторая карта" }, VOTE),
+      Object.assign({ name: "Третья карта" }, VOTE)
+    ],
+    layout: window.LAYOUTS.row(3)
+  },
+  {
+    id: "three",
+    type: "spread",
+    access: "free",
+    menu: ["3 карты", "Три карты", "Прошлое, настоящее и будущее."],
+    title: "Три карты",
+    lead: "Простой расклад, чтобы увидеть, откуда пришла ситуация, где она сейчас и куда движется.",
+    reader: "three",
+    positions: [
+      { name: "Прошлое", what: "Что привело к ситуации", when: "Время: прошлое",
+        read: ["В прошлом заложено хорошее, на него можно опереться.", "Прошлое повлияло, но его роль уже слабеет.", "Ситуация тянется из трудного прошлого."] },
+      { name: "Настоящее", what: "Что происходит сейчас", when: "Время: сейчас", read: SITUATION },
+      { name: "Будущее", what: "Куда движется ситуация", when: "Время: ближайшие месяцы",
+        read: ["Будущее светлое: ситуация идёт к хорошему.", "Будущее открыто и зависит от твоих шагов.", "Впереди непростой период, к нему стоит подготовиться."] }
+    ],
+    layout: window.LAYOUTS.row(3)
+  },
+  {
+    id: "two-paths",
+    type: "spread",
+    access: "free",
+    menu: ["8 карт", "Делать или не делать", "Сравнить два пути: что будет, если сделать, и если нет."],
+    title: "Делать или не делать",
+    lead: "Для решений вроде «переезжать или нет», «менять работу или нет». Слева путь «если сделать», справа — «если не делать». Сформулируй, о каком шаге речь.",
+    reader: "twoPaths",
+    positions: [
+      { name: "Суть выбора", what: "О чём на самом деле этот выбор", when: "Время: сейчас", read: SITUATION },
+      { name: "Если сделать: что получишь", what: "Польза этого шага", when: "Путь «сделать»",
+        read: ["Сделав шаг, ты получишь ощутимую пользу.", "Польза будет, но не такая яркая, как хочется.", "Выигрыш сомнительный: может оказаться меньше, чем ожидаешь."] },
+      { name: "Если сделать: чем рискуешь", what: "Цена и риски", when: "Путь «сделать»",
+        read: ["Риск небольшой.", "Риск умеренный, его стоит взвесить.", "Риск серьёзный, к нему нужно подготовиться."] },
+      { name: "Если сделать: к чему придёшь", what: "Итог этого пути", when: "Путь «сделать»",
+        read: ["Этот путь ведёт к хорошему итогу.", "Итог этого пути открыт.", "Этот путь ведёт к трудному итогу."] },
+      { name: "Если не делать: что сохранишь", what: "Что даёт отказ от шага", when: "Путь «не делать»",
+        read: ["Оставив всё как есть, ты сохранишь что-то ценное.", "Отказ мало что изменит.", "Оставив всё как есть, ты мало что выиграешь."] },
+      { name: "Если не делать: чем рискуешь", what: "Цена отказа", when: "Путь «не делать»",
+        read: ["Риск небольшой.", "Риск умеренный, его стоит взвесить.", "Отказ обойдётся дорого: можно упустить важное."] },
+      { name: "Если не делать: к чему придёшь", what: "Итог этого пути", when: "Путь «не делать»",
+        read: ["Этот путь ведёт к хорошему итогу.", "Итог этого пути открыт.", "Этот путь ведёт к трудному итогу."] },
+      { name: "Совет", what: "Что подсказывают карты", when: "О чём: совет",
+        read: ["Карта поддерживает тебя: действуй уверенно.", "Карта советует ещё раз всё взвесить.", "Карта советует не торопиться и беречь силы."] }
+    ],
+    // Deck on its own row on top; below it the choice, then two columns (left: do it, right: don't), advice between them
+    layout(u) {
+      return {
+        width: 3 * u.w + 2 * u.g, height: 5 * u.h + 4 * u.g, deck: [col(u, 0), rowY(u, 0)],
+        slots: [
+          [col(u, 1), rowY(u, 1), 0],
+          [col(u, 0), rowY(u, 2), 0], [col(u, 0), rowY(u, 3), 0], [col(u, 0), rowY(u, 4), 0],
+          [col(u, 2), rowY(u, 2), 0], [col(u, 2), rowY(u, 3), 0], [col(u, 2), rowY(u, 4), 0],
+          [col(u, 1), rowY(u, 3), 0]
+        ]
+      };
+    }
+  },
+  {
+    id: "relationship",
+    type: "spread",
+    access: "free",
+    menu: ["7 карт", "Отношения", "Ты и другой человек: что связывает, что разделяет и к чему идёт."],
+    title: "Отношения",
+    lead: "Подходит для любой пары: партнёры, друзья, родители и дети, начальник и подчинённый. Думай о конкретном человеке, когда раскладываешь карты.",
+    reader: "relationship",
+    positions: [
+      { name: "Ты", what: "Твои чувства и роль в этих отношениях", when: "О чём: ты",
+        read: ["Ты открыто и тепло относишься к этим отношениям.", "Свои чувства или роль ты пока не до конца понимаешь.", "Тебе сейчас тяжело в этих отношениях."] },
+      { name: "Что вас связывает", what: "Общее, на чём держатся отношения", when: "О чём: связь",
+        read: ["Вас связывает крепкое и живое чувство.", "Связь есть, но её нужно поддерживать.", "Связь ослабла или держится на привычке."] },
+      { name: "Другой человек", what: "Его чувства и роль в отношениях", when: "О чём: другой человек",
+        read: ["Человек настроен к тебе хорошо.", "Человек сам не определился, чего хочет от отношений.", "Человеку сейчас непросто, и это отражается на отношениях."] },
+      { name: "Прошлое пары", what: "Что было и повлияло на отношения", when: "Время: прошлое",
+        read: ["В прошлом у вас много хорошего.", "Прошлое было неровным, но уже уходит.", "Прошлые обиды ещё дают о себе знать."] },
+      { name: "Что разделяет", what: "Разногласия и препятствия", when: "О чём: разногласия",
+        read: ["Серьёзных разногласий нет, скорее мелочи.", "Разногласия есть, их можно обсудить.", "Это главное, что стоит между вами."] },
+      { name: "Ближайшее будущее", what: "Как отношения изменятся в ближайшее время", when: "Время: ближайшие недели",
+        read: ["Отношения становятся теплее.", "Отношения в переходном состоянии.", "Впереди непростой период для пары."] },
+      { name: "Итог и совет", what: "К чему идут отношения и что делать", when: "Время: итог",
+        read: ["Отношения идут к хорошему итогу.", "Итог зависит от того, что вы оба будете делать.", "Если ничего не менять, отношения ждёт трудный итог."] }
+    ],
+    // Deck on top; below it you and the other person on either side of what connects you,
+    // then past, what divides and the future; outcome at the bottom
+    layout(u) {
+      return {
+        width: 3 * u.w + 2 * u.g, height: 4 * u.h + 3 * u.g, deck: [col(u, 0), rowY(u, 0)],
+        slots: [
+          [col(u, 0), rowY(u, 1), 0], [col(u, 1), rowY(u, 1), 0], [col(u, 2), rowY(u, 1), 0],
+          [col(u, 0), rowY(u, 2), 0], [col(u, 1), rowY(u, 2), 0], [col(u, 2), rowY(u, 2), 0],
+          [col(u, 1), rowY(u, 3), 0]
+        ]
+      };
+    }
+  },
+  {
+    id: "celtic-cross",
+    type: "spread",
+    access: "free",
+    menu: ["12 карт", "Полный расклад", "Кельтский крест: ситуация, что помогает и мешает, мысли и подсознание, страхи и три месяца вперёд."],
+    title: "Кельтский крест",
+    lead: "Полный расклад, который даёт картину целиком. Опиши свою ситуацию или спроси, что происходит в жизни, и разложи карты.",
+    reader: "celtic",
+    overlaps: [[0, 2]],
+    positions: [
+      { name: "Ситуация", what: "Что происходит, в чём суть проблемы", when: "Время: сейчас", read: SITUATION },
+      { name: "Что помогает", what: "Ресурсы и поддержка", when: "О чём: твои ресурсы",
+        read: ["У тебя есть сильная опора, используй её.", "Помощь есть, но её нужно разглядеть и попросить.", "Поддержка сейчас слабая: рассчитывай на себя и береги силы."] },
+      { name: "Что мешает", what: "Главное препятствие", when: "О чём: препятствие",
+        read: ["Помеха мягкая: скорее отвлекает, чем мешает всерьёз.", "Мешает неопределённость: ясности пока не хватает.", "Это главная трудность, с которой предстоит справиться."] },
+      { name: "Мысли", what: "Что в голове, сознательное отношение", when: "О чём: мысли",
+        read: ["Мысли ясные и работают на тебя.", "В голове много сомнений и вариантов.", "Мысли сейчас тянут вниз: тревога мешает видеть выход."] },
+      { name: "Подсознание", what: "Скрытые установки, которые влияют на ситуацию", when: "О чём: подсознание",
+        read: ["Глубинные установки поддерживают тебя.", "В подсознании есть противоречие, которое стоит заметить.", "Здесь скрытая программа, которая не даёт двигаться дальше."] },
+      { name: "Прошлое", what: "Что спровоцировало ситуацию", when: "Время: прошлое",
+        read: ["В прошлом заложено хорошее, на него можно опереться.", "Прошлое повлияло, но его роль уже слабеет.", "Ситуацию спровоцировали события прошлого, и они ещё дают о себе знать."] },
+      { name: "Ближайшие дни", what: "Как начнёт меняться ситуация", when: "Время: ближайшие дни",
+        read: ["В ближайшие дни начнутся хорошие перемены.", "Ближайшие дни переходные: многое зависит от твоих шагов.", "В ближайшие дни возможны трудности, к ним лучше подготовиться."] },
+      { name: "Взгляд со стороны", what: "Как ситуацию видят другие люди", when: "О чём: люди вокруг",
+        read: ["Окружающие видят тебя и ситуацию в хорошем свете.", "Со стороны ситуация выглядит неоднозначно.", "Со стороны ситуацию оценивают критически, это стоит учесть."] },
+      { name: "Страхи и сомнения", what: "Чего ты боишься именно в этой ситуации", when: "О чём: страхи",
+        read: ["Страхов немного, и они не мешают.", "Сомнения есть, но это скорее осторожность, чем страх.", "Это главный страх, и он может тормозить сильнее, чем реальные трудности."] },
+      { name: "Первый месяц", what: "Как пойдут события", when: "Время: первый месяц",
+        read: ["Первый месяц будет удачным.", "Первый месяц пройдёт без резких поворотов.", "Первый месяц будет непростым."] },
+      { name: "Второй месяц", what: "Как пойдут события", when: "Время: второй месяц",
+        read: ["Во второй месяц ситуация заметно улучшится.", "Второй месяц будет ровным, без больших перемен.", "Второй месяц потребует сил и терпения."] },
+      { name: "Третий месяц", what: "К чему придёт ситуация", when: "Время: третий месяц",
+        read: ["К третьему месяцу ситуация придёт к хорошему результату.", "К третьему месяцу ситуация ещё не решится окончательно.", "Третий месяц будет тяжёлым, но это тенденция, а не приговор."] }
+    ],
+    // Deck on its own row on top. Below it: the cross in the middle (card 3 lies across card 1),
+    // helps top left, outside view bottom right, fears bottom left, the three months in a row at the bottom
+    layout(u) {
+      const dx = u.h / 2 + u.w / 2 + u.g;    // neighbours keep clear of the long side of the crossing card
+      const x = c => u.w / 2 + c * dx;
+      const y = r => rowY(u, r + 1);         // row 0 belongs to the deck
+      return {
+        width: u.w + 2 * dx, height: 5 * u.h + 4 * u.g, deck: [x(0), rowY(u, 0)],
+        slots: [
+          [x(1), y(1), 0], [x(0), y(0), 0], [x(1), y(1), 90], [x(1), y(0), 0], [x(1), y(2), 0],
+          [x(0), y(1), 0], [x(2), y(1), 0], [x(2), y(2), 0], [x(0), y(2), 0],
+          [x(0), y(3), 0], [x(1), y(3), 0], [x(2), y(3), 0]
+        ]
+      };
+    }
+  }
+];
+
+</script>
+<script>
+// Access to spreads. Each spread in spreads.js is marked access: "free" or "paid".
+// Free spreads always open. A paid spread opens when the viewer holds an entitlement for it:
+// its own id, or "all" for full access.
+//
+// Payments are not connected yet, so nobody holds entitlements and every paid spread shows the
+// "full access" screen. When payments exist, the site's backend confirms a purchase and calls
+// ACCESS.setEntitlements([...]) after load; requestAccess() is where the checkout starts.
+// Do not trust anything stored in the browser for this: the check must come from the backend.
+
+window.ACCESS = (function () {
+  let entitlements = [];
+  const listeners = [];
+
+  function canOpen(spread) {
+    return !spread || spread.access !== "paid" || entitlements.includes("all") || entitlements.includes(spread.id);
+  }
+
+  function setEntitlements(list) {
+    entitlements = Array.isArray(list) ? list.slice() : [];
+    listeners.forEach(fn => fn());
+  }
+
+  function onChange(fn) { listeners.push(fn); }
+
+  // Starts buying access to a spread. Resolves true once access is granted, false otherwise.
+  function requestAccess(spread) {
+    return Promise.resolve(false);
+  }
+
+  return { canOpen, setEntitlements, onChange, requestAccess, paymentsReady: false };
+})();
+
+</script>
+<script>
+// Readings for particular spreads; spreads.js points to them by `reader`.
+// Each reader has summary() -> {title, paragraphs} and may have detail() -> [[section title, text], ...].
+// They run in the page and use its helpers: spread, tone, cardName, says, lc, suitOf, generalSummary, $.
+
+const SUIT_ADVICE = {
+  wands: "Действуй, а не жди: сейчас решают инициатива и энергия. Только не распыляйся на всё сразу.",
+  cups: "Прислушайся к чувствам, своим и чужим: ответ лежит скорее в сердце, чем в расчётах.",
+  swords: "Сначала проясни мысли и поговори открыто: недосказанность сейчас мешает больше всего.",
+  pents: "Опирайся на практические шаги: посчитай ресурсы, составь план и двигайся по нему спокойно.",
+  maj: "Доверься ходу событий: часть вещей сейчас решается не тобой, и это нормально."
+};
+const quoted = i => "«" + spread[i].card[1] + "»";
+const tones = () => spread.map(tone);
+const sum = (t, idx) => idx.reduce((a, i) => a + t[i], 0);
+const question = () => $("question").value.trim();
+function leadingSuit() {
+  const counts = {};
+  spread.forEach(d => { const k = suitOf(d.card); counts[k] = (counts[k] || 0) + 1; });
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+// Answer to the question (or the overall picture when none was asked) from the outcome card and the overall tone
+function answerSection(outcome, score) {
+  const q = question();
+  let a;
+  if (q) {
+    if (outcome > 0 && score >= 0) a = "Ответ скорее «да». Расклад показывает благополучный исход, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
+    else if (outcome > 0) a = "Ответ скорее «да, но не сразу». Итог хороший, однако по дороге придётся пройти через трудности.";
+    else if (outcome === 0) a = "Однозначного ответа карты не дают. Исход открыт и во многом зависит от твоих решений.";
+    else if (score > 0) a = "Ответ скорее «не так, как ты ждёшь». Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
+    else a = "Сейчас ответ скорее «нет». Карты предупреждают о трудностях. Это повод пересмотреть подход, а не опускать руки.";
+    return ["Ответ на твой вопрос", "«" + q + "» — " + lc(a)];
+  }
+  if (outcome > 0 && score >= 0) a = "Картина в целом светлая: ситуация идёт к хорошему исходу, и путь к нему " + (score >= 3 ? "будет довольно лёгким." : "потребует усилий.");
+  else if (outcome > 0) a = "Итог хороший, но путь к нему лежит через трудности.";
+  else if (outcome === 0) a = "Ситуация открыта: многое решится в ближайшее время и зависит от тебя.";
+  else if (score > 0) a = "Поддержка у тебя есть, но итог пока складывается не в твою пользу, и его ещё можно изменить.";
+  else a = "Карты предупреждают о трудном периоде. Это повод пересмотреть подход, а не опускать руки.";
+  return ["Общая картина", a];
+}
+const trend = (from, to, a, b) => to > from ? "Дальше ситуация улучшается: после " + quoted(a) + " приходит " + quoted(b) + "."
+  : to < from ? "Дальше становится сложнее: после " + quoted(a) + " приходит " + quoted(b) + ", так что не стоит расслабляться."
+  : "Ситуация развивается ровно: " + quoted(a) + ", затем " + quoted(b) + ".";
+
+window.READERS = {
+  // Yes or no: three cards, upright votes for, reversed against
+  yesNo: {
+    summary() {
+      const yes = spread.filter(d => !d.reversed).length;
+      const title = ["Нет", "Скорее нет", "Скорее да", "Да"][yes];
+      const q = question();
+      const out = [(q ? "«" + q + "» — " : "") + ["все три карты против.", "две карты из трёх против.", "две карты из трёх за.", "все три карты за."][yes]];
+      const heavy = spread.map((d, i) => i).filter(i => tone(spread[i]) < 0);
+      if (yes >= 2 && heavy.length) out.push("Но " + heavy.map(quoted).join(" и ") + " " + (heavy.length > 1 ? "предупреждают" : "предупреждает") + ": на пути к цели будут трудности.");
+      if (yes <= 1 && spread.some(d => !d.reversed && tone(d) > 0)) out.push("Шанс всё же есть: " + spread.map((d, i) => i).filter(i => !spread[i].reversed && tone(spread[i]) > 0).map(quoted).join(" и ") + " поддерживает тебя.");
+      out.push("Совет: " + lc(SUIT_ADVICE[leadingSuit()]));
+      return { title, paragraphs: out };
+    }
+  },
+
+  // Past, present, future
+  three: {
+    summary() {
+      const t = tones();
+      const { title, verdict } = generalSummary();
+      return { title, paragraphs: [verdict, trend(t[1], t[2], 1, 2), "Совет: " + lc(SUIT_ADVICE[leadingSuit()])] };
+    },
+    detail() {
+      const t = tones();
+      return [
+        answerSection(t[2], sum(t, [0, 1, 2])),
+        ["Прошлое", "Ситуацию принесла " + says(0) + " " + (t[0] < 0 ? "Отсюда тянутся нынешние сложности." : t[0] > 0 ? "Это хорошая опора." : "Этот этап уже уходит.")],
+        ["Настоящее", "Сейчас — " + says(1)],
+        ["Будущее", "Впереди — " + says(2) + " " + trend(t[1], t[2], 1, 2)]
+      ];
+    }
+  },
+
+  // Do it or not: path A (cards 2–4) against path B (cards 5–7); the outcome of each path counts double
+  twoPaths: {
+    summary() {
+      const t = tones();
+      const a = t[1] + t[2] + 2 * t[3], b = t[4] + t[5] + 2 * t[6];
+      const title = a > b + 1 ? "Карты скорее за то, чтобы сделать" : b > a + 1 ? "Карты скорее за то, чтобы не делать" : "Оба пути примерно равны";
+      const out = [a > b + 1 ? "Путь «сделать» выглядит светлее: польза и итог перевешивают риски."
+        : b > a + 1 ? "Путь «оставить как есть» выглядит спокойнее и надёжнее. Возможно, сейчас не время для этого шага."
+        : "Ни один путь не выигрывает явно. Решение стоит принимать по тому, что для тебя важнее."];
+      out.push("Итог, если сделать, — " + quoted(3) + ". Итог, если не делать, — " + quoted(6) + ".");
+      out.push("Совет — " + quoted(7) + ": " + lc(spread[7].reversed ? spread[7].card[3] : spread[7].card[2]));
+      return { title, paragraphs: out };
+    },
+    detail() {
+      const t = tones();
+      const path = (i, label) => label + " Что получишь: " + says(i) + " Чем рискуешь: " + says(i + 1) + " К чему придёшь: " + says(i + 2) + " " +
+        (t[i + 2] > 0 ? "Этот путь ведёт к хорошему." : t[i + 2] < 0 ? "Этот путь ведёт к трудностям." : "Итог этого пути открыт.");
+      return [
+        ["Суть выбора", "В центре выбора — " + says(0)],
+        ["Если сделать", path(1, "Если сделать этот шаг.")],
+        ["Если не делать", path(4, "Если оставить всё как есть.")],
+        ["Совет", "Карта совета — " + says(7) + " " + SUIT_ADVICE[leadingSuit()]]
+      ];
+    }
+  },
+
+  // Relationship: you (0), what connects (1), the other person (2), past (3), what divides (4), near future (5), outcome (6)
+  relationship: {
+    summary() {
+      const t = tones();
+      const { title, verdict } = generalSummary();
+      const out = [verdict];
+      out.push(t[1] > t[4] ? "То, что вас связывает (" + quoted(1) + "), сильнее того, что разделяет (" + quoted(4) + ")."
+        : t[1] < t[4] ? "Разногласия (" + quoted(4) + ") сейчас заметнее того, что вас связывает (" + quoted(1) + ")."
+        : "Связь и разногласия уравновешены: многое зависит от того, как вы будете разговаривать.");
+      out.push(t[0] > 0 && t[2] > 0 ? "Вы оба настроены друг к другу хорошо."
+        : t[0] !== t[2] ? "Вы сейчас относитесь к отношениям по-разному: " + quoted(0) + " у тебя и " + quoted(2) + " у другого человека."
+        : "Обоим сейчас непросто в этих отношениях.");
+      out.push(trend(t[5], t[6], 5, 6));
+      return { title, paragraphs: out };
+    },
+    detail() {
+      const t = tones();
+      return [
+        answerSection(t[6], t.reduce((a, b) => a + b, 0)),
+        ["Вы двое", "Ты в этих отношениях — " + says(0) + " Другой человек — " + says(2)],
+        ["Что связывает и что разделяет", "Вас связывает " + says(1) + " Разделяет " + says(4) + " " +
+          (t[4] < 0 ? "Об этом стоит поговорить открыто, пока разногласие не стало привычкой." : "Серьёзных преград между вами нет.")],
+        ["Прошлое пары", "На отношения повлияла " + says(3) + " " + (t[3] < 0 ? "Старые обиды стоит отпустить, чтобы двигаться дальше." : "")],
+        ["Будущее", "В ближайшее время — " + says(5) + " В итоге — " + says(6)],
+        ["Совет", SUIT_ADVICE[leadingSuit()]]
+      ];
+    }
+  },
+
+  // Celtic Cross, the tarot reader's 12-card version
+  celtic: {
+    summary() {
+      const t = tones();
+      const { title, verdict, notes } = generalSummary();
+      const out = [verdict];
+      out.push(t[1] > t[2] ? "Сил, которые помогают (" + quoted(1) + "), больше, чем помех (" + quoted(2) + ")."
+        : t[1] < t[2] ? "Помехи (" + quoted(2) + ") сейчас сильнее поддержки (" + quoted(1) + "), поэтому важно беречь силы."
+        : "Поддержка (" + quoted(1) + ") и помехи (" + quoted(2) + ") уравновешены.");
+      if (t[3] * t[4] < 0) out.push("Мысли и подсознание тянут в разные стороны: умом ты хочешь одного, а глубинные установки ведут к другому.");
+      else if (t[3] < 0 && t[4] < 0) out.push("И мысли, и подсознание сейчас настроены тревожно: начни с того, чтобы разобраться в себе.");
+      else if (t[3] > 0 && t[4] > 0) out.push("Мысли и подсознание заодно, и это сильная позиция.");
+      out.push("Три месяца: " + quoted(9) + ", затем " + quoted(10) + ", затем " + quoted(11) + ". " +
+        (t[11] > t[9] ? "К концу срока ситуация улучшится." : t[11] < t[9] ? "К концу срока станет сложнее, лучше подготовиться заранее." : "Ситуация будет развиваться ровно."));
+      out.push(...notes);
+      return { title, paragraphs: out };
+    },
+    detail() {
+      const t = tones();
+      const score = t.reduce((a, b) => a + b, 0);
+      const sections = [answerSection(t[11], score)];
+      sections.push(["Ситуация", "Суть ситуации — " + says(0)]);
+      sections.push(["Что помогает и что мешает", "Помогает " + says(1) + " Мешает " + says(2) + " " +
+        (t[2] < 0 && t[1] > 0 ? "Опирайся на то, что помогает: этого хватит, чтобы справиться с помехой."
+          : t[2] < 0 ? "С этой помехой придётся поработать в первую очередь." : "Серьёзных преград нет.")]);
+      sections.push(["Мысли и подсознание", "В мыслях — " + says(3) + " В подсознании — " + says(4) + " " +
+        (t[4] < 0 ? "Именно эта скрытая установка может не давать двигаться дальше. Стоит её заметить и спросить себя, откуда она." : "")]);
+      sections.push(["Прошлое и ближайшие дни", "Ситуацию спровоцировала " + says(5) + " В ближайшие дни — " + says(6)]);
+      sections.push(["Взгляд со стороны и страхи", "Со стороны ситуацию видят так: " + says(7) + " Твой страх здесь — " + says(8) + " " +
+        (t[8] < 0 ? (t[11] >= 0 ? "Итог расклада этот страх не подтверждает." : "Отнесись к нему как к предупреждению, а не как к приговору.") : "")]);
+      sections.push(["Три месяца", "Первый месяц — " + says(9) + " Второй — " + says(10) + " Третий — " + says(11)]);
+      sections.push(["Совет", SUIT_ADVICE[leadingSuit()] + " " + (t[2] < 0 ? "Главное, над чем стоит поработать, — " + quoted(2) + ". " : "") +
+        (t[11] >= 0 ? "Итог на твоей стороне, если ты продолжишь в том же направлении." : "Расклад показывает тенденцию, и её можно изменить своими решениями.")]);
+      return sections;
+    }
+  }
+};
+
+</script>
+<script>
+  let S = null;                                  // the spread on screen, from spreads.js
+  const N = () => S.positions.length;
+  const POS = i => S.positions[i];
+  const SUITS = {
+    maj: ["Старший аркан", "важный, судьбоносный момент"],
+    wands: ["Жезлов", "действия, работа и энергия"],
+    cups: ["Кубков", "чувства и отношения"],
+    swords: ["Мечей", "мысли, решения и конфликты"],
+    pents: ["Пентаклей", "деньги, работа и быт"]
+  };
+  // Card tone when upright: most cards are light; these are heavy or mixed
+  const HEAVY = ["maj15", "maj16", "maj18", "wands05", "wands10", "cups05", "swords03", "swords05", "swords07", "swords08", "swords09", "swords10", "pents05"];
+  const MIXED = ["maj09", "maj10", "maj11", "maj12", "maj13", "maj20", "wands07", "wands09", "cups04", "cups07", "cups08", "swords02", "swords04", "swords06", "pents04", "pents07"];
+  const suitOf = card => card[0].replace(/\d+$/, "");
+  function tone({ card, reversed }) {
+    const base = HEAVY.includes(card[0]) ? -1 : MIXED.includes(card[0]) ? 0 : 1;
+    return reversed ? (base === 0 ? 0 : -base) : base;
+  }
+  function comment(i) {
+    const d = spread[i], t = tone(d), suit = SUITS[suitOf(d.card)];
+    return {
+      when: (POS(i).when ? POS(i).when + " · " : "") + "сфера: " + suit[1],
+      text: POS(i).vote ? POS(i).vote[d.reversed ? 1 : 0] : POS(i).read ? POS(i).read[1 - t] : ""
+    };
+  }
+
+  // What any spread can say as a whole: overall tone, many or few major arcana, a leading suit, reversed cards
+  function generalSummary() {
+    const tones = spread.map(tone);
+    const score = tones.reduce((a, b) => a + b, 0), n = spread.length, big = Math.max(2, Math.round(n * 0.3));
+    const title = score >= big ? "Расклад благоприятный" : score <= -big ? "Расклад напряжённый" : "Расклад смешанный";
+    const verdict = score >= big ? "Светлых карт заметно больше, чем тяжёлых: обстоятельства в целом работают на тебя."
+      : score <= -big ? "Тяжёлых карт больше, чем светлых: впереди непростой период, но к нему можно подготовиться."
+      : "Есть и поддержка, и трудности. Многое зависит от твоих решений.";
+    const notes = [];
+    if (n >= 5) {
+      const majors = spread.filter(d => suitOf(d.card) === "maj").length;
+      if (majors >= Math.ceil(n * 0.4)) notes.push("Старших арканов много (" + majors + " из " + n + "): это важный жизненный этап, и обстоятельства влияют на него сильнее, чем повседневные решения.");
+      else if (majors <= Math.floor(n * 0.1)) notes.push("Старших арканов почти нет: всё в твоих руках, ситуация решается обычными повседневными шагами.");
+
+      const counts = {};
+      spread.forEach(d => { const k = suitOf(d.card); if (k !== "maj") counts[k] = (counts[k] || 0) + 1; });
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      if (top.length && top[0][1] >= 3 && (!top[1] || top[0][1] > top[1][1]))
+        notes.push("Больше всего карт масти " + SUITS[top[0][0]][0] + " (" + top[0][1] + "): главное в вопросе — " + SUITS[top[0][0]][1] + ".");
+
+      const rev = spread.filter(d => d.reversed).length;
+      if (rev >= Math.ceil(n * 0.6)) notes.push("Перевёрнутых карт много (" + rev + "): энергия сейчас скорее заблокирована, многое происходит внутри тебя.");
+      else if (rev <= Math.floor(n * 0.2)) notes.push("Почти все карты прямые: события развиваются открыто и без задержек.");
+    }
+    return { title, verdict, notes };
+  }
+
+  function summarize() {
+    const r = READERS[S.reader];
+    if (r && r.summary) return r.summary();
+    const { title, verdict, notes } = generalSummary();
+    return { title, paragraphs: [verdict, ...notes] };
+  }
+
+  const $ = id => document.getElementById(id);
+  // Card pictures live next to the page; a copy hosted elsewhere (the Tilda block) sets window.CARD_BASE
+  const CARD_BASE = window.CARD_BASE || "cards/";
+  const img = c => CARD_BASE + c[0] + ".jpg";
+
+  function shuffled() {
+    const d = DECK.slice();
+    for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+    return d.map(c => ({ card: c, reversed: Math.random() < 0.5 }));
+  }
+  function preload(draws) { draws.forEach(d => { const i = new Image(); i.src = img(d.card); }); }
+
+  /* Navigation: #day, #<spread id> (#spread is the old address of the Celtic Cross); no hash is the choice screen */
+  const spreadById = id => SPREADS.find(x => x.id === (id === "spread" ? "celtic-cross" : id));
+  function route() {
+    const def = spreadById(location.hash.slice(1));
+    let view = "home";
+    if (def) view = !ACCESS.canOpen(def) ? "locked" : def.type === "day" ? "day" : "spread";
+    for (const id of ["home", "day", "spread", "locked"]) $(id).hidden = id !== view;
+    if (view === "day" && !dayDraw) newDay();
+    if (view === "spread") openSpread(def);
+    if (view === "locked") showLocked(def);
+    window.scrollTo(0, 0);
+  }
+  function bindGo(root) {
+    root.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
+      const to = b.dataset.go;
+      if (to) location.hash = to;
+      else history.pushState("", document.title, location.pathname + location.search), route();
+    }));
+  }
+
+  // Choice screen, built from the catalogue
+  function renderMenu() {
+    const box = $("choices");
+    box.innerHTML = "";
+    SPREADS.forEach(def => {
+      const b = document.createElement("button");
+      b.className = "choice";
+      b.type = "button";
+      b.dataset.go = def.id;
+      const [count, title, blurb] = def.menu;
+      b.innerHTML = '<span class="count"></span><b></b><span></span>';
+      b.children[0].textContent = count;
+      b.children[1].textContent = title;
+      b.children[2].textContent = blurb;
+      if (!ACCESS.canOpen(def)) {
+        const lock = document.createElement("span");
+        lock.className = "lock";
+        lock.textContent = "Полный доступ";
+        b.appendChild(lock);
+      }
+      box.appendChild(b);
+    });
+    bindGo(box);
+  }
+
+  function showLocked(def) {
+    $("lk-title").textContent = def.title || def.menu[1];
+    $("lk-lead").textContent = def.menu[2] + " Этот расклад входит в полный доступ.";
+    $("lk-note").hidden = true;
+    $("lk-buy").onclick = () => ACCESS.requestAccess(def).then(ok => {
+      if (ok) { renderMenu(); route(); }
+      else $("lk-note").hidden = ACCESS.paymentsReady;
+    });
+  }
+  ACCESS.onChange(() => { renderMenu(); route(); });
+
+  bindGo(document);
+  window.addEventListener("hashchange", route);
+
+  /* Card of the day: tap the deck, it is shuffled, the top card comes off and turns over */
+  let dayDraw = null, dayBusy = false;
+  function newDay() {
+    if (!$("day-deck").querySelector(".back-face")) $("day-deck").innerHTML = deckLayers() + '<span class="left"></span>';
+    dayDraw = shuffled()[0];
+    preload([dayDraw]);
+    const el = $("day-card");
+    el.classList.remove("open", "reversed", "drawn");
+    el.hidden = true;
+    $("day-deck").hidden = false;
+    $("day-deck").disabled = false;
+    $("day-deck").classList.add("ready");
+    $("day-result").hidden = $("day-actions").hidden = true;
+    $("day-hint").hidden = false;
+  }
+  $("day-deck").addEventListener("click", async () => {
+    if (dayBusy) return;
+    dayBusy = true;
+    const deck = $("day-deck");
+    deck.disabled = true;
+    deck.classList.remove("ready");
+    $("day-hint").textContent = "Тасую колоду…";
+    await shuffleDeck(deck, 3);
+    const { card, reversed } = dayDraw;
+    const el = $("day-card");
+    const im = el.querySelector("img");
+    im.src = img(card);
+    im.alt = card[1];
+    el.classList.toggle("reversed", reversed);
+    el.hidden = false;
+    el.classList.add("drawn");
+    $("day-hint").hidden = true;
+    $("day-hint").textContent = "Нажми на колоду, чтобы вытянуть карту";
+    setTimeout(() => {
+      el.classList.add("open");
+      $("day-tag").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
+      $("day-name").textContent = card[1];
+      $("day-meaning").textContent = reversed ? card[3] : card[2];
+      setTimeout(() => {
+        deck.hidden = true;
+        $("day-result").hidden = $("day-actions").hidden = false;
+        dayBusy = false;
+      }, reduced() ? 0 : 600);
+    }, reduced() ? 0 : 650);
+  });
+  $("day-again").addEventListener("click", () => {
+    $("day-card").classList.remove("open");
+    setTimeout(newDay, 350);
+  });
+
+  /* Spread table. Card positions come from the spread's layout (in card widths), scaled to the table width.
+     Cards are dealt one by one from the deck, then turned face up. */
+  let spread = [], dealt = 0, busy = false, autoTimer = null, topZ = 10;
+  const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const CARD = { w: 1, h: 1.73, g: 0.13 };
+
+  function openSpread(def) {
+    if (S === def) return;
+    clearInterval(autoTimer); autoTimer = null;
+    S = def;
+    spread = []; dealt = 0; busy = false;
+    round++; shuffling = false;                  // timers of the spread left behind are ignored
+    $("sp-title").textContent = def.title;
+    $("sp-lead").textContent = def.lead;
+    $("positions").innerHTML = "";
+    $("summary").hidden = $("list-title").hidden = $("asked").hidden = $("spread-hint").hidden = true;
+    $("next").hidden = $("auto").hidden = true;
+    $("deal").textContent = "Начать расклад";
+    $("deal").classList.remove("ghost");
+    $("spread-hint").textContent = def.overlaps && def.overlaps.length
+      ? "Нажми на карту, чтобы рассмотреть её крупно. Если карта лежит под другой, первое нажатие поднимает её наверх."
+      : "Нажми на карту, чтобы рассмотреть её крупно.";
+    // The deck lies on the table from the start; a tap on it starts the spread
+    $("table").innerHTML = '<button class="deck ready" type="button" aria-label="Начать расклад">' + deckLayers() + '<span class="left">Нажми на колоду, чтобы начать</span></button>';
+    $("table").querySelector(".deck").addEventListener("click", start);
+    layout();
+  }
+
+  function geometry() {
+    const W = $("table").clientWidth;
+    const L = S.layout(CARD);
+    const k = W / L.width;
+    const at = p => [p[0] * k, p[1] * k];
+    return { w: CARD.w * k, h: CARD.h * k, H: L.height * k, centres: L.slots.map(at), rot: L.slots.map(p => p[2] || 0), deck: at(L.deck) };
+  }
+  function place(el, c, G) {
+    el.style.width = G.w + "px";
+    el.style.height = G.h + "px";
+    el.style.left = c[0] - G.w / 2 + "px";
+    el.style.top = c[1] - G.h / 2 + "px";
+  }
+  function layout() {
+    if (!S || S.type !== "spread" || !$("table").clientWidth) return;
+    const G = geometry();
+    $("table").style.height = G.H + "px";
+    const deck = $("table").querySelector(".deck");
+    if (deck) {
+      place(deck, G.deck, G);
+      deck.style.setProperty("--dir", G.deck[0] < $("table").clientWidth / 2 ? 1 : -1);
+    }
+    $("table").querySelectorAll(".slot").forEach(s => place(s, G.centres[+s.dataset.i], G));
+  }
+  window.addEventListener("resize", layout);
+
+  function updateButtons() {
+    const left = N() - dealt;
+    $("next").hidden = $("auto").hidden = left === 0;
+    $("next").textContent = dealt === 0 ? "Положить первую карту" : "Положить следующую карту (" + (dealt + 1) + " из " + N() + ")";
+    $("next").disabled = $("auto").disabled = busy || !!autoTimer;
+    const deck = $("table").querySelector(".deck");
+    if (deck) {
+      deck.hidden = left === 0 && !shuffling;
+      deck.disabled = busy || !!autoTimer;
+      deck.classList.toggle("ready", !deck.disabled);
+      deck.querySelector(".left").textContent = shuffling ? "Тасую колоду…" : "Нажми на колоду";
+    }
+  }
+
+  let shuffling = false, round = 0;
+  const DECK_LAYERS = 7;
+  function deckLayers() {
+    let html = "";
+    for (let k = 0; k < DECK_LAYERS; k++) html += '<div class="back-face" style="--k:' + k + '"></div>';
+    return html;
+  }
+  // Riffle the deck `cycles` times; resolves when it is back together
+  function shuffleDeck(deck, cycles) {
+    deck.classList.remove("shuffling");
+    void deck.offsetWidth;                         // restart the animation
+    deck.style.setProperty("--n", cycles);
+    deck.classList.add("shuffling");
+    return new Promise(done => setTimeout(() => { deck.classList.remove("shuffling"); done(); }, reduced() ? 0 : cycles * 560 + 120));
+  }
+
+  function start() {
+    clearInterval(autoTimer); autoTimer = null;
+    const thisRound = ++round;
+    spread = shuffled().slice(0, N());
+    dealt = 0; topZ = 10;
+    preload(spread);
+    $("table").innerHTML = '<button class="deck" type="button" aria-label="Положить следующую карту">' + deckLayers() + '<span class="left"></span></button>';
+    const deck = $("table").querySelector(".deck");
+    deck.addEventListener("click", dealNext);
+    // The deck is shuffled before the first card can be taken
+    busy = shuffling = true;
+    shuffleDeck(deck, 3).then(() => {
+      if (round !== thisRound) return;
+      busy = shuffling = false;
+      updateButtons();
+    });
+    $("positions").innerHTML = "";
+    $("summary").hidden = $("list-title").hidden = true;
+    const q = $("question").value.trim();
+    $("asked").textContent = q ? "«" + q + "»" : "";
+    $("asked").hidden = !q;
+    $("deal").textContent = "Новый расклад";
+    $("deal").classList.add("ghost");
+    $("spread-hint").hidden = false;
+    layout();
+    updateButtons();
+  }
+
+  async function dealNext() {
+    if (busy || dealt >= N()) return;
+    busy = shuffling = true;
+    const thisRound = round;
+    updateButtons();
+    // A short riffle before each card; one when laying out the rest automatically
+    await shuffleDeck($("table").querySelector(".deck"), autoTimer ? 1 : 2);
+    if (round !== thisRound) return;
+    shuffling = false;
+    const i = dealt++;
+    const { card, reversed } = spread[i];
+    const G = geometry();
+    const s = document.createElement("button");
+    s.type = "button";
+    s.dataset.i = i;
+    s.className = "slot card flying" + (G.rot[i] === 90 ? " cross" : "") + (reversed ? " reversed" : "");
+    s.style.zIndex = ++topZ;
+    s.setAttribute("aria-label", (i + 1) + ". " + POS(i).name + ": " + card[1]);
+    s.innerHTML = '<span class="num">' + (i + 1) + '</span><div class="inner"><div class="back-face"></div><div class="face"><img alt=""></div></div>';
+    s.querySelector("img").src = img(card);
+    s.querySelector("img").alt = card[1];
+    s.addEventListener("click", () => tapCard(i));
+    place(s, G.centres[i], G);
+    // Start on top of the deck, then glide to the card's place on the table
+    const fromX = G.deck[0] - G.centres[i][0], fromY = G.deck[1] - G.centres[i][1];
+    const rest = G.rot[i] ? "rotate(" + G.rot[i] + "deg)" : "none";
+    s.style.transition = "none";
+    s.style.transform = "translate(" + fromX + "px," + fromY + "px)";
+    $("table").appendChild(s);
+    updateButtons();
+    const fly = reduced() ? 0 : 850, flip = reduced() ? 0 : 700;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      s.style.transition = "";
+      s.style.transform = rest;
+    }));
+    setTimeout(() => {
+      if (round !== thisRound) return;
+      s.classList.add("open");
+      setTimeout(() => {
+        if (round !== thisRound) return;
+        s.classList.remove("flying");
+        addPosition(i);
+        if (i === N() - 1) showSummary();
+        busy = false;
+        updateButtons();
+      }, flip);
+    }, fly);
+  }
+
+  function addPosition(i) {
+    const { card, reversed } = spread[i];
+    const li = document.createElement("li");
+    li.id = "pos-" + i;
+    li.innerHTML = '<div class="thumb' + (reversed ? " reversed" : "") + '"><img alt=""></div><div class="body">' +
+      '<span class="pos"></span><span class="what"></span><span class="name"></span><span class="when"></span>' +
+      '<p class="comment"></p><p class="meaning"></p></div>';
+    li.querySelector("img").src = img(card);
+    li.querySelector(".pos").textContent = (i + 1) + " · " + POS(i).name;
+    li.querySelector(".what").textContent = POS(i).what;
+    li.querySelector(".name").textContent = card[1] + (reversed ? " (перевёрнутая)" : "");
+    const c = comment(i);
+    li.querySelector(".when").textContent = c.when;
+    li.querySelector(".comment").textContent = c.text;
+    li.querySelector(".meaning").textContent = "Значение карты: " + (reversed ? card[3] : card[2]);
+    li.addEventListener("click", () => openViewer(i));
+    $("list-title").hidden = false;
+    $("positions").appendChild(li);
+    flash(li);
+  }
+  function flash(li) {
+    li.classList.add("flash");
+    setTimeout(() => li.classList.remove("flash"), 1400);
+  }
+
+  const slotOf = i => $("table").querySelector('.slot[data-i="' + i + '"]');
+
+  // Cards that lie on top of each other (the spread's `overlaps`): a tap on the one underneath
+  // brings it to the front, a tap on the card that is already on top opens it in the viewer.
+  function tapCard(i) {
+    const s = slotOf(i);
+    if (!s || s.classList.contains("flying")) return;
+    const pair = (S.overlaps || []).find(p => p.includes(i));
+    if (pair) {
+      const other = slotOf(pair[0] === i ? pair[1] : pair[0]);
+      if (other && +other.style.zIndex > +s.style.zIndex) {
+        s.style.zIndex = ++topZ;
+        const li = $("pos-" + i);
+        if (li) flash(li);
+        return;
+      }
+    }
+    openViewer(i);
+  }
+
+  let viewing = -1;
+  function openViewer(i) {
+    if (i < 0 || i >= N() || !$("pos-" + i)) return;
+    viewing = i;
+    const { card, reversed } = spread[i];
+    const im = $("v-img");
+    im.src = img(card);                          // small copy shows at once, the large one replaces it when loaded
+    const big = new Image();
+    big.onload = () => { if (viewing === i) im.src = big.src; };
+    big.src = CARD_BASE + "lg/" + card[0] + ".jpg";
+    im.alt = card[1];
+    $("v-card").classList.toggle("reversed", reversed);
+    $("v-pos").textContent = (i + 1) + " · " + POS(i).name;
+    $("v-orient").textContent = reversed ? "Перевёрнутая карта" : "Прямая карта";
+    $("v-name").textContent = card[1];
+    $("v-what").textContent = POS(i).what;
+    const c = comment(i);
+    $("v-when").textContent = c.when;
+    $("v-comment").textContent = c.text;
+    $("v-meaning").textContent = "Значение карты: " + (reversed ? card[3] : card[2]);
+    const shown = $("positions").children.length;
+    $("v-count").textContent = (i + 1) + " из " + shown;
+    $("v-prev").disabled = i === 0;
+    $("v-next").disabled = i >= shown - 1;
+    if (!$("viewer").open) $("viewer").showModal();
+  }
+  $("v-close").addEventListener("click", () => $("viewer").close());
+  $("v-prev").addEventListener("click", () => openViewer(viewing - 1));
+  $("v-next").addEventListener("click", () => openViewer(viewing + 1));
+  $("viewer").addEventListener("click", e => { if (e.target === $("viewer")) $("viewer").close(); });
+  $("viewer").addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") openViewer(viewing - 1);
+    if (e.key === "ArrowRight") openViewer(viewing + 1);
+  });
+
+  function dealRest() {
+    if (autoTimer || dealt >= N()) return;
+    dealNext();
+    autoTimer = setInterval(() => {
+      if (dealt >= N()) { clearInterval(autoTimer); autoTimer = null; updateButtons(); return; }
+      if (!busy) dealNext();
+    }, 250);
+    updateButtons();
+  }
+
+  function showSummary() {
+    const { title, paragraphs } = summarize();
+    $("sum-title").textContent = title;
+    $("sum-body").innerHTML = "";
+    paragraphs.forEach((t, k) => {
+      const p = document.createElement("p");
+      if (k === 0) p.className = "verdict";
+      p.textContent = t;
+      $("sum-body").appendChild(p);
+    });
+    const r = READERS[S.reader];
+    $("detail").hidden = !(r && r.detail);
+    if (r && r.detail) renderDetail(r.detail());
+    $("summary").hidden = false;
+    $("summary").scrollIntoView({ behavior: reduced() ? "auto" : "smooth", block: "start" });
+  }
+
+  /* Detailed reading, built on the page from the cards, their positions and how they relate */
+  const lc = t => t.charAt(0).toLowerCase() + t.slice(1);
+  const cardName = i => "карта «" + spread[i].card[1] + "»" + (spread[i].reversed ? " (перевёрнутая)" : "");
+  const meaningOf = i => lc(spread[i].reversed ? spread[i].card[3] : spread[i].card[2]);
+  // "карта «X»: meaning", with a dash when the meaning already has a colon
+  const says = i => cardName(i) + (meaningOf(i).includes(":") ? " — " : ": ") + meaningOf(i);
+  function renderDetail(sections) {
+    const box = $("detail");
+    box.innerHTML = '<p class="lead-in">Подробное толкование</p>';
+    sections.forEach(([title, text]) => {
+      const div = document.createElement("div");
+      const h = document.createElement("h4");
+      h.textContent = title;
+      const p = document.createElement("p");
+      p.textContent = text;
+      div.append(h, p);
+      box.appendChild(div);
+    });
+  }
+
+  $("deal").addEventListener("click", start);
+  $("next").addEventListener("click", dealNext);
+  $("auto").addEventListener("click", dealRest);
+
+  renderMenu();
+  route();
+</script>

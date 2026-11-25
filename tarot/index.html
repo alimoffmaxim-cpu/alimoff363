@@ -442,7 +442,9 @@
   }
 
   const $ = id => document.getElementById(id);
-  const img = c => "cards/" + c[0] + ".jpg";
+  // Card pictures live next to the page; a copy hosted elsewhere (the Tilda block) sets window.CARD_BASE
+  const CARD_BASE = window.CARD_BASE || "cards/";
+  const img = c => CARD_BASE + c[0] + ".jpg";
 
   function shuffled() {
     const d = DECK.slice();
@@ -775,7 +777,7 @@
     im.src = img(card);                          // small copy shows at once, the large one replaces it when loaded
     const big = new Image();
     big.onload = () => { if (viewing === i) im.src = big.src; };
-    big.src = "cards/lg/" + card[0] + ".jpg";
+    big.src = CARD_BASE + "lg/" + card[0] + ".jpg";
     im.alt = card[1];
     $("v-card").classList.toggle("reversed", reversed);
     $("v-pos").textContent = (i + 1) + " · " + POS(i).name;
